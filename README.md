@@ -62,8 +62,6 @@ user.first_name     # => Lloyd
 user.last_name     # => Christmas
 ```
 
-------------------
-
 ## 2. RPC
 
 RPC is one of many technologies that tries to solve the problem of getting smaller pieces of data from one place to another. Many will argue for or against RPC and its usefulness, but I'm not going to do that here. Google's Protocol Buffers relies on RPC and that's why you're here.
@@ -209,15 +207,11 @@ Mycompany::UserService.client.find(req) do |c|
 end
 ```
 
-Many different options can be passed to the `.client` call above (such as `:async => true` or `:timeout => 600`). See the `lib/protobuf/rpc/client.rb` and `lib/protobuf/rpc/service.rb` files for more documentation. It hsould be noted that the default behavior of `UserService.client` is to return a blocking client. The nature of using Client calls within an framework like Rails demands a blocking call if the response of a web request is dependent on data returned from the service.
-
--------------
+Many different options can be passed to the `.client` call above (such as `:async => true` or `:timeout => 600`). See the `lib/protobuf/rpc/client.rb` and `lib/protobuf/rpc/service.rb` files for more documentation. It should be noted that the default behavior of `UserService.client` is to return a blocking client. The nature of using Client calls within a framework like Rails demands a blocking call if the response of a web request is dependent on data returned from the service.
 
 ## 3. RPC Interop
 
 The main reason I wrote this gem was to provide a ruby implementation to google's protobuf that worked on the RPC layer with a Java Service layer that was already running [protobuf-socket-rpc][], the supported socket rpc library for protobuf from Google. The [old gem][] did not provide a very robust RPC implementation and it most certainly did not work with the Java stack.
-
---------------
 
 ## Accreditation & Caveats
 
