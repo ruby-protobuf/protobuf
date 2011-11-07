@@ -1,0 +1,6 @@
+package tutorial;
+
+service AddressBookService {
+  rpc Search (Person) returns (AddressBook);
+  rpc Add (Person) returns (Person);
+}

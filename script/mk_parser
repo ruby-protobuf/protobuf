@@ -1,0 +1,2 @@
+#!/bin/sh
+racc -E lib/protobuf/compiler/proto.y -o lib/protobuf/compiler/proto_parser.rb

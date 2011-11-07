@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+if File.directory?("#{File.dirname(__FILE__)}/../lib")
+  $: << "#{File.dirname(__FILE__)}/../lib"
+else
+  require 'rubygems'
+  gem 'protobuf'
+end
+require 'protobuf'
+require 'protobuf/compiler/compiler'
+
+
+options = {
+  :proto_path => '.',
+  :out => '.',
+}
+opts = OptionParser.new("#{$0} [OPTIONS] PROTO_FILE")
+opts.on('-p', '--proto_path <PATH>', 'Specify the directory in which to search for imports. The current directory is default.'){|v| options[:proto_path] = v}
+opts.on('-o', '--out <OUT_DIR>', 'Specify the directory in which Ruby source file is generated. The current directory is default.'){|v| options[:out] = v}
+opts.on_tail('-v', '--version', 'Show version.'){ puts(opts.ver); exit }
+opts.on_tail('-h', '--help', 'Show this message.'){ puts(opts.help); exit }
+
+::Version = Protobuf::VERSION
+
+begin
+  opts.order!
+rescue OptionParser::ParseError
+  $stderr.puts $!.to_s
+  exit 1
+end
+
+unless ARGV.size > 0
+  puts opts
+  exit
+end
+
+begin
+  ARGV.each do |proto_file|
+    Protobuf::Compiler.compile(proto_file, options[:proto_path], options[:out])
+  end
+rescue
+  $stderr.puts $!.message
+  exit 1
+end

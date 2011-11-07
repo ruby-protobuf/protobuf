@@ -1,0 +1,15 @@
+package test;
+
+message MergeMessage {
+  message InnerMessage1 {
+    required string name = 1;
+  }
+  message InnerMessage2 {
+    required string name = 1;
+    repeated InnerMessage1 repeate_message = 2;
+  }
+
+  required string name = 1;
+  repeated InnerMessage1 repeate_message = 2;
+  required InnerMessage2 require_message = 3;
+}

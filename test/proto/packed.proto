@@ -1,0 +1,6 @@
+package test.packed_field;
+
+message Message {
+  repeated int32   a = 1 [packed = true];
+  repeated fixed32 b = 2 [packed = true];
+}

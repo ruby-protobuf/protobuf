@@ -1,0 +1,5 @@
+*.gem
+pkg/*
+.bundle
+.rvmrc
+*.log

@@ -1,0 +1,9 @@
+package test.lowercase;
+
+message foo {  
+  message bar {
+  } 
+}
+message baaz {  
+  required foo.bar x = 1;
+}

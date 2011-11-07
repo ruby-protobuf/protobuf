@@ -1,0 +1,31 @@
+package spec.proto;
+
+enum StatusType {
+  PENDING = 0;
+  ENABLED = 1;
+  DISABLED = 2;
+  DELETED = 3;
+}
+
+message ResourceFindRequest {
+  optional string name = 1;
+  optional bool active = 2;
+}
+
+message Resource {
+  optional string name = 1;
+  optional int64 date_created = 2;
+  optional StatusType status = 3;
+  repeated StatusType repeated_enum = 4;
+}
+
+message Nested {
+  optional string name = 1;
+  optional Resource resource = 2;
+  repeated Resource multiple_resources = 3;
+  optional StatusType status = 4;
+}
+
+service TestService {
+  rpc Find (ResourceFindRequest) returns (Resource);
+}

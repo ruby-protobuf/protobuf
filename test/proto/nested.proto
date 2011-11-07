@@ -1,0 +1,9 @@
+package test.nested;
+
+message Foo {  
+  message Bar {
+  } 
+}
+message Baaz {  
+  optional Foo.Bar x = 1;
+}

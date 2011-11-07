@@ -1,0 +1,7 @@
+message ExtRangeTest {
+  extensions 1 to 10;
+}
+
+extend ExtRangeTest {
+  optional string a = 11;
+}
