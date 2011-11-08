@@ -1,3 +1,6 @@
+require 'eventmachine'
+require 'protobuf/ext/eventmachine'
+
 module Protobuf
 end
 

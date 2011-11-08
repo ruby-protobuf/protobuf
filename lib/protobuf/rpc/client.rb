@@ -1,9 +1,7 @@
-require 'eventmachine'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/client_connection'
 require 'protobuf/rpc/buffer'
 require 'protobuf/rpc/error'
-require 'timeout'
 
 module Protobuf
   module Rpc
@@ -135,51 +133,20 @@ module Protobuf
       #
       def send_request
         Thread.new { EM.run } unless EM.reactor_running?
+
+        f = Fiber.current
         
         EM.schedule do
           log_debug '[client] Scheduling client connection to be created on next tick'
           connection = ClientConnection.connect @options, &ensure_callback
           connection.on_success &@success_callback unless @success_callback.nil?
           connection.on_failure &ensure_callback
-          connection.on_complete { @do_block = false } if @do_block
+          connection.on_complete { resume_fiber f } if @do_block
           log_debug '[client] Connection scheduled'
         end
-        
-        return synchronize_or_return
-      end
-      
-      # Block the client call to send_request from returning if
-      # async is false, otherwise do nothing.
-      # Simple blocking algorithm to sleep while @do_block is set to true.
-      # The eventmachine connection has a registered callback to flip 
-      # @do_block to false as soon as the response has been received and processed.
-      # If any errors are returned an appropriate RPC_ERROR is sent back to the client
-      # through the failure callback.
-      # 
-      def synchronize_or_return
-        if @do_block
-          begin
-            Timeout.timeout(@options[:timeout]) do
-              sleep 0.5 while @do_block
-              true
-            end
-          rescue => ex
-            log_error 'An exception occurred while waiting for server response:'
-            log_error ex.message
-            log_error ex.backtrace.join("\n")
-          
-            if ex.is_a?(Timeout::Error)
-              message = 'Client timeout of %d seconds expired' % @options[:timeout]
-            else
-              message = 'Client failed: %s' % ex.message
-            end
-          
-            err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
-            ensure_callback.call(err)
-          end
-        else
-          true
-        end
+
+        return set_timeout_and_validate_fiber if @do_block
+        return true 
       end
       
       # Returns a proc that ensures any errors will be returned to the client
@@ -253,16 +220,47 @@ module Protobuf
       def failed?
         !@error.nil? and !@error[:code].nil?
       end
+
       def error
         @error[:message] if failed?
       end
+
       def error_reason
         Protobuf::Socketrpc::ErrorReason.name_by_value(@error[:code]).to_s if failed?
       end
+
       def error_message
         "%s: %s" % [error_reason, error] if failed?
       end
       
+      private
+
+      def set_timeout_and_validate_fiber
+        @timeout_timer = EventMachine::add_timer(@options[:timeout]) do
+          message = 'Client timeout of %d seconds expired' % @options[:timeout]
+          err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
+          ensure_callback.call(err)
+        end
+
+        Fiber.yield
+      rescue FiberError
+        message = "Synchronous calls must be in 'EventMachine.fiber_run' block" 
+        err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
+        ensure_callback.call(err)
+      end
+
+      def resume_fiber(fib)
+        EventMachine::cancel_timer(@timeout_timer)
+        fib.resume(true)
+      rescue => ex 
+        log_error 'An exception occurred while waiting for server response:'
+        log_error ex.message
+        log_error ex.backtrace.join("\n")
+
+        message = 'Synchronous client failed: %s' % ex.message
+        err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
+        ensure_callback.call(err)
+      end
     end
   end
 end
