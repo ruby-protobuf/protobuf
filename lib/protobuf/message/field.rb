@@ -59,11 +59,11 @@ module Protobuf
 
         @default_value = \
           case @rule
-          when :repeated
+          when :repeated then
             FieldArray.new(self).freeze
-          when :required
+          when :required then
             nil
-          when :optional
+          when :optional then
             typed_default_value
           end
 
@@ -77,11 +77,11 @@ module Protobuf
       def initialized?(message_instance)
         value = message_instance.__send__(@name)
         case @rule
-        when :required
+        when :required then
           ! value.nil? && (! kind_of?(MessageField) || value.initialized?)
-        when :repeated
+        when :repeated then
           value.all? {|msg| ! kind_of?(MessageField) || msg.initialized? }
-        when :optional
+        when :optional then
           value.nil? || ! kind_of?(MessageField) || value.initialized?
         end
       end
@@ -625,11 +625,11 @@ module Protobuf
         @message_class.class_eval do
           define_method("#{field.name}=") do |val|
             case val
-            when nil
+            when nil then
               @values.delete(field.name)
-            when Hash
+            when Hash then
               @values[field.name] = field.type.new(val)
-            when field.type
+            when field.type then
               @values[field.name] = val
             else
               raise TypeError, "Expected value of type '#{field.type}', but got '#{val.class}'"
@@ -647,9 +647,9 @@ module Protobuf
     class EnumField < VarintField
       def acceptable?(val)
         case val
-        when Symbol
+        when Symbol then
           raise TypeError unless @type.const_defined?(val)
-        when EnumValue
+        when EnumValue then
           raise TypeError if val.parent_class != @type
         else
           raise TypeError unless @type.valid_tag?(val)
@@ -680,11 +680,11 @@ module Protobuf
             else
               val = \
                 case val
-                when Symbol
+                when Symbol then
                   field.type.const_get(val) rescue nil
-                when Integer
+                when Integer then
                   field.type.const_get(field.type.name_by_value(val)) rescue nil
-                when EnumValue
+                when EnumValue then
                   raise TypeError, "Invalid value: #{val.inspect}" if val.parent_class != field.type
                   val
                 end

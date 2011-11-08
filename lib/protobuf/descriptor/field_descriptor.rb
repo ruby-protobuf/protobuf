@@ -32,9 +32,9 @@ module Protobuf
         field_proto.default_value = @field_instance.default.to_s if @field_instance.default
 
         case parent_proto
-        when Google::Protobuf::FileDescriptorProto
+        when Google::Protobuf::FileDescriptorProto then
           parent_proto.extension << field_proto
-        when Google::Protobuf::DescriptorProto
+        when Google::Protobuf::DescriptorProto then
           if extension
             parent_proto.extension << field_proto
           else

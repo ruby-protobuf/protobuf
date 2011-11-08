@@ -232,19 +232,19 @@ module Protobuf
       def add_option(name, value)
         options =
           case current_descriptor
-          when Google::Protobuf::FileDescriptorProto
+          when Google::Protobuf::FileDescriptorProto then
             Google::Protobuf::FileOptions.new
-          when Google::Protobuf::DescriptorProto
+          when Google::Protobuf::DescriptorProto then
             Google::Protobuf::MessageOptions.new
-          when Google::Protobuf::FieldDescriptorProto
+          when Google::Protobuf::FieldDescriptorProto then
             Google::Protobuf::FieldOptions.new
-          when Google::Protobuf::EnumDescriptorProto
+          when Google::Protobuf::EnumDescriptorProto then
             Google::Protobuf::EnumOptions.new
-          when Google::Protobuf::EnumValueDescriptorProto
+          when Google::Protobuf::EnumValueDescriptorProto then
             Google::Protobuf::EnumValueOptions.new
-          when Google::Protobuf::ServiceDescriptorProto
+          when Google::Protobuf::ServiceDescriptorProto then
             Google::Protobuf::ServiceOptions.new
-          when Google::Protobuf::MethodDescriptorProto
+          when Google::Protobuf::MethodDescriptorProto then
             Google::Protobuf::MethodOptions.new
           else
             raise ArgumentError, 'Invalid context'
@@ -255,9 +255,9 @@ module Protobuf
 
       def descriptor=(descriptor)
         case current_descriptor
-        when Google::Protobuf::FileDescriptorProto
+        when Google::Protobuf::FileDescriptorProto then
           current_descriptor.message_type << descriptor
-        when Google::Protobuf::DescriptorProto
+        when Google::Protobuf::DescriptorProto then
           current_descriptor.nested_type << descriptor
         else
           raise ArgumentError, 'Invalid context'
@@ -283,9 +283,9 @@ module Protobuf
 
       def field_descriptor=(descriptor)
         case current_descriptor
-        when Google::Protobuf::FileDescriptorProto
+        when Google::Protobuf::FileDescriptorProto then
           current_descriptor.extension << descriptor
-        when Google::Protobuf::DescriptorProto
+        when Google::Protobuf::DescriptorProto then
           current_descriptor.field << descriptor
           #TODO: how should i distiguish between field and extension
           #current_descriptor.extension << descriptor

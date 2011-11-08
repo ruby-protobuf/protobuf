@@ -256,10 +256,10 @@ module Racc
         }
         if code
           case code
-          when 1 # yyerror
+          when 1 then # yyerror
             @racc_user_yyerror = true   # user_yyerror
             return -reduce_n
-          when 2 # yyaccept
+          when 2 then # yyaccept
             return shift_n
           else
             raise '[Racc Bug] unknown jump code'
@@ -278,12 +278,12 @@ module Racc
         # error
         #
         case @racc_error_status
-        when 0
+        when 0 then
           unless arg[21]    # user_yyerror
             nerr += 1
             on_error @racc_t, @racc_val, @racc_vstack
           end
-        when 3
+        when 3 then
           if @racc_t == 0   # is $
             throw :racc_end_parse, nil
           end
@@ -482,30 +482,30 @@ module_eval <<'..end lib/protobuf/compiler/proto.y modeval..id110d2bf917', 'lib/
   def scan
     until @scanner.eos?
       case
-      when match(/\s+/, /\/\/.*/)
+      when match(/\s+/, /\/\/.*/) then
         # skip
-      when match(/\/\*/)
+      when match(/\/\*/) then
         # C-like comment
         raise 'EOF inside block comment' until @scanner.scan_until(/\*\//)
-      when match(/(?:required|optional|repeated|import|package|option|message|extend|enum|service|rpc|returns|group|default|extensions|to|max|double|float|int32|int64|uint32|uint64|sint32|sint64|fixed32|fixed64|sfixed32|sfixed64|bool|string|bytes)\b/)
+      when match(/(?:required|optional|repeated|import|package|option|message|extend|enum|service|rpc|returns|group|default|extensions|to|max|double|float|int32|int64|uint32|uint64|sint32|sint64|fixed32|fixed64|sfixed32|sfixed64|bool|string|bytes)\b/) then
         yield [@token, @token.to_sym]
-      when match(/[+-]?\d*\.\d+([Ee][\+-]?\d+)?/)
+      when match(/[+-]?\d*\.\d+([Ee][\+-]?\d+)?/) then
         yield [:FLOAT_LITERAL, @token.to_f]
-      when match(/[+-]?[1-9]\d*(?!\.)/, /0(?![.xX0-9])/)
+      when match(/[+-]?[1-9]\d*(?!\.)/, /0(?![.xX0-9])/) then
         yield [:DEC_INTEGER, @token.to_i]
-      when match(/0[xX]([A-Fa-f0-9])+/)
+      when match(/0[xX]([A-Fa-f0-9])+/) then
         yield [:HEX_INTEGER, @token.to_i(0)]
-      when match(/0[0-7]+/)
+      when match(/0[0-7]+/) then
         yield [:OCT_INTEGER, @token.to_i(0)]
-      when match(/(true|false)\b/)
+      when match(/(true|false)\b/) then
         yield [:BOOLEAN_LITERAL, @token == 'true']
-      when match(/"(?:[^"\\]+|\\.)*"/, /'(?:[^'\\]+|\\.)*'/)
+      when match(/"(?:[^"\\]+|\\.)*"/, /'(?:[^'\\]+|\\.)*'/) then
         yield [:STRING_LITERAL, eval(@token)]
-      when match(/[a-zA-Z_]\w*/)
+      when match(/[a-zA-Z_]\w*/) then
         yield [:IDENT, @token.to_sym]
-      when match(/[A-Z]\w*/)
+      when match(/[A-Z]\w*/) then
         yield [:CAMEL_IDENT, @token.to_sym]
-      when match(/./)
+      when match(/./) then
         yield [@token, @token]
       else
         raise "parse error around #{@scanner.string[@scanner.pos, 32].inspect}"
