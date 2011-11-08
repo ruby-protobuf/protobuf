@@ -1,23 +1,100 @@
 require 'spec_helper'
 require 'spec/proto/test_service_impl'
+require 'spec/helper/all'
 
 describe Protobuf::Rpc::Client do
+
+  context "when using fiber based calls" do
+    it "waits for response when running synchronously" do
+      EventMachine.fiber_run do
+        delay = 3
+        server = StubServer.new(delay)
+        stop_servers = lambda { server.stop; EventMachine.stop }
+        client = Spec::Proto::TestService.client(:async => false)
+
+        start = now
+        
+        client.find(:name => "Test Name", :active => true) do |c|
+          c.on_success do |succ|
+            succ.name.should eq("Test Name")
+            succ.status.should eq(Spec::Proto::StatusType::ENABLED) 
+          end
+
+          c.on_failure do |err|
+            raise err.inspect
+          end
+        end
+
+        (now - start).should be_within(delay * 0.10).of(delay)
+        stop_servers.call
+      end
+    end
+
+    it "doesn't wait for response when running async call inside fiber" do
+      EventMachine.fiber_run do
+        delay = 3
+        server = StubServer.new(delay)
+        stop_servers = lambda { server.stop; EventMachine.stop }
+        client = Spec::Proto::TestService.client(:async => true)
+
+        start = now
+        
+        client.find(:name => "Test Name", :active => true)
+
+        (now - start).should_not be_within(delay * 0.10).of(delay)
+        stop_servers.call
+      end
+    end
+
+    it "throws and error when synchronous code is attempted without 'EventMachine.fiber_run'" do
+      subject = Proc.new do
+        EventMachine.run do
+          delay = 1
+          server = StubServer.new(delay)
+          stop_servers = lambda { server.stop; EventMachine.stop }
+          client = Spec::Proto::TestService.client(:async => false)
+
+          client.find(:name => "Test Name", :active => true)
+          stop_servers.call
+        end
+      end
+
+      subject.should raise_error(RuntimeError, /EventMachine.fiber_run/)
+    end
+
+    it "throws a timeout when client timeout is exceeded" do
+      subject = Proc.new do
+        EventMachine.fiber_run do
+          delay = 3
+          server = StubServer.new(delay)
+          stop_servers = lambda { server.stop; EventMachine.stop }
+          client = Spec::Proto::TestService.client(:async => false, :timeout => 1)
+
+          client.find(:name => "Test Name", :active => true)
+          stop_servers.call
+        end
+      end
+
+      subject.should raise_error(RuntimeError, /timeout/i)
+    end
+
+  end
   
   context 'when creating a client from a service' do
     
     it 'should be able to get a client through the Service#client helper method' do
-      Spec::Proto::TestService.client(:port => 9191).should == Protobuf::Rpc::Client.new(:service => Spec::Proto::TestService, :port => 9191)
+      Spec::Proto::TestService.client(:port => 9191).should eq(Protobuf::Rpc::Client.new(:service => Spec::Proto::TestService, :port => 9191))
     end
     
     it "should be able to override a service location's host and port" do
       Spec::Proto::TestService.located_at 'somewheregreat.com:12345'
       clean_client = Spec::Proto::TestService.client
-      clean_client.options[:host].should == 'somewheregreat.com'
-      clean_client.options[:port].should == 12345
+      clean_client.options[:host].should eq('somewheregreat.com')
+      clean_client.options[:port].should eq(12345)
       
       updated_client = Spec::Proto::TestService.client(:host => 'amazing.com', :port => 54321)
-      updated_client.options[:host].should == 'amazing.com'
-      updated_client.options[:port].should == 54321
+      updated_client.options[:host].should eq('amazing.com')
+      updated_client.options[:port].should eq(54321)
     end
     
     it 'should be able to define the syncronicity of the client request' do
@@ -32,14 +109,14 @@ describe Protobuf::Rpc::Client do
     
     it 'should be able to define which service to create itself for' do
       client = Protobuf::Rpc::Client.new :service => Spec::Proto::TestService
-      client.options[:service].should == Spec::Proto::TestService
+      client.options[:service].should eq(Spec::Proto::TestService)
     end
     
     it 'should have a hard default for host and port on a service that has not been configured' do
       reset_service_location Spec::Proto::TestService
       client = Spec::Proto::TestService.client
-      client.options[:host].should == Protobuf::Rpc::Service::DEFAULT_LOCATION[:host]
-      client.options[:port].should == Protobuf::Rpc::Service::DEFAULT_LOCATION[:port]
+      client.options[:host].should eq(Protobuf::Rpc::Service::DEFAULT_LOCATION[:host])
+      client.options[:port].should eq(Protobuf::Rpc::Service::DEFAULT_LOCATION[:port])
     end
 
   end
@@ -72,11 +149,11 @@ describe Protobuf::Rpc::Client do
       
       client.find(nil) do |c|
         c.on_success do |response|
-          outer_value.should == 'OUTER'
+          outer_value.should eq('OUTER')
           outer_value = response
         end
       end
-      outer_value.should == inner_value
+      outer_value.should eq(inner_value)
     end
     
   end
@@ -88,41 +165,10 @@ describe Protobuf::Rpc::Client do
       client.should_receive(:send_request)
       client.find({:name => 'Test Name', :active => false})
       client.options[:request].should be_a Spec::Proto::ResourceFindRequest
-      client.options[:request].name.should == 'Test Name'
-      client.options[:request].active.should == false
+      client.options[:request].name.should eq('Test Name')
+      client.options[:request].active.should eq(false)
     end
     
   end
-  
-  describe '#synchronize_or_return' do
-    
-    context 'when a timeout error occurs' do
-      it 'returns a timeout error' do
-        client = Spec::Proto::TestService.client :timeout => 1
-        client.stub(:ensure_callback).and_return(proc {|err|
-          err.should be_a Protobuf::Rpc::ClientError
-          err.message.should == 'Client timeout of 1 seconds expired'
-          err.code.should == Protobuf::Socketrpc::ErrorReason::RPC_ERROR
-        })
-        Timeout.timeout(2) { client.synchronize_or_return }
-      end
-    end
-    
-    context 'when any other error occurs' do
-      it 'returns the error' do
-        client = Spec::Proto::TestService.client
-        client.stub(:ensure_callback).and_return(proc {|err|
-          err.should be_a Protobuf::Rpc::ClientError
-          err.message.should == 'Client failed: This is another type of error'
-          err.code.should == Protobuf::Socketrpc::ErrorReason::RPC_ERROR
-        })
-        Timeout.timeout(2) {
-          Timeout.stub(:timeout).and_raise(RuntimeError.new('This is another type of error'))
-          client.synchronize_or_return
-        }
-      end
-    end
-    
-  end
-  
+ 
 end
