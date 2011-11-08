@@ -213,13 +213,13 @@ module Protobuf
             ''
           else
             case field
-            when Field::MessageField
+            when Field::MessageField then
               if value.nil?
                 "#{i}#{field.name} {}\n"
               else
                 "#{i}#{field.name} {\n#{value.inspect(indent + 1)}#{i}}\n"
               end
-            when Field::EnumField
+            when Field::EnumField then
               if value.is_a?(EnumValue)
                 "#{i}#{field.name}: #{value.name}\n"
               else
@@ -368,9 +368,9 @@ module Protobuf
       build_value = lambda {|field, value|
         if !field.optional? || (field.optional? && has_field?(field.name))
           case field
-          when Field::MessageField
+          when Field::MessageField then
             value.to_hash
-          when Field::EnumField
+          when Field::EnumField then
             if value.is_a?(EnumValue)
               value.to_i
             elsif value.is_a?(Symbol)

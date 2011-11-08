@@ -9,11 +9,11 @@ def list_people(address_book)
     puts "  E-mail: #{person.email}" unless person.email.empty?
     person.phone.each do |phone_number|
       print(case phone_number.type
-            when Tutorial::Person::PhoneType::MOBILE
+            when Tutorial::Person::PhoneType::MOBILE then
               '  Mobile phone #: '
-            when Tutorial::Person::PhoneType::HOME
+            when Tutorial::Person::PhoneType::HOME then
               '  Home phone #: '
-            when Tutorial::Person::PhoneType::WORK
+            when Tutorial::Person::PhoneType::WORK then
               '  Work phone #: '
             end)
       puts phone_number.number

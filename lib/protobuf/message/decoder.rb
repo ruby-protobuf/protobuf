@@ -13,17 +13,17 @@ module Protobuf
         tag, wire_type = read_key(stream)
         bytes =
           case wire_type
-          when WireType::VARINT
+          when WireType::VARINT then
             read_varint(stream)
-          when WireType::FIXED64
+          when WireType::FIXED64 then
             read_fixed64(stream)
-          when WireType::LENGTH_DELIMITED
+          when WireType::LENGTH_DELIMITED then
             read_length_delimited(stream)
-          when WireType::START_GROUP
+          when WireType::START_GROUP then
             read_start_group(stream)
-          when WireType::END_GROUP
+          when WireType::END_GROUP then
             read_end_group(stream)
-          when WireType::FIXED32
+          when WireType::FIXED32 then
             read_fixed32(stream)
           else
             raise InvalidWireType, wire_type
