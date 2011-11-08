@@ -264,7 +264,7 @@ require 'protobuf/message/extend'
         descriptor.type_name = @type.is_a?(Array) ? @type.join : @type.to_s
         @opts.each do |key, val|
           case key.to_sym
-          when :default
+          when :default then
             descriptor.default_value = val.to_s
           end
         end

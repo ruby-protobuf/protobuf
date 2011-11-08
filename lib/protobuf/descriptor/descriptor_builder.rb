@@ -5,41 +5,41 @@ module Protobuf
     def self.id2type(type_id)
       require 'protobuf/descriptor/descriptor_proto'
       case type_id
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_DOUBLE
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_DOUBLE then
         :double
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_FLOAT
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_FLOAT then
         :float
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_INT64
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_INT64 then
         :int64
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_UINT64
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_UINT64 then
         :unit64
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_INT32
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_INT32 then
         :int64
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_FIXED64
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_FIXED64 then
         :fixed64
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_FIXED32
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_FIXED32 then
         :fixed32
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_BOOL
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_BOOL then
         :bool
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_STRING
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_STRING then
         :string
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_GROUP
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_GROUP then
         :group
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_MESSAGE
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_MESSAGE then
         :message
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_BYTES
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_BYTES then
         :bytes
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_UINT32
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_UINT32 then
         :uint32
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_ENUM
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_ENUM then
         :enum
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_SFIXED32
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_SFIXED32 then
         :sfixed32
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_SFIXED64
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_SFIXED64 then
         :sfixed64
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_SINT32
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_SINT32 then
         :sint32
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_SINT64
+      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_SINT64 then
         :sint64
       else
         raise ArgumentError, "Invalid type: #{proto.type}"
@@ -49,42 +49,42 @@ module Protobuf
     def self.type2id(type)
       require 'protobuf/descriptor/descriptor_proto'
       case type
-      when :double
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_DOUBLE
-      when :float
+      when :double then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_DOUBLE 
+      when :float then
         Google::Protobuf::FieldDescriptorProto::Type::TYPE_FLOAT
-      when :int64
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_INT64
-      when :unit64
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_UINT64
-      when :int64
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_INT32
-      when :fixed64
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_FIXED64
-      when :fixed32
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_FIXED32
-      when Google::Protobuf::FieldDescriptorProto::Type::TYPE_BOOL
-        :bool
-      when :string
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_STRING
-      when :group
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_GROUP
-      when :message
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_MESSAGE
-      when :bytes
+      when :int64 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_INT64 
+      when :unit64 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_UINT64 
+      when :int64 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_INT32 
+      when :fixed64 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_FIXED64 
+      when :fixed32 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_FIXED32 
+      when :bool then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_BOOL 
+      when :string then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_STRING 
+      when :group then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_GROUP 
+      when :message then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_MESSAGE 
+      when :bytes then
         Google::Protobuf::FieldDescriptorProto::Type::TYPE_BYTES
-      when :uint32
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_UINT32
-      when :enum
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_ENUM
-      when :sfixed32
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_SFIXED32
-      when :sfixed64
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_SFIXED64
-      when :sint32
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_SINT32
-      when :sint64
-        Google::Protobuf::FieldDescriptorProto::Type::TYPE_SINT64
+      when :uint32 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_UINT32 
+      when :enum then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_ENUM 
+      when :sfixed32 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_SFIXED32 
+      when :sfixed64 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_SFIXED64 
+      when :sint32 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_SINT32 
+      when :sint64 then
+        Google::Protobuf::FieldDescriptorProto::Type::TYPE_SINT64 
       else
         Google::Protobuf::FieldDescriptorProto::Type::TYPE_MESSAGE
       end
@@ -93,11 +93,11 @@ module Protobuf
     def self.id2label(label_id)
       require 'protobuf/descriptor/descriptor_proto'
       case label_id
-      when Google::Protobuf::FieldDescriptorProto::Label::LABEL_REQUIRED
+      when Google::Protobuf::FieldDescriptorProto::Label::LABEL_REQUIRED then
         :required
-      when Google::Protobuf::FieldDescriptorProto::Label::LABEL_OPTIONAL
+      when Google::Protobuf::FieldDescriptorProto::Label::LABEL_OPTIONAL then
         :optional
-      when Google::Protobuf::FieldDescriptorProto::Label::LABEL_REPEATED
+      when Google::Protobuf::FieldDescriptorProto::Label::LABEL_REPEATED then
         :repeated
       else
         raise ArgumentError, "Invalid label: #{proto.label}"
@@ -108,11 +108,11 @@ module Protobuf
       require 'protobuf/descriptor/descriptor_proto'
       case label
       when :required
-        Google::Protobuf::FieldDescriptorProto::Label::LABEL_REQUIRED
+        Google::Protobuf::FieldDescriptorProto::Label::LABEL_REQUIRED then
       when :optional
-        Google::Protobuf::FieldDescriptorProto::Label::LABEL_OPTIONAL
+        Google::Protobuf::FieldDescriptorProto::Label::LABEL_OPTIONAL then
       when :repeated
-        Google::Protobuf::FieldDescriptorProto::Label::LABEL_REPEATED
+        Google::Protobuf::FieldDescriptorProto::Label::LABEL_REPEATED then
       else
         raise ArgumentError, "Invalid label: #{label}"
       end

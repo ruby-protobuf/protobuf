@@ -21,11 +21,11 @@ def prompt_for_address(person)
     print 'Is this a mobile, home, or work phone? '
     person.phone.last.type = 
       case type = STDIN.gets.strip
-      when 'mobile'
+      when 'mobile' then
         Tutorial::Person::PhoneType::MOBILE
-      when 'home'
+      when 'home' then
         Tutorial::Person::PhoneType::HOME
-      when 'work'
+      when 'work' then
         Tutorial::Person::PhoneType::WORK
       else
         puts 'Unknown phone type; leaving as default value.'
