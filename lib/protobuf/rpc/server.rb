@@ -1,5 +1,3 @@
-require 'eventmachine'
-require 'socket'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'
@@ -8,26 +6,7 @@ require 'protobuf/rpc/stat'
 
 module Protobuf
   module Rpc
-    class Server < EventMachine::Connection
-      include Protobuf::Logger::LogMethods
-      
-      # Initialize a new read buffer for storing client request info
-      def post_init
-        log_debug '[server] Post init, new read buffer created'
-        
-        @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
-        @stats.client = Socket.unpack_sockaddr_in(get_peername)
-        
-        @buffer = Protobuf::Rpc::Buffer.new :read
-        @did_respond = false
-      end
-      
-      # Receive a chunk of data, potentially flushed to handle_client
-      def receive_data data
-        log_debug '[server] receive_data: %s' % data
-        @buffer << data
-        handle_client if @buffer.flushed?
-      end
+    module Server 
       
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
@@ -56,8 +35,6 @@ module Protobuf
         handle_error(error)
         send_response
       end
-      
-      private
       
       # Assuming all things check out, we can call the service method
       def invoke_rpc_method

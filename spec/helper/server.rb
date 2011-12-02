@@ -3,7 +3,7 @@ require 'spec/proto/test_service_impl'
 
 module StubProtobufServerFactory
   def self.build(delay)
-    new_server = Class.new(Protobuf::Rpc::Server) do
+    new_server = Class.new(Protobuf::Rpc::EventedServer) do
       class << self
         def sleep_interval
           @sleep_interval
