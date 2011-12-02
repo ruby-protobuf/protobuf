@@ -5,8 +5,7 @@ module Protobuf
       class << self
 
         def stop
-          Protobuf::Rpc::SocketServer.stop
-        rescue 
+          Protobuf::Rpc::SocketServer.stop 
           Protobuf::Logger.info 'Shutdown complete'
           $stdout.puts 'Shutdown complete'
         end

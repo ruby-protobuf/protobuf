@@ -8,8 +8,8 @@ module Protobuf
 
       class << self
         def stop 
-          @server.close
           @running = false
+          @server.close
         end
 
         def run(host = "127.0.0.1", port = 9399)
@@ -22,6 +22,12 @@ module Protobuf
               service_worker = self.new(sock)
               sock.close 
             end
+          end
+
+        rescue Errno::EBADF
+          # Closing the server causes the loop to raise an exception here
+          if running?
+            raise
           end
         end
 
