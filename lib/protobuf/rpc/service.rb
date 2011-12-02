@@ -141,8 +141,8 @@ module Protobuf
       
       # Callback register for the server when a service
       # method calls rpc_failed. Called by Service#rpc_failed.
-      def on_rpc_failed &rpc_failure_callback
-        @rpc_failure_callback = rpc_failure_callback
+      def on_rpc_failed &rpc_failure_cb
+        @rpc_failure_cb = rpc_failure_cb
       end
       
       # Automatically fail a service method.
@@ -150,14 +150,14 @@ module Protobuf
       # not any way to get around this currently (and I'm not sure you should want to).
       #
       def rpc_failed message="RPC Failed while executing service method #{@current_method}"
-        if @rpc_failure_callback.nil?
+        if @rpc_failure_cb.nil?
           exc = RuntimeError.new 'Unable to invoke rpc_failed, no failure callback is setup.' 
           log_error exc.message
           raise exc
         end
         error = message.is_a?(String) ? RpcFailed.new(message) : message
         log_warn '[service] RPC Failed: %s' % error.message
-        @rpc_failure_callback.call(error)
+        @rpc_failure_cb.call(error)
       end
       
       # Callback register for the server to be notified
