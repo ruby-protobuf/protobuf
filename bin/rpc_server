@@ -95,8 +95,8 @@ begin
   end
   
   # Set the name of the process
-  $0 = 'rpc_server %s:%d' % [server.host, server.port]
-
+  $0 = 'rpc_server %s:%d %s' % [server.host, server.port, server.app]
+  
   # Require the given application file
   require server.app
   
