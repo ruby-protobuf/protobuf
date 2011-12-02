@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   
   s.add_dependency 'eventmachine', '~> 0.12.10'
-  s.add_dependency 'socketpool'
   
   s.add_development_dependency 'rake', '~> 0.8.7'
   s.add_development_dependency 'rspec', '~> 2.7.0'

@@ -1,6 +1,5 @@
 require 'logger'
 require 'socket'
-require 'socketpool'
 
 module Protobuf
 end
