@@ -7,16 +7,26 @@ module Protobuf
       include Protobuf::Logger::LogMethods
 
       class << self
+        def stop 
+          @server.close
+          @running = false
+        end
+
         def run(host = "127.0.0.1", port = 9399)
-          server = TCPServer.new(host, port)
-          server.listen(100)
+          @running = true
+          @server = TCPServer.new(host, port)
+          @server.listen(100)
 
           loop do 
-            Thread.new(server.accept) do |sock|
+            Thread.new(@server.accept) do |sock|
               service_worker = self.new(sock)
               sock.close 
             end
           end
+        end
+
+        def running?
+          defined?(@running) && @running
         end
       end
 
