@@ -3,14 +3,12 @@ PATH
   specs:
     protobuf (1.0.0)
       eventmachine (~> 0.12.10)
-      socketpool
 
 GEM
   remote: http://rubygems.org/
   specs:
     diff-lcs (1.1.2)
     eventmachine (0.12.10)
-    eventmachine (0.12.10-java)
     rake (0.8.7)
     rspec (2.7.0)
       rspec-core (~> 2.7.0)
@@ -20,7 +18,6 @@ GEM
     rspec-expectations (2.7.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.7.0)
-    socketpool (0.1.4)
 
 PLATFORMS
   java
