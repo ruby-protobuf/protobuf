@@ -13,11 +13,9 @@ require 'protobuf'
 require 'protobuf/rpc/client'
 class ::Protobuf::Rpc::Client
   def == other
-   options == other.options && \
-   error == other.error && \
-   do_block == other.do_block && \
-   @success_callback == other.instance_variable_get(:@success_callback) && \
-   @failure_callback == other.instance_variable_get(:@failure_callback)
+   connector.options == other.options && \
+   success_cb == other.success_cb && \
+   failure_cb == other.failure_cb
   end
 end
 

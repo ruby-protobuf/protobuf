@@ -59,7 +59,7 @@ describe Protobuf::Rpc::Client do
         end
       end
 
-      subject.should raise_error(RuntimeError, /EventMachine.fiber_run/)
+      subject.should raise_error(RuntimeError, /EM.fiber_run/)
     end
 
     it "throws a timeout when client timeout is exceeded" do
@@ -100,11 +100,11 @@ describe Protobuf::Rpc::Client do
     it 'should be able to define the syncronicity of the client request' do
       client = Spec::Proto::TestService.client(:async => false)
       client.options[:async].should be_false
-      client.do_block.should be_true
+      client.async?.should be_false
       
       client = Spec::Proto::TestService.client(:async => true)
       client.options[:async].should be_true
-      client.do_block.should be_false
+      client.async?.should be_true
     end
     
     it 'should be able to define which service to create itself for' do
@@ -144,7 +144,7 @@ describe Protobuf::Rpc::Client do
       
       EM.should_receive(:reactor_running?).and_return(true)
       EM.stub!(:schedule) do
-        client.instance_variable_get(:@success_callback).call(inner_value)
+        client.success_cb.call(inner_value)
       end
       
       client.find(nil) do |c|

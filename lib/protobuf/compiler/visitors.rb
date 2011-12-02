@@ -168,25 +168,11 @@ module Protobuf
         @file_contents
       end
 
-      def create_bin(out_dir, underscored_name, module_name, service_name, default_port)
-        bin_filename = "#{out_dir}/bin/start_#{underscored_name}"
-        bin_contents = template_erb('rpc_bin').result(binding)
-        create_file_with_backup(bin_filename, bin_contents, true) if @create_file
-        @file_contents[bin_filename] = bin_contents
-      end
-
       def create_service(message_file, out_dir, underscored_name, module_name, service_name, default_port, rpcs, required_file)
         service_filename = "#{out_dir}/#{Util.module_to_path(module_name)}/#{underscored_name}.rb"
         service_contents = template_erb('rpc_service_implementation').result(binding)
         create_file_with_backup(service_filename, service_contents) if @create_file
         @file_contents[service_filename] = service_contents
-      end
-
-      def create_client(out_dir, underscored_name, default_port, name, request, response, message_module, required_file)
-        client_filename = "#{out_dir}/clients/#{Util.module_to_path(message_module)}_client_#{underscore name}.rb"
-        client_contents = template_erb('rpc_client').result binding
-        create_file_with_backup(client_filename, client_contents, true) if @create_file
-        @file_contents[client_filename] = client_contents
       end
 
       private
