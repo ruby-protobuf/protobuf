@@ -4,6 +4,7 @@ require 'socket'
 module Protobuf
 end
 
+# For running the rpc_server
 if defined?(Protobuf::ServerType) && Protobuf::ServerType == "SocketServer"
   require 'protobuf/rpc/client'
   require 'protobuf/rpc/service'
@@ -14,4 +15,16 @@ else
   require 'protobuf/rpc/client'
   require 'protobuf/rpc/service'
   require 'protobuf/rpc/servers/evented_server'
+end
+
+# When setting up a client
+if defined?(Protobuf::ConnectorType) && Protobuf::ConnectorType == "Socket"
+  require 'protobuf/rpc/client'
+  require 'protobuf/rpc/connectors/socket'
+else
+  Protobuf::ConnectorType = "EventMachine"
+  require 'eventmachine'
+  require 'protobuf/ext/eventmachine'
+  require 'protobuf/rpc/client'
+  require 'protobuf/rpc/connectors/eventmachine'
 end

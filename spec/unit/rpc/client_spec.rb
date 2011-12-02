@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'spec/proto/test_service_impl'
-require 'spec/helper/all'
 
 describe Protobuf::Rpc::Client do
 

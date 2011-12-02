@@ -1,4 +1,4 @@
-require 'lib/protobuf/rpc/server'
+require 'protobuf/rpc/server'
 require 'spec/proto/test_service_impl'
 
 module StubProtobufServerFactory

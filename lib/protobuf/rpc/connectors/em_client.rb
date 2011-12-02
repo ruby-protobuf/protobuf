@@ -1,4 +1,3 @@
-require 'eventmachine'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'

@@ -27,7 +27,7 @@ module Protobuf
       #
       def initialize opts={}
         raise "Invalid client configuration. Service must be defined." if !opts[:service] || opts[:service].nil?
-        @connector = Connector.connector_for_platform.new(opts)
+        @connector = Connector.connector_for_client.new(opts)
         log_debug '[client] Initialized with options: %s' % opts.inspect
       end
       
