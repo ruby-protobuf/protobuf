@@ -1,4 +1,9 @@
 require 'protobuf/common/logger'
+require 'protobuf/rpc/rpc.pb'
+require 'protobuf/rpc/buffer'
+require 'protobuf/rpc/error'
+require 'protobuf/rpc/stat'
+require 'protobuf/rpc/connectors/common'
 
 module Protobuf
   module Rpc
