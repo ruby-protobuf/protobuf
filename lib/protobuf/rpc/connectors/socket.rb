@@ -6,6 +6,18 @@ module Protobuf
       class Socket < Base
         
         def send_request
+          check_async
+          connect_to_rpc_server
+        end
+
+        private
+
+        def check_async
+          raise "Cannot use Socket client in async mode" if async?
+        end
+
+        def connect_to_rpc_server
+          
         end
         
       end

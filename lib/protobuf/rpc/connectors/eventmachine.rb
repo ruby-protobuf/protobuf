@@ -6,10 +6,6 @@ module Protobuf
     module Connectors
       class EventMachine < Base
         
-        def initialize(options)
-          super(EMClient::DEFAULT_OPTIONS.merge(options))
-        end
-        
         def send_request
           Thread.new { EM.run } unless EM.reactor_running?
 
@@ -17,10 +13,10 @@ module Protobuf
         
           EM.schedule do
             log_debug '[client] Scheduling EventMachine client request to be created on next tick'
-            cnxn = EMClient.connect options, &ensure_cb
-            cnxn.on_success &success_cb if success_cb
-            cnxn.on_failure &ensure_cb
-            cnxn.on_complete { resume_fiber f } unless async?
+            cnxn = EMClient.connect(options, &ensure_cb)
+            cnxn.on_success(&success_cb) if success_cb
+            cnxn.on_failure(&ensure_cb)
+            cnxn.on_complete { resume_fiber(f) } unless async?
             log_debug '[client] Connection scheduled'
           end
 

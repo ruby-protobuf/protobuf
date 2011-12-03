@@ -15,18 +15,6 @@ module Protobuf
       
         attr_reader :options, :request, :response
         attr_reader :error, :error_reason, :error_message
-
-        DEFAULT_OPTIONS = {
-          :service        => nil,           # Service to invoke
-          :method         => nil,           # Service method to call
-          :host           => 'localhost',   # A default host (usually overridden)
-          :port           => '9938',        # A default port (usually overridden)
-          :request        => nil,           # The request object sent by the client
-          :request_type   => nil,           # The request type expected by the client
-          :response_type  => nil,           # The response type expected by the client
-          :async          => false,         # Whether or not to block a client call, this is actually handled by client.rb
-          :timeout        => 30             # The default timeout for the request, also handled by client.rb
-        }
       
         # For state tracking
         STATES = {
@@ -36,48 +24,43 @@ module Protobuf
           :completed  => 3
         }
       
-        def self.connect options={}
-          options = DEFAULT_OPTIONS.merge(options)
-          Protobuf::Logger.debug '[client-cnxn] Connecting to server: %s' % options.inspect
-          host = options[:host]
-          port = options[:port]
-          EM.connect host, port, self, options
+        class << self
+
+          def connect(options={})
+            options = DEFAULT_OPTIONS.merge(options)
+            Protobuf::Logger.debug '[client-cnxn] Connecting to server: %s' % options.inspect
+            EM.connect(options[:host], options[:port], self, options)
+          end
+
         end
       
-        def initialize options={}, &failure_cb
+        def initialize(options={}, &failure_cb)
           @failure_cb = failure_cb
-        
-          # Verify the options that are necessary and merge them in
-          [:service, :method, :host, :port].each do |opt|
-            fail(:RPC_ERROR, "Invalid client connection configuration. #{opt} must be a defined option.") if !options[opt] || options[opt].nil?
-          end
           @options = DEFAULT_OPTIONS.merge(options)
+          verify_options
+
           log_debug '[client-cnxn] Client Initialized: %s' % options.inspect
-        
           @error = ClientError.new
           @success_cb = nil
           @state = STATES[:pending]
-        
-          @stats = Protobuf::Rpc::Stat.new(:CLIENT, true)
-          @stats.server = [@options[:port], @options[:host]]
-          @stats.service = @options[:service].name
-          @stats.method = @options[:method]
+
+          initialize_stats
         rescue
           fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message) unless failed?
         end
 
         # Success callback registration
-        def on_success &success_cb
+        def on_success(&success_cb)
           @success_cb = success_cb
         end
       
         # Failure callback registration
-        def on_failure &failure_cb
+        def on_failure(&failure_cb)
           @failure_cb = failure_cb
         end
       
         # Completion callback registration
-        def on_complete &complete_cb
+        def on_complete(&complete_cb)
           @complete_cb = complete_cb
         end
       
@@ -97,7 +80,7 @@ module Protobuf
           fail(:RPC_ERROR, 'Connection error: %s' % $!.message) unless failed?
         end
       
-        def receive_data data
+        def receive_data(data)
           log_debug '[client-cnxn] receive_data: %s' % data
           @buffer << data
           parse_response if @buffer.flushed?
@@ -120,6 +103,20 @@ module Protobuf
         end
       
       private
+
+        def initialize_stats
+          @stats = Protobuf::Rpc::Stat.new(:CLIENT, true)
+          @stats.server = [@options[:port], @options[:host]]
+          @stats.service = @options[:service].name
+          @stats.method = @options[:method]
+        end
+
+        def verify_options
+          # Verify the options that are necessary and merge them in
+          [:service, :method, :host, :port].each do |opt|
+            fail(:RPC_ERROR, "Invalid client connection configuration. #{opt} must be a defined option.") if @options[opt].nil?
+          end
+        end
     
         # Sends the request to the server, invoked by the connection_completed event
         def send_request
@@ -169,55 +166,48 @@ module Protobuf
             if parsed.nil? and not response_wrapper.has_field?(:error_reason)
               fail :BAD_RESPONSE_PROTO, 'Unable to parse response from server'
             else
-              succeed parsed
+              succeed(parsed)
             end
           end
         end
       
-        def fail code, message
+        def fail(code, message)
           @state = STATES[:failed]
           @error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
           @error.message = message
           log_debug '[client-cnxn] Server failed request (invoking on_failure): %s' % @error.inspect
-          begin
-            @stats.end
-            @stats.log_stats
-            @failure_cb.call(@error) unless @failure_cb.nil?
-          rescue
-            log_error '[client-cnxn] Failure callback error encountered: %s' % $!.message
-            log_error '[client-cnxn] %s' % $!.backtrace.join("\n")
-            raise
-          ensure
-            complete
-          end
+          @failure_cb.call(@error) unless @failure_cb.nil?
+        rescue
+          log_error '[client-cnxn] Failure callback error encountered: %s' % $!.message
+          log_error '[client-cnxn] %s' % $!.backtrace.join("\n")
+          raise
+        ensure
+          complete
         end
       
-        def succeed response
+        def succeed(response)
           @state = STATES[:succeeded]
-          begin
-            log_debug '[client-cnxn] Server succeeded request (invoking on_success)'
-            @stats.end
-            @stats.log_stats
-            @success_cb.call(response) unless @success_cb.nil?
-            complete
-          rescue
-            log_error '[client-cnxn] Success callback error encountered: %s' % $!.message
-            log_error '[client-cnxn] %s' % $!.backtrace.join("\n")
-            fail :RPC_ERROR, 'An exception occurred while calling on_success: %s' % $!.message
-          end
+          log_debug '[client-cnxn] Server succeeded request (invoking on_success)'
+          @success_cb.call(response) unless @success_cb.nil?
+        rescue
+          log_error '[client-cnxn] Success callback error encountered: %s' % $!.message
+          log_error '[client-cnxn] %s' % $!.backtrace.join("\n")
+          fail :RPC_ERROR, 'An exception occurred while calling on_success: %s' % $!.message
+        ensure 
+          complete
         end
       
         def complete
           @state = STATES[:completed]
-          begin
-            log_debug '[client-cnxn] Response proceessing complete'
-            @success_cb = @failure_cb = nil
-            @complete_cb.call(@state) unless @complete_cb.nil?
-          rescue
-            log_error '[client-cnxn] Complete callback error encountered: %s' % $!.message
-            log_error '[client-cnxn] %s' % $!.backtrace.join("\n")
-            raise
-          end
+          @stats.end
+          @stats.log_stats
+          log_debug '[client-cnxn] Response proceessing complete'
+          @success_cb = @failure_cb = nil
+          @complete_cb.call(@state) unless @complete_cb.nil?
+        rescue
+          log_error '[client-cnxn] Complete callback error encountered: %s' % $!.message
+          log_error '[client-cnxn] %s' % $!.backtrace.join("\n")
+          raise
         end
   
       end

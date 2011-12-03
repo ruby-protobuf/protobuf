@@ -51,7 +51,7 @@ module Protobuf
       end
       
       def log_stats
-        Protobuf::Logger.info to_s
+        Protobuf::Logger.info(self.to_s)
       end
       
       def to_s

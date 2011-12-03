@@ -10,7 +10,7 @@ describe Protobuf::Rpc::Connectors::Base do
   
   describe '.new' do
     it 'assigns passed options and initializes success/failure callbacks' do
-      subject.options.should eq opts
+      subject.options.should eq(Protobuf::Rpc::Connectors::DEFAULT_OPTIONS.merge(opts))
       subject.success_cb.should be_nil
       subject.failure_cb.should be_nil
     end
