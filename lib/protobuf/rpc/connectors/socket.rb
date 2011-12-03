@@ -17,7 +17,8 @@ module Protobuf
         end
 
         def connect_to_rpc_server
-          
+          @socket = TCPSocket.new(options[:host], options[:port])
+
         end
         
       end

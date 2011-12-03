@@ -23,12 +23,10 @@ module Protobuf
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
-          @success_cb = nil
-          @failure_cb = nil
         end
         
         def send_request
-          raise 'not implemented'
+          raise 'If you inherit a Connector from Base you must implement send_request'
         end
         
         def async?

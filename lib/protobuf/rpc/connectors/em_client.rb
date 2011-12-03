@@ -40,13 +40,16 @@ module Protobuf
           verify_options
 
           log_debug '[client-cnxn] Client Initialized: %s' % options.inspect
-          @error = ClientError.new
           @success_cb = nil
           @state = STATES[:pending]
 
           initialize_stats
         rescue
           fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message) unless failed?
+        end
+
+        def error
+          @error || ClientError.new
         end
 
         # Success callback registration
@@ -173,10 +176,10 @@ module Protobuf
       
         def fail(code, message)
           @state = STATES[:failed]
-          @error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
-          @error.message = message
-          log_debug '[client-cnxn] Server failed request (invoking on_failure): %s' % @error.inspect
-          @failure_cb.call(@error) unless @failure_cb.nil?
+          error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
+          error.message = message
+          log_debug '[client-cnxn] Server failed request (invoking on_failure): %s' % error.inspect
+          @failure_cb.call(error) unless @failure_cb.nil?
         rescue
           log_error '[client-cnxn] Failure callback error encountered: %s' % $!.message
           log_error '[client-cnxn] %s' % $!.backtrace.join("\n")

@@ -26,7 +26,7 @@ module Protobuf
       #   })
       #
       def initialize opts={}
-        raise "Invalid client configuration. Service must be defined." if !opts[:service] || opts[:service].nil?
+        raise "Invalid client configuration. Service must be defined." if opts[:service].nil?
         @connector = Connector.connector_for_client.new(opts)
         log_debug '[client] Initialized with options: %s' % opts.inspect
       end
@@ -39,7 +39,7 @@ module Protobuf
       #   client = Client.new(:service => WidgetService)
       #   client.on_success {|res| ... }
       # 
-      def on_success &success_cb
+      def on_success(&success_cb)
         @connector.success_cb = success_cb
       end
       
@@ -51,7 +51,7 @@ module Protobuf
       #   client = Client.new(:service => WidgetService)
       #   client.on_failure {|err| ... }
       # 
-      def on_failure &failure_cb
+      def on_failure(&failure_cb)
         @connector.failure_cb = failure_cb
       end
       
@@ -67,7 +67,7 @@ module Protobuf
       #     c.on_failure {|err| ... }
       #   end
       # 
-      def method_missing method, *params
+      def method_missing(method, *params)
         service = options[:service]
         unless service.rpcs[service].keys.include?(method)
           log_error '[client] %s#%s not rpc method, passing to super' % [service.name, method.to_s]
@@ -88,7 +88,7 @@ module Protobuf
             log_debug '[client] client setup callback given, invoking'
             yield(self)
           else
-            log_debug '[client] no callbacks given'
+            log_debug '[client] no block given for callbacks'
           end
       
           send_request
