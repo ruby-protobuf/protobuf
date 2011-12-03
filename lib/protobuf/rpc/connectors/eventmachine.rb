@@ -6,7 +6,7 @@ module Protobuf
     module Connectors
       class EventMachine < Base
         
-        def initialize options
+        def initialize(options)
           super(EMClient::DEFAULT_OPTIONS.merge(options))
         end
         
@@ -76,7 +76,6 @@ module Protobuf
           err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
           ensure_cb.call(err)
         end
-
 
       end
     end
