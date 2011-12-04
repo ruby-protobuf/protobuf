@@ -18,7 +18,7 @@ module Protobuf
       end
       
       # Receive a chunk of data, potentially flushed to handle_client
-      def receive_data data
+      def receive_data(data)
         log_debug '[server] receive_data: %s' % data
         @buffer << data
         handle_client if @buffer.flushed?

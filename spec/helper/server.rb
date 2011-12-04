@@ -1,9 +1,10 @@
+require 'ostruct'
 require 'protobuf/rpc/server'
 require 'spec/proto/test_service_impl'
 
 module StubProtobufServerFactory
-  def self.build(delay)
-    new_server = Class.new(Protobuf::Rpc::EventedServer) do
+  def self.build(delay, server_class)
+    new_server = Class.new(server_class) do
       class << self
         def sleep_interval
           @sleep_interval
@@ -26,11 +27,27 @@ module StubProtobufServerFactory
 end
 
 class StubServer
-  def initialize(delay = 0, port = 9191)
-    @server_handle = EventMachine::start_server("127.0.0.1", port, StubProtobufServerFactory.build(delay)) 
+  def initialize(opts = {})
+    @options = OpenStruct.new({
+        :host => "127.0.0.1", 
+        :port => 9191, 
+        :delay => 0, 
+        :server => Protobuf::Rpc::EventedServer
+      }.merge(opts))
+
+    if @options.server == Protobuf::Rpc::EventedServer
+      @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay, @options.server)) 
+    else
+      Protobuf::Rpc::SocketRunner.run(@options)
+    end
   end
 
   def stop
-    EventMachine.stop_server(@server_handle)
+    case 
+    when @options.server == Protobuf::Rpc::EventedServer then
+      EventMachine.stop_server(@server_handle)
+    else
+      Protobuf::Rpc::SocketRunner.stop
+    end
   end
 end

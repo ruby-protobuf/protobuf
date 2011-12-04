@@ -7,7 +7,7 @@ describe Protobuf::Rpc::Client do
     it "waits for response when running synchronously" do
       EventMachine.fiber_run do
         delay = 3
-        server = StubServer.new(delay)
+        server = StubServer.new(:delay => delay)
         stop_servers = lambda { server.stop; EventMachine.stop }
         client = Spec::Proto::TestService.client(:async => false)
 
@@ -32,7 +32,7 @@ describe Protobuf::Rpc::Client do
     it "doesn't wait for response when running async call inside fiber" do
       EventMachine.fiber_run do
         delay = 3
-        server = StubServer.new(delay)
+        server = StubServer.new(:delay => delay)
         stop_servers = lambda { server.stop; EventMachine.stop }
         client = Spec::Proto::TestService.client(:async => true)
 
@@ -49,7 +49,7 @@ describe Protobuf::Rpc::Client do
       subject = Proc.new do
         EventMachine.run do
           delay = 1
-          server = StubServer.new(delay)
+          server = StubServer.new(:delay => delay)
           stop_servers = lambda { server.stop; EventMachine.stop }
           client = Spec::Proto::TestService.client(:async => false)
 
@@ -65,7 +65,7 @@ describe Protobuf::Rpc::Client do
       subject = Proc.new do
         EventMachine.fiber_run do
           delay = 3
-          server = StubServer.new(delay)
+          server = StubServer.new(:delay => delay)
           stop_servers = lambda { server.stop; EventMachine.stop }
           client = Spec::Proto::TestService.client(:async => false, :timeout => 1)
 
