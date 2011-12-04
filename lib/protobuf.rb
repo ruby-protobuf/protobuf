@@ -9,6 +9,7 @@ if defined?(Protobuf::ConnectorType) && Protobuf::ConnectorType == "Socket"
   require 'protobuf/rpc/client'
   require 'protobuf/rpc/connectors/socket'
 else
+  Protobuf::ConnectorType = "EventMachine"
   require 'eventmachine'
   require 'protobuf/ext/eventmachine'
   require 'protobuf/rpc/client'
