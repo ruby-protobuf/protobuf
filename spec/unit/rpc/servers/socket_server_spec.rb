@@ -32,7 +32,6 @@ describe Protobuf::Rpc::SocketServer do
     end
   end
 
-
   context 'when sending response objects' do
     it 'should be able to send a hash object as a response' do
       server = Protobuf::Rpc::SocketServer.new

@@ -19,8 +19,7 @@ module Protobuf
               log_debug '[client] Connection scheduled'
             end
 
-            set_timeout_and_validate_fiber unless async?
-            true if async?
+            async? ? true : set_timeout_and_validate_fiber
           end
         end
         
@@ -50,9 +49,9 @@ module Protobuf
           return yield if EM.reactor_running?
 
           if async?
-            @em_thread = Thread.new { EM.run(blk) } unless EM.reactor_running?
+            @em_thread = Thread.new { EM.run(blk) }
           else
-            @em_thread = Thread.new { EM.fiber_run(blk) } unless EM.reactor_running?
+            @em_thread = Thread.new { EM.fiber_run(blk) }
           end
         end
 
