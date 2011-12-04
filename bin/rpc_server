@@ -42,6 +42,10 @@ parser = OptionParser.new do |opts|
     server.level = v.to_i
   end
 
+  opts.on("-cs", "--client_socket", "Socket Mode for client connections (No EventMachine)") do |v|
+    Protobuf::ConnectorType = "Socket"
+  end
+
   opts.on("-s", "--socket", "Socket Server Mode (No EventMachine)") do |v|
     Protobuf::ServerType = "SocketServer"
     server.runner = Protobuf::Rpc::SocketRunner
