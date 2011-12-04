@@ -7,21 +7,21 @@ module Protobuf
       class EventMachine < Base
         
         def send_request
-          Thread.new { EM.run } unless EM.reactor_running?
+          return ensure_em_running do 
+            f = Fiber.current
+          
+            EM.schedule do
+              log_debug '[client] Scheduling EventMachine client request to be created on next tick'
+              cnxn = EMClient.connect(options, &ensure_cb)
+              cnxn.on_success(&success_cb) if success_cb
+              cnxn.on_failure(&ensure_cb)
+              cnxn.on_complete { resume_fiber(f) } unless async?
+              log_debug '[client] Connection scheduled'
+            end
 
-          f = Fiber.current
-        
-          EM.schedule do
-            log_debug '[client] Scheduling EventMachine client request to be created on next tick'
-            cnxn = EMClient.connect(options, &ensure_cb)
-            cnxn.on_success(&success_cb) if success_cb
-            cnxn.on_failure(&ensure_cb)
-            cnxn.on_complete { resume_fiber(f) } unless async?
-            log_debug '[client] Connection scheduled'
+            set_timeout_and_validate_fiber unless async?
+            true if async?
           end
-
-          return set_timeout_and_validate_fiber unless async?
-          return true
         end
         
         # Returns a proc that ensures any errors will be returned to the client
@@ -46,18 +46,14 @@ module Protobuf
       
         private
 
-        def set_timeout_and_validate_fiber
-          @timeout_timer = EM::add_timer(@options[:timeout]) do
-            message = 'Client timeout of %d seconds expired' % @options[:timeout]
-            err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
-            ensure_cb.call(err)
-          end
+        def ensure_em_running(&blk)
+          return yield if EM.reactor_running?
 
-          Fiber.yield
-        rescue FiberError
-          message = "Synchronous calls must be in 'EM.fiber_run' block" 
-          err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
-          ensure_cb.call(err)
+          if async?
+            @em_thread = Thread.new { EM.run(blk) } unless EM.reactor_running?
+          else
+            @em_thread = Thread.new { EM.fiber_run(blk) } unless EM.reactor_running?
+          end
         end
 
         def resume_fiber(fib)
@@ -69,6 +65,20 @@ module Protobuf
           log_error ex.backtrace.join("\n")
 
           message = 'Synchronous client failed: %s' % ex.message
+          err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
+          ensure_cb.call(err)
+        end
+
+        def set_timeout_and_validate_fiber
+          @timeout_timer = EM::add_timer(@options[:timeout]) do
+            message = 'Client timeout of %d seconds expired' % @options[:timeout]
+            err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
+            ensure_cb.call(err)
+          end
+
+          Fiber.yield
+        rescue FiberError
+          message = "Synchronous calls must be in 'EM.fiber_run' block" 
           err = ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
           ensure_cb.call(err)
         end

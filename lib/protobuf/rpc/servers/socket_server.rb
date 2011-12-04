@@ -13,10 +13,11 @@ module Protobuf
           @server.close
         end
 
-        def run(host = "127.0.0.1", port = 9399)
+        # TODO make listen/backlog part of config
+        def run(host = "127.0.0.1", port = 9399, backlog = 100)
           @running = true
           @server = TCPServer.new(host, port)
-          @server.listen(100)
+          @server.listen(backlog)
 
           loop do 
             Thread.new(@server.accept) do |sock|
@@ -27,14 +28,13 @@ module Protobuf
 
         rescue Errno::EBADF
           # Closing the server causes the loop to raise an exception here
-          if running?
-            raise
-          end
+          raise if running?
         end
 
         def running?
-          defined?(@running) && @running
+          @running
         end
+
       end
 
       def initialize(sock)

@@ -1,7 +1,38 @@
 require 'spec_helper'
 require 'spec/proto/test_service_impl'
+require 'protobuf/rpc/servers/socket_runner'
 
-describe Protobuf::Rpc::Server do
+describe Protobuf::Rpc::SocketServer do
+  before(:all) do 
+    server = OpenStruct.new(:server => "127.0.0.1", :port => 9399)
+    Thread.new { Protobuf::Rpc::SocketRunner.run(server) }
+    Thread.pass # Pass control to the SocketRunner thread to let it startup
+  end
+
+  after(:all) do 
+    Protobuf::Rpc::SocketRunner.stop
+  end
+
+  it "signals the SocketServer is running" do 
+    Protobuf::Rpc::SocketServer.running?.should be_true
+  end
+
+  it "calls the service in the client request" do 
+    client = Spec::Proto::TestService.client(:async => false)
+
+    client.find(:name => "Test Name", :active => true) do |c|
+      c.on_success do |succ|
+        succ.name.should eq("Test Name")
+        succ.status.should eq(Spec::Proto::StatusType::Enabled)
+      end
+
+      c.on_failure do |err|
+        raise err.inspect
+      end
+    end
+  end
+
+
   context 'when sending response objects' do
     it 'should be able to send a hash object as a response' do
       server = Protobuf::Rpc::SocketServer.new
