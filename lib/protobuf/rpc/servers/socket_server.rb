@@ -46,7 +46,7 @@ module Protobuf
 
         @stats.client = Socket.unpack_sockaddr_in(sock.getpeername)
         @buffer << @socket.read
-        handle_client
+        handle_client if @buffer.flushed?
       end
 
     end

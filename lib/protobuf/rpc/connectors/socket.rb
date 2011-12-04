@@ -10,19 +10,31 @@ module Protobuf
           post_init
           check_async
           connect_to_rpc_server
+          _send_request
+          read_response
         end
 
         private
-
-        def send_data(data)
-        end
 
         def check_async
           raise "Cannot use Socket client in async mode" if async?
         end
 
+        def close_connection
+          @socket.close
+        end
+
         def connect_to_rpc_server
           @socket = TCPSocket.new(options[:host], options[:port])
+        end
+
+        def read_response
+          @buffer << @socket.read
+          parse_response if @buffer.flushed?
+        end
+
+        def send_data(data)
+          @socket.write(data)
         end
 
       end

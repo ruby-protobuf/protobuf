@@ -57,7 +57,7 @@ module Protobuf
         # Called after the EM.connect
         def connection_completed
           log_debug '[client-cnxn] Established server connection, sending request'
-          send_request unless error?
+          _send_request unless error?
         rescue
           fail(:RPC_ERROR, 'Connection error: %s' % $!.message) unless failed?
         end

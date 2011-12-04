@@ -80,13 +80,13 @@ module Protobuf
         # Setup the read buffer for data coming back
         def post_init
           log_debug '[client-cnxn] Post init, new read buffer created'
-          @buffer = Protobuf::Rpc::Buffer.new :read
+          @buffer = Protobuf::Rpc::Buffer.new(:read)
         rescue
           fail(:RPC_ERROR, 'Connection error: %s' % $!.message) unless failed?
         end
 
         # Sends the request to the server, invoked by the connection_completed event
-        def send_request
+        def _send_request
           request_wrapper = Protobuf::Socketrpc::Request.new
           request_wrapper.service_name = @options[:service].name
           request_wrapper.method_name = @options[:method].to_s
