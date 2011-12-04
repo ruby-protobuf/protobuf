@@ -29,13 +29,12 @@ module SilentConstants
       Kernel::silence_warnings { source_object.const_set(const_name, val) }
     end
 
-    begin
-      block.call
-    ensure
-      constants.each do |constant, val|
-        source_object, const_name = parse(constant)
-        Kernel::silence_warnings { source_object.const_set(const_name, saved_constants[constant]) }
-      end
+    block.call
+  ensure
+    constants.each do |constant, val|
+      source_object, const_name = parse(constant)
+      Kernel::silence_warnings { source_object.const_set(const_name, saved_constants[constant]) }
     end
   end
+
 end

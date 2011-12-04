@@ -27,13 +27,25 @@ module Protobuf
         # Call the service method
         log_debug '[server] Dispatching client request to service'
         invoke_rpc_method
-        
       rescue => error
         # Ensure we're handling any errors that try to slip out the back door
         log_error error.message
         log_error error.backtrace.join("\n")
         handle_error(error)
         send_response
+      end
+
+      # Client error handler. Receives an exception object and writes it into the @response
+      def handle_error(error)
+        log_debug '[server] handle_error: %s' % error.inspect
+        if error.is_a?(PbError)
+          error.to_response(@response)
+        elsif error.is_a?(ClientError)
+          PbError.new(error.message, error.code.to_s).to_response(@response)
+        else
+          message = error.is_a?(String) ? error : error.message
+          PbError.new(message, 'RPC_ERROR').to_response(@response)
+        end
       end
       
       # Assuming all things check out, we can call the service method
@@ -68,49 +80,53 @@ module Protobuf
       
       # Parse the incoming request object into our expected request object
       def parse_request_from_buffer
-        begin
-          log_debug '[server] parsing request from buffer: %s' % @buffer.data.inspect
-          @request.parse_from_string @buffer.data
-        rescue => error
-          exc = BadRequestData.new 'Unable to parse request: %s' % error.message
-          log_error exc.message
-          raise exc
-        end
+        log_debug '[server] parsing request from buffer: %s' % @buffer.data.inspect
+        @request.parse_from_string @buffer.data
+      rescue => error
+        exc = BadRequestData.new 'Unable to parse request: %s' % error.message
+        log_error exc.message
+        raise exc
       end
-      
+
       # Read out the response from the service method,
       # setting it on the pb request, and serializing the
       # response to the protobuf response wrapper
-      def parse_response_from_service response
-        begin
-          expected = @klass.rpcs[@klass][@method].response_type
-          
-          # Cannibalize the response if it's a Hash
-          response = expected.new(response) if response.is_a?(Hash)
-          actual = response.class
-          
-          log_debug '[server] response (should/actual): %s/%s' % [expected.name, actual.name]
-          
-          # Determine if the service tried to change response types on us
-          if expected == actual
-            begin
-              # Response types match, so go ahead and serialize
-              log_debug '[server] serializing response: %s' % response.inspect
-              @response.response_proto = response.serialize_to_string
-            rescue
-              raise BadResponseProto, $!.message
-            end
-          else
-            # response types do not match, throw the appropriate error
-            raise BadResponseProto, 'Response proto changed from %s to %s' % [expected.name, actual.name]
-          end
-        rescue => error
-          log_error error.message
-          log_error error.backtrace.join("\n")
-          handle_error(error)
+      def parse_response_from_service(response)
+        expected = @klass.rpcs[@klass][@method].response_type
+        
+        # Cannibalize the response if it's a Hash
+        response = expected.new(response) if response.is_a?(Hash)
+        actual = response.class
+        log_debug '[server] response (should/actual): %s/%s' % [expected.name, actual.name]
+        
+        # Determine if the service tried to change response types on us
+        if expected == actual
+          serialize_response(response)
+        else
+          # response types do not match, throw the appropriate error
+          raise BadResponseProto, 'Response proto changed from %s to %s' % [expected.name, actual.name]
         end
+      rescue => error
+        log_error error.message
+        log_error error.backtrace.join("\n")
+        handle_error(error)
       end
-      
+
+      # Parses and returns the service and method name from the request wrapper proto
+      def parse_service_info
+        @klass = Util.constantize(@request.service_name)
+        @method = Util.underscore(@request.method_name).to_sym
+
+        unless @klass.instance_methods.include?(@method)
+          raise MethodNotFound, "Service method #{@request.method_name} is not defined by the service"
+        end
+        
+        @stats.service = @klass.name
+        @stats.method = @method
+      rescue NameError
+        raise ServiceNotFound, "Service class #{@request.service_name} is not found"
+      end
+
       # Write the response wrapper to the client
       def send_response
         raise 'Response already sent to client' if @did_respond
@@ -122,39 +138,16 @@ module Protobuf
         @stats.log_stats
         @did_respond = true
       end
-      
-      # Client error handler. Receives an exception object and writes it into the @response
-      def handle_error error
-        log_debug '[server] handle_error: %s' % error.inspect
-        if error.is_a? PbError
-          error.to_response @response
-        elsif error.is_a? ClientError
-          PbError.new(error.message, error.code.to_s).to_response @response
-        else
-          message = error.is_a?(String) ? error : error.message
-          PbError.new(message, 'RPC_ERROR').to_response @response
-        end
-      end
-      
-      # Parses and returns the service and method name from the request wrapper proto
-      def parse_service_info
-        @klass, @method = nil, nil
-        
-        begin
-          @klass = Util.constantize(@request.service_name)
-        rescue
-          raise ServiceNotFound, "Service class #{@request.service_name} is not found"
-        end
-        
-        @method = Util.underscore(@request.method_name).to_sym
-        unless @klass.instance_methods.include?(@method)
-          raise MethodNotFound, "Service method #{@request.method_name} is not defined by the service"
-        end
-        
-        @stats.service = @klass.name
-        @stats.method = @method
+
+      def serialize_response(response)
+        log_debug '[server] serializing response: %s' % response.inspect
+        @response.response_proto = response.serialize_to_string
+      rescue
+        raise BadResponseProto, $!.message
       end
       
     end
+
   end
+
 end

@@ -110,15 +110,14 @@ module Protobuf
       end
 
       def create_files(filename, out_dir, file_create)
-        begin
-          $: << File.expand_path(out_dir)
-          Class.new.class_eval(to_s) # check the message
-          $:.delete File.expand_path(out_dir)
-        rescue LoadError
-          puts "Error creating file #{filename}"
-          puts $!.message
-          exit 1
-        end
+        $: << File.expand_path(out_dir)
+        Class.new.class_eval(to_s) # check the message
+        $:.delete File.expand_path(out_dir)
+      rescue LoadError
+        puts "Error creating file #{filename}"
+        puts $!.message
+        exit 1
+      else 
         
         file = File.basename(filename)
         message_module = Util.module_to_path(package.map{|p| p.to_s.capitalize}.join('::'))

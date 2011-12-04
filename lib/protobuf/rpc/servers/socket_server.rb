@@ -7,6 +7,7 @@ module Protobuf
       include Protobuf::Logger::LogMethods
 
       class << self
+
         def stop 
           @running = false
           @server.close
