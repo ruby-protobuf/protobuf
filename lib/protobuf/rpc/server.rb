@@ -40,7 +40,7 @@ module Protobuf
         log_debug '[server] handle_error: %s' % error.inspect
         if error.is_a?(PbError)
           error.to_response(@response)
-        elsif error.is_a?(ClientError)
+        elsif error.is_a?(Protobuf::Rpc::Connectors::Common::ClientError)
           PbError.new(error.message, error.code.to_s).to_response(@response)
         else
           message = error.is_a?(String) ? error : error.message
@@ -75,7 +75,7 @@ module Protobuf
         
         # Call the service method
         log_debug '[server] Invoking %s#%s with request %s' % [@klass.name, @method, @request.inspect]
-        @service.__send__ @method, @request
+        @service.__send__(@method, @request)
       end
       
       # Parse the incoming request object into our expected request object

@@ -25,7 +25,7 @@ module Protobuf
       #     :request => request
       #   })
       #
-      def initialize opts={}
+      def initialize(opts={})
         raise "Invalid client configuration. Service must be defined." if opts[:service].nil?
         @connector = Connector.connector_for_client.new(opts)
         log_debug '[client] Initialized with options: %s' % opts.inspect
@@ -71,7 +71,7 @@ module Protobuf
         service = options[:service]
         unless service.rpcs[service].keys.include?(method)
           log_error '[client] %s#%s not rpc method, passing to super' % [service.name, method.to_s]
-          super method, *params
+          super(method, *params)
         else
           log_debug '[client] %s#%s' % [service.name, method.to_s]
           rpc = service.rpcs[service][method.to_sym]

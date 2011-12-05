@@ -7,6 +7,7 @@ module Protobuf
         include Protobuf::Rpc::Connectors::Common
         
         def send_request
+          initialize_stats
           post_init
           check_async
           connect_to_rpc_server
@@ -35,6 +36,7 @@ module Protobuf
 
         def send_data(data)
           @socket.write(data)
+          @socket.close_write
         end
 
       end

@@ -6,30 +6,44 @@ describe Protobuf::Rpc::SocketServer do
   before(:all) do 
     server = OpenStruct.new(:server => "127.0.0.1", :port => 9399)
     Thread.new { Protobuf::Rpc::SocketRunner.run(server) }
-    Thread.pass # Pass control to the SocketRunner thread to let it startup
+    sleep 0.5 # TODO figure out how to do this without sleep (Thread.pass didn't work either...hmmmm)
   end
 
   after(:all) do 
+    sleep 5
     Protobuf::Rpc::SocketRunner.stop
   end
 
-  it "signals the SocketServer is running" do 
+  it "provides a stop method" do
+    described_class.respond_to?(:stop).should be_true
+  end
+
+  it "provides a Runner class" do 
+    runner_class = described_class.to_s.gsub(/Server/, "Runner")
+    expect { Protobuf::Util.constantize(runner_class) }.to_not raise_error     
+  end
+
+  it "signals the Server is running" do 
     Protobuf::Rpc::SocketServer.running?.should be_true
   end
 
-  it "calls the service in the client request" do 
-    client = Spec::Proto::TestService.client(:async => false)
+  context "Eventmachine client" do 
 
-    client.find(:name => "Test Name", :active => true) do |c|
-      c.on_success do |succ|
-        succ.name.should eq("Test Name")
-        succ.status.should eq(Spec::Proto::StatusType::Enabled)
-      end
+    it "calls the service in the client request" do 
+      client = Spec::Proto::TestService.client(:async => false, :port => 9399, :host => "127.0.0.1")
 
-      c.on_failure do |err|
-        raise err.inspect
+      client.find(:name => "Test Name", :active => true) do |c|
+        c.on_success do |succ|
+          succ.name.should eq("Test Name")
+          succ.status.should eq(Spec::Proto::StatusType::Enabled)
+        end
+
+        c.on_failure do |err|
+          raise err.inspect
+        end
       end
     end
+    
   end
 
   context 'when sending response objects' do

@@ -19,11 +19,9 @@ module Protobuf
           @server = TCPServer.new(host, port)
           @server.listen(backlog)
 
-          loop do 
-            Thread.new(@server.accept) do |sock|
-              service_worker = self.new(sock)
-              sock.close 
-            end
+          while (sock = @server.accept)
+            self.new(sock)
+            sock.close 
           end
 
         rescue Errno::EBADF
@@ -48,6 +46,11 @@ module Protobuf
         @stats.client = Socket.unpack_sockaddr_in(sock.getpeername)
         @buffer << @socket.read
         handle_client if @buffer.flushed?
+      end
+
+      def send_data(data)
+        @socket.write(data)
+        @socket.close_write
       end
 
     end

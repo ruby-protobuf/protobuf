@@ -2,6 +2,8 @@ module Protobuf
   module Rpc 
     module Connectors
       module Common 
+        ClientError = Struct.new("ClientError", :code, :message)
+
         # For state tracking
         STATES = {
           :pending    => 0,
@@ -9,7 +11,13 @@ module Protobuf
           :failed     => 2,
           :completed  => 3
         }
- 
+
+        def any_callbacks?
+          return [@complete_cb, @failure_cb, @success_cb].inject(false) do |reduction, cb|
+            reduction = (reduction || !cb.nil?)
+          end
+        end
+
         def complete
           @state = STATES[:completed]
           @stats.end
@@ -21,6 +29,15 @@ module Protobuf
           log_error '[client-cnxn] Complete callback error encountered: %s' % $!.message
           log_error '[client-cnxn] %s' % $!.backtrace.join("\n")
           raise
+        end
+
+        def data_callback(data)
+          @used_data_callback = true
+          @data = data
+        end
+
+        def error
+          @error || ClientError.new
         end
 
         def fail(code, message)
@@ -47,38 +64,42 @@ module Protobuf
         def parse_response
           # Close up the connection as we no longer need it
           close_connection
-        
+
           log_debug '[client-cnxn] Parsing response from server (connection closed)'
           @stats.response_size = @buffer.size
-        
+
           # Parse out the raw response
           response_wrapper = Protobuf::Socketrpc::Response.new
           response_wrapper.parse_from_string(@buffer.data)
-        
+
           # Determine success or failure based on parsed data
-          if response_wrapper.has_field? :error_reason
+          if response_wrapper.has_field?(:error_reason)
             log_debug '[client-cnxn] Error response parsed'
-          
+
             # fail the call if we already know the client is failed
             # (don't try to parse out the response payload)
-            fail response_wrapper.error_reason, response_wrapper.error
+            fail(response_wrapper.error_reason, response_wrapper.error)
           else
             log_debug '[client-cnxn] Successful response parsed'
-          
+
             # Ensure client_response is an instance
             response_type = @options[:response_type].new
             parsed = response_type.parse_from_string(response_wrapper.response_proto.to_s)
-      
+
             if parsed.nil? and not response_wrapper.has_field?(:error_reason)
-              fail :BAD_RESPONSE_PROTO, 'Unable to parse response from server'
+              fail(:BAD_RESPONSE_PROTO, 'Unable to parse response from server')
             else
+              verify_callbacks
               succeed(parsed)
+              return @data if @used_data_callback
             end
           end
         end
 
         # Setup the read buffer for data coming back
         def post_init
+          # Setup an object for reponses without callbacks
+          @data = nil
           log_debug '[client-cnxn] Post init, new read buffer created'
           @buffer = Protobuf::Rpc::Buffer.new(:read)
         rescue
@@ -90,7 +111,7 @@ module Protobuf
           request_wrapper = Protobuf::Socketrpc::Request.new
           request_wrapper.service_name = @options[:service].name
           request_wrapper.method_name = @options[:method].to_s
-        
+
           if @options[:request].class == @options[:request_type]
             request_wrapper.request_proto = @options[:request].serialize_to_string
           else
@@ -98,13 +119,13 @@ module Protobuf
             actual = @options[:request].class.name
             fail :INVALID_REQUEST_PROTO, 'Expected request type to be type of %s, got %s instead' % [expected, actual]
           end
-        
+
           log_debug '[client-cnxn] Sending Request: %s' % request_wrapper.inspect
           request_buffer = Protobuf::Rpc::Buffer.new(:write, request_wrapper)
-          send_data(request_buffer.write)
           @stats.request_size = request_buffer.size
+          send_data(request_buffer.write)
         end
-      
+
         def succeed(response)
           @state = STATES[:succeeded]
           log_debug '[client-cnxn] Server succeeded request (invoking on_success)'
@@ -115,6 +136,12 @@ module Protobuf
           fail :RPC_ERROR, 'An exception occurred while calling on_success: %s' % $!.message
         ensure 
           complete
+        end
+
+        def verify_callbacks
+          if !any_callbacks?
+            @success_cb = @failure_cb = self.method(:data_callback)
+          end
         end
 
         def verify_options

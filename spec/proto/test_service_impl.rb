@@ -1,9 +1,10 @@
-require 'spec/proto/test_service'
+require 'protobuf/rpc/service'
+require File.dirname(__FILE__) + '/test.pb'
+require File.dirname(__FILE__) + '/test_service'
 
 module Spec
   module Proto
     class TestService
-      located_at "localhost:9191"
     
       # request -> Spec::Proto::ResourceFindRequest
       # response -> Spec::Proto::Resource

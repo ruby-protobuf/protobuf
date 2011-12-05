@@ -13,7 +13,7 @@ module Protobuf
         @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
         @stats.client = Socket.unpack_sockaddr_in(get_peername)
         
-        @buffer = Protobuf::Rpc::Buffer.new :read
+        @buffer = Protobuf::Rpc::Buffer.new(:read)
         @did_respond = false
       end
       

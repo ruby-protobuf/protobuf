@@ -14,7 +14,7 @@ module Protobuf
       end
       
       def mode=(mode)
-        if MODES.include? mode
+        if MODES.include?(mode)
           @mode = mode
         else
           @mode = :read

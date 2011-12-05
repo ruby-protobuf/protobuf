@@ -2,7 +2,6 @@
 module Protobuf
   module Rpc
     module Connectors
-      ClientError = Struct.new("ClientError", :code, :message)
     
       class EMClient < EM::Connection
         include Protobuf::Logger::LogMethods
@@ -33,10 +32,6 @@ module Protobuf
           initialize_stats
         rescue
           fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message) unless failed?
-        end
-
-        def error
-          @error || ClientError.new
         end
 
         # Success callback registration
