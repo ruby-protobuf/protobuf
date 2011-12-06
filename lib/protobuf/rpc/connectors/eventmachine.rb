@@ -23,7 +23,7 @@ module Protobuf
           end
         end
         
-        # Returns a proc that ensures any errors will be returned to the client
+        # Returns a callable that ensures any errors will be returned to the client
         # 
         # If a failure callback was set, just use that as a direct assignment
         # otherwise implement one here that simply throws an exception, since we
@@ -38,7 +38,7 @@ module Protobuf
         def ensure_em_running(&blk)
           case
           when EM.reactor_running? then
-            blk.call
+            yield
           when async? then 
             @em_thread = Thread.new { EM.run(blk) }
             Thread.pass until EM.reactor_running?
