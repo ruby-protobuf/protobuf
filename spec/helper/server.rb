@@ -3,8 +3,8 @@ require 'protobuf/rpc/server'
 require 'spec/proto/test_service_impl'
 
 module StubProtobufServerFactory
-  def self.build(delay, server_class)
-    new_server = Class.new(server_class) do
+  def self.build(delay)
+    new_server = Class.new(Protobuf::Rpc::EventedServer) do
       class << self
         def sleep_interval
           @sleep_interval
@@ -48,7 +48,7 @@ class StubServer
       Thread.pass until EM.reactor_running?
     end
 
-    @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay, @options.server)) 
+    @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
   end
 
   def stop

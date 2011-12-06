@@ -30,17 +30,7 @@ module Protobuf
         # don't want to swallow the black holes.
         # 
         def ensure_cb
-          @ensure_cb ||= begin
-            cbk = nil
-            if @failure_cb
-              cbk = @failure_cb
-            else
-              cbk = proc do |error|
-                raise '%s: %s' % [error.code.name, error.message]
-              end
-            end
-            cbk
-          end
+          @ensure_cb ||= (@failure_cb || lambda { |error| raise '%s: %s' % [error.code.name, error.message] } )
         end
       
         private
