@@ -36,10 +36,19 @@ class StubServer
       }.merge(opts))
 
     if @options.server == Protobuf::Rpc::EventedServer
-      @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay, @options.server)) 
+      start_em_server
     else
       Protobuf::Rpc::SocketRunner.run(@options)
     end
+  end
+
+  def start_em_server
+    if !EM.reactor_running?
+      Thread.new { EM.run }
+      Thread.pass until EM.reactor_running?
+    end
+
+    @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay, @options.server)) 
   end
 
   def stop
