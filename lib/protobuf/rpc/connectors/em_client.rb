@@ -15,19 +15,30 @@ module Protobuf
           def connect(options={})
             options = DEFAULT_OPTIONS.merge(options)
             Protobuf::Logger.debug '[client-cnxn] Connecting to server: %s' % options.inspect
-            EM.connect(options[:host], options[:port], self, options)
+#            socket = TCPSocket.new(options[:host], options[:port])
+#            EM.attach(socket, self, socket, options)
+            EM.connect(options[:host], options[:port], self, nil, options)
           end
 
         end
+        
+        # Called after the EM.connect
+        def connection_completed
+          log_debug '[client-cnxn] Established server connection, sending request'
+          _send_request unless error?
+#          @socket.close_write
+        rescue
+          fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
+        end
       
-        def initialize(options={}, &failure_cb)
+        def initialize(socket, options={}, &failure_cb)
+          @socket = socket
           @failure_cb = failure_cb
           @options = DEFAULT_OPTIONS.merge(options)
           verify_options
 
           log_debug '[client-cnxn] Client Initialized: %s' % options.inspect
           @success_cb = nil
-          @state = STATES[:pending]
 
           initialize_stats
         rescue
@@ -49,36 +60,12 @@ module Protobuf
           @complete_cb = complete_cb
         end
       
-        # Called after the EM.connect
-        def connection_completed
-          log_debug '[client-cnxn] Established server connection, sending request'
-          _send_request unless error?
-        rescue
-          fail(:RPC_ERROR, 'Connection error: %s' % $!.message) unless failed?
-        end
-      
         def receive_data(data)
           log_debug '[client-cnxn] receive_data: %s' % data
           @buffer << data
           parse_response if @buffer.flushed?
         end
-    
-        def pending?
-          @state == STATES[:pending]
-        end
-    
-        def succeeded?
-          @state == STATES[:succeeded]
-        end
-    
-        def failed?
-          @state == STATES[:failed]
-        end
-    
-        def completed?
-          @state == STATES[:completed]
-        end
-      
+     
       end
     end
   end

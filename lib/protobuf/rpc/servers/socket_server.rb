@@ -50,7 +50,6 @@ module Protobuf
 
       def send_data(data)
         @socket.write(data)
-        @socket.close_write
       end
 
     end

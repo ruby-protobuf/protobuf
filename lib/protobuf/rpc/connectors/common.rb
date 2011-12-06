@@ -4,14 +4,6 @@ module Protobuf
       module Common 
         ClientError = Struct.new("ClientError", :code, :message)
 
-        # For state tracking
-        STATES = {
-          :pending    => 0,
-          :succeeded  => 1,
-          :failed     => 2,
-          :completed  => 3
-        }
-
         def any_callbacks?
           return [@complete_cb, @failure_cb, @success_cb].inject(false) do |reduction, cb|
             reduction = (reduction || !cb.nil?)
@@ -19,12 +11,10 @@ module Protobuf
         end
 
         def complete
-          @state = STATES[:completed]
           @stats.end
           @stats.log_stats
           log_debug '[client-cnxn] Response proceessing complete'
-          @success_cb = @failure_cb = nil
-          @complete_cb.call(@state) unless @complete_cb.nil?
+          @complete_cb.call(self) unless @complete_cb.nil?
         rescue
           log_error '[client-cnxn] Complete callback error encountered: %s' % $!.message
           log_error '[client-cnxn] %s' % $!.backtrace.join("\n")
@@ -41,7 +31,6 @@ module Protobuf
         end
 
         def fail(code, message)
-          @state = STATES[:failed]
           error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
           error.message = message
           log_debug '[client-cnxn] Server failed request (invoking on_failure): %s' % error.inspect
@@ -127,7 +116,6 @@ module Protobuf
         end
 
         def succeed(response)
-          @state = STATES[:succeeded]
           log_debug '[client-cnxn] Server succeeded request (invoking on_success)'
           @success_cb.call(response) unless @success_cb.nil?
         rescue
