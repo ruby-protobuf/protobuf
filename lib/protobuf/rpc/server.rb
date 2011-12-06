@@ -38,13 +38,12 @@ module Protobuf
       # Client error handler. Receives an exception object and writes it into the @response
       def handle_error(error)
         log_debug '[server] handle_error: %s' % error.inspect
-        if error.is_a?(PbError)
+        if error.respond_to?(:to_response)
           error.to_response(@response)
-        elsif error.is_a?(Protobuf::Rpc::Connectors::Common::ClientError)
-          PbError.new(error.message, error.code.to_s).to_response(@response)
         else
-          message = error.is_a?(String) ? error : error.message
-          PbError.new(message, 'RPC_ERROR').to_response(@response)
+          message = error.respond_to?(:message) ? error.message : error.to_s
+          code = error.respond_to?(:code) ? error.code.to_s : "RPC_ERROR"
+          PbError.new(message, code).to_response(@response)
         end
       end
       
