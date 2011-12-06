@@ -42,7 +42,7 @@ module Protobuf
 
           initialize_stats
         rescue
-          fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message) unless failed?
+          fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message)
         end
 
         # Success callback registration

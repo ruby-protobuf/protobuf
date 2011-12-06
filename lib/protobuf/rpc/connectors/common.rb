@@ -92,7 +92,7 @@ module Protobuf
           log_debug '[client-cnxn] Post init, new read buffer created'
           @buffer = Protobuf::Rpc::Buffer.new(:read)
         rescue
-          fail(:RPC_ERROR, 'Connection error: %s' % $!.message) unless failed?
+          fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
         end
 
         # Sends the request to the server, invoked by the connection_completed event
