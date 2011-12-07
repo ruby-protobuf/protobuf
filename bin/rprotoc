@@ -9,8 +9,10 @@ else
   gem 'protobuf'
 end
 require 'protobuf'
+require 'protobuf/version'
 require 'protobuf/compiler/compiler'
 
+::Version = Protobuf::VERSION
 
 options = {
   :proto_path => '.',
@@ -21,8 +23,6 @@ opts.on('-p', '--proto_path <PATH>', 'Specify the directory in which to search f
 opts.on('-o', '--out <OUT_DIR>', 'Specify the directory in which Ruby source file is generated. The current directory is default.'){|v| options[:out] = v}
 opts.on_tail('-v', '--version', 'Show version.'){ puts(opts.ver); exit }
 opts.on_tail('-h', '--help', 'Show this message.'){ puts(opts.help); exit }
-
-::Version = Protobuf::VERSION
 
 begin
   opts.order!

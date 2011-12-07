@@ -5,10 +5,10 @@ require "protobuf/version"
 Gem::Specification.new do |s|
   s.name          = 'protobuf'
   s.version       = Protobuf::VERSION
-  s.date          = %q{2011-11-06}
+  s.date          = %q{2011-12-07}
 
-  s.authors       = ['BJ Neilsen']
-  s.email         = ["bj.neilsen@gmail.com"]
+  s.authors       = ['BJ Neilsen', 'Brandon Dewitt']
+  s.email         = ["bj.neilsen@gmail.com", "brandonsdewitt@gmail.com"]
   s.homepage      = %q{https://github.com/localshred/protobuf}
   s.summary       = 'Ruby implementation for Protocol Buffers. Works with other protobuf rpc implementations (e.g. Java, Python, C++).'
   s.description   = s.summary + "\n\nThis gem has diverged from https://github.com/macks/ruby-protobuf. All credit for serialization and rprotoc work most certainly goes to the original authors. All RPC implementation code (client/server/service) was written and is maintained by this author. Attempts to reconcile the original codebase with the current RPC implementation went unsuccessful."
