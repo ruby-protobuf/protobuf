@@ -8,6 +8,10 @@ describe Protobuf::Rpc::Connectors::Base do
   
   subject { Protobuf::Rpc::Connectors::Base.new(opts) }
   
+  it "raising an error when 'send_request' is not overridden" do 
+    expect{ subject.send_request }.to raise_error(RuntimeError, /inherit a Connector/)
+  end
+
   describe '.new' do
     it 'assigns passed options and initializes success/failure callbacks' do
       subject.options.should eq(Protobuf::Rpc::Connectors::DEFAULT_OPTIONS.merge(opts))

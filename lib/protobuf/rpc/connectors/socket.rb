@@ -7,9 +7,9 @@ module Protobuf
         include Protobuf::Rpc::Connectors::Common
         
         def send_request
+          check_async
           initialize_stats
           post_init
-          check_async
           connect_to_rpc_server
           _send_request
           read_response
