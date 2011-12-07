@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'protobuf/common/logger'
 require 'protobuf/rpc/server'
 require 'spec/proto/test_service_impl'
 
@@ -27,10 +28,12 @@ module StubProtobufServerFactory
 end
 
 class StubServer
+  include Protobuf::Logger::LogMethods
+
   def initialize(opts = {})
     @options = OpenStruct.new({
         :host => "127.0.0.1", 
-        :port => 9191, 
+        :port => 9939, 
         :delay => 0, 
         :server => Protobuf::Rpc::EventedServer
       }.merge(opts))
@@ -40,6 +43,7 @@ class StubServer
     else
       Protobuf::Rpc::SocketRunner.run(@options)
     end
+    log_debug "[stub-server] Server started #{@options.host}:#{@options.port}"
   end
 
   def start_em_server

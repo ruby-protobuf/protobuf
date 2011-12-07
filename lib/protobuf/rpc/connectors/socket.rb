@@ -29,6 +29,11 @@ module Protobuf
           @socket = TCPSocket.new(options[:host], options[:port])
         end
 
+        # Method to determine error state, must be used with Connector api
+        def error?
+          @socket.closed?
+        end
+
         def read_response
           @buffer << @socket.read
           parse_response if @buffer.flushed?

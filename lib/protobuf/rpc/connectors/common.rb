@@ -48,6 +48,9 @@ module Protobuf
           @stats.server = [@options[:port], @options[:host]]
           @stats.service = @options[:service].name
           @stats.method = @options[:method]
+          self
+        rescue => ex
+          fail(:RPC_ERROR, "Invalid stats configuration. #{ex.message}") 
         end
 
         def parse_response
@@ -91,6 +94,8 @@ module Protobuf
           @data = nil
           log_debug '[client-cnxn] Post init, new read buffer created'
           @buffer = Protobuf::Rpc::Buffer.new(:read)
+          _send_request unless error?
+          log_debug '[client-cnxn] Post init, new read buffer created just sent'
         rescue
           fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
         end

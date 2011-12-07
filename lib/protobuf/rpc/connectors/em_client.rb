@@ -15,22 +15,13 @@ module Protobuf
           def connect(options={})
             options = DEFAULT_OPTIONS.merge(options)
             Protobuf::Logger.debug '[client-cnxn] Connecting to server: %s' % options.inspect
-#            socket = TCPSocket.new(options[:host], options[:port])
-#            EM.attach(socket, self, socket, options)
-            EM.connect(options[:host], options[:port], self, nil, options)
+            # Using 'attach' to get access to a Ruby socket if needed
+            socket = TCPSocket.new(options[:host], options[:port])
+            EM.attach(socket, self, socket, options)
           end
 
         end
-        
-        # Called after the EM.connect
-        def connection_completed
-          log_debug '[client-cnxn] Established server connection, sending request'
-          _send_request unless error?
-#          @socket.close_write
-        rescue
-          fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
-        end
-      
+       
         def initialize(socket, options={}, &failure_cb)
           @socket = socket
           @failure_cb = failure_cb
