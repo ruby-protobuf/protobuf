@@ -14,8 +14,7 @@ describe Protobuf::Rpc::Connectors::Base do
     end
 
     it "does not raise error when 'send_request' is overridden" do 
-      new_sub = Class.new(subject.class){ def send_request; end }
-      new_sub = new_sub.new(opts)
+      new_sub = Class.new(subject.class){ def send_request; end }.new(opts)
       expect{ new_sub.send_request }.to_not raise_error
     end
   end
@@ -33,7 +32,7 @@ describe Protobuf::Rpc::Connectors::Base do
       subject.success_cb.should be_nil
       cb = proc {|res| raise res }
       subject.success_cb = cb
-      subject.success_cb.should eq cb
+      subject.success_cb.should eq(cb)
       expect { subject.success_cb.call('an error from cb') }.to raise_error 'an error from cb'
     end
   end
@@ -43,7 +42,7 @@ describe Protobuf::Rpc::Connectors::Base do
       subject.failure_cb.should be_nil
       cb = proc {|res| raise res }
       subject.failure_cb = cb
-      subject.failure_cb.should eq cb
+      subject.failure_cb.should eq(cb)
       expect { subject.failure_cb.call('an error from cb') }.to raise_error 'an error from cb'
     end
   end
