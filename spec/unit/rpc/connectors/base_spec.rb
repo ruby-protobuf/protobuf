@@ -8,8 +8,16 @@ describe Protobuf::Rpc::Connectors::Base do
   
   subject { Protobuf::Rpc::Connectors::Base.new(opts) }
   
-  it "raising an error when 'send_request' is not overridden" do 
-    expect{ subject.send_request }.to raise_error(RuntimeError, /inherit a Connector/)
+  describe "#send_request" do 
+    it "raising an error when 'send_request' is not overridden" do 
+      expect{ subject.send_request }.to raise_error(RuntimeError, /inherit a Connector/)
+    end
+
+    it "does not raise error when 'send_request' is overridden" do 
+      new_sub = Class.new(subject.class){ def send_request; end }
+      new_sub = new_sub.new(opts)
+      expect{ new_sub.send_request }.to_not raise_error
+    end
   end
 
   describe '.new' do
