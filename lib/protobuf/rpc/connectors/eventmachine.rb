@@ -36,12 +36,8 @@ module Protobuf
         private
 
         def ensure_em_running(&blk)
-          case
-          when EM.reactor_running? then
+          if EM.reactor_running? then
             yield
-          when async? then 
-            @em_thread = Thread.new { EM.run(blk) }
-            Thread.pass until EM.reactor_running?
           else
             @em_thread = Thread.new { EM.fiber_run(blk) }
             Thread.pass until EM.reactor_running?

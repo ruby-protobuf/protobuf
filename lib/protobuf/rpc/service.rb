@@ -6,7 +6,7 @@ module Protobuf
   module Rpc
     # Object to encapsulate the request/response types for a given service method
     # 
-    RpcMethod = Struct.new "RpcMethod", :service, :method, :request_type, :response_type
+    RpcMethod = Struct.new("RpcMethod", :service, :method, :request_type, :response_type)
     
     class Service
       include Protobuf::Logger::LogMethods
@@ -65,7 +65,7 @@ module Protobuf
         # See Client#initialize and ClientConnection::DEFAULT_OPTIONS
         # for all available options.
         #
-        def client options={}
+        def client(options={})
           configure
           Client.new({
             :service => self,
@@ -80,7 +80,7 @@ module Protobuf
         # so that any Clients using the Service.client sugar
         # will not have to configure the location each time.
         # 
-        def configure config={}
+        def configure(config={})
           locations[self] ||= {}
           locations[self][:host] = config[:host] if config.key?(:host)
           locations[self][:port] = config[:port] if config.key?(:port)
@@ -90,7 +90,7 @@ module Protobuf
         # e.g. 127.0.0.1:9933
         # e.g. localhost:0
         #
-        def located_at location
+        def located_at(location)
           return if location.nil? or location.downcase.strip !~ /[a-z0-9.]+:\d+/
           host, port = location.downcase.strip.split ':'
           configure :host => host, :port => port.to_i

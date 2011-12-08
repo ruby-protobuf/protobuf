@@ -15,8 +15,38 @@ shared_examples "a Protobuf Connector" do
 end
 
 describe Protobuf::Rpc::Connectors::Socket do 
+  subject{ described_class.new({}) }
+
+  it_behaves_like "a Protobuf Connector"
   
   specify{ described_class.include?(Protobuf::Rpc::Connectors::Common).should be_true }
+
+  context "#read_response" do
+    it "fills the buffer with data from the socket" do 
+      data = "New data"
+      socket = StringIO.new("#{data.bytesize}-#{data}")
+      subject.instance_variable_set(:@buffer, Protobuf::Rpc::Buffer.new(:read))
+      subject.instance_variable_set(:@socket, socket)
+      subject.should_receive(:parse_response).and_return(true)
+
+      subject.__send__(:read_response)
+      subject.instance_variable_get(:@buffer).flushed?.should be_true
+      subject.instance_variable_get(:@buffer).data.should eq(data)
+    end
+
+    it "waits for the IO to be readable" do 
+      data = "New data"
+      socket = StringIO.new("#{data.bytesize}-#{data}")
+      slow_reader = OpenStruct.new(:read => lambda{ sleep 1; socket.read }.call )
+      subject.instance_variable_set(:@buffer, Protobuf::Rpc::Buffer.new(:read))
+      subject.instance_variable_set(:@socket, slow_reader)
+      subject.should_receive(:parse_response).and_return(true)
+
+      subject.__send__(:read_response)
+      subject.instance_variable_get(:@buffer).flushed?.should be_true
+      subject.instance_variable_get(:@buffer).data.should eq(data)
+    end
+  end
 
   context "#check_async" do 
     it "raises an error when trying to execute asynchronously" do 
@@ -29,7 +59,5 @@ describe Protobuf::Rpc::Connectors::Socket do
       expect{ conn.__send__(:check_async) }.to_not raise_error
     end
   end
-
-  it_behaves_like "a Protobuf Connector"
 
 end

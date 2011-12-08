@@ -10,12 +10,13 @@ module Protobuf
         attr_reader :options, :request, :response
         attr_reader :error, :error_reason, :error_message
       
-        class << self
+       class << self
 
           def connect(options={})
             options = DEFAULT_OPTIONS.merge(options)
             Protobuf::Logger.debug '[client-cnxn] Connecting to server: %s' % options.inspect
             # Using 'attach' to get access to a Ruby socket if needed
+            # TODO use 'attach' and IO interface for plugin interface for new line protos
             socket = TCPSocket.new(options[:host], options[:port])
             EM.attach(socket, self, socket, options)
           end

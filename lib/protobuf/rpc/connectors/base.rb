@@ -24,7 +24,7 @@ module Protobuf
         include Protobuf::Logger::LogMethods
         
         attr_reader :options
-        attr_accessor :success_cb, :failure_cb
+        attr_accessor :success_cb, :failure_cb, :complete_cb
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)

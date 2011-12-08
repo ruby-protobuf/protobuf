@@ -9,9 +9,8 @@ module Protobuf
         def send_request
           check_async
           initialize_stats
-          post_init
           connect_to_rpc_server
-          _send_request
+          post_init # calls _send_request
           read_response
         end
 

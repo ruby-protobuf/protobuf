@@ -6,55 +6,48 @@ describe Protobuf::Rpc::Client do
   context "when using fiber based calls" do
     it "waits for response when running synchronously" do
       EventMachine.fiber_run do
-        delay = 3
-        server = StubServer.new(:delay => delay)
-        stop_servers = lambda { server.stop; EventMachine.stop }
-        client = Spec::Proto::TestService.client(:async => false)
+        StubServer.new(:delay => 3) do |server|
+          client = Spec::Proto::TestService.client(:async => false)
+          start = now
+          
+          client.find(:name => "Test Name", :active => true) do |c|
+            c.on_success do |succ|
+              succ.name.should eq("Test Name")
+              succ.status.should eq(Spec::Proto::StatusType::ENABLED) 
+            end 
 
-        start = now
-        
-        client.find(:name => "Test Name", :active => true) do |c|
-          c.on_success do |succ|
-            succ.name.should eq("Test Name")
-            succ.status.should eq(Spec::Proto::StatusType::ENABLED) 
+            c.on_failure do |err|
+              raise err.inspect
+            end
           end
 
-          c.on_failure do |err|
-            raise err.inspect
-          end
+          (now - start).should be_within(server.options.delay * 0.10).of(server.options.delay)
         end
 
-        (now - start).should be_within(delay * 0.10).of(delay)
-        stop_servers.call
+        EM.stop
       end
     end
 
     it "doesn't wait for response when running async call inside fiber" do
       EventMachine.fiber_run do
-        delay = 3
-        server = StubServer.new(:delay => delay)
-        stop_servers = lambda { server.stop; EventMachine.stop }
-        client = Spec::Proto::TestService.client(:async => true)
+        StubServer.new(:delay => 3) do |server|
+          client = Spec::Proto::TestService.client(:async => true)
+          start = now
+          client.find(:name => "Test Name", :active => true)
 
-        start = now
-        
-        client.find(:name => "Test Name", :active => true)
-
-        (now - start).should_not be_within(delay * 0.10).of(delay)
-        stop_servers.call
+          (now - start).should_not be_within(server.options.delay* 0.10).of(server.options.delay)
+        end
+        EM.stop
       end
     end
 
     it "throws and error when synchronous code is attempted without 'EventMachine.fiber_run'" do
       subject = Proc.new do
         EventMachine.run do
-          delay = 1
-          server = StubServer.new(:delay => delay)
-          stop_servers = lambda { server.stop; EventMachine.stop }
-          client = Spec::Proto::TestService.client(:async => false)
-
-          client.find(:name => "Test Name", :active => true)
-          stop_servers.call
+          StubServer.new(:delay => 1) do |server|
+            client = Spec::Proto::TestService.client(:async => false)
+            client.find(:name => "Test Name", :active => true)
+          end
         end
       end
 
@@ -64,13 +57,11 @@ describe Protobuf::Rpc::Client do
     it "throws a timeout when client timeout is exceeded" do
       subject = Proc.new do
         EventMachine.fiber_run do
-          delay = 3
-          server = StubServer.new(:delay => delay)
-          stop_servers = lambda { server.stop; EventMachine.stop }
-          client = Spec::Proto::TestService.client(:async => false, :timeout => 1)
-
-          client.find(:name => "Test Name", :active => true)
-          stop_servers.call
+          StubServer.new(:delay => 2) do |server|
+            client = Spec::Proto::TestService.client(:async => false, :timeout => 1)
+            client.find(:name => "Test Name", :active => true)
+          end
+          EM.stop
         end
       end
 

@@ -9,7 +9,7 @@ module Protobuf
       extend Forwardable
       include Protobuf::Logger::LogMethods
       
-      delegate [:options, :success_cb, :failure_cb, :async?] => :@connector
+      delegate [:options, :complete_cb, :success_cb, :failure_cb, :async?] => :@connector
       attr_reader :connector
       
       # Create a new client with default options (defined in ClientConnection)
@@ -31,16 +31,19 @@ module Protobuf
         log_debug '[client] Initialized with options: %s' % opts.inspect
       end
       
-      # Set a success callback on the client to return the
-      # successful response from the service when it is returned.
-      # If this callback is called, failure_cb will NOT be called.
+      # Set a complete callback on the client to return the object (self). 
       # Callback is called regardless of :async setting.
       # 
       #   client = Client.new(:service => WidgetService)
-      #   client.on_success {|res| ... }
+      #   client.on_complete {|obj| ... }
       # 
-      def on_success(&success_cb)
-        @connector.success_cb = success_cb
+      def on_complete(&complete_cb)
+        @connector.complete_cb = complete_cb 
+      end
+
+      def on_complete=(callable)
+        raise "callable must take a single argument" if callable.arity != 1
+        @connector.complete_cb = callable 
       end
       
       # Set a failure callback on the client to return the
@@ -53,6 +56,28 @@ module Protobuf
       # 
       def on_failure(&failure_cb)
         @connector.failure_cb = failure_cb
+      end
+
+      def on_failure=(callable)
+        raise "callable must take a single argument" if callable.arity != 1
+        @connector.failure_cb = callable 
+      end
+      
+      # Set a success callback on the client to return the
+      # successful response from the service when it is returned.
+      # If this callback is called, failure_cb will NOT be called.
+      # Callback is called regardless of :async setting.
+      # 
+      #   client = Client.new(:service => WidgetService)
+      #   client.on_success {|res| ... }
+      # 
+      def on_success(&success_cb)
+        @connector.success_cb = success_cb
+      end
+
+      def on_success=(callable)
+        raise "callable must take a single argument" if callable.arity != 1
+        @connector.success_cb = callable 
       end
       
       # Provides a mechanism to call the service method against the client

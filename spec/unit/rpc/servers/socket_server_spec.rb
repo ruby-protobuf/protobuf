@@ -10,7 +10,7 @@ describe Protobuf::Rpc::SocketServer do
   end
 
   after(:all) do 
-    sleep 5
+    sleep 2
     Protobuf::Rpc::SocketRunner.stop
   end
 
@@ -30,16 +30,18 @@ describe Protobuf::Rpc::SocketServer do
   context "Eventmachine client" do 
 
     it "calls the service in the client request" do 
-      client = Spec::Proto::TestService.client(:async => false, :port => 9399, :host => "127.0.0.1")
+      with_constants "Protobuf::ConnectorType" => "Evented" do
+        client = Spec::Proto::TestService.client(:async => false, :port => 9939, :host => "127.0.0.1")
 
-      client.find(:name => "Test Name", :active => true) do |c|
-        c.on_success do |succ|
-          succ.name.should eq("Test Name")
-          succ.status.should eq(Spec::Proto::StatusType::Enabled)
-        end
+        client.find(:name => "Test Name", :active => true) do |c|
+          c.on_success do |succ|
+            succ.name.should eq("Test Name")
+            succ.status.should eq(Spec::Proto::StatusType::Enabled)
+          end
 
-        c.on_failure do |err|
-          raise err.inspect
+          c.on_failure do |err|
+            raise err.inspect
+          end
         end
       end
     end
