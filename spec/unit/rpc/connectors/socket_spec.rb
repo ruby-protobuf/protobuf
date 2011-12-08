@@ -22,8 +22,9 @@ describe Protobuf::Rpc::Connectors::Socket do
   specify{ described_class.include?(Protobuf::Rpc::Connectors::Common).should be_true }
 
   context "#read_response" do
+    let(:data){ "New data" }
+
     it "fills the buffer with data from the socket" do 
-      data = "New data"
       socket = StringIO.new("#{data.bytesize}-#{data}")
       subject.instance_variable_set(:@buffer, Protobuf::Rpc::Buffer.new(:read))
       subject.instance_variable_set(:@socket, socket)
@@ -35,7 +36,6 @@ describe Protobuf::Rpc::Connectors::Socket do
     end
 
     it "waits for the IO to be readable" do 
-      data = "New data"
       socket = StringIO.new("#{data.bytesize}-#{data}")
       slow_reader = OpenStruct.new(:read => lambda{ sleep 1; socket.read }.call )
       subject.instance_variable_set(:@buffer, Protobuf::Rpc::Buffer.new(:read))
