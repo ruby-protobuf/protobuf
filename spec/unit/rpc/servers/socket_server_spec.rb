@@ -5,13 +5,13 @@ require 'protobuf/rpc/servers/socket_runner'
 describe Protobuf::Rpc::SocketServer do
   before(:all) do 
     server = OpenStruct.new(:server => "127.0.0.1", :port => 9399)
-    Thread.new { Protobuf::Rpc::SocketRunner.run(server) }
-    sleep 0.5 # TODO figure out how to do this without sleep (Thread.pass didn't work either...hmmmm)
+    @server_thread = Thread.new { Protobuf::Rpc::SocketRunner.run(server) }
+    Thread.pass until Protobuf::Rpc::SocketServer.running?
   end
 
   after(:all) do 
-    sleep 2
     Protobuf::Rpc::SocketRunner.stop
+    Thread.kill(@server_thread)
   end
 
   it "provides a stop method" do
