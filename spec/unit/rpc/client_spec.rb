@@ -154,7 +154,7 @@ describe Protobuf::Rpc::Client do
       client = Spec::Proto::TestService.client
       client.should_receive(:send_request)
       client.find({:name => 'Test Name', :active => false})
-      client.options[:request].should be_a Spec::Proto::ResourceFindRequest
+      client.options[:request].should be_a(Spec::Proto::ResourceFindRequest)
       client.options[:request].name.should eq('Test Name')
       client.options[:request].active.should eq(false)
     end

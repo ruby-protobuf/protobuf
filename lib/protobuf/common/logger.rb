@@ -52,6 +52,10 @@ module Protobuf
           Protobuf::Logger.__send__(m, *params, &block)
         end
       end
+
+      def self.included(base)
+        base.extend(LogMethods)
+      end
     end
     
   end

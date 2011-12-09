@@ -5,6 +5,7 @@ module Protobuf
     module Connectors
       class Socket < Base
         include Protobuf::Rpc::Connectors::Common
+        include Protobuf::Logger::LogMethods
         
         def send_request
           check_async
@@ -33,8 +34,19 @@ module Protobuf
           @socket.closed?
         end
 
+        def read_data
+          size_io = StringIO.new
+
+          while((size_reader = @socket.getc) != "-")
+            size_io << size_reader
+          end
+          str_size_io = size_io.string
+
+          "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
+        end
+
         def read_response
-          @buffer << @socket.read
+          @buffer << read_data 
           parse_response if @buffer.flushed?
         end
 

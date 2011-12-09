@@ -7,7 +7,7 @@ module Protobuf
       class EventMachine < Base
         
         def send_request
-          return ensure_em_running do 
+          ensure_em_running do 
             f = Fiber.current
           
             EM.schedule do
@@ -36,11 +36,16 @@ module Protobuf
         private
 
         def ensure_em_running(&blk)
-          if EM.reactor_running? then
+          if EM.reactor_running?
             yield
           else
-            @em_thread = Thread.new { EM.fiber_run(blk) }
-            Thread.pass until EM.reactor_running?
+            EM.fiber_run {
+              blk.call
+              EM.stop
+            }
+            
+            #Thread.pass until EM.reactor_running?
+            #EM.reactor_thread.join
           end
         end
 

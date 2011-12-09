@@ -1,6 +1,6 @@
 require 'fiber'
 
-# Method and concept from em-synchrony
+# Method from em-synchrony
 # https://github.com/igrigorik/em-synchrony
 #
 # A convenience method for wrapping EM.run body within
@@ -8,9 +8,7 @@ require 'fiber'
 # paused and resumed based on IO scheduling
 module EventMachine
   def self.fiber_run(blk=nil, tail=nil, &block)
-    blk ||= block
-    context = Proc.new{ Fiber.new{ blk.call }.resume }
-
+    context = Proc.new{ Fiber.new{ (b = blk || block) and b.call }.resume }
     self.run(context, tail)
   end
 end

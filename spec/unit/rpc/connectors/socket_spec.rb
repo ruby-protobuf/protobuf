@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 shared_examples "a Protobuf Connector" do 
-
   subject{ described_class.new({}) }
 
   context "API" do
@@ -11,7 +10,6 @@ shared_examples "a Protobuf Connector" do
     specify{ subject.respond_to?(:close_connection, true).should be_true }
     specify{ subject.respond_to?(:error?, true).should be_true }
   end
-
 end
 
 describe Protobuf::Rpc::Connectors::Socket do 
@@ -28,18 +26,6 @@ describe Protobuf::Rpc::Connectors::Socket do
       socket = StringIO.new("#{data.bytesize}-#{data}")
       subject.instance_variable_set(:@buffer, Protobuf::Rpc::Buffer.new(:read))
       subject.instance_variable_set(:@socket, socket)
-      subject.should_receive(:parse_response).and_return(true)
-
-      subject.__send__(:read_response)
-      subject.instance_variable_get(:@buffer).flushed?.should be_true
-      subject.instance_variable_get(:@buffer).data.should eq(data)
-    end
-
-    it "waits for the IO to be readable" do 
-      socket = StringIO.new("#{data.bytesize}-#{data}")
-      slow_reader = OpenStruct.new(:read => lambda{ sleep 1; socket.read }.call )
-      subject.instance_variable_set(:@buffer, Protobuf::Rpc::Buffer.new(:read))
-      subject.instance_variable_set(:@socket, slow_reader)
       subject.should_receive(:parse_response).and_return(true)
 
       subject.__send__(:read_response)

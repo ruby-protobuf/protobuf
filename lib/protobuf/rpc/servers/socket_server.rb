@@ -15,11 +15,13 @@ module Protobuf
 
         # TODO make listen/backlog part of config
         def run(host = "127.0.0.1", port = 9399, backlog = 100)
+          log_debug '[socket-server] Run'
           @running = true
           @server = TCPServer.new(host, port)
           @server.listen(backlog)
 
           while (sock = @server.accept)
+            log_debug '[socket-server] Accepted new connection'
             self.new(sock)
             sock.close 
           end
@@ -42,14 +44,29 @@ module Protobuf
         @response = Protobuf::Socketrpc::Response.new
         @buffer = Protobuf::Rpc::Buffer.new(:read)
         @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
+        log_debug '[socket-server] Post init, new read buffer created'
 
         @stats.client = Socket.unpack_sockaddr_in(sock.getpeername)
-        @buffer << @socket.read
+        @buffer << read_data 
+        log_debug '[socket-server] handling request'
         handle_client if @buffer.flushed?
       end
 
+      def read_data
+        size_io = StringIO.new
+
+        while((size_reader = @socket.getc) != "-")
+          size_io << size_reader
+        end
+        str_size_io = size_io.string
+
+        "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
+      end
+
       def send_data(data)
+        log_debug '[socket-server] sending data : %s' % data
         @socket.write(data)
+        @socket.close_write
       end
 
     end
