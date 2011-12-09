@@ -31,12 +31,12 @@ describe Protobuf::Rpc::SocketServer do
 
     it "calls the service in the client request" do 
       with_constants "Protobuf::ConnectorType" => "Evented" do
-        client = Spec::Proto::TestService.client(:async => false, :port => 9939, :host => "127.0.0.1")
+        client = Spec::Proto::TestService.client(:async => false, :port => 9399, :host => "127.0.0.1")
 
         client.find(:name => "Test Name", :active => true) do |c|
           c.on_success do |succ|
             succ.name.should eq("Test Name")
-            succ.status.should eq(Spec::Proto::StatusType::Enabled)
+            succ.status.should eq(Spec::Proto::StatusType::ENABLED)
           end
 
           c.on_failure do |err|

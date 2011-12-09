@@ -9,7 +9,7 @@ module Protobuf
         def send_request
           ensure_em_running do 
             f = Fiber.current
-          
+ 
             EM.schedule do
               log_debug '[client] Scheduling EventMachine client request to be created on next tick'
               cnxn = EMClient.connect(options, &ensure_cb)
@@ -36,17 +36,7 @@ module Protobuf
         private
 
         def ensure_em_running(&blk)
-          if EM.reactor_running?
-            yield
-          else
-            EM.fiber_run {
-              blk.call
-              EM.stop
-            }
-            
-            #Thread.pass until EM.reactor_running?
-            #EM.reactor_thread.join
-          end
+          EM.reactor_running? ? yield : EM.fiber_run { blk.call; EM.stop }
         end
 
         def resume_fiber(fib)
