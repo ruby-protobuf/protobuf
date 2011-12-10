@@ -14,14 +14,18 @@ module Protobuf
         end
 
         def cleanup_threads
-          log_debug "[socket-#{self}] Thread cleanup - #{@threads.size} - start"
+          log_debug "[#{log_signature}] Thread cleanup - #{@threads.size} - start"
           @threads = @threads.select{ |t| t.alive? ? true : (t.join; false) }
-          log_debug "[socket-#{self}] Thread cleanup - #{@threads.size} - complete"
+          log_debug "[#{log_signature}] Thread cleanup - #{@threads.size} - complete"
+        end
+
+        def log_signature
+          @log_signature ||= "server-#{self}"
         end
 
         # TODO make listen/backlog part of config
         def run(host = "127.0.0.1", port = 9399, backlog = 100, thread_threshold = 10)
-          log_debug "[socket-#{self}] Run"
+          log_debug "[#{log_signature}] Run"
           @running = true
           @threads = []
           @thread_threshold = thread_threshold
@@ -30,7 +34,7 @@ module Protobuf
 
           while true
             @threads << Thread.new(@server.accept) do |sock|
-              log_debug "[socket-#{self}] Accepted new connection"
+              log_debug "[#{log_signature}] Accepted new connection"
               Protobuf::Rpc::SocketServer::Worker.new(sock)
               sock.close 
             end
@@ -65,12 +69,16 @@ module Protobuf
           @response = Protobuf::Socketrpc::Response.new
           @buffer = Protobuf::Rpc::Buffer.new(:read)
           @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
-          log_debug "[server-#{self.class}] Post init, new read buffer created"
+          log_debug "[#{log_signature}] Post init, new read buffer created"
 
           @stats.client = Socket.unpack_sockaddr_in(@socket.getpeername)
           @buffer << read_data 
-          log_debug "[server-#{self.class}] handling request"
+          log_debug "[#{log_signature}] handling request"
           handle_client if @buffer.flushed?
+        end
+
+        def log_signature
+          @log_signature ||= "server-#{self.class}"
         end
 
         def read_data
@@ -85,7 +93,7 @@ module Protobuf
         end
 
         def send_data(data)
-          log_debug "[server-#{self.class}] sending data : %s" % data
+          log_debug "[#{log_signature}] sending data : %s" % data
           @socket.write(data)
           @socket.close_write
         end
