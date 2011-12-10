@@ -178,7 +178,8 @@ end
       when match(/\/\*/)
         # C-like comment
         raise 'EOF inside block comment' until @scanner.scan_until(/\*\//)
-      when match(/(?:required|optional|repeated|import|package|option|message|extend|enum|service|rpc|returns|group|default|extensions|to|max|double|float|int32|int64|uint32|uint64|sint32|sint64|fixed32|fixed64|sfixed32|sfixed64|bool|string|bytes)\b/)
+      when !@in_package_stack && match(/(?:required|optional|repeated|import|package|option|message|extend|enum|service|rpc|returns|group|default|extensions|to|max|double|float|int32|int64|uint32|uint64|sint32|sint64|fixed32|fixed64|sfixed32|sfixed64|bool|string|bytes)\b/)
+        @in_package_stack = @token == 'package'
         yield [@token, @token.to_sym]
       when match(/[+-]?\d*\.\d+([Ee][\+-]?\d+)?/)
         yield [:FLOAT_LITERAL, @token.to_f]
@@ -197,6 +198,7 @@ end
       when match(/[A-Z]\w*/)
         yield [:CAMEL_IDENT, @token.to_sym]
       when match(/./)
+        @in_package_stack = @token != ';' if @in_package_stack
         yield [@token, @token]
       else
         raise "parse error around #{@scanner.string[@scanner.pos, 32].inspect}"
