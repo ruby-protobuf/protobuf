@@ -1,5 +1,7 @@
 require 'logger'
 require 'socket'
+require 'pp'
+require 'stringio'
 
 module Protobuf
 end

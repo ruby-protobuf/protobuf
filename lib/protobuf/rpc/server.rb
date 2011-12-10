@@ -17,15 +17,15 @@ module Protobuf
         @response = Protobuf::Socketrpc::Response.new
         
         # Parse the protobuf request from the socket
-        log_debug '[server] Parsing request from client'
+        log_debug "[#{log_signature}] Parsing request from client"
         parse_request_from_buffer
       
         # Determine the service class and method name from the request
-        log_debug '[server] Extracting procedure call info from request'
+        log_debug "[#{log_signature}] Extracting procedure call info from request"
         parse_service_info
         
         # Call the service method
-        log_debug '[server] Dispatching client request to service'
+        log_debug "[#{log_signature}] Dispatching client request to service"
         invoke_rpc_method
       rescue => error
         # Ensure we're handling any errors that try to slip out the back door
@@ -37,7 +37,7 @@ module Protobuf
 
       # Client error handler. Receives an exception object and writes it into the @response
       def handle_error(error)
-        log_debug '[server] handle_error: %s' % error.inspect
+        log_debug "[#{log_signature}] handle_error: %s" % error.inspect
         if error.respond_to?(:to_response)
           error.to_response(@response)
         else
@@ -73,14 +73,18 @@ module Protobuf
         end
         
         # Call the service method
-        log_debug '[server] Invoking %s#%s with request %s' % [@klass.name, @method, @request.inspect]
+        log_debug "[#{log_signature}] Invoking %s#%s with request %s" % [@klass.name, @method, @request.inspect]
         @service.__send__(@method, @request)
+      end
+
+      def log_signature
+        @log_signature ||= "server-#{self.class}"
       end
       
       # Parse the incoming request object into our expected request object
       def parse_request_from_buffer
-        log_debug '[server] parsing request from buffer: %s' % @buffer.data.inspect
-        @request.parse_from_string @buffer.data
+        log_debug "[#{log_signature}] parsing request from buffer: %s" % @buffer.data.inspect
+        @request.parse_from_string(@buffer.data)
       rescue => error
         exc = BadRequestData.new 'Unable to parse request: %s' % error.message
         log_error exc.message
@@ -96,7 +100,7 @@ module Protobuf
         # Cannibalize the response if it's a Hash
         response = expected.new(response) if response.is_a?(Hash)
         actual = response.class
-        log_debug '[server] response (should/actual): %s/%s' % [expected.name, actual.name]
+        log_debug "[#{log_signature}] response (should/actual): %s/%s" % [expected.name, actual.name]
         
         # Determine if the service tried to change response types on us
         if expected == actual
@@ -129,7 +133,7 @@ module Protobuf
       # Write the response wrapper to the client
       def send_response
         raise 'Response already sent to client' if @did_respond
-        log_debug '[server] Sending response to client: %s' % @response.inspect
+        log_debug "[#{log_signature}] Sending response to client: %s" % @response.inspect
         response_buffer = Protobuf::Rpc::Buffer.new(:write, @response)
         send_data(response_buffer.write)
         @stats.response_size = response_buffer.size
@@ -139,7 +143,7 @@ module Protobuf
       end
 
       def serialize_response(response)
-        log_debug '[server] serializing response: %s' % response.inspect
+        log_debug "[#{log_signature}] serializing response: %s" % response.inspect
         @response.response_proto = response.serialize_to_string
       rescue
         raise BadResponseProto, $!.message

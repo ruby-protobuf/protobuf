@@ -8,22 +8,34 @@ module Protobuf
 
       class << self
 
-        def stop 
-          @running = false
-          @server.close
+        def cleanup? 
+          # every 10 connections run a cleanup routine after closing the response
+          @threads.size > (@thread_threshold - 1) && (@threads.size % @thread_threshold) == 0
+        end
+
+        def cleanup_threads
+          log_debug "[socket-#{self}] Thread cleanup - #{@threads.size} - start"
+          @threads = @threads.select{ |t| t.alive? ? true : (t.join; false) }
+          log_debug "[socket-#{self}] Thread cleanup - #{@threads.size} - complete"
         end
 
         # TODO make listen/backlog part of config
-        def run(host = "127.0.0.1", port = 9399, backlog = 100)
-          log_debug '[socket-server] Run'
+        def run(host = "127.0.0.1", port = 9399, backlog = 100, thread_threshold = 10)
+          log_debug "[socket-#{self}] Run"
           @running = true
+          @threads = []
+          @thread_threshold = thread_threshold
           @server = TCPServer.new(host, port)
           @server.listen(backlog)
 
-          while (sock = @server.accept)
-            log_debug '[socket-server] Accepted new connection'
-            self.new(sock)
-            sock.close 
+          while true
+            @threads << Thread.new(@server.accept) do |sock|
+              log_debug "[socket-#{self}] Accepted new connection"
+              Protobuf::Rpc::SocketServer.new(sock)
+              sock.close 
+            end
+
+            cleanup_threads if cleanup? 
           end
 
         rescue Errno::EBADF
@@ -35,6 +47,11 @@ module Protobuf
           @running
         end
 
+        def stop 
+          @running = false
+          @server.close
+        end
+
       end
 
       def initialize(sock)
@@ -44,11 +61,11 @@ module Protobuf
         @response = Protobuf::Socketrpc::Response.new
         @buffer = Protobuf::Rpc::Buffer.new(:read)
         @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
-        log_debug '[socket-server] Post init, new read buffer created'
+        log_debug "[server-#{self.class}] Post init, new read buffer created"
 
-        @stats.client = Socket.unpack_sockaddr_in(sock.getpeername)
+        @stats.client = Socket.unpack_sockaddr_in(@socket.getpeername)
         @buffer << read_data 
-        log_debug '[socket-server] handling request'
+        log_debug "[server-#{self.class}] handling request"
         handle_client if @buffer.flushed?
       end
 
@@ -64,7 +81,7 @@ module Protobuf
       end
 
       def send_data(data)
-        log_debug '[socket-server] sending data : %s' % data
+        log_debug "[server-#{self.class}] sending data : %s" % data
         @socket.write(data)
         @socket.close_write
       end

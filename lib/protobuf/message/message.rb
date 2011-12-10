@@ -1,5 +1,3 @@
-require 'pp'
-require 'stringio'
 require 'protobuf/descriptor/descriptor'
 require 'protobuf/message/decoder'
 require 'protobuf/message/encoder'
@@ -27,7 +25,7 @@ module Protobuf
       end
     end
 
-    class <<self
+    class << self
       include Protoable
 
       # Reserve field numbers for extensions. Don't use this method directly.
