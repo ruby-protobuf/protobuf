@@ -51,7 +51,7 @@ module Protobuf
       
         # Generated service classes should call this method on themselves to add rpc methods
         # to the stack with a given request and response type
-        def rpc method, request_type, response_type
+        def rpc(method, request_type, response_type)
           rpcs[self] ||= {}
           rpcs[self][method] = RpcMethod.new self, method, request_type, response_type
         end
@@ -114,6 +114,10 @@ module Protobuf
         end
         
       end
+
+      def log_signature
+        @log_signature ||= "service-#{self.class}"
+      end
       
       # If a method comes through that hasn't been found, and it
       # is defined in the rpcs method list, we know that the rpc
@@ -126,7 +130,7 @@ module Protobuf
           log_error exc.message
           raise exc
         else
-          log_error '-------------- [service] %s#%s not rpc method, passing to super' % [self.class.name, m.to_s]
+          log_error "-------------- [#{log_signature}] %s#%s not rpc method, passing to super" % [self.class.name, m.to_s]
           super m, params
         end
       end
@@ -150,7 +154,7 @@ module Protobuf
         error_message = 'Unable to invoke rpc_failed, no failure callback is setup.' 
         log_and_raise_error(error_message) if @rpc_failure_cb.nil?
         error = message.is_a?(String) ? RpcFailed.new(message) : message
-        log_warn '[service] RPC Failed: %s' % error.message
+        log_warn "[#{log_signature}] RPC Failed: %s" % error.message
         @rpc_failure_cb.call(error)
       end
       
@@ -217,17 +221,17 @@ module Protobuf
         # Setup the response
         @response = rpcs[method].response_type.new
 
-        log_debug '[service] calling service method %s#%s' % [self.class.name, method]
+        log_debug "[#{log_signature}] calling service method %s#%s" % [self.class.name, method]
         # Call the aliased rpc method (e.g. :rpc_find for :find)
         __send__("rpc_#{method}".to_sym)
-        log_debug '[service] completed service method %s#%s' % [self.class.name, method]
+        log_debug "[#{log_signature}] completed service method %s#%s" % [self.class.name, method]
         
         # Pass the populated response back to the server
         # Note this will only get called if the rpc method didn't explode (by design)
         if @async_responder
-          log_debug '[service] async request, not sending response (yet)'
+          log_debug "[#{log_signature}] async request, not sending response (yet)"
         else
-          log_debug '[service] trigger server send_response'
+          log_debug "[#{log_signature}] trigger server send_response"
           send_response
         end
       end

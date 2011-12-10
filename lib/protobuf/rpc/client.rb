@@ -28,7 +28,11 @@ module Protobuf
       def initialize(opts={})
         raise "Invalid client configuration. Service must be defined." if opts[:service].nil?
         @connector = Connector.connector_for_client.new(opts)
-        log_debug '[client] Initialized with options: %s' % opts.inspect
+        log_debug "[#{log_signature}] Initialized with options: %s" % opts.inspect
+      end
+
+      def log_signature
+        @log_signature ||= "client-#{self.class}"
       end
       
       # Set a complete callback on the client to return the object (self). 
@@ -104,25 +108,25 @@ module Protobuf
       def method_missing(method, *params)
         service = options[:service]
         unless service.rpcs[service].keys.include?(method)
-          log_error '[client] %s#%s not rpc method, passing to super' % [service.name, method.to_s]
+          log_error "[#{log_signature}] %s#%s not rpc method, passing to super" % [service.name, method.to_s]
           super(method, *params)
         else
-          log_debug '[client] %s#%s' % [service.name, method.to_s]
+          log_debug "[#{log_signature}] %s#%s" % [service.name, method.to_s]
           rpc = service.rpcs[service][method.to_sym]
           options[:request_type] = rpc.request_type
-          log_debug '[client] Request Type: %s' % options[:request_type].name
+          log_debug "[#{log_signature}] Request Type: %s" % options[:request_type].name
           options[:response_type] = rpc.response_type
-          log_debug '[client] Response Type: %s' % options[:response_type].name
+          log_debug "[#{log_signature}] Response Type: %s" % options[:response_type].name
           options[:method] = method.to_s
           options[:request] = params[0].is_a?(Hash) ? options[:request_type].new(params[0]) : params[0]
-          log_debug '[client] Request Data: %s' % options[:request].inspect
+          log_debug "[#{log_signature}] Request Data: %s" % options[:request].inspect
           
           # Call client to setup on_success and on_failure event callbacks
           if block_given?
-            log_debug '[client] client setup callback given, invoking'
+            log_debug "[#{log_signature}] client setup callback given, invoking"
             yield(self)
           else
-            log_debug '[client] no block given for callbacks'
+            log_debug "[#{log_signature}] no block given for callbacks"
           end
       
           send_request

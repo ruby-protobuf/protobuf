@@ -56,7 +56,7 @@ module Protobuf
       
       def to_s
         [
-          @type == :SERVER ? '[SRV]' : '[CLT]',
+          @type == :SERVER ? "[SRV-#{self.class}]" : "[CLT-#{self.class}]",
           rpc,
           elapsed_time,
           sizes,
