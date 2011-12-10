@@ -11,12 +11,12 @@ module Protobuf
             f = Fiber.current
  
             EM.schedule do
-              log_debug '[client] Scheduling EventMachine client request to be created on next tick'
+              log_debug "[#{log_signature}] Scheduling EventMachine client request to be created on next tick"
               cnxn = EMClient.connect(options, &ensure_cb)
               cnxn.on_success(&success_cb) if success_cb
               cnxn.on_failure(&ensure_cb)
               cnxn.on_complete { resume_fiber(f) } unless async?
-              log_debug '[client] Connection scheduled'
+              log_debug "[#{log_signature}] Connection scheduled"
             end
 
             async? ? true : set_timeout_and_validate_fiber
@@ -32,6 +32,10 @@ module Protobuf
         def ensure_cb
           @ensure_cb ||= (@failure_cb || lambda { |error| raise '%s: %s' % [error.code.name, error.message] } )
         end
+
+        def log_signature
+          @log_signature ||= "client-#{self.class}"
+        end
       
         private
 
@@ -43,7 +47,7 @@ module Protobuf
           EM::cancel_timer(@timeout_timer)
           fib.resume(true)
         rescue => ex 
-          log_error 'An exception occurred while waiting for server response:'
+          log_error "[#{log_signature}] An exception occurred while waiting for server response:"
           log_error ex.message
           log_error ex.backtrace.join("\n")
 

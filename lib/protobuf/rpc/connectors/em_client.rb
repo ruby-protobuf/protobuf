@@ -14,7 +14,7 @@ module Protobuf
 
           def connect(options={})
             options = DEFAULT_OPTIONS.merge(options)
-            Protobuf::Logger.debug '[client-cnxn] Connecting to server: %s' % options.inspect
+            log_debug "[client-#{self}] Connecting to server: %s" % options.inspect
             # Using 'attach' to get access to a Ruby socket if needed
             # TODO use 'attach' and IO interface for plugin interface for new line protos
             socket = TCPSocket.new(options[:host], options[:port])
@@ -28,11 +28,9 @@ module Protobuf
           @failure_cb = failure_cb
           @options = DEFAULT_OPTIONS.merge(options)
           verify_options
-
-          log_debug '[client-cnxn] Client Initialized: %s' % options.inspect
-          @success_cb = nil
-
           initialize_stats
+
+          log_debug "[#{log_signature}] Client Initialized: %s" % options.inspect
         rescue
           fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message)
         end
@@ -53,7 +51,7 @@ module Protobuf
         end
       
         def receive_data(data)
-          log_debug '[client-cnxn] receive_data: %s' % data
+          log_debug "[#{log_signature}] receive_data: %s" % data
           @buffer << data
           parse_response if @buffer.flushed?
         end
