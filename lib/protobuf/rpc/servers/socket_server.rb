@@ -31,7 +31,7 @@ module Protobuf
           while true
             @threads << Thread.new(@server.accept) do |sock|
               log_debug "[socket-#{self}] Accepted new connection"
-              Protobuf::Rpc::SocketServer.new(sock)
+              Protobuf::Rpc::SocketServer::Worker.new(sock)
               sock.close 
             end
 
@@ -54,38 +54,42 @@ module Protobuf
 
       end
 
-      def initialize(sock)
-        @did_response = false
-        @socket = sock
-        @request = Protobuf::Socketrpc::Request.new
-        @response = Protobuf::Socketrpc::Response.new
-        @buffer = Protobuf::Rpc::Buffer.new(:read)
-        @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
-        log_debug "[server-#{self.class}] Post init, new read buffer created"
+      class Worker 
+        include Protobuf::Rpc::Server
+        include Protobuf::Logger::LogMethods
 
-        @stats.client = Socket.unpack_sockaddr_in(@socket.getpeername)
-        @buffer << read_data 
-        log_debug "[server-#{self.class}] handling request"
-        handle_client if @buffer.flushed?
-      end
+        def initialize(sock)
+          @did_response = false
+          @socket = sock
+          @request = Protobuf::Socketrpc::Request.new
+          @response = Protobuf::Socketrpc::Response.new
+          @buffer = Protobuf::Rpc::Buffer.new(:read)
+          @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
+          log_debug "[server-#{self.class}] Post init, new read buffer created"
 
-      def read_data
-        size_io = StringIO.new
-
-        while((size_reader = @socket.getc) != "-")
-          size_io << size_reader
+          @stats.client = Socket.unpack_sockaddr_in(@socket.getpeername)
+          @buffer << read_data 
+          log_debug "[server-#{self.class}] handling request"
+          handle_client if @buffer.flushed?
         end
-        str_size_io = size_io.string
 
-        "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
+        def read_data
+          size_io = StringIO.new
+
+          while((size_reader = @socket.getc) != "-")
+            size_io << size_reader
+          end
+          str_size_io = size_io.string
+
+          "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
+        end
+
+        def send_data(data)
+          log_debug "[server-#{self.class}] sending data : %s" % data
+          @socket.write(data)
+          @socket.close_write
+        end
       end
-
-      def send_data(data)
-        log_debug "[server-#{self.class}] sending data : %s" % data
-        @socket.write(data)
-        @socket.close_write
-      end
-
     end
   end
 end
