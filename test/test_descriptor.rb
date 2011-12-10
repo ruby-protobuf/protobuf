@@ -116,7 +116,5 @@ class DescriptorTest < Test::Unit::TestCase
   def test_unbuild
     proto = Protobuf::Descriptor::FileDescriptor.unbuild(Tutorial::Person)
     proto.serialize_to_file('person.bin')
-    puts
-    puts "run `test/check_unbuild.rb'"
   end
 end
