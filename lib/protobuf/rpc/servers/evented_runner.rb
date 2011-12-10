@@ -7,7 +7,6 @@ module Protobuf
         def stop
           EventMachine.stop_event_loop if EventMachine.reactor_running?
           Protobuf::Logger.info 'Shutdown complete'
-          $stdout.puts 'Shutdown complete'
         end
 
         def run(server)
