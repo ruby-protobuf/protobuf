@@ -121,8 +121,11 @@ module Protobuf
         end
         
         file = File.basename(filename)
-        message_module = Util.module_to_path(package.map{|p| p.to_s.capitalize}.join('::'))
-        filename = "#{out_dir}/#{message_module}/#{file}"
+        filename = if package
+                     File.join out_dir, Util.module_to_path(package.map{|p| p.to_s.capitalize}.join('::')), file
+                   else
+                     File.join out_dir, file
+                   end
         
         if file_create
           log_writing(filename)
