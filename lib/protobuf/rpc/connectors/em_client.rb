@@ -15,16 +15,12 @@ module Protobuf
           def connect(options={})
             options = DEFAULT_OPTIONS.merge(options)
             log_debug "[client-#{self}] Connecting to server: %s" % options.inspect
-            # Using 'attach' to get access to a Ruby socket if needed
-            # TODO use 'attach' and IO interface for plugin interface for new line protos
-            socket = TCPSocket.new(options[:host], options[:port])
-            EM.attach(socket, self, socket, options)
+            EM.connect(options[:host], options[:port], self, options)
           end
 
         end
        
-        def initialize(socket, options={}, &failure_cb)
-          @socket = socket
+        def initialize(options={}, &failure_cb)
           @failure_cb = failure_cb
           @options = DEFAULT_OPTIONS.merge(options)
           verify_options
