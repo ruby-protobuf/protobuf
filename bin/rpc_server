@@ -102,7 +102,7 @@ begin
 
   server.runner.run(server)
 rescue
-  msg = 'ERROR: RPC Server failed to start. %s' % $!.message
+  msg = 'ERROR: RPC Server failed to start. %s' % $!.inspect
   $stderr.puts msg, *($!.backtrace)
   Protobuf::Logger.error msg
   Protobuf::Logger.error $!.backtrace.join("\n")

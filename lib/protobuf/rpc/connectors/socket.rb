@@ -38,8 +38,8 @@ module Protobuf
 
         # Method to determine error state, must be used with Connector api
         def error?
-          @socket.closed?
           log_debug "[client-#{self.class}] Error state : #{@socket.closed?}" 
+          @socket.closed?
         end
 
         def read_data
@@ -60,8 +60,9 @@ module Protobuf
 
         def send_data(data)
           @socket.write(data)
+          @socket.flush
           @socket.close_write
-          log_debug "[client-#{self.class}] Write closed." 
+          log_debug "[client-#{self.class}] write closed" 
         end
 
       end

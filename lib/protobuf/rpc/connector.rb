@@ -1,6 +1,3 @@
-require 'protobuf/rpc/connectors/eventmachine'
-require 'protobuf/rpc/connectors/socket'
-
 module Protobuf
   module Rpc
     class Connector
