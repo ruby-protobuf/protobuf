@@ -1,26 +1,18 @@
 require 'spec_helper'
 require 'spec/proto/test_service_impl'
+require 'protobuf/rpc/servers/evented_runner'
 
-describe Protobuf::Rpc::Server do
-  context 'when sending response objects' do
-    it 'should be able to send a hash object as a response' do
-      server = Protobuf::Rpc::EventedServer.new
-      
-      # Setup the right mocks
-      server.instance_variable_set(:@klass, Spec::Proto::TestService)
-      response_wrapper = mock('response')
-      response_wrapper.stub(:response_proto=)
-      server.instance_variable_set(:@response, response_wrapper)
-      Spec::Proto::TestService.stub_chain(:rpcs, :[], :[], :response_type).and_return(Spec::Proto::ResourceFindRequest)
-      
-      # Setup expectations
-      hash_response = {:name => 'Test Name', :active => false}
-      expected = Spec::Proto::ResourceFindRequest.new(hash_response)
-      Spec::Proto::ResourceFindRequest.should_receive(:new).with(hash_response).and_return(expected)
-      server.should_not_receive(:handle_error)
-      
-      # Call the method
-      server.send(:parse_response_from_service, hash_response)
-    end
+describe Protobuf::Rpc::EventedServer do
+
+  it "provides a Runner class" do 
+    runner_class = described_class.to_s.gsub(/Server/, "Runner")
+    expect { Protobuf::Util.constantize(runner_class) }.to_not raise_error     
   end
+
+  it "Runner provides a stop method" do
+    runner_class = described_class.to_s.gsub(/Server/, "Runner")
+    runner_class = Protobuf::Util.constantize(runner_class)
+    runner_class.respond_to?(:stop).should be_true
+  end
+
 end

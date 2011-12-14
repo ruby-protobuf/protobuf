@@ -16,6 +16,7 @@ end
 
 # For running the rpc_server
 unless defined?(Protobuf::ServerType) && Protobuf::ServerType == "SocketServer"
+  Protobuf::ServerType = "EventedServer"
   require 'eventmachine'
   require 'protobuf/ext/eventmachine'
   require 'protobuf/rpc/servers/evented_server'

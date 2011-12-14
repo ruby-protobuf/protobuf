@@ -14,6 +14,12 @@ describe Protobuf::Rpc::SocketServer do
     Thread.kill(@server_thread)
   end
 
+  it "Runner provides a stop method" do
+    runner_class = described_class.to_s.gsub(/Server/, "Runner")
+    runner_class = Protobuf::Util.constantize(runner_class)
+    runner_class.respond_to?(:stop).should be_true
+  end
+
   it "provides a stop method" do
     described_class.respond_to?(:stop).should be_true
   end
@@ -24,7 +30,7 @@ describe Protobuf::Rpc::SocketServer do
   end
 
   it "signals the Server is running" do 
-    Protobuf::Rpc::SocketServer.running?.should be_true
+    described_class.running?.should be_true
   end
 
   context "Eventmachine client" do 

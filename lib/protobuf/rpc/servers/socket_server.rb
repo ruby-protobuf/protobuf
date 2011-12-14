@@ -85,17 +85,6 @@ module Protobuf
             end
           end
 
-#          # Threaded server
-#          while true
-#            @threads << Thread.new(@server.accept) do |sock|
-#              log_debug "[#{log_signature}] Accepted new connection"
-#              Protobuf::Rpc::SocketServer::Worker.new(sock)
-#              sock.close 
-#            end
-#
-#            cleanup_threads if cleanup? 
-#          end
-
         rescue 
           # Closing the server causes the loop to raise an exception here
           raise if running?
