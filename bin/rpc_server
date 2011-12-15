@@ -48,7 +48,7 @@ parser = OptionParser.new do |opts|
     server.backlog = v.to_i
   end
 
-  opts.on("-tt", "--threshold=N", Integer, "Multi-threaded Socket Server threshold for cleanup") do |v|
+  opts.on("-tt", "--threshold=N", Integer, "Multi-threaded Socket Server cleanup threshold") do |v|
     server.threshold = v.to_i
   end
 
@@ -91,7 +91,9 @@ end
 
 begin
   if ARGV.empty?
-    raise 'You must specify an app file to use.'
+    puts 'You must specify an app file to use.'
+    puts parser.help
+    exit
   else
     server.app = ARGV.pop
     raise 'Invalid app file specified (%s).' % server.app unless File.exists?(server.app)
