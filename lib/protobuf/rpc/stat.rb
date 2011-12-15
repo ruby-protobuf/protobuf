@@ -51,12 +51,12 @@ module Protobuf
       end
       
       def log_stats
-        Protobuf::Logger.info to_s
+        Protobuf::Logger.info(self.to_s)
       end
       
       def to_s
         [
-          @type == :SERVER ? '[SRV]' : '[CLT]',
+          @type == :SERVER ? "[SRV-#{self.class}]" : "[CLT-#{self.class}]",
           rpc,
           elapsed_time,
           sizes,

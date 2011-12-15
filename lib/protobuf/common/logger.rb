@@ -1,5 +1,3 @@
-require 'logger'
-
 module Protobuf
   class Logger < ::Logger
     
@@ -7,13 +5,9 @@ module Protobuf
       attr_accessor :file, :level
       
       # One-line file/level configuration
-      def configure options
+      def configure(options)
         self.file = options[:file] if options[:file]
         self.level = options[:level] if options[:level]
-      end
-      
-      def configured?
-        ! instance.nil?
       end
       
       # Use to reset the instance
@@ -57,6 +51,10 @@ module Protobuf
         define_method("log_#{m}") do |*params, &block|
           Protobuf::Logger.__send__(m, *params, &block)
         end
+      end
+
+      def self.included(base)
+        base.extend(LogMethods)
       end
     end
     
