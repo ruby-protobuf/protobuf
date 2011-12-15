@@ -44,15 +44,15 @@ parser = OptionParser.new do |opts|
     server.level = v.to_i
   end
 
-  opts.on("-b", "--backlog=N", Integer, "Backlog for listening socket when using Socket Server") do |v|
+  opts.on("-b N", "--backlog=N", Integer, "Backlog for listening socket when using Socket Server") do |v|
     server.backlog = v.to_i
   end
 
-  opts.on("-tt", "--threshold=N", Integer, "Multi-threaded Socket Server cleanup threshold") do |v|
+  opts.on("-t N", "--threshold=N", Integer, "Multi-threaded Socket Server cleanup threshold") do |v|
     server.threshold = v.to_i
   end
 
-  opts.on("-cs", "--client_socket", "Socket Mode for client connections (No EventMachine)") do |v|
+  opts.on("-c", "--client_socket", "Socket Mode for client connections (No EventMachine)") do |v|
     Protobuf::ConnectorType = "Socket"
   end
 
