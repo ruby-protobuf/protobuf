@@ -33,7 +33,6 @@ module Protobuf
           @log_signature ||= "server-#{self}"
         end
 
-        # TODO fiber way to get a new worker?
         def new_worker(socket)
           Thread.new(socket) do |sock|
             Protobuf::Rpc::SocketServer::Worker.new(sock) do |s|
@@ -65,12 +64,10 @@ module Protobuf
                 when client == @server then 
                   log_debug "[#{log_signature}] Accepted new connection"
                   client, sockaddr = @server.accept
-                  log_debug "--------------->#{sockaddr}"
                   @listen_fds << client
                 else 
                   if !@working.include?(client)
-                    @listen_fds.delete(client)
-                    @working << client
+                    @working << @listen_fds.delete(client)
                     log_debug "[#{log_signature}] Working" 
                     @threads << { :thread => new_worker(client), 
                                   :socket => client }

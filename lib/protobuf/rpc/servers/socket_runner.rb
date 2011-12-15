@@ -9,7 +9,7 @@ module Protobuf
 
       def self.run(server)
         Protobuf::Logger.info "SocketServer Running"
-        Protobuf::Rpc::SocketServer.run(server.host, server.port) if !Protobuf::Rpc::SocketServer.running?
+        Protobuf::Rpc::SocketServer.run(server.host, server.port, server.backlog, server.threshold) if !Protobuf::Rpc::SocketServer.running?
       end
     end
 

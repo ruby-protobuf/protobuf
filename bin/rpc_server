@@ -13,6 +13,8 @@ server = OpenStruct.new({
   :env => ENV['RPC_SERVER_ENV'] || 'development',
   :host => '127.0.0.1',
   :port => 9595,
+  :backlog => 100,
+  :threshold => 100,
   :log => File.expand_path('./protobuf.log'),
   :level => ::Logger::INFO,
   :runner => Protobuf::Rpc::EventedRunner, 
@@ -40,6 +42,14 @@ parser = OptionParser.new do |opts|
   
   opts.on("-v N", "--level=N", Integer, "Log level to use, 0-5 (see http://www.ruby-doc.org/stdlib/libdoc/logger/rdoc/)") do |v|
     server.level = v.to_i
+  end
+
+  opts.on("-b", "--backlog=N", Integer, "Backlog for listening socket when using Socket Server") do |v|
+    server.backlog = v.to_i
+  end
+
+  opts.on("-tt", "--threshold=N", Integer, "Multi-threaded Socket Server threshold for cleanup") do |v|
+    server.threshold = v.to_i
   end
 
   opts.on("-cs", "--client_socket", "Socket Mode for client connections (No EventMachine)") do |v|
