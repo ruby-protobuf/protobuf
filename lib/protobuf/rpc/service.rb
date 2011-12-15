@@ -181,7 +181,7 @@ module Protobuf
     private
 
       def log_and_raise_error(error_message)
-        logg_error(error_message)
+        log_error(error_message)
         raise error_message
       end
       
