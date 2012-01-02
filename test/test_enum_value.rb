@@ -14,8 +14,8 @@ class EnumValueTest < Test::Unit::TestCase
     assert_equal('name', "#{e}")
     assert(e == 100)
     assert(100 == e)
-    assert(101, e + 1)
-    assert(101, 1 + e)
+    assert(101 == e + 1)
+    assert(101 == 1 + e)
   end
 
   def test_enum_field_and_enum_value

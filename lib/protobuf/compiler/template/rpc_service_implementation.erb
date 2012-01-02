@@ -32,7 +32,7 @@ require '<%= required_file %>'
 <%- module_array.each_with_index do |m, i| -%>
 <%= "#{"\t"*i}module #{m}" %>
 <%- end -%>
-<%= class_indent %>class <%= service_name %> < Protobuf::Rpc::Service
+<%= class_indent %>class <%= service_name %> < ::Protobuf::Rpc::Service
 <%- rpcs.each do |name, request, response| -%>
 <%= class_indent %>  rpc :<%= underscore name %>, <%= request %>, <%= response %>
 <%- end -%>

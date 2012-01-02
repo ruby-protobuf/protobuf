@@ -107,12 +107,12 @@ module Protobuf
     def self.label2id(label)
       require 'protobuf/descriptor/descriptor_proto'
       case label
-      when :required
-        Google::Protobuf::FieldDescriptorProto::Label::LABEL_REQUIRED then
-      when :optional
-        Google::Protobuf::FieldDescriptorProto::Label::LABEL_OPTIONAL then
-      when :repeated
-        Google::Protobuf::FieldDescriptorProto::Label::LABEL_REPEATED then
+      when :required then
+        Google::Protobuf::FieldDescriptorProto::Label::LABEL_REQUIRED
+      when :optional then
+        Google::Protobuf::FieldDescriptorProto::Label::LABEL_OPTIONAL
+      when :repeated then
+        Google::Protobuf::FieldDescriptorProto::Label::LABEL_REPEATED
       else
         raise ArgumentError, "Invalid label: #{label}"
       end

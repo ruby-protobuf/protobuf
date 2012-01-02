@@ -487,7 +487,8 @@ module_eval <<'..end lib/protobuf/compiler/proto.y modeval..id110d2bf917', 'lib/
       when match(/\/\*/) then
         # C-like comment
         raise 'EOF inside block comment' until @scanner.scan_until(/\*\//)
-      when match(/(?:required|optional|repeated|import|package|option|message|extend|enum|service|rpc|returns|group|default|extensions|to|max|double|float|int32|int64|uint32|uint64|sint32|sint64|fixed32|fixed64|sfixed32|sfixed64|bool|string|bytes)\b/) then
+      when !@in_package_stack && match(/(?:required|optional|repeated|import|package|option|message|extend|enum|service|rpc|returns|group|default|extensions|to|max|double|float|int32|int64|uint32|uint64|sint32|sint64|fixed32|fixed64|sfixed32|sfixed64|bool|string|bytes)\b/)
+        @in_package_stack = @token == 'package'
         yield [@token, @token.to_sym]
       when match(/[+-]?\d*\.\d+([Ee][\+-]?\d+)?/) then
         yield [:FLOAT_LITERAL, @token.to_f]
@@ -506,6 +507,7 @@ module_eval <<'..end lib/protobuf/compiler/proto.y modeval..id110d2bf917', 'lib/
       when match(/[A-Z]\w*/) then
         yield [:CAMEL_IDENT, @token.to_sym]
       when match(/./) then
+        @in_package_stack = @token != ';' if @in_package_stack
         yield [@token, @token]
       else
         raise "parse error around #{@scanner.string[@scanner.pos, 32].inspect}"
