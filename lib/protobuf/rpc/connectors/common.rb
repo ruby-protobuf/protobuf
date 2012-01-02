@@ -133,10 +133,7 @@ module Protobuf
         end
 
         def any_callbacks?
-          cb_count = [:complete, :failure, :success].inject(0) do |count, event_type|
-            count += listeners(event_type)
-          end
-          cb_count > 0
+          num_listeners > 0
         end
 
         def verify_callbacks

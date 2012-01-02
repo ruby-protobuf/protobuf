@@ -6,6 +6,11 @@ module Protobuf
       class EMClient < EM::Connection
         include Protobuf::Logger::LogMethods
         include Protobuf::Rpc::Connectors::Common
+        include Eventually
+        enable_strict!
+        emits :success, :arity => 1
+        emits :failure, :arity => 1
+        emits :complete, :arity => 1
       
         attr_reader :options, :request, :response
         attr_reader :error, :error_reason, :error_message
