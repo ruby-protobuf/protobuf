@@ -28,6 +28,9 @@ module Protobuf
       def initialize(opts={})
         raise "Invalid client configuration. Service must be defined." if opts[:service].nil?
         @connector = Connector.connector_for_client.new(opts)
+        @connector.on(:success) {|response| emit(:success, response) }
+        @connector.on(:failure) {|error| emit(:failure, error) }
+        @connector.on(:complete) {|connector| emit(:complete, connector) }
         log_debug "[#{log_signature}] Initialized with options: %s" % opts.inspect
       end
 
@@ -39,18 +42,12 @@ module Protobuf
       # Callback is called regardless of :async setting.
       # 
       #   client = Client.new(:service => WidgetService)
-      #   client.on_complete {|obj| ... }
+      #   client.on(:complete) {|client| ... }
+      #   client.on_complete {|client| ... } # deprecated usage, use on(:complete) instead
       # 
       def on_complete(&complete_cb)
-        @connector.complete_cb = complete_cb 
-      end
-
-      def on_complete=(callable)
-        if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
-          raise "callable must take a single argument and respond to :call"
-        end
-        
-        @connector.complete_cb = callable 
+        log_warn "[#{log_signature}] Client#on_complete is deprecated. Use on(:complete) instead."
+        on(:complete, &complete_cb)
       end
       
       # Set a failure callback on the client to return the
@@ -59,40 +56,29 @@ module Protobuf
       # Callback is called regardless of :async setting.
       # 
       #   client = Client.new(:service => WidgetService)
-      #   client.on_failure {|err| ... }
+      #   client.on(:failure) {|err| ... }
+      #   client.on_failure {|err| ... } # deprecated usage, use on(:failure) instead
       # 
       def on_failure(&failure_cb)
-        @connector.failure_cb = failure_cb
+        log_warn "[#{log_signature}] Client#on_failure is deprecated. Use on(:failure) instead."
+        on(:failure, &failure_cb)
       end
 
-      def on_failure=(callable)
-        if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
-          raise "callable must take a single argument and respond to :call"
-        end
-
-        @connector.failure_cb = callable 
-      end
-      
       # Set a success callback on the client to return the
       # successful response from the service when it is returned.
       # If this callback is called, failure_cb will NOT be called.
       # Callback is called regardless of :async setting.
       # 
       #   client = Client.new(:service => WidgetService)
+      #   client.on(:success) {|res| ... }
+      #   client.on_success {|res| ... } # deprecated usage, use on(:success) instead
       #   client.on_success {|res| ... }
       # 
       def on_success(&success_cb)
-        @connector.success_cb = success_cb
+        log_warn "[#{log_signature}] Client#on_success is deprecated. Use on(:success) instead."
+        on(:success, &success_cb)
       end
 
-      def on_success=(callable)
-        if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
-          raise "callable must take a single argument and respond to :call"
-        end
-
-        @connector.success_cb = callable 
-      end
-      
       # Provides a mechanism to call the service method against the client
       # which will automatically setup the service_class and method_name
       # in the wrapper protobuf request.
@@ -101,8 +87,8 @@ module Protobuf
       #   Client.new(:service => WidgetService).find do |c|
       #     # This block will be invoked before the request is made
       #     # `c` in this case is the client object you created above
-      #     c.on_success {|res| ... }
-      #     c.on_failure {|err| ... }
+      #     c.on(:success) {|res| ... }
+      #     c.on(:failure) {|err| ... }
       #   end
       # 
       def method_missing(method, *params)
@@ -121,7 +107,7 @@ module Protobuf
           options[:request] = params[0].is_a?(Hash) ? options[:request_type].new(params[0]) : params[0]
           log_debug "[#{log_signature}] Request Data: %s" % options[:request].inspect
           
-          # Call client to setup on_success and on_failure event callbacks
+          # Call client to setup :success and :failure event callbacks
           if block_given?
             log_debug "[#{log_signature}] client setup callback given, invoking"
             yield(self)
@@ -146,11 +132,11 @@ module Protobuf
       #     :request => request
       #   })
       # 
-      #   client.on_success do |res|
+      #   client.on(:success) do |res|
       #     res.widgets.each{|w| puts w.inspect }
       #   end
       #
-      #   client.on_failure do |err|
+      #   client.on(:failure) do |err|
       #     puts err.message
       #   end
       # 

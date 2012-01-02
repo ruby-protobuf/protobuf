@@ -5,6 +5,13 @@ module Protobuf
   module Rpc
     module Connectors
       class EventMachine < Base
+        include Protobuf::Logger::LogMethods
+        include Protobuf::Rpc::Connectors::Common
+        include Eventually
+        enable_strict!
+        emits :success, :arity => 1
+        emits :failure, :arity => 1
+        emits :complete, :arity => 1
         
         def send_request
           ensure_em_running do 
@@ -13,9 +20,12 @@ module Protobuf
             EM.schedule do
               log_debug "[#{log_signature}] Scheduling EventMachine client request to be created on next tick"
               cnxn = EMClient.connect(options, &ensure_cb)
-              cnxn.on_success(&success_cb) if success_cb
-              cnxn.on_failure(&ensure_cb)
-              cnxn.on_complete { resume_fiber(f) } unless async?
+              cnxn.on(:success) {|response| emit(:success, response) }
+              cnxn.on(:failure) {|error| emit(:failure, error) }
+              cnxn.on(:complete) do |obj|
+                resume_fiber(f) unless async?
+                emit(:complete, obj)
+              end
               log_debug "[#{log_signature}] Connection scheduled"
             end
 

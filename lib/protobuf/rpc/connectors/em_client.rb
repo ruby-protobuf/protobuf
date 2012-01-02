@@ -31,20 +31,20 @@ module Protobuf
           fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message)
         end
 
-        # Success callback registration
-        def on_success(&success_cb)
-          @success_cb = success_cb
-        end
-      
-        # Failure callback registration
-        def on_failure(&failure_cb)
-          @failure_cb = failure_cb
-        end
-      
-        # Completion callback registration
-        def on_complete(&complete_cb)
-          @complete_cb = complete_cb
-        end
+        # # Success callback registration
+        # def on_success(&success_cb)
+        #   @success_cb = success_cb
+        # end
+        #       
+        # # Failure callback registration
+        # def on_failure(&failure_cb)
+        #   @failure_cb = failure_cb
+        # end
+        #       
+        # # Completion callback registration
+        # def on_complete(&complete_cb)
+        #   @complete_cb = complete_cb
+        # end
       
         def receive_data(data)
           log_debug "[#{log_signature}] receive_data: %s" % data

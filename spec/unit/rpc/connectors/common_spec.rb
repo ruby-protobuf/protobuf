@@ -5,6 +5,12 @@ describe Protobuf::Rpc::Connectors::Common do
   let(:common_class) do 
     Class.new(Protobuf::Rpc::Connectors::Base) do
       include Protobuf::Rpc::Connectors::Common 
+      include Eventually
+      enable_strict!
+      emits :success, :arity => 1
+      emits :failure, :arity => 1
+      emits :complete, :arity => 1
+      
       attr_accessor :options
       attr_accessor :stats
     end
