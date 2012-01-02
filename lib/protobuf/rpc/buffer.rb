@@ -7,21 +7,21 @@ module Protobuf
       
       MODES = [:read, :write]
       
-      def initialize mode=:read, data=''
+      def initialize(mode=:read, data='')
         @data = data.is_a?(Protobuf::Message) ? data.serialize_to_string : data.to_s
         @flush = false
         self.mode = mode
       end
       
-      def mode= mode
-        if MODES.include? mode
+      def mode=(mode)
+        if MODES.include?(mode)
           @mode = mode
         else
           @mode = :read
         end
       end
       
-      def write force_mode=true
+      def write(force_mode=true)
         if force_mode and reading?
           mode = :write
         elsif not force_mode and reading?
@@ -32,7 +32,7 @@ module Protobuf
         '%d-%s' % [@size, @data]
       end
       
-      def << data
+      def <<(data)
         @data << data
         if reading?
           get_data_size

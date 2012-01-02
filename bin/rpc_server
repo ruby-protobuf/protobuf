@@ -3,16 +3,9 @@
 require 'optparse'
 require 'ostruct'
 require 'logger'
-require 'protobuf'
-require 'protobuf/rpc/server'
-
-[:INT, :QUIT, :TERM].each do |sig|
-  trap(sig) do
-    EventMachine.stop_event_loop if EventMachine.reactor_running?
-    Protobuf::Logger.info 'Shutdown complete'
-    $stdout.puts 'Shutdown complete'
-  end
-end
+require 'protobuf/version'
+require 'protobuf/rpc/servers/evented_runner'
+require 'protobuf/rpc/servers/socket_runner'
 
 # Default options
 server = OpenStruct.new({
@@ -20,8 +13,11 @@ server = OpenStruct.new({
   :env => ENV['RPC_SERVER_ENV'] || 'development',
   :host => '127.0.0.1',
   :port => 9595,
+  :backlog => 100,
+  :threshold => 100,
   :log => File.expand_path('./protobuf.log'),
   :level => ::Logger::INFO,
+  :runner => Protobuf::Rpc::EventedRunner, 
   :debug => false
 })
 
@@ -47,6 +43,23 @@ parser = OptionParser.new do |opts|
   opts.on("-v N", "--level=N", Integer, "Log level to use, 0-5 (see http://www.ruby-doc.org/stdlib/libdoc/logger/rdoc/)") do |v|
     server.level = v.to_i
   end
+
+  opts.on("-b N", "--backlog=N", Integer, "Backlog for listening socket when using Socket Server") do |v|
+    server.backlog = v.to_i
+  end
+
+  opts.on("-t N", "--threshold=N", Integer, "Multi-threaded Socket Server cleanup threshold") do |v|
+    server.threshold = v.to_i
+  end
+
+  opts.on("-c", "--client_socket", "Socket Mode for client connections (No EventMachine)") do |v|
+    Protobuf::ConnectorType = "Socket"
+  end
+
+  opts.on("-s", "--socket", "Socket Server Mode (No EventMachine)") do |v|
+    Protobuf::ServerType = "SocketServer"
+    server.runner = Protobuf::Rpc::SocketRunner
+  end
   
   opts.on("-d", "--[no-]debug", "Debug Mode. Override log level to DEBUG.") do |v|
     server.debug = v
@@ -67,49 +80,41 @@ parser = OptionParser.new do |opts|
   end
 end
 
+parser.parse!
+require 'protobuf'
+
+[:INT, :QUIT, :TERM].each do |sig|
+  trap(sig) do
+    server.runner.stop
+  end
+end
+
 begin
-  parser.parse!
-  
   if ARGV.empty?
-    raise 'You must specify an app file to use.'
+    puts 'You must specify an app file to use.'
+    puts parser.help
+    exit
   else
     server.app = ARGV.pop
     raise 'Invalid app file specified (%s).' % server.app unless File.exists?(server.app)
   end
-  
+
   # Configure the Protobuf::Logger
   Protobuf::Logger.configure :file => server.log, :level => server.debug ? ::Logger::DEBUG : server.level
 
   # Output the server opts
   Protobuf::Logger.debug 'Debugging options:'
   Protobuf::Logger.debug server.inspect
-
-  # Ensure errors thrown within EM are caught and logged appropriately
-  EventMachine.error_handler do |error|
-    if error.message == 'no acceptor'
-      raise 'Failed binding to %s:%d (%s)' % [server.host, server.port, error.message]
-    else
-      Protobuf::Logger.error error.message
-      Protobuf::Logger.error error.backtrace.join("\n")
-    end
-  end
   
   # Set the name of the process
   $0 = 'rpc_server %s:%d %s' % [server.host, server.port, server.app]
   
   # Require the given application file
   require server.app
-  
-  # Startup and run the rpc server
-  EM.schedule do
-    EventMachine.start_server(server.host, server.port, Protobuf::Rpc::Server) && \
-      Protobuf::Logger.info('RPC Server listening at %s:%d in %s' % [server.host, server.port, server.env])
-  end
 
-  # Join or start the reactor
-  EM.reactor_running? ? EM.reactor_thread.join : EM.run
+  server.runner.run(server)
 rescue
-  msg = 'ERROR: RPC Server failed to start. %s' % $!.message
+  msg = 'ERROR: RPC Server failed to start. %s' % $!.inspect
   $stderr.puts msg, *($!.backtrace)
   Protobuf::Logger.error msg
   Protobuf::Logger.error $!.backtrace.join("\n")

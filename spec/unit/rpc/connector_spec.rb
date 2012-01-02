@@ -2,32 +2,27 @@ require 'spec_helper'
 
 describe Protobuf::Rpc::Connector do
   
-  describe '.connector_for_platform' do
+  describe '.connector_for_client' do
     
-    context 'when platform is java' do
-      let(:platform) { 'jruby' }
+    context 'when set to Socket connector' do
       it 'returns a socket connector class reference' do
-        Protobuf::Rpc::Connector.connector_for_platform(platform).should eq Protobuf::Rpc::Connectors::Socket
+        with_constants "Protobuf::ConnectorType" => "Socket" do
+          Protobuf::Rpc::Connector.connector_for_client.should eq(Protobuf::Rpc::Connectors::Socket)
+        end
       end
     end
   
-    context 'when platform is mri' do
-      let(:platform) { 'mri' }
+    context 'when set to non Socket Connector' do
       it 'returns an eventmachine connector class reference' do
-        Protobuf::Rpc::Connector.connector_for_platform(platform).should eq Protobuf::Rpc::Connectors::EventMachine
+        with_constants "Protobuf::ConnectorType" => "EventMachine" do 
+          Protobuf::Rpc::Connector.connector_for_client.should eq Protobuf::Rpc::Connectors::EventMachine
+        end
       end
     end
   
-    context 'when platform is unknown' do
-      let(:platform) { 'some_bogus_engine' }
+    context 'when connector type not given' do
       it 'returns an eventmachine connector class reference' do
-        Protobuf::Rpc::Connector.connector_for_platform(platform).should eq Protobuf::Rpc::Connectors::EventMachine
-      end
-    end
-  
-    context 'when platform is not given' do
-      it 'returns an eventmachine connector class reference' do
-        Protobuf::Rpc::Connector.connector_for_platform.should eq Protobuf::Rpc::Connectors::EventMachine
+        Protobuf::Rpc::Connector.connector_for_client.should eq Protobuf::Rpc::Connectors::EventMachine
       end
     end
   
