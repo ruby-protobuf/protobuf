@@ -19,8 +19,12 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   
   s.add_dependency 'eventmachine', '~> 0.12.10'
-  s.add_dependency 'json_pure'  
+  s.add_dependency 'eventually', '~> 0.1.0'
+  s.add_dependency 'json_pure', '~> 1.6.4'
 
   s.add_development_dependency 'rake', '~> 0.8.7'
   s.add_development_dependency 'rspec', '~> 2.7.0'
+  s.add_development_dependency 'yard', '~> 0.7.4'
+  s.add_development_dependency 'redcarpet', '~> 1.17.2'
+  s.add_development_dependency 'simplecov', '~> 0.5.4'
 end

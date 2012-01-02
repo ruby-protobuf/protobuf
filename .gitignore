@@ -3,3 +3,6 @@ pkg/*
 .bundle
 .rvmrc
 *.log
+coverage
+doc
+.yardoc
