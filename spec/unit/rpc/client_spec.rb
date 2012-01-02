@@ -134,7 +134,7 @@ describe Protobuf::Rpc::Client do
       
       EM.should_receive(:reactor_running?).and_return(true)
       EM.stub!(:schedule) do
-        client.success_cb.call(inner_value)
+        client.instance_variable_get(:@connector).emit(:success, inner_value)
       end
       
       client.find(nil) do |c|

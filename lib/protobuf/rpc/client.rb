@@ -1,5 +1,4 @@
 require 'forwardable'
-require 'eventually'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/error'
 require 'protobuf/rpc/connector'
@@ -9,13 +8,8 @@ module Protobuf
     class Client
       extend Forwardable
       include Protobuf::Logger::LogMethods
-      include Eventually
-      enable_strict!
-      emits :success, :arity => 1
-      emits :failure, :arity => 1
-      emits :complete, :arity => 1
       
-      delegate [:options, :complete_cb, :success_cb, :failure_cb, :async?] => :@connector
+      delegate [:options, :on, :listeners, :num_listeners, :async?] => :@connector
       attr_reader :connector
       
       # Create a new client with default options (defined in ClientConnection)
@@ -34,9 +28,6 @@ module Protobuf
       def initialize(opts={})
         raise "Invalid client configuration. Service must be defined." if opts[:service].nil?
         @connector = Connector.connector_for_client.new(opts)
-        @connector.on(:success) {|response| emit(:success, response) }
-        @connector.on(:failure) {|error| emit(:failure, error) }
-        @connector.on(:complete) {|connector| emit(:complete, connector) }
         log_debug "[#{log_signature}] Initialized with options: %s" % opts.inspect
       end
 

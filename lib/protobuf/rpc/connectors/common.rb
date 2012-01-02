@@ -84,16 +84,11 @@ module Protobuf
           send_data(request_buffer.write)
         end
 
-        def error
-          @error || ClientError.new
-        end
-
         def complete
           @stats.end
           @stats.log_stats
           log_debug "[#{log_signature}] Response processing complete"
           emit(:complete, self)
-          # @complete_cb.call(self) unless @complete_cb.nil?
         rescue
           log_error "[#{log_signature}] Complete callback error encountered: %s" % $!.message
           log_error "[#{log_signature}] %s" % $!.backtrace.join("\n")
@@ -101,11 +96,11 @@ module Protobuf
         end
         
         def fail(code, message)
+          error = ClientError.new
           error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
           error.message = message
           log_debug "[#{log_signature}] Server failed request (emit :failure): %s" % error.inspect
           emit(:failure, error)
-          # @failure_cb.call(error) unless @failure_cb.nil?
         rescue
           log_error "[#{log_signature}] Failure callback error encountered: %s" % $!.message
           log_error "[#{log_signature}] %s" % $!.backtrace.join("\n")
@@ -116,8 +111,7 @@ module Protobuf
 
         def succeed(response)
           log_debug "[#{log_signature}] Server succeeded request (emit :success)"
-          emit(:succes, response)
-          # @success_cb.call(response) unless @success_cb.nil?
+          emit(:success, response)
         rescue
           log_error "[#{log_signature}] Success callback error encountered: %s" % $!.message
           log_error "[#{log_signature}] %s" % $!.backtrace.join("\n")
