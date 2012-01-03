@@ -1,3 +1,4 @@
+require 'eventually'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'
@@ -19,12 +20,17 @@ module Protobuf
         :async          => false,         # Whether or not to block a client call, this is actually handled by client.rb
         :timeout        => 30             # The default timeout for the request, also handled by client.rb
       }
-
+      
       class Base
         include Protobuf::Logger::LogMethods
+        include Eventually
+        enable_strict!
+        emits :success, :arity => 1
+        emits :failure, :arity => 1
+        emits :complete, :arity => 1
         
         attr_reader :options
-        attr_accessor :success_cb, :failure_cb, :complete_cb
+        # attr_accessor :success_cb, :failure_cb, :complete_cb
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)

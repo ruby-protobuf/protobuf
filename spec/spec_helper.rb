@@ -1,5 +1,9 @@
-require 'simplecov'
-SimpleCov.start
+unless ENV['NOCOV']
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter 'spec/'
+  end
+end
 
 require 'rubygems'
 require 'bundler'
@@ -10,7 +14,7 @@ $:.push File.expand_path('../lib', File.dirname(__FILE__))
 
 require 'protobuf'
 require 'protobuf/rpc/client'
-require File.dirname(__FILE__) + '/helper/all'
+require File.dirname(__FILE__) + '/support/all'
 
 # Including a way to turn on debug logger for spec runs
 if ENV["DEBUG"]
@@ -26,9 +30,7 @@ end
 
 class ::Protobuf::Rpc::Client
   def == other
-   connector.options == other.options && \
-   success_cb == other.success_cb && \
-   failure_cb == other.failure_cb
+   connector.options == other.options
   end
 end
 
