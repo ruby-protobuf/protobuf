@@ -21,7 +21,7 @@ describe Protobuf::Rpc::Connectors::Common do
   context "API" do 
     specify{ subject.respond_to?(:any_callbacks?).should be_true }
     specify{ subject.respond_to?(:data_callback).should be_true }
-    specify{ subject.respond_to?(:error).should be_true }
+    specify{ subject.respond_to?(:succeed).should be_true }
     specify{ subject.respond_to?(:fail).should be_true }
     specify{ subject.respond_to?(:complete).should be_true }
     specify{ subject.respond_to?(:parse_response).should be_true }
@@ -32,18 +32,15 @@ describe Protobuf::Rpc::Connectors::Common do
 
   context "#any_callbacks?" do 
 
-    [:@complete_cb, :@success_cb, :@failure_cb].each do |cb|
-      it "returns true if #{cb} is provided" do 
-        subject.instance_variable_set(cb, "something")
+    [:complete, :success, :failure].each do |cb|
+      it "returns true if #{cb} event is being listened for" do 
+        subject.on(cb, lambda{|p|})
         subject.any_callbacks?.should be_true
       end
     end
 
     it "returns false when all callbacks are not provided" do 
-      subject.instance_variable_set(:@complete_cb, nil)
-      subject.instance_variable_set(:@success_cb, nil)
-      subject.instance_variable_set(:@failure_cb, nil)
-
+      subject.num_listeners.should eq 0
       subject.any_callbacks?.should be_false
     end
 
@@ -63,76 +60,64 @@ describe Protobuf::Rpc::Connectors::Common do
 
   context "#verify_callbacks" do 
 
-    it "sets @failure_cb to #data_callback when no callbacks are defined" do 
+    it "registers data_callback as :failure listener when no listeners are registered" do 
       subject.verify_callbacks
-      subject.instance_variable_get(:@failure_cb).should eq(subject.method(:data_callback)) 
+      subject.listeners(:failure).should eq([subject.method(:data_callback)])
     end
 
-    it "sets @success_cb to #data_callback when no callbacks are defined" do
+    it "registers data_callback as :success listener when no listeners are registered" do 
       subject.verify_callbacks
-      subject.instance_variable_get(:@success_cb).should eq(subject.method(:data_callback)) 
+      subject.listeners(:success).should eq([subject.method(:data_callback)])
     end
 
-    it "doesn't set @failure_cb when already defined" do 
-      set_cb = lambda{ true }
-      subject.instance_variable_set(:@failure_cb, set_cb)
+    it "doesn't register data_callback as :failure listener when any listeners are registered" do 
+      set_cb = lambda{|v| true }
+      subject.on(:failure, set_cb)
       subject.verify_callbacks
-      subject.instance_variable_get(:@failure_cb).should eq(set_cb)
-      subject.instance_variable_get(:@failure_cb).should_not eq(subject.method(:data_callback))
+      subject.listeners(:failure).should eq([set_cb])
+      subject.listeners(:failure).should_not include(subject.method(:data_callback))
     end
 
-    it "doesn't set @success_cb when already defined" do 
-      set_cb = lambda{ true }
-      subject.instance_variable_set(:@success_cb, set_cb)
+    it "doesn't register data_callback as :success listener when any listeners are registered" do 
+      set_cb = lambda{|v| true }
+      subject.on(:success, set_cb)
       subject.verify_callbacks
-      subject.instance_variable_get(:@success_cb).should eq(set_cb)
-      subject.instance_variable_get(:@success_cb).should_not eq(subject.method(:data_callback))
+      subject.listeners(:success).should eq([set_cb])
+      subject.listeners(:success).should_not include(subject.method(:data_callback))
     end
 
   end
 
-  shared_examples "a ConnectorDisposition" do |meth, cb, *args|
-
-    it "calls #complete before exit" do 
+  shared_examples "a ConnectorDisposition" do |meth, events, args=nil, emitted=nil|
+    
+    before(:each) do
       stats = double("Object")
       stats.stub(:end) { true }
       stats.stub(:log_stats) { true }
       subject.stats = stats
-
-      subject.should_receive(:complete)
-      subject.method(meth).call(*args)
     end
 
-    it "calls the #{cb} callback when provided" do 
-      stats = double("Object")
-      stats.stub(:end) { true }
-      stats.stub(:log_stats) { true }
-      subject.stats = stats
-      _cb = double("Object")
-
-      subject.instance_variable_set("@#{cb}", _cb)
-      _cb.should_receive(:call).and_return(true)
-      subject.method(meth).call(*args)
+    context "when invoking the #{meth} method" do
+      it "emits the #{events.join(",")} event(s)" do 
+        events.each do |event|
+          cb = lambda{|v| }
+          expected_cb_args = event == :complete ? subject : emitted
+          cb.should_receive(:call).with(*expected_cb_args).and_return(true)
+          subject.on(event, cb)
+        end
+        
+        if meth == :complete
+          subject.__send__(meth)
+        else
+          subject.method(meth).call(*args)
+        end
+      end
     end
-
-    it "calls the complete callback when provided" do 
-      stats = double("Object")
-      stats.stub(:end) { true }
-      stats.stub(:log_stats) { true }
-      subject.stats = stats
-      comp_cb = double("Object")
-     
-      subject.instance_variable_set(:@complete_cb, comp_cb)
-      comp_cb.should_receive(:call).and_return(true)
-      subject.method(meth).call(*args)
-    end
-
   end
-
-  it_behaves_like("a ConnectorDisposition", :fail, "failure_cb", "code", "message")
-  it_behaves_like("a ConnectorDisposition", :fail, "complete_cb", "code", "message")
-  it_behaves_like("a ConnectorDisposition", :succeed, "complete_cb", "response")
-  it_behaves_like("a ConnectorDisposition", :succeed, "success_cb", "response")
-  it_behaves_like("a ConnectorDisposition", :complete, "complete_cb")
-
+  
+  context 'event cascade' do
+    it_behaves_like("a ConnectorDisposition", :fail, [:failure, :complete], [1, "hi"], [Protobuf::Rpc::Connectors::Common::ClientError.new(1,"hi")])
+    it_behaves_like("a ConnectorDisposition", :succeed, [:success, :complete], ["response"], ["response"])
+    it_behaves_like("a ConnectorDisposition", :complete, [:complete])
+  end
 end
