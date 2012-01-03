@@ -1,5 +1,3 @@
-require 'eventually'
-
 module Protobuf
   module Rpc 
     module Connectors

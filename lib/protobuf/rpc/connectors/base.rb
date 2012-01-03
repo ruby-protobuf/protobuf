@@ -1,3 +1,4 @@
+require 'eventually'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'
@@ -22,6 +23,11 @@ module Protobuf
       
       class Base
         include Protobuf::Logger::LogMethods
+        include Eventually
+        enable_strict!
+        emits :success, :arity => 1
+        emits :failure, :arity => 1
+        emits :complete, :arity => 1
         
         attr_reader :options
         # attr_accessor :success_cb, :failure_cb, :complete_cb

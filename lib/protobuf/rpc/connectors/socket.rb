@@ -6,11 +6,6 @@ module Protobuf
       class Socket < Base
         include Protobuf::Rpc::Connectors::Common
         include Protobuf::Logger::LogMethods
-        include Eventually
-        enable_strict!
-        emits :success, :arity => 1
-        emits :failure, :arity => 1
-        emits :complete, :arity => 1
         
         def send_request
           check_async
