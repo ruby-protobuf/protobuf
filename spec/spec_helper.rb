@@ -1,6 +1,8 @@
-require 'simplecov'
-SimpleCov.start do
-  add_filter 'spec/'
+unless ENV['NOCOV']
+  require 'simplecov'
+  SimpleCov.start do
+    add_filter 'spec/'
+  end
 end
 
 require 'rubygems'

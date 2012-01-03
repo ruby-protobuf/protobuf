@@ -5,7 +5,7 @@ module Protobuf
       attr_accessor :mode
       attr_reader :data, :size
       
-      MODES = [:read, :write]
+      MODES = [:read, :write].freeze
       
       def initialize(mode=:read, data='')
         @data = data.is_a?(Protobuf::Message) ? data.serialize_to_string : data.to_s
@@ -14,20 +14,10 @@ module Protobuf
       end
       
       def mode=(mode)
-        if MODES.include?(mode)
-          @mode = mode
-        else
-          @mode = :read
-        end
+        @mode = MODES.include?(mode) ? mode : :read
       end
       
-      def write(force_mode=true)
-        if force_mode and reading?
-          mode = :write
-        elsif not force_mode and reading?
-          raise = 'You chose to write the buffer when in read mode'
-        end
-        
+      def write(switch_mode=true)
         @size = @data.length
         '%d-%s' % [@size, @data]
       end
@@ -64,7 +54,7 @@ module Protobuf
       end
       
       def check_for_flush
-        if not @size.nil? and @data.length == @size
+        if !@size.nil? && @data.length == @size
           @flush = true
         end
       end
