@@ -2,7 +2,6 @@ module Protobuf
   module Rpc 
     module Connectors
       module Common 
-        ClientError = Struct.new("ClientError", :code, :message)
 
         def any_callbacks?
           return [@complete_cb, @failure_cb, @success_cb].inject(false) do |reduction, cb|
