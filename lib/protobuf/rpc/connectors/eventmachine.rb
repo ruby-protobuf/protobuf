@@ -52,21 +52,21 @@ module Protobuf
           log_error ex.backtrace.join("\n")
 
           message = 'Synchronous client failed: %s' % ex.message
-          err = Protobuf::Rpc::Connectors::Common::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
+          err = Protobuf::Rpc::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
           ensure_cb.call(err)
         end
 
         def set_timeout_and_validate_fiber
           @timeout_timer = EM::add_timer(@options[:timeout]) do
             message = 'Client timeout of %d seconds expired' % @options[:timeout]
-            err = Protobuf::Rpc::Connectors::Common::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
+            err = Protobuf::Rpc::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
             ensure_cb.call(err)
           end
 
           Fiber.yield
         rescue FiberError
           message = "Synchronous calls must be in 'EM.fiber_run' block" 
-          err = Protobuf::Rpc::Connectors::Common::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
+          err = Protobuf::Rpc::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
           ensure_cb.call(err)
         end
 

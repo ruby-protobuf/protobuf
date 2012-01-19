@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'json_pure', '~> 1.6.4'
 
   s.add_development_dependency 'rake', '~> 0.8.7'
-  s.add_development_dependency 'rspec', '~> 2.7.0'
+  s.add_development_dependency 'rspec', '~> 2.8.0'
   s.add_development_dependency 'yard', '~> 0.7.4'
   s.add_development_dependency 'redcarpet', '~> 1.17.2'
   s.add_development_dependency 'simplecov', '~> 0.5.4'

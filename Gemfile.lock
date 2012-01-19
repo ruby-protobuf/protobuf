@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    protobuf (1.1.0)
+    protobuf (1.1.0.beta0)
       eventmachine (~> 0.12.10)
       eventually (~> 0.1.0)
       json_pure (~> 1.6.4)
@@ -16,14 +16,14 @@ GEM
     multi_json (1.0.4)
     rake (0.8.7)
     redcarpet (1.17.2)
-    rspec (2.7.0)
-      rspec-core (~> 2.7.0)
-      rspec-expectations (~> 2.7.0)
-      rspec-mocks (~> 2.7.0)
-    rspec-core (2.7.1)
-    rspec-expectations (2.7.0)
+    rspec (2.8.0)
+      rspec-core (~> 2.8.0)
+      rspec-expectations (~> 2.8.0)
+      rspec-mocks (~> 2.8.0)
+    rspec-core (2.8.0)
+    rspec-expectations (2.8.0)
       diff-lcs (~> 1.1.2)
-    rspec-mocks (2.7.0)
+    rspec-mocks (2.8.0)
     simplecov (0.5.4)
       multi_json (~> 1.0.3)
       simplecov-html (~> 0.5.3)
@@ -38,6 +38,6 @@ DEPENDENCIES
   protobuf!
   rake (~> 0.8.7)
   redcarpet (~> 1.17.2)
-  rspec (~> 2.7.0)
+  rspec (~> 2.8.0)
   simplecov (~> 0.5.4)
   yard (~> 0.7.4)
