@@ -2,6 +2,8 @@ module Protobuf
   module Rpc 
     module Connectors
       module Common 
+        
+        attr_reader :error
 
         def any_callbacks?
           return [@complete_cb, @failure_cb, @success_cb].inject(false) do |reduction, cb|
@@ -26,15 +28,13 @@ module Protobuf
           @data = data
         end
 
-        def error
-          @error || ClientError.new
-        end
-
         def fail(code, message)
-          error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
-          error.message = message
-          log_debug "[#{log_signature}] Server failed request (invoking on_failure): %s" % error.inspect
-          @failure_cb.call(error) unless @failure_cb.nil?
+          @error =  ClientError.new
+          @error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
+          @error.message = message
+          log_debug "[#{log_signature}] Server failed request (invoking on_failure): %s" % @error.inspect
+          
+          @failure_cb.call(@error) unless @failure_cb.nil?
         rescue
           log_error "[#{log_signature}] Failure callback error encountered: %s" % $!.message
           log_error "[#{log_signature}] %s" % $!.backtrace.join("\n")

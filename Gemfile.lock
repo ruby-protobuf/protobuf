@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    protobuf (1.1.0.beta0)
+    protobuf (1.1.0.beta1)
       eventmachine (~> 0.12.10)
       eventually (~> 0.1.0)
       json_pure (~> 1.6.4)
