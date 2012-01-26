@@ -34,7 +34,6 @@ describe Protobuf::Rpc::SocketServer do
   end
 
   context "Eventmachine client" do 
-
     it "calls the service in the client request" do 
       with_constants "Protobuf::ConnectorType" => "Evented" do
         client = Spec::Proto::TestService.client(:async => false, :port => 9399, :host => "127.0.0.1")

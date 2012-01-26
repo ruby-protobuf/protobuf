@@ -67,7 +67,7 @@ class StubServer
 
   def stop
     if @options.server == Protobuf::Rpc::EventedServer
-      EventMachine.stop_server(@server_handle)
+      EventMachine.stop_server(@server_handle) if @server_handle
     else
       Protobuf::Rpc::SocketRunner.stop
     end
