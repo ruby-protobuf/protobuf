@@ -8,14 +8,12 @@ require 'spec/proto/test_service_impl'
 module StubProtobufServerFactory
   def self.build(delay)
     new_server = Class.new(Protobuf::Rpc::EventedServer) do
-      class << self
-        def sleep_interval
-          @sleep_interval
-        end
+      def self.sleep_interval
+        @sleep_interval
+      end
 
-        def sleep_interval=(si)
-          @sleep_interval = si
-        end
+      def self.sleep_interval=(si)
+        @sleep_interval = si
       end
 
       def post_init
@@ -53,8 +51,8 @@ class StubServer
     if @options.server == Protobuf::Rpc::EventedServer
       start_em_server
     else
-      $stdout << "STARTING\n"
       @sock_server = Thread.new(@options) { |opt| Protobuf::Rpc::SocketRunner.run(opt) }
+      @sock_server.abort_on_exception = true # Set for testing purposes
       Thread.pass until Protobuf::Rpc::SocketServer.running?
     end
     log_debug "[stub-server] Server started #{@options.host}:#{@options.port}"

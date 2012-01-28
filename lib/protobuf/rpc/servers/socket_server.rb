@@ -40,11 +40,14 @@ module Protobuf
         end
       end
 
-      # TODO make listen/backlog part of config
-      # TODO make select timeout part of config
-      def self.run(host = "127.0.0.1", port = 9399, backlog = 100, thread_threshold = 100)
-        $stdout << "RUNNING"
+      def self.run(opts = {})
         log_debug "[#{log_signature}] Run"
+        host = opts.fetch(:host, "127.0.0.1")
+        port = opts.fetch(:port, 9399)
+        backlog = opts.fetch(:backlog, 100)
+        thread_threshold = opts.fetch(:thread_threshold, 100)
+        auto_collect_timeout = opts.fetch(:auto_collect_timeout, 20)
+
         @running = true
         @threads = []
         @thread_threshold = thread_threshold
@@ -56,14 +59,13 @@ module Protobuf
         while running?
           log_debug "[#{log_signature}] Waiting for connections"
 
-          if ready_cnxns = IO.select(@listen_fds, [], [], 20)
+          if ready_cnxns = IO.select(@listen_fds, [], [], auto_collect_timeout)
             cnxns = ready_cnxns.first
             cnxns.each do |client|
               case 
               when !running? then
                 # no-op
               when client == @server then 
-                $stdout << "ACCEPT"
                 log_debug "[#{log_signature}] Accepted new connection"
                 client, sockaddr = @server.accept
                 @listen_fds << client

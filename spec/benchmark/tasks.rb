@@ -5,11 +5,21 @@ require 'proto/test_service_impl'
 namespace :benchmark do
   include SilentConstants
 
-  task :em_client_em_server do 
+  def benchmark_wrapper(global_bench = nil)
+    if global_bench
+      yield global_bench
+    else
+      Benchmark.bm(10) do |bench|
+        yield bench
+      end
+    end
+  end
+
+  def em_client_em_server(global_bench = nil)
     EventMachine.fiber_run do 
       StubServer.new do |server|
-        Benchmark.bm(7) do |bench|
-          bench.report("EM S / EM C") do 
+        benchmark_wrapper(global_bench) do |bench|
+          bench.report("ES / EC") do 
             client = Spec::Proto::TestService.client(:async => false)
             (1..1000).each { client.find(:name => "Test Name" * 100, :active => true) }
           end
@@ -20,47 +30,78 @@ namespace :benchmark do
     end
   end
 
-  task :sock_client_em_server do
-    #    server = OpenStruct.new(:server => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
-    #    @server_thread = Thread.new(server) { |s| Protobuf::Rpc::SocketRunner.run(s) }
-    #    Thread.pass until Protobuf::Rpc::SocketServer.running?
-
-    Benchmark.bm(7) do |bench|
-      bench.report("S S / EM C") do 
-        EventMachine.fiber_run do
-          client = Spec::Proto::TestService.client(:async => false, :port => 9399)
-          (1..1000).each { client.find(:name => "Test Name", :active => true) }
-          EM.stop
+  def em_client_sock_server(global_bench = nil)
+    StubServer.new(:server => Protobuf::Rpc::SocketServer, :port => 9399) do |server| 
+      benchmark_wrapper(global_bench) do |bench|
+        bench.report("SS / EC") do 
+          EventMachine.fiber_run do
+            client = Spec::Proto::TestService.client(:async => false, :port => 9399)
+            (1..1000).each { client.find(:name => "Test Name" * 100, :active => true) }
+            EM.stop
+          end
         end
       end
     end
-
-    #    Protobuf::Rpc::SocketRunner.stop
-    #    Thread.kill(@server_thread)
   end
 
-  task :sock_client_sock_server do
-# server = OpenStruct.new(:server => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
-#        @server_thread = Thread.new(server) { |s| Protobuf::Rpc::SocketRunner.run(s) }
-#        Thread.pass until Protobuf::Rpc::SocketServer.running?
-
+  def sock_client_sock_server(global_bench = nil)
     StubServer.new(:server => Protobuf::Rpc::SocketServer, :port => 9399) do |server| 
-      $stdout << server.inspect
-      Benchmark.bm(7) do |bench|
+      benchmark_wrapper(global_bench) do |bench|
         bench.report("SS / SC") do 
           with_constants "Protobuf::ConnectorType" => "Socket" do
             client = Spec::Proto::TestService.client(:async => false, :port => 9399)
-            $stdout << client.inspect << $\
+            (1..1000).each { client.find(:name => "Test Name" * 100, :active => true) }
+          end
+        end
+      end
+    end
+  end
+
+  def sock_client_em_server(global_bench = nil)
+    Thread.new { EM.run }
+    Thread.pass until EM.reactor_running?
+
+    StubServer.new(:port => 9399) do |server| 
+      benchmark_wrapper(global_bench) do |bench|
+        bench.report("ES / SC") do 
+          with_constants "Protobuf::ConnectorType" => "Socket" do
+            client = Spec::Proto::TestService.client(:async => false, :port => 9399)
             (1..1000).each { client.find(:name => "Test Name" * 100, :active => true) }
           end
         end
       end
     end
 
-#        Protobuf::Rpc::SocketRunner.stop
-#        Thread.kill(@server_thread)
+    EM.stop
   end
 
-  desc "output server performance"
-  task :servers => [:sock_client_sock_server, :em_client_em_server, :sock_client_em_server]
+  desc "benchmark EventMachine client with EventMachine server"
+  task :em_client_em_server do 
+    em_client_em_server
+  end
+
+  desc "benchmark EventMachine client with Socket server"
+  task :em_client_sock_server do
+    em_client_sock_server
+  end
+
+  desc "benchmark Socket client with Socket server"
+  task :sock_client_sock_server do
+    sock_client_sock_server
+  end
+
+  desc "benchmark Socket client with EventMachine server"
+  task :sock_client_em_server do 
+    sock_client_em_server
+  end
+
+  desc "benchmark server performance"
+  task :servers do 
+    Benchmark.bm(10) do |bench|
+      em_client_em_server(bench)
+      em_client_sock_server(bench)
+      sock_client_sock_server(bench)
+      sock_client_em_server(bench)
+    end
+  end
 end

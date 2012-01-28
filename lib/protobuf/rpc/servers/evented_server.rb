@@ -9,7 +9,6 @@ module Protobuf
       # Initialize a new read buffer for storing client request info
       def post_init
         log_debug '[server] Post init, new read buffer created'
-        
         @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
         @stats.client = Socket.unpack_sockaddr_in(get_peername)
         
