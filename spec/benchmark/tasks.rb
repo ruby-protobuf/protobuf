@@ -58,7 +58,7 @@ namespace :benchmark do
   end
 
   def sock_client_em_server(global_bench = nil)
-    Thread.new { EM.run }
+    em_thread = Thread.new { EM.run }
     Thread.pass until EM.reactor_running?
 
     StubServer.new(:port => 9399) do |server| 
@@ -73,6 +73,7 @@ namespace :benchmark do
     end
 
     EM.stop
+    Thread.kill(em_thread) if em_thread
   end
 
   desc "benchmark EventMachine client with EventMachine server"
