@@ -11,8 +11,8 @@ module Protobuf
       DEFAULT_OPTIONS = {
         :service        => nil,           # Service to invoke
         :method         => nil,           # Service method to call
-        :host           => 'localhost',   # A default host (usually overridden)
-        :port           => '9938',        # A default port (usually overridden)
+        :host           => '127.0.0.1',   # A default host (usually overridden)
+        :port           => '9399',        # A default port (usually overridden)
         :request        => nil,           # The request object sent by the client
         :request_type   => nil,           # The request type expected by the client
         :response_type  => nil,           # The response type expected by the client
