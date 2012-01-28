@@ -96,7 +96,7 @@ module Protobuf
 
       def self.stop 
         @running = false
-        @server.close
+        @server.close if @server
       end
 
       class Worker 
