@@ -26,9 +26,9 @@ end
 
 class ::Protobuf::Rpc::Client
   def == other
-   connector.options == other.options && \
-   success_cb == other.success_cb && \
-   failure_cb == other.failure_cb
+    connector.options == other.options && \
+      success_cb == other.success_cb && \
+      failure_cb == other.failure_cb
   end
 end
 
