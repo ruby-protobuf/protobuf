@@ -55,7 +55,7 @@ namespace :benchmark do
     EM.stop if EM.reactor_running?
 
     StubServer.new(:server => Protobuf::Rpc::SocketServer, :port => 9399) do |server| 
-      with_constants "Protobuf::ConnectorType" => "Socket" do
+      with_constants "Protobuf::ClientType" => "Socket" do
         client = Spec::Proto::TestService.client(:async => false, :port => 9399)
 
         benchmark_wrapper(global_bench) do |bench|
@@ -73,7 +73,7 @@ namespace :benchmark do
     Thread.pass until EM.reactor_running?
 
     StubServer.new(:port => 9399) do |server| 
-      with_constants "Protobuf::ConnectorType" => "Socket" do
+      with_constants "Protobuf::ClientType" => "Socket" do
         client = Spec::Proto::TestService.client(:async => false, :port => 9399)
 
         benchmark_wrapper(global_bench) do |bench|

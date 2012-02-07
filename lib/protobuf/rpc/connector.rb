@@ -3,8 +3,8 @@ module Protobuf
     class Connector
       
       def self.connector_for_client
-        if defined?(Protobuf::ConnectorType)
-          case Protobuf::ConnectorType 
+        if defined?(Protobuf::ClientType)
+          case Protobuf::ClientType 
           when "Socket" then 
             ::Protobuf::Rpc::Connectors::Socket
           else
