@@ -18,8 +18,8 @@ require '<%= required_file %>'
 <%- rpcs.each do |name, request, response| -%>
 ## <%= class_indent %>	# request -> <%= module_name %>::<%= request %>
 ## <%= class_indent %>	# response -> <%= module_name %>::<%= response %>
-## <%= class_indent %>	def <%= underscore name %>
-## <%= class_indent %>		# TODO: implement <%= underscore name %>
+## <%= class_indent %>	def <%= Util.underscore(name) %>
+## <%= class_indent %>		# TODO: implement <%= Util.underscore(name) %>
 ## <%= class_indent %>	end
 ## <%= class_indent %>
 <%- end -%>
@@ -34,7 +34,7 @@ require '<%= required_file %>'
 <%- end -%>
 <%= class_indent %>class <%= service_name %> < Protobuf::Rpc::Service
 <%- rpcs.each do |name, request, response| -%>
-<%= class_indent %>  rpc :<%= underscore name %>, <%= request %>, <%= response %>
+<%= class_indent %>  rpc :<%= Util.underscore(name) %>, <%= request %>, <%= response %>
 <%- end -%>
 <%= class_indent %>end
 <%- (module_array.size-1).downto(0) do |i| -%>
