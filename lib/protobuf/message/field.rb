@@ -685,10 +685,10 @@ module Protobuf
                 when Integer then
                   field.type.const_get(field.type.name_by_value(val)) rescue nil
                 when EnumValue then
-                  raise TypeError, "Invalid value: #{val.inspect}" if val.parent_class != field.type
+                  raise TypeError, "Invalid value: #{val.inspect} for #{field.name}" if val.parent_class != field.type
                   val
                 end
-              raise TypeError, "Invalid value: #{val.inspect}" unless val
+              raise TypeError, "Invalid value: #{val.inspect} for #{field.name}" unless val
 
               @values[field.name] = val
             end
