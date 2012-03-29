@@ -60,6 +60,12 @@ parser = OptionParser.new do |opts|
     Protobuf::ServerType = "SocketServer"
     server.runner = Protobuf::Rpc::SocketRunner
   end
+
+  opts.on("-z", "--zmq", "ZeroMQ Socket Mode for client and server connections (they must be used together)") do |v|
+    Protobuf::ConnectorType = "Zmq"
+    Protobuf::ServerType = "ZmqServer"
+    server.running = Protobuf::Rpc::ZmqRunner
+  end
   
   opts.on("-d", "--[no-]debug", "Debug Mode. Override log level to DEBUG.") do |v|
     server.debug = v

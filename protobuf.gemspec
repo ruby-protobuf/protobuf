@@ -24,8 +24,9 @@ Gem::Specification.new do |s|
   s.add_dependency 'ffi-rzmq'
 
   s.add_development_dependency 'rake'
+  s.add_development_dependency 'pry'
   s.add_development_dependency 'rspec'
-  s.add_development_dependency 'yard', '~> 0.7.4'
-  s.add_development_dependency 'redcarpet', '~> 1.17.2'
-  s.add_development_dependency 'simplecov', '~> 0.5.4'
+  s.add_development_dependency 'yard'
+  s.add_development_dependency 'redcarpet'
+  s.add_development_dependency 'simplecov'
 end

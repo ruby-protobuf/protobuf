@@ -48,8 +48,11 @@ class StubServer
   end
 
   def start
-    if @options.server == Protobuf::Rpc::EventedServer
+    case
+    when @options.server == Protobuf::Rpc::EventedServer then
       start_em_server
+    when @options.server == Protobuf::Rpc::ZmqServer then
+      start_zmq_server
     else
       @sock_server = Thread.new(@options) { |opt| Protobuf::Rpc::SocketRunner.run(opt) }
       @sock_server.abort_on_exception = true # Set for testing purposes
@@ -63,17 +66,27 @@ class StubServer
     end
   end
 
+  def start_zmq_server
+    @zmq_server = Thread.new(@options) { |opt| Protobuf::Rpc::ZmqRunner.run(opt) }    
+    Thread.pass until Protobuf::Rpc::ZmqServer.running?
+  end
+
   def start_em_server
     @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
   end
 
   def stop
-    if @options.server == Protobuf::Rpc::EventedServer
+    case
+    when @options.server == Protobuf::Rpc::EventedServer then
       EventMachine.stop_server(@server_handle) if @server_handle
+    when @options.server == Protobuf::Rpc::ZmqServer then
+      Protobuf::Rpc::ZmqRunner.stop
+      Thread.kill(@zmq_server) if @zmq_server
     else
       Protobuf::Rpc::SocketRunner.stop
       Thread.kill(@sock_server) if @sock_server
     end
+
     @running = false
   end
 end

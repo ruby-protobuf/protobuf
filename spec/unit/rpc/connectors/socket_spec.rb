@@ -45,5 +45,4 @@ describe Protobuf::Rpc::Connectors::Socket do
       expect{ conn.__send__(:check_async) }.to_not raise_error
     end
   end
-
 end
