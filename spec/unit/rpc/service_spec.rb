@@ -72,4 +72,17 @@ describe Protobuf::Rpc::Service do
     
   end
   
+  context 'when using rpc_failed mechanism' do
+    it 'provides callback registration and invokes block on rpc_failed call' do
+      expected_error = nil
+      service = Protobuf::Rpc::Service.new
+      service.on_rpc_failed do |error|
+        expected_error = error
+      end
+      service.rpc_failed('an error happened')
+      expected_error.should be_an(Protobuf::Rpc::RpcFailed)
+      expected_error.message.should eq 'an error happened'
+    end
+  end
+  
 end
