@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'protobuf'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/error'
 require 'protobuf/rpc/connector'

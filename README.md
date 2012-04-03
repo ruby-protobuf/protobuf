@@ -39,8 +39,8 @@ And `defs.pb.rb` should look like this:
 ```ruby
 module Mycompany
   class User
-    optional :string, :first_name, 1
-    optional :string, :last_name, 2
+    required :string, :first_name, 1
+    required :string, :last_name, 2
   end
 end
 ```

@@ -153,21 +153,20 @@ module Protobuf
 
       def create_files(message_file, out_dir, create_file=true)
         @create_file = create_file
-        default_port = 9999
         @services.each do |service_name, rpcs|
-          underscored_name = underscore service_name.to_s
+          underscored_name = Util.underscore(service_name.to_s)
           message_module = package.map{|p| p.to_s.capitalize}.join('::')
           required_file = [
             Util.module_to_path(message_module),
-            File.basename(message_file.sub(/^\.\//, '').sub(/\.rb$/, ''))
+            File.basename(message_file, '.rb')
           ].join('/').gsub(/\/{2,}/, '/')
 
-          create_service(message_file, out_dir, underscored_name, message_module, service_name, default_port, rpcs, required_file)
+          create_service(message_file, out_dir, underscored_name, message_module, service_name, rpcs, required_file)
         end
         @file_contents
       end
 
-      def create_service(message_file, out_dir, underscored_name, module_name, service_name, default_port, rpcs, required_file)
+      def create_service(message_file, out_dir, underscored_name, module_name, service_name, rpcs, required_file)
         service_filename = "#{out_dir}/#{Util.module_to_path(module_name)}/#{underscored_name}.rb"
         service_contents = template_erb('rpc_service_implementation').result(binding)
         create_file_with_backup(service_filename, service_contents) if @create_file
@@ -175,10 +174,6 @@ module Protobuf
       end
 
       private
-
-      def underscore(str)
-        str.to_s.gsub(/\B[A-Z]/, '_\&').downcase
-      end
 
       def template_erb(template)
         ERB.new(File.read("#{File.dirname(__FILE__)}/template/#{template}.erb"), nil, '-')

@@ -6,9 +6,13 @@ require 'stringio'
 module Protobuf
 end
 
+
+Protobuf::ClientType = ENV['PB_CLIENT_TYPE'] if ENV['PB_CLIENT_TYPE']
+Protobuf::ServerType = ENV['PB_SERVER_TYPE'] if ENV['PB_SERVER_TYPE']
+
 # When setting up a client
-unless defined?(Protobuf::ConnectorType) && Protobuf::ConnectorType == "Socket"
-  Protobuf::ConnectorType = "EventMachine"
+unless defined?(Protobuf::ClientType) && Protobuf::ClientType == "Socket"
+  Protobuf::ClientType = "EventMachine"
   require 'eventmachine'
   require 'protobuf/ext/eventmachine'
   require 'protobuf/rpc/connectors/eventmachine'

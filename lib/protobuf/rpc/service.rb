@@ -16,8 +16,8 @@ module Protobuf
       private :request, :response, :response=
       
       DEFAULT_LOCATION = {
-        :host => 'localhost',
-        :port => 9939
+        :host => '127.0.0.1',
+        :port => 9399 
       }
       
       # Class methods are intended for use on the client-side.

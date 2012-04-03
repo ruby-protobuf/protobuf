@@ -5,7 +5,7 @@ require "protobuf/version"
 Gem::Specification.new do |s|
   s.name          = 'protobuf'
   s.version       = Protobuf::VERSION
-  s.date          = %q{2011-12-07}
+  s.date          = Time.now.strftime('%Y-%m-%d')
 
   s.authors       = ['BJ Neilsen', 'Brandon Dewitt']
   s.email         = ["bj.neilsen@gmail.com", "brandonsdewitt+protobuf@gmail.com"]

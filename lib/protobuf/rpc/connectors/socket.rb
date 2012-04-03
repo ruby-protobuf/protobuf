@@ -61,7 +61,6 @@ module Protobuf
         def send_data(data)
           @socket.write(data)
           @socket.flush
-          @socket.close_write
           log_debug "[client-#{self.class}] write closed" 
         end
 

@@ -1,3 +1,5 @@
+require 'logger'
+
 module Protobuf
   class Logger < ::Logger
     

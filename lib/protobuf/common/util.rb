@@ -13,10 +13,10 @@ module Protobuf
       end
     end
 
-    # Expects: SomeLongName
+    # Expects: SomeLongName, SOMELongName
     # Returns: some_long_name
     def underscore(str)
-      str.to_s.gsub(/\B[A-Z]/, '_\&').downcase
+      str.to_s.gsub(/\B[A-Z](?:[a-z])/, '_\&').downcase
     end
   
     # Expects: SomeModule::Path
