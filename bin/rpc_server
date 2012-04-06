@@ -6,6 +6,7 @@ require 'logger'
 require 'protobuf/version'
 require 'protobuf/rpc/servers/evented_runner'
 require 'protobuf/rpc/servers/socket_runner'
+require 'protobuf/rpc/servers/zmq_runner'
 
 # Default options
 server = OpenStruct.new({
@@ -64,7 +65,7 @@ parser = OptionParser.new do |opts|
   opts.on("-z", "--zmq", "ZeroMQ Socket Mode for client and server connections (they must be used together)") do |v|
     Protobuf::ConnectorType = "Zmq"
     Protobuf::ServerType = "ZmqServer"
-    server.running = Protobuf::Rpc::ZmqRunner
+    server.runner = Protobuf::Rpc::ZmqRunner
   end
   
   opts.on("-d", "--[no-]debug", "Debug Mode. Override log level to DEBUG.") do |v|

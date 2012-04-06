@@ -1,3 +1,5 @@
+require 'pry'
+require 'ruby-prof'
 require 'benchmark'
 require 'helper/all'
 require 'proto/test_service_impl'
@@ -88,6 +90,26 @@ namespace :benchmark do
     Thread.kill(em_thread) if em_thread
   end
 
+  def zmq_client_zmq_server(number_tests, test_length, global_bench = nil)
+    StubServer.new(:port => 9399, :server => Protobuf::Rpc::ZmqServer) do |server| 
+      with_constants "Protobuf::ClientType" => "Zmq" do
+        client = Spec::Proto::TestService.client(:async => false, :port => 9399)
+
+        benchmark_wrapper(global_bench) do |bench|
+          bench.report("ZS / ZC") do 
+            (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
+          end
+        end
+      end
+    end
+  end
+
+  desc "benchmark ZMQ client with ZMQ server"
+  task :zmq_client_zmq_server, [:number, :length] do |t, args|
+    args.with_defaults(:number => 1000, :length => 100)
+    zmq_client_zmq_server(args[:number], args[:length])
+  end
+
   desc "benchmark EventMachine client with EventMachine server"
   task :em_client_em_server, [:number, :length] do |t, args|
     args.with_defaults(:number => 1000, :length => 100)
@@ -117,10 +139,11 @@ namespace :benchmark do
     args.with_defaults(:number => 1000, :length => 100)
 
     Benchmark.bm(10) do |bench|
-      em_client_em_server(args[:number], args[:length], bench)
-      em_client_sock_server(args[:number], args[:length], bench)
+      zmq_client_zmq_server(args[:number], args[:length], bench)
+      #      em_client_em_server(args[:number], args[:length], bench)
+      #      em_client_sock_server(args[:number], args[:length], bench)
       sock_client_sock_server(args[:number], args[:length], bench)
-      sock_client_em_server(args[:number], args[:length], bench)
+      #      sock_client_em_server(args[:number], args[:length], bench)
     end
   end
 end

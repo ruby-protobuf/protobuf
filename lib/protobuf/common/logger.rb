@@ -5,30 +5,7 @@ module Protobuf
     
     class << self
       attr_accessor :file, :level
-      
-      # One-line file/level configuration
-      def configure(options)
-        self.file = options[:file] if options[:file]
-        self.level = options[:level] if options[:level]
-      end
-      
-      # Use to reset the instance
-      def reset_device!
-        self.file = self.level = @__instance = nil
-      end
-      
-      # Singleton instance
-      def instance
-        @__instance ||= begin
-          log = nil
-          if @file and @level
-            log = new(self.file)
-            log.level = self.level
-          end
-          log
-        end
-      end
-      
+
       # Stub out the log methods for Protobuf::Logger as singleton methods
       [:debug, :info, :warn, :error, :fatal, :any, :add, :log].each do |m|
         define_method(m) do |*params, &block|
@@ -36,7 +13,31 @@ module Protobuf
         end
       end
     end
+       
+    # One-line file/level configuration
+    def self.configure(options)
+      self.file = options[:file] if options[:file]
+      self.level = options[:level] if options[:level]
+    end
     
+    # Use to reset the instance
+    def self.reset_device!
+      self.file = self.level = @__instance = nil
+    end
+    
+    # Singleton instance
+    def self.instance
+      @__instance ||= begin
+        log = nil
+        if @file and @level
+          log = new(self.file)
+          log.level = self.level
+        end
+        log
+      end
+    end
+    
+   
     # 
     # LogMethods module for log method including, e.g.:
     # 
@@ -51,6 +52,7 @@ module Protobuf
     module LogMethods
       [:debug, :info, :warn, :error, :fatal, :any, :add, :log].each do |m|
         define_method("log_#{m}") do |*params, &block|
+          return
           Protobuf::Logger.__send__(m, *params, &block)
         end
       end

@@ -1,4 +1,3 @@
-# require 'protobuf'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'
@@ -11,12 +10,8 @@ module Protobuf
       
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
-        @stats.request_size = @buffer.size
-        
-        # Setup the initial request and response
-        @request = Protobuf::Socketrpc::Request.new
-        @response = Protobuf::Socketrpc::Response.new
-        
+        @stats.request_size = @request_buffer.size
+       
         # Parse the protobuf request from the socket
         log_debug "[#{log_signature}] Parsing request from client"
         parse_request_from_buffer
@@ -84,8 +79,8 @@ module Protobuf
       
       # Parse the incoming request object into our expected request object
       def parse_request_from_buffer
-        log_debug "[#{log_signature}] parsing request from buffer: %s" % @buffer.data.inspect
-        @request.parse_from_string(@buffer.data)
+        log_debug "[#{log_signature}] parsing request from buffer: %s" % @request_buffer.data.inspect
+        @request.parse_from_string(@request_buffer.data)
       rescue => error
         exc = BadRequestData.new 'Unable to parse request: %s' % error.message
         log_error exc.message
@@ -135,9 +130,9 @@ module Protobuf
       def send_response
         raise 'Response already sent to client' if @did_respond
         log_debug "[#{log_signature}] Sending response to client: %s" % @response.inspect
-        response_buffer = Protobuf::Rpc::Buffer.new(:write, @response)
-        send_data(response_buffer.write)
-        @stats.response_size = response_buffer.size
+        @response_buffer.set_data(@response)
+        send_data
+        @stats.response_size = @response_buffer.size
         @stats.end
         @stats.log_stats
         @did_respond = true

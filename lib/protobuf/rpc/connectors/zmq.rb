@@ -9,15 +9,19 @@ module Protobuf
         
         def send_request
           check_async
-          initialize_stats
+          setup_connection
           connect_to_rpc_server
           post_init # calls _send_request
           read_response
+        ensure
+          @socket.close if @socket
+          @zmq_context.terminate if @zmq_context
+          @zmq_context = nil
         end
 
         private
 
-        def assert(return_code)
+        def zmq_error_check(return_code)
           raise "Last API call failed at #{caller(1)}" unless return_code >= 0
         end
 
@@ -31,14 +35,15 @@ module Protobuf
         end
 
         def close_connection
-          @socket.close
+          zmq_error_check(@socket.close)
+          zmq_error_check(@zmq_context.terminate)
           log_debug "[client-#{self.class}] Connector closed" 
         end
 
         def connect_to_rpc_server
-          zmq_context = ZMQ::Context.new
-          @socket = zmq_context.socket(ZMQ::REQ)
-          assert(@socket.connect("tcp://#{options[:host]}:#{options[:port]}"))
+          @zmq_context = ZMQ::Context.new
+          @socket = @zmq_context.socket(ZMQ::REQ)
+          zmq_error_check(@socket.connect("tcp://#{options[:host]}:#{options[:port]}"))
           log_debug "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}" 
         end
 
@@ -48,15 +53,15 @@ module Protobuf
         end
 
         def read_response
-          assert(@socket.recv_string(@buffer.data))
-          @buffer.size = @buffer.data.size
+          zmq_error_check(@socket.recv_string(@response_buffer.data))
+          @response_buffer.size = @response_buffer.data.size
+          parse_response
         end
 
-        def send_data(data)
-          assert(@socket.send_string(data.split("-")[1]))
+        def send_data
+          zmq_error_check(@socket.send_string(@request_buffer.data))
           log_debug "[client-#{self.class}] write closed" 
         end
-
       end
     end
   end

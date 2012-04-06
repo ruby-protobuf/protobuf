@@ -2,13 +2,11 @@ module Protobuf
   module Rpc
     class Buffer
       
-      attr_accessor :mode
-      attr_reader :data, :size
+      attr_accessor :mode, :data, :size
       
       MODES = [:read, :write]
       
-      def initialize(mode=:read, data='')
-        @data = data.is_a?(Protobuf::Message) ? data.serialize_to_string : data.to_s
+      def initialize(mode=:read)
         @flush = false
         self.mode = mode
       end
@@ -19,6 +17,11 @@ module Protobuf
         else
           @mode = :read
         end
+      end
+
+      def size_prefixed_data
+        @size = @data.length
+        return "#{@size}-#{@data}"
       end
       
       def write(force_mode=true)
@@ -38,6 +41,11 @@ module Protobuf
           get_data_size
           check_for_flush
         end
+      end
+
+      def set_data(data)
+        @data = data.is_a?(Protobuf::Message) ? data.serialize_to_string : data.to_s
+        @size = @data.size
       end
       
       def reading?
@@ -68,7 +76,6 @@ module Protobuf
           @flush = true
         end
       end
-      
     end
   end
 end

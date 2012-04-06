@@ -62,11 +62,11 @@ module Protobuf
           close_connection
 
           log_debug "[#{log_signature}] Parsing response from server (connection closed)"
-          @stats.response_size = @buffer.size
+          @stats.response_size = @response_buffer.size
 
           # Parse out the raw response
           response_wrapper = Protobuf::Socketrpc::Response.new
-          response_wrapper.parse_from_string(@buffer.data)
+          response_wrapper.parse_from_string(@response_buffer.data)
 
           # Determine success or failure based on parsed data
           if response_wrapper.has_field?(:error_reason)
@@ -96,8 +96,6 @@ module Protobuf
         def post_init
           # Setup an object for reponses without callbacks
           @data = nil
-          log_debug "[#{log_signature}] Post init, new read buffer created"
-          @buffer = Protobuf::Rpc::Buffer.new(:read)
           _send_request unless error?
           log_debug "[#{log_signature}] Post init, new read buffer created just sent"
         rescue
@@ -106,22 +104,33 @@ module Protobuf
 
         # Sends the request to the server, invoked by the connection_completed event
         def _send_request
-          request_wrapper = Protobuf::Socketrpc::Request.new
-          request_wrapper.service_name = @options[:service].name
-          request_wrapper.method_name = @options[:method].to_s
+          log_debug "[#{log_signature}] Sending Request: %s" % request_wrapper.inspect
+          @stats.request_size = @request_buffer.size
+          send_data
+        end
+
+        def request_wrapper
+          wrapper = Protobuf::Socketrpc::Request.new
+          wrapper.service_name = @options[:service].name
+          wrapper.method_name = @options[:method].to_s
 
           if @options[:request].class == @options[:request_type]
-            request_wrapper.request_proto = @options[:request].serialize_to_string
+            wrapper.request_proto = @options[:request].serialize_to_string
           else
             expected = @options[:request_type].name
             actual = @options[:request].class.name
             fail :INVALID_REQUEST_PROTO, 'Expected request type to be type of %s, got %s instead' % [expected, actual]
           end
 
-          log_debug "[#{log_signature}] Sending Request: %s" % request_wrapper.inspect
-          request_buffer = Protobuf::Rpc::Buffer.new(:write, request_wrapper)
-          @stats.request_size = request_buffer.size
-          send_data(request_buffer.write)
+          return wrapper
+        end
+
+        def setup_connection
+          initialize_stats
+          wrapper = request_wrapper
+          @response_buffer = Protobuf::Rpc::Buffer.new(:read)
+          @request_buffer = Protobuf::Rpc::Buffer.new(:write)
+          @request_buffer.set_data(wrapper)
         end
 
         def succeed(response)

@@ -39,5 +39,9 @@ end
 require 'protobuf/rpc/service'
 require 'protobuf/rpc/servers/socket_server'  
 
+  require 'ffi-rzmq'
+  require 'protobuf/rpc/client'
+  require 'protobuf/rpc/connectors/zmq'
+
 require 'protobuf/rpc/client'
 require 'protobuf/rpc/connectors/socket'
