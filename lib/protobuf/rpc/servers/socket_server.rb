@@ -6,7 +6,6 @@ module Protobuf
       include Protobuf::Rpc::Server
       include Protobuf::Logger::LogMethods
 
-
       def self.cleanup? 
         # every 10 connections run a cleanup routine after closing the response
         @threads.size > (@thread_threshold - 1) && (@threads.size % @thread_threshold) == 0
@@ -108,15 +107,16 @@ module Protobuf
           @socket = sock
           @request = Protobuf::Socketrpc::Request.new
           @response = Protobuf::Socketrpc::Response.new
-          @buffer = Protobuf::Rpc::Buffer.new(:read)
+          @response_buffer = Protobuf::Rpc::Buffer.new(:write)
+          @request_buffer = Protobuf::Rpc::Buffer.new(:read)
           @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
           @complete_cb = complete_cb
           log_debug "[#{log_signature}] Post init, new read buffer created"
 
           @stats.client = Socket.unpack_sockaddr_in(@socket.getpeername)
-          @buffer << read_data 
+          @request_buffer << read_data 
           log_debug "[#{log_signature}] handling request"
-          handle_client if @buffer.flushed?
+          handle_client(true) if @request_buffer.flushed?
         end
 
         def log_signature
@@ -131,12 +131,12 @@ module Protobuf
           end
           str_size_io = size_io.string
 
-          "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
+          "#{@socket.read(str_size_io.to_i)}"
         end
 
-        def send_data(data)
-          log_debug "[#{log_signature}] sending data : %s" % data
-          @socket.write(data)
+        def send_data
+          log_debug "[#{log_signature}] sending data : %s" % @response_buffer.size_prefixed_data
+          @socket.write(@response_buffer.size_prefixed_data)
           @socket.flush
           @complete_cb.call(@socket)
         end

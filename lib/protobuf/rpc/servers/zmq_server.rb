@@ -1,5 +1,4 @@
 require 'protobuf/rpc/server'
-require 'pry'
 
 module Protobuf
   module Rpc
@@ -16,15 +15,15 @@ module Protobuf
         @socket = sock
         log_debug "[#{log_signature}] Post init, new read buffer created"
 
-        zmq_error_check(sock.recv_string(@request_buffer.data))
+        zmq_error_check(@socket.recv_string(@request_buffer.data))
         @request_buffer.size = @request_buffer.data.size
 
         log_debug "[#{log_signature}] handling request"
         handle_client
       end
 
-      def send_data(data_buffer)
-        zmq_error_check(@socket.send_string(data_buffer.data)) 
+      def send_data
+        zmq_error_check(@socket.send_string(@response_buffer.data)) 
       end
 
       def zmq_error_check(return_code)
@@ -39,11 +38,26 @@ module Protobuf
         host = opts.fetch(:host, "127.0.0.1")
         port = opts.fetch(:port, 9399)
 
-        @zmq_context ||= ZMQ::Context.new(8)
+        @zmq_context ||= ZMQ::Context.new
         @socket = @zmq_context.socket(ZMQ::REP)
         zmq_error_check(@socket.setsockopt(ZMQ::SNDHWM, 1000))
         zmq_error_check(@socket.setsockopt(ZMQ::RCVHWM, 1000))
         zmq_error_check(@socket.bind("tcp://#{host}:#{port}"))
+
+#        @frontend = @zmq_context.socket(ZMQ::ROUTER)
+#        zmq_error_check(@frontend.setsockopt(ZMQ::SNDHWM, 1000))
+#        zmq_error_check(@frontend.setsockopt(ZMQ::RCVHWM, 1000))
+#        zmq_error_check(@frontend.bind("tcp://#{host}:#{port}"))
+#
+#        @backend = @zmq_context.socket(ZMQ::DEALER)
+#        zmq_error_check(@backend.setsockopt(ZMQ::SNDHWM, 1000))
+#        zmq_error_check(@backend.setsockopt(ZMQ::RCVHWM, 1000))
+#        zmq_error_check(@backend.bind("tcp://#{host}:#{port + 1}"))
+#
+#        @frontend.identity = "frontend"
+#        @backend.identity = "backend"
+#
+#        @poller = ZMQ::Poller.new
         @running = true
 
         loop do

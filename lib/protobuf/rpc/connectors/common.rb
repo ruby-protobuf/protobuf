@@ -47,8 +47,7 @@ module Protobuf
           @stats = Protobuf::Rpc::Stat.new(:CLIENT, true)
           @stats.server = [@options[:port], @options[:host]]
           @stats.service = @options[:service].name
-          @stats.method = @options[:method]
-          self
+          @stats.method = @options[:method].to_s
         rescue => ex
           fail(:RPC_ERROR, "Invalid stats configuration. #{ex.message}") 
         end
@@ -92,45 +91,27 @@ module Protobuf
           end
         end
 
-        # Setup the read buffer for data coming back
         def post_init
-          # Setup an object for reponses without callbacks
-          @data = nil
-          _send_request unless error?
-          log_debug "[#{log_signature}] Post init, new read buffer created just sent"
+          send_data unless error?
         rescue
           fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
         end
 
-        # Sends the request to the server, invoked by the connection_completed event
-        def _send_request
-          log_debug "[#{log_signature}] Sending Request: %s" % request_wrapper.inspect
-          @stats.request_size = @request_buffer.size
-          send_data
-        end
-
         def request_wrapper
-          wrapper = Protobuf::Socketrpc::Request.new
-          wrapper.service_name = @options[:service].name
-          wrapper.method_name = @options[:method].to_s
+          validate_request_type
 
-          if @options[:request].class == @options[:request_type]
-            wrapper.request_proto = @options[:request].serialize_to_string
-          else
-            expected = @options[:request_type].name
-            actual = @options[:request].class.name
-            fail :INVALID_REQUEST_PROTO, 'Expected request type to be type of %s, got %s instead' % [expected, actual]
-          end
-
-          return wrapper
+          return Protobuf::Socketrpc::Request.new(
+            :service_name => @options[:service].name,
+            :method_name => @options[:method].to_s,
+            :request_proto => @options[:request].serialize_to_string
+          )
         end
 
         def setup_connection
           initialize_stats
-          wrapper = request_wrapper
           @response_buffer = Protobuf::Rpc::Buffer.new(:read)
           @request_buffer = Protobuf::Rpc::Buffer.new(:write)
-          @request_buffer.set_data(wrapper)
+          @request_buffer.set_data(request_wrapper)
         end
 
         def succeed(response)
@@ -142,6 +123,14 @@ module Protobuf
           fail :RPC_ERROR, 'An exception occurred while calling on_success: %s' % $!.message
         ensure 
           complete
+        end
+
+        def validate_request_type
+          unless @options[:request].class == @options[:request_type]
+            expected = @options[:request_type].name
+            actual = @options[:request].class.name
+            fail :INVALID_REQUEST_PROTO, 'Expected request type to be type of %s, got %s instead' % [expected, actual]
+          end
         end
 
         def verify_callbacks
@@ -157,7 +146,6 @@ module Protobuf
             fail(:RPC_ERROR, "Invalid client connection configuration. #{opt} must be a defined option.") if @options[opt].nil?
           end
         end
-
       end
     end
   end

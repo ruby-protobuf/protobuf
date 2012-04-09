@@ -1,4 +1,3 @@
-require 'pry'
 require 'ostruct'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/server'
@@ -7,6 +6,9 @@ require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq_server'
 require 'protobuf/rpc/servers/zmq_runner'
 require 'spec/proto/test_service_impl'
+
+# Want to abort if server dies?
+# Thread.abort_on_exception = true
 
 module StubProtobufServerFactory
   def self.build(delay)

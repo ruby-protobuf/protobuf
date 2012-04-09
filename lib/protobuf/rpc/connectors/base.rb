@@ -37,7 +37,6 @@ module Protobuf
         def async?
           !!@options[:async]
         end
-        
       end
     end
   end

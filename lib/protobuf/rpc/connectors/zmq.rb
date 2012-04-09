@@ -6,12 +6,12 @@ module Protobuf
       class Zmq < Base
         include Protobuf::Rpc::Connectors::Common
         include Protobuf::Logger::LogMethods
-        
+
         def send_request
           check_async
           setup_connection
           connect_to_rpc_server
-          post_init # calls _send_request
+          post_init
           read_response
         ensure
           @socket.close if @socket
@@ -21,16 +21,10 @@ module Protobuf
 
         private
 
-        def zmq_error_check(return_code)
-          raise "Last API call failed at #{caller(1)}" unless return_code >= 0
-        end
-
         def check_async
           if async?
             log_error "[client-#{self.class}] Cannot run in async mode"
             raise "Cannot use Zmq client in async mode" 
-          else
-            log_debug "[client-#{self.class}] Async check passed" 
           end
         end
 
@@ -59,8 +53,14 @@ module Protobuf
         end
 
         def send_data
+          log_debug "[#{log_signature}] Sending Request: %s" % @request_buffer.data
+          @stats.request_size = @request_buffer.size
           zmq_error_check(@socket.send_string(@request_buffer.data))
           log_debug "[client-#{self.class}] write closed" 
+        end
+
+        def zmq_error_check(return_code)
+          raise "Last API call failed at #{caller(1)}" unless return_code >= 0
         end
       end
     end

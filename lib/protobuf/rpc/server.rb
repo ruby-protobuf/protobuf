@@ -9,7 +9,7 @@ module Protobuf
     module Server 
       
       # Invoke the service method dictated by the proto wrapper request object
-      def handle_client
+      def handle_client(check=false)
         @stats.request_size = @request_buffer.size
        
         # Parse the protobuf request from the socket
@@ -25,6 +25,7 @@ module Protobuf
         invoke_rpc_method
       rescue => error
         # Ensure we're handling any errors that try to slip out the back door
+        binding.pry if check
         log_error error.message
         log_error error.backtrace.join("\n")
         handle_error(error)
@@ -144,9 +145,6 @@ module Protobuf
       rescue
         raise BadResponseProto, $!.message
       end
-      
     end
-
   end
-
 end

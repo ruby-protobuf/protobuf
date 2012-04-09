@@ -8,6 +8,8 @@ module Protobuf
       
       def initialize(mode=:read)
         @flush = false
+        @data = ""
+        @size = 0
         self.mode = mode
       end
       
@@ -38,7 +40,7 @@ module Protobuf
       def <<(data)
         @data << data
         if reading?
-          get_data_size
+          @size = @data.size
           check_for_flush
         end
       end
@@ -61,18 +63,9 @@ module Protobuf
       end
       
     private
-    
-      def get_data_size
-        if @size.nil?
-          sliced_size = @data.slice! /^\d+-/
-          unless sliced_size.nil?
-            @size = sliced_size.gsub(/-/, '').to_i 
-          end
-        end
-      end
-      
+     
       def check_for_flush
-        if not @size.nil? and @data.length == @size
+        if !@size.nil? && @data.length == @size
           @flush = true
         end
       end

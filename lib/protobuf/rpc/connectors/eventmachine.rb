@@ -41,10 +41,10 @@ module Protobuf
 
         def ensure_em_running(&blk)
           if EM.reactor_running? 
-            @global_reactor = true
+            @using_global_reactor = true
             yield
           else 
-            @global_reactor = false
+            @using_global_reactor = false
             EM.fiber_run do 
               blk.call
               EM.stop
@@ -56,32 +56,27 @@ module Protobuf
           EM::cancel_timer(@timeout_timer)
           fib.resume(true)
         rescue => ex 
-          log_error "[#{log_signature}] An exception occurred while waiting for server response:"
-          log_error ex.message
-          log_error ex.backtrace.join("\n")
-
           message = 'Synchronous client failed: %s' % ex.message
-          err = Protobuf::Rpc::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
-          ensure_cb.call(err)
-          EM.stop if !@global_reactor
+          error_stop_reactor(message)
         end
 
         def set_timeout_and_validate_fiber
           @timeout_timer = EM::add_timer(@options[:timeout]) do
             message = 'Client timeout of %d seconds expired' % @options[:timeout]
-            err = Protobuf::Rpc::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
-            ensure_cb.call(err)
-            EM.stop if !@global_reactor
+            error_stop_reactor(message)
           end
 
           Fiber.yield
         rescue FiberError
           message = "Synchronous calls must be in 'EM.fiber_run' block" 
+          error_stop_reactor(message)
+        end
+
+        def error_stop_reactor(message)
           err = Protobuf::Rpc::ClientError.new(Protobuf::Socketrpc::ErrorReason::RPC_ERROR, message)
           ensure_cb.call(err)
-          EM.stop if !@global_reactor
-       end
-
+          EM.stop unless @using_global_reactor
+        end
       end
     end
   end

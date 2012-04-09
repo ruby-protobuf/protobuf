@@ -10,14 +10,10 @@ module Protobuf
         attr_reader :options, :request, :response
         attr_reader :error, :error_reason, :error_message
       
-       class << self
-
-          def connect(options={})
-            options = DEFAULT_OPTIONS.merge(options)
-            log_debug "[client-#{self}] Connecting to server: %s" % options.inspect
-            EM.connect(options[:host], options[:port], self, options)
-          end
-
+        def self.connect(options={})
+          options = DEFAULT_OPTIONS.merge(options)
+          log_debug "[client-#{self}] Connecting to server: %s" % options.inspect
+          EM.connect(options[:host], options[:port], self, options)
         end
        
         def initialize(options={}, &failure_cb)
@@ -51,7 +47,6 @@ module Protobuf
           @buffer << data
           parse_response if @buffer.flushed?
         end
-     
       end
     end
   end

@@ -9,9 +9,9 @@ module Protobuf
         
         def send_request
           check_async
-          initialize_stats
+          setup_connection
           connect_to_rpc_server
-          post_init # calls _send_request
+          post_init
           read_response
         end
 
@@ -21,9 +21,7 @@ module Protobuf
           if async?
             log_error "[client-#{self.class}] Cannot run in async mode"
             raise "Cannot use Socket client in async mode" 
-          else
-            log_debug "[client-#{self.class}] Async check passed" 
-         end
+          end
         end
 
         def close_connection
@@ -50,16 +48,16 @@ module Protobuf
           end
           str_size_io = size_io.string
 
-          "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
+          "#{@socket.read(str_size_io.to_i)}"
         end
 
         def read_response
-          @buffer << read_data 
-          parse_response if @buffer.flushed?
+          @response_buffer << read_data 
+          parse_response if @response_buffer.flushed?
         end
 
-        def send_data(data)
-          @socket.write(data)
+        def send_data
+          @socket.write(@request_buffer.size_prefixed_data)
           @socket.flush
           log_debug "[client-#{self.class}] write closed" 
         end
