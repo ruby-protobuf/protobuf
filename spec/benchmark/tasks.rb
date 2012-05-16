@@ -1,5 +1,3 @@
-require 'pry'
-require 'ruby-prof'
 require 'benchmark'
 require 'helper/all'
 require 'proto/test_service_impl'
@@ -139,7 +137,7 @@ namespace :benchmark do
     args.with_defaults(:number => 1000, :length => 100)
 
     Benchmark.bm(10) do |bench|
-      zmq_client_zmq_server(args[:number], args[:length], bench)
+      # zmq_client_zmq_server(args[:number], args[:length], bench)
       #      em_client_em_server(args[:number], args[:length], bench)
       #      em_client_sock_server(args[:number], args[:length], bench)
       sock_client_sock_server(args[:number], args[:length], bench)

@@ -8,7 +8,7 @@ require 'protobuf/rpc/servers/zmq_runner'
 require 'spec/proto/test_service_impl'
 
 # Want to abort if server dies?
-# Thread.abort_on_exception = true
+Thread.abort_on_exception = true
 
 module StubProtobufServerFactory
   def self.build(delay)
@@ -54,14 +54,10 @@ class StubServer
 
   def start
     case
-    when @options.server == Protobuf::Rpc::EventedServer then
-      start_em_server
-    when @options.server == Protobuf::Rpc::ZmqServer then
-      start_zmq_server
+    when @options.server == Protobuf::Rpc::EventedServer then start_em_server
+    when @options.server == Protobuf::Rpc::ZmqServer then start_zmq_server
     else
-      @sock_server = Thread.new(@options) { |opt| Protobuf::Rpc::SocketRunner.run(opt) }
-      @sock_server.abort_on_exception = true # Set for testing purposes
-      Thread.pass until Protobuf::Rpc::SocketServer.running?
+      start_socket_server
     end
     log_debug "[stub-server] Server started #{@options.host}:#{@options.port}"
   rescue => ex
@@ -71,13 +67,19 @@ class StubServer
     end
   end
 
+  def start_em_server
+    @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
+  end
+
+  def start_socket_server
+    @sock_server = Thread.new(@options) { |opt| Protobuf::Rpc::SocketRunner.run(opt) }
+    @sock_server.abort_on_exception = true # Set for testing purposes
+    Thread.pass until Protobuf::Rpc::SocketServer.running?
+  end
+
   def start_zmq_server
     @zmq_server = Thread.new(@options) { |opt| Protobuf::Rpc::ZmqRunner.run(opt) }    
     Thread.pass until Protobuf::Rpc::ZmqServer.running?
-  end
-
-  def start_em_server
-    @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
   end
 
   def stop

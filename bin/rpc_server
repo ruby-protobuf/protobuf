@@ -18,7 +18,7 @@ server = OpenStruct.new({
   :threshold => 100,
   :log => File.expand_path('./protobuf.log'),
   :level => ::Logger::INFO,
-  :runner => Protobuf::Rpc::EventedRunner, 
+  :runner => ::Protobuf::Rpc::EventedRunner, 
   :debug => false
 })
 
@@ -54,18 +54,18 @@ parser = OptionParser.new do |opts|
   end
 
   opts.on("-c", "--client_socket", "Socket Mode for client connections (No EventMachine)") do |v|
-    Protobuf::ConnectorType = "Socket"
+    ::Protobuf::ClientType = "Socket"
   end
 
   opts.on("-s", "--socket", "Socket Server Mode (No EventMachine)") do |v|
-    Protobuf::ServerType = "SocketServer"
-    server.runner = Protobuf::Rpc::SocketRunner
+    ::Protobuf::ServerType = "Socket"
+    server.runner = ::Protobuf::Rpc::SocketRunner
   end
 
   opts.on("-z", "--zmq", "ZeroMQ Socket Mode for client and server connections (they must be used together)") do |v|
-    Protobuf::ConnectorType = "Zmq"
-    Protobuf::ServerType = "ZmqServer"
-    server.runner = Protobuf::Rpc::ZmqRunner
+    ::Protobuf::ClientType = "Zmq"
+    ::Protobuf::ServerType = "Zmq"
+    server.runner = ::Protobuf::Rpc::ZmqRunner
   end
   
   opts.on("-d", "--[no-]debug", "Debug Mode. Override log level to DEBUG.") do |v|
@@ -82,7 +82,7 @@ parser = OptionParser.new do |opts|
   end
 
   opts.on_tail("--version", "Show version") do
-    puts Protobuf::VERSION
+    puts ::Protobuf::VERSION
     exit
   end
 end
@@ -106,12 +106,12 @@ begin
     raise 'Invalid app file specified (%s).' % server.app unless File.exists?(server.app)
   end
 
-  # Configure the Protobuf::Logger
-  Protobuf::Logger.configure :file => server.log, :level => server.debug ? ::Logger::DEBUG : server.level
+  # Configure the ::Protobuf::Logger
+  ::Protobuf::Logger.configure :file => server.log, :level => server.debug ? ::Logger::DEBUG : server.level
 
   # Output the server opts
-  Protobuf::Logger.debug 'Debugging options:'
-  Protobuf::Logger.debug server.inspect
+  ::Protobuf::Logger.debug 'Debugging options:'
+  ::Protobuf::Logger.debug server.inspect
   
   # Set the name of the process
   $0 = 'rpc_server %s:%d %s' % [server.host, server.port, server.app]
@@ -123,7 +123,7 @@ begin
 rescue
   msg = 'ERROR: RPC Server failed to start. %s' % $!.inspect
   $stderr.puts msg, *($!.backtrace)
-  Protobuf::Logger.error msg
-  Protobuf::Logger.error $!.backtrace.join("\n")
+  ::Protobuf::Logger.error msg
+  ::Protobuf::Logger.error $!.backtrace.join("\n")
   exit 1
 end

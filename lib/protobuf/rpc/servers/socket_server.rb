@@ -3,8 +3,8 @@ require 'protobuf/rpc/server'
 module Protobuf
   module Rpc
     class SocketServer  
-      include Protobuf::Rpc::Server
-      include Protobuf::Logger::LogMethods
+      include ::Protobuf::Rpc::Server
+      include ::Protobuf::Logger::LogMethods
 
       def self.cleanup? 
         # every 10 connections run a cleanup routine after closing the response
@@ -12,7 +12,7 @@ module Protobuf
       end
 
       def self.cleanup_threads
-        log_debug "[#{log_signature}] Thread cleanup - #{@threads.size} - start"
+        log_debug { "[#{log_signature}] Thread cleanup - #{@threads.size} - start" }
 
         @threads = @threads.select do |t| 
           if t[:thread].alive? 
@@ -24,7 +24,7 @@ module Protobuf
           end
         end
 
-        log_debug "[#{log_signature}] Thread cleanup - #{@threads.size} - complete"
+        log_debug { "[#{log_signature}] Thread cleanup - #{@threads.size} - complete" }
       end
 
       def self.log_signature
@@ -33,7 +33,7 @@ module Protobuf
 
       def self.new_worker(socket)
         Thread.new(socket) do |sock|
-          Protobuf::Rpc::SocketServer::Worker.new(sock) do |s|
+          ::Protobuf::Rpc::SocketServer::Worker.new(sock) do |s|
             s.close
           end
         end
@@ -47,16 +47,16 @@ module Protobuf
         thread_threshold = opts.fetch(:thread_threshold, 100)
         auto_collect_timeout = opts.fetch(:auto_collect_timeout, 20)
 
-        @running = true
         @threads = []
         @thread_threshold = thread_threshold
-        @server = TCPServer.new(host, port)
+        @server = ::TCPServer.new(host, port)
         @server.listen(backlog)
         @working = []
         @listen_fds = [@server]
+        @running = true
 
         while running?
-          log_debug "[#{log_signature}] Waiting for connections"
+          log_debug { "[#{log_signature}] Waiting for connections" }
 
           if ready_cnxns = IO.select(@listen_fds, [], [], auto_collect_timeout)
             cnxns = ready_cnxns.first
@@ -99,8 +99,8 @@ module Protobuf
       end
 
       class Worker 
-        include Protobuf::Rpc::Server
-        include Protobuf::Logger::LogMethods
+        include ::Protobuf::Rpc::Server
+        include ::Protobuf::Logger::LogMethods
 
         def initialize(sock, &complete_cb)
           @did_response = false
@@ -111,12 +111,12 @@ module Protobuf
           @request_buffer = Protobuf::Rpc::Buffer.new(:read)
           @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
           @complete_cb = complete_cb
-          log_debug "[#{log_signature}] Post init, new read buffer created"
+          log_debug { "[#{log_signature}] Post init, new read buffer created" }
 
           @stats.client = Socket.unpack_sockaddr_in(@socket.getpeername)
           @request_buffer << read_data 
-          log_debug "[#{log_signature}] handling request"
-          handle_client(true) if @request_buffer.flushed?
+          log_debug { "[#{log_signature}] handling request" }
+          handle_client if @request_buffer.flushed?
         end
 
         def log_signature
@@ -135,7 +135,7 @@ module Protobuf
         end
 
         def send_data
-          log_debug "[#{log_signature}] sending data : %s" % @response_buffer.size_prefixed_data
+          log_debug { "[#{log_signature}] sending data : %s" % @response_buffer.size_prefixed_data }
           @socket.write(@response_buffer.size_prefixed_data)
           @socket.flush
           @complete_cb.call(@socket)

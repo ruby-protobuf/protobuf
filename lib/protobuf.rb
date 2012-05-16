@@ -11,7 +11,9 @@ Protobuf::ServerType = ENV['PB_SERVER_TYPE'] if ENV['PB_SERVER_TYPE']
 
 # When setting up a client
 case
-when defined?(Protobuf::ClientType) && Protobuf::ClientType == "Zmq" then 
+when defined?(Protobuf::ClientType) && Protobuf::ClientType =~ /\Asocket\Z/i then 
+  #no-op
+when defined?(Protobuf::ClientType) && Protobuf::ClientType =~ /\Azmq\Z/i then 
   require 'ffi-rzmq'
   require 'protobuf/rpc/client'
   require 'protobuf/rpc/connectors/zmq'
@@ -24,7 +26,9 @@ end
 
 # For running the rpc_server
 case
-when defined?(Protobuf::ServerType) && Protobuf::ServerType == "ZmqServer" then
+when defined?(Protobuf::ServerType) && Protobuf::ServerType =~ /\Asocket\Z/i then
+  #no-op
+when defined?(Protobuf::ServerType) && Protobuf::ServerType =~ /\Azmq\Z/i then
   require 'ffi-rzmq'
   require 'protobuf/rpc/service'
   require 'protobuf/rpc/servers/zmq_server'
