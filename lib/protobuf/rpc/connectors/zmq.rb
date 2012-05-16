@@ -23,7 +23,7 @@ module Protobuf
 
         def check_async
           if async?
-            log_error "[client-#{self.class}] Cannot run in async mode"
+            log_error { "[client-#{self.class}] Cannot run in async mode" }
             raise "Cannot use Zmq client in async mode" 
           end
         end
@@ -31,14 +31,14 @@ module Protobuf
         def close_connection
           zmq_error_check(@socket.close)
           zmq_error_check(@zmq_context.terminate)
-          log_debug "[client-#{self.class}] Connector closed" 
+          log_debug { "[client-#{self.class}] Connector closed"  }
         end
 
         def connect_to_rpc_server
           @zmq_context = ZMQ::Context.new
           @socket = @zmq_context.socket(ZMQ::REQ)
           zmq_error_check(@socket.connect("tcp://#{options[:host]}:#{options[:port]}"))
-          log_debug "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}" 
+          log_debug { "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}" }
         end
 
         # Method to determine error state, must be used with Connector api
@@ -53,10 +53,10 @@ module Protobuf
         end
 
         def send_data
-          log_debug "[#{log_signature}] Sending Request: %s" % @request_buffer.data
+          log_debug { "[#{log_signature}] Sending Request: %s" % @request_buffer.data }
           @stats.request_size = @request_buffer.size
           zmq_error_check(@socket.send_string(@request_buffer.data))
-          log_debug "[client-#{self.class}] write closed" 
+          log_debug { "[client-#{self.class}] write closed" }
         end
 
         def zmq_error_check(return_code)
