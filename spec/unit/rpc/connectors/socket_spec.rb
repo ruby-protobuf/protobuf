@@ -30,7 +30,7 @@ describe Protobuf::Rpc::Connectors::Socket do
 
       subject.__send__(:read_response)
       subject.instance_variable_get(:@response_buffer).flushed?.should be_true
-      subject.instance_variable_get(:@responsebuffer).data.should eq(data)
+      subject.instance_variable_get(:@response_buffer).data.should eq(data)
     end
   end
 

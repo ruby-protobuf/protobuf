@@ -44,7 +44,7 @@ module Protobuf
         end
 
         def send_data
-          super(@request_buffer.write)
+          super(@request_buffer.data)
         end
       
         def receive_data(data)

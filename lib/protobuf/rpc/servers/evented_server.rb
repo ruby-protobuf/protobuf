@@ -25,6 +25,10 @@ module Protobuf
         @response = ::Protobuf::Socketrpc::Response.new
         handle_client if @request_buffer.flushed?
       end
+
+      def send_data
+        super(@response_buffer.data)
+      end
     end
   end
 end
