@@ -68,7 +68,7 @@ class StubServer
   end
 
   def start_em_server
-    @server_handle = EventMachine::start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
+    @server_handle = EventMachine.start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
   end
 
   def start_socket_server

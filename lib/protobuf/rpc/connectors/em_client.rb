@@ -21,6 +21,7 @@ module Protobuf
           @options = DEFAULT_OPTIONS.merge(options)
           verify_options
           initialize_stats
+          setup_connection
 
           log_debug "[#{log_signature}] Client Initialized: %s" % options.inspect
         rescue
@@ -41,11 +42,15 @@ module Protobuf
         def on_complete(&complete_cb)
           @complete_cb = complete_cb
         end
+
+        def send_data
+          super(@request_buffer.write)
+        end
       
         def receive_data(data)
           log_debug "[#{log_signature}] receive_data: %s" % data
-          @buffer << data
-          parse_response if @buffer.flushed?
+          @response_buffer << data
+          parse_response if @response_buffer.flushed?
         end
       end
     end

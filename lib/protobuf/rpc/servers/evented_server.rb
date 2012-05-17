@@ -12,15 +12,18 @@ module Protobuf
         @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
         @stats.client = Socket.unpack_sockaddr_in(get_peername)
         
-        @buffer = Protobuf::Rpc::Buffer.new(:read)
+        @response_buffer = Protobuf::Rpc::Buffer.new(:write)
+        @request_buffer = Protobuf::Rpc::Buffer.new(:read)
         @did_respond = false
       end
       
       # Receive a chunk of data, potentially flushed to handle_client
       def receive_data(data)
         log_debug { '[server] receive_data: %s' % data }
-        @buffer << data
-        handle_client if @buffer.flushed?
+        @request_buffer << data
+        @request = ::Protobuf::Socketrpc::Request.new
+        @response = ::Protobuf::Socketrpc::Response.new
+        handle_client if @request_buffer.flushed?
       end
     end
   end

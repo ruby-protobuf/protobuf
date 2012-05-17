@@ -11,6 +11,7 @@ $:.push File.expand_path('../lib', File.dirname(__FILE__))
 require 'protobuf'
 require 'protobuf/rpc/client'
 require File.dirname(__FILE__) + '/helper/all'
+require 'pry'
 
 # Including a way to turn on debug logger for spec runs
 if ENV["DEBUG"]
