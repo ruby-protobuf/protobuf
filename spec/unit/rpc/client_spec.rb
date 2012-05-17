@@ -2,6 +2,9 @@ require 'spec_helper'
 require 'spec/proto/test_service_impl'
 
 describe Protobuf::Rpc::Client do
+  before(:each) do
+    ::Spec::Proto::TestService.configure(::Spec::Proto::TestService::DEFAULT_LOCATION)
+  end
 
   context "when using fiber based calls" do
     it "waits for response when running synchronously" do
