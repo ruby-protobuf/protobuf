@@ -2,36 +2,40 @@ require 'protobuf/rpc/server'
 
 module Protobuf
   module Rpc
-    class ZmqServer 
+    class ZmqServer
       include ::Protobuf::Logger::LogMethods
 
       def self.zmq_error_check(return_code)
-        raise "Last API call failed at #{caller(1)}" unless return_code >= 0
+        raise "Last API call failed with \"#{ZMQ::Util.error_string}\"\n\n#{caller(1)}" unless return_code >= 0
       end
 
       def self.run(opts = {})
         host = opts.fetch(:host, "127.0.0.1")
+        host_ip = Socket.getaddrinfo(host, nil).select{|type| type[0] == 'AF_INET'}[0][3]
+
         port = opts.fetch(:port, 9399)
         protocol = opts.fetch(:protocol, "tcp")
         local_worker_threads = opts.fetch(:threads, 10)
 
         @zmq_context = ::ZMQ::Context.new
         @frontend = @zmq_context.socket(::ZMQ::ROUTER)
-        zmq_error_check(@frontend.bind("#{protocol}://#{host}:#{port}"))
+        zmq_error_check(@frontend.bind("#{protocol}://#{host_ip}:#{port}"))
 
         dealer_options = opts.merge(:port => opts.fetch(:port, 9399) + 1)
         dealer_host = dealer_options.fetch(:host, "127.0.0.1")
+        dealer_host_ip = Socket.getaddrinfo(dealer_host, nil).select{|type| type[0] == 'AF_INET'}[0][3]
+
         dealer_port = dealer_options.fetch(:port, 9400)
         dealer_protocol = dealer_options.fetch(:protocol, "tcp")
         @backend = @zmq_context.socket(::ZMQ::DEALER)
-        zmq_error_check(@backend.bind("#{dealer_protocol}://#{dealer_host}:#{dealer_port}"))
+        zmq_error_check(@backend.bind("#{dealer_protocol}://#{dealer_host_ip}:#{dealer_port}"))
 
         @poller = ::ZMQ::Poller.new
         @poller.register(@frontend, ::ZMQ::POLLIN)
         @poller.register(@backend, ::ZMQ::POLLIN)
 
         @threads = []
-        local_worker_threads.times do 
+        local_worker_threads.times do
           @threads << Thread.new(dealer_options) { |options| ZmqWorker.new(options).run }
         end
         @running = true
@@ -55,7 +59,7 @@ module Protobuf
                 @frontend.send_string(message, more ? ::ZMQ::SNDMORE : 0)
               end
             end
-          end  
+          end
         end
       end
 
@@ -88,7 +92,7 @@ module Protobuf
       end
 
       def self.zmq_error_check(return_code)
-        raise "Last API call failed at #{caller(1)}" unless return_code >= 0
+        raise "Last API call failed with \"#{ZMQ::Util.error_string}\"\n\n#{caller(1)}" unless return_code >= 0
       end
 
       def run
@@ -97,14 +101,15 @@ module Protobuf
           handle_request
           handle_client
         end
-      ensure 
+      ensure
         @socket.close
         @zmq_context.terminate
       end
 
       def handle_request
         zmq_error_check(@socket.recv_string(@request_buffer.data))
-        @request_buffer.size = @request_buffer.data.size
+        # compatibility with other server/client types
+        @request_buffer.get_data_size
         log_debug { "[#{log_signature}] handling request" }
       end
 
@@ -119,7 +124,7 @@ module Protobuf
       end
 
       def send_data
-        zmq_error_check(@socket.send_string(@response_buffer.data)) 
+        zmq_error_check(@socket.send_string(@response_buffer.write))
       end
 
       def zmq_error_check(return_code)

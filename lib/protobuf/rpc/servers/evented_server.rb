@@ -27,6 +27,7 @@ module Protobuf
       end
 
       def send_data
+        log_debug { "[#{log_signature}] sending data: #{@response_buffer.inspect}" }
         super(@response_buffer.write)
       end
     end
