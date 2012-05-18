@@ -48,7 +48,7 @@ module Protobuf
           end
           str_size_io = size_io.string
 
-          "#{@socket.read(str_size_io.to_i)}"
+          "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
         end
 
         def read_response
@@ -57,7 +57,7 @@ module Protobuf
         end
 
         def send_data
-          @socket.write(@request_buffer.size_prefixed_data)
+          @socket.write(@request_buffer.write)
           @socket.flush
           log_debug "[client-#{self.class}] write closed" 
         end

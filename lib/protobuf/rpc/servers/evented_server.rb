@@ -27,7 +27,7 @@ module Protobuf
       end
 
       def send_data
-        super(@response_buffer.data)
+        super(@response_buffer.write)
       end
     end
   end

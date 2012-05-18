@@ -131,12 +131,12 @@ module Protobuf
           end
           str_size_io = size_io.string
 
-          "#{@socket.read(str_size_io.to_i)}"
+          "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
         end
 
         def send_data
-          log_debug { "[#{log_signature}] sending data : %s" % @response_buffer.size_prefixed_data }
-          @socket.write(@response_buffer.size_prefixed_data)
+          log_debug { "[#{log_signature}] sending data : %s" % @response_buffer.write }
+          @socket.write(@response_buffer.write)
           @socket.flush
           @complete_cb.call(@socket)
         end
