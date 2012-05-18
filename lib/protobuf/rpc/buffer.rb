@@ -60,13 +60,14 @@ module Protobuf
         @flush
       end
 
-    private
       def get_data_size
         if @size == 0 || @data.match(SIZE_REGEX)
           sliced_size = @data.slice!(SIZE_REGEX)
           @size = sliced_size.gsub('-', '').to_i unless(sliced_size.nil?)
         end
       end
+
+    private
 
       def check_for_flush
         if !@size.nil? && @data.length == @size

@@ -48,14 +48,14 @@ module Protobuf
 
         def read_response
           zmq_error_check(@socket.recv_string(@response_buffer.data))
-          @response_buffer.size = @response_buffer.data.size
+          @response_buffer.get_data_size
           parse_response
         end
 
         def send_data
-          log_debug { "[#{log_signature}] Sending Request: %s" % @request_buffer.data }
+          log_debug { "[#{log_signature}] Sending Request: %s" % @request_buffer.write }
           @stats.request_size = @request_buffer.size
-          zmq_error_check(@socket.send_string(@request_buffer.data))
+          zmq_error_check(@socket.send_string(@request_buffer.write))
           log_debug { "[client-#{self.class}] write closed" }
         end
 
