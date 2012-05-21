@@ -114,6 +114,7 @@ module Protobuf
           log_debug { "[#{log_signature}] Post init, new read buffer created" }
 
           @stats.client = Socket.unpack_sockaddr_in(@socket.getpeername)
+          log_debug { "stats are #{@stats.to_s}" }
           @request_buffer << read_data 
           log_debug { "[#{log_signature}] handling request" }
           handle_client if @request_buffer.flushed?

@@ -99,6 +99,7 @@ namespace :benchmark do
           end
         end
       end
+      server.stop
     end
   end
 
