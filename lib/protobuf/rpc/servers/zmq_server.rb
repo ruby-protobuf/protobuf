@@ -37,12 +37,11 @@ module Protobuf
       end
 
       def self.stop
-        until(@threads.select {|t| t.status == 'run'}.count == 0)
-          # TODO: find a better way of exiting these threads
-          #   joining on an endless loop doesn't work. This is messy though
-          @threads.map{ |t| t.exit unless(t.status == 'run')}
-        end
+        # TODO: find a better way of exiting these threads
+        #   joining on an endless loop doesn't work. This is very brute force though. Potential loss of data
+        @threads.map{ |t| t.exit; t.join}
         @running = false
+        puts @threads.inspect
       end
     end
 

@@ -48,6 +48,13 @@ module Protobuf
           super(@request_buffer.write)
         end
       
+        # overwriting this method for java because it's broken in eventmachine. See https://github.com/eventmachine/eventmachine/issues/14
+        if(RUBY_PLATFORM == "java")
+          def error?
+            false
+          end
+        end
+
         def receive_data(data)
           log_debug "[#{log_signature}] receive_data: %s" % data
           @response_buffer << data
