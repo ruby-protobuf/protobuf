@@ -26,6 +26,9 @@ module Protobuf
             log_debug { "[#{log_signature}] server started" }
             @broker.poll
           end
+
+        ensure
+          @broker.teardown if(@broker)
         end
 
         def self.running?
@@ -36,7 +39,7 @@ module Protobuf
           @threads.each do |t|
             t[:running] = false
             t.join
-          end
+          end if(@threads)
 
           @running = false
         end

@@ -84,6 +84,8 @@ module Protobuf
           end
         end
 
+      rescue Errno::EADDRINUSE
+        raise
       rescue 
         # Closing the server causes the loop to raise an exception here
         raise if running?

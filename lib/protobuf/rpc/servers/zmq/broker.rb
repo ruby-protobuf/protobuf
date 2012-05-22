@@ -36,6 +36,12 @@ module Protobuf
           end
         end
 
+        def teardown
+          frontend.close
+          backend.close
+          context.terminate
+        end
+
         private
           def setup_frontend(opts={})
             host = opts.fetch(:host, "127.0.0.1")

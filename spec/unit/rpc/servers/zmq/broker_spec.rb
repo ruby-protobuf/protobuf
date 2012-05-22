@@ -2,9 +2,7 @@ require 'spec_helper'
 
 describe ::Protobuf::Rpc::Zmq::Broker do
   after(:each) do
-    subject.frontend.close
-    subject.backend.close
-    subject.context.terminate
+    subject.teardown
   end
 
   it 'sets up a context' do
