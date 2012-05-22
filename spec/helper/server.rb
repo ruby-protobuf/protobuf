@@ -3,7 +3,7 @@ require 'protobuf/common/logger'
 require 'protobuf/rpc/server'
 require 'protobuf/rpc/servers/socket_server'
 require 'protobuf/rpc/servers/socket_runner'
-require 'protobuf/rpc/servers/zmq_server'
+require 'protobuf/rpc/servers/zmq/server'
 require 'protobuf/rpc/servers/zmq_runner'
 require 'spec/proto/test_service_impl'
 
@@ -55,7 +55,7 @@ class StubServer
   def start
     case
     when @options.server == Protobuf::Rpc::EventedServer then start_em_server
-    when @options.server == Protobuf::Rpc::ZmqServer then start_zmq_server
+    when @options.server == Protobuf::Rpc::Zmq::Server then start_zmq_server
     else
       start_socket_server
     end
@@ -79,14 +79,14 @@ class StubServer
 
   def start_zmq_server
     @zmq_server = Thread.new(@options) { |opt| Protobuf::Rpc::ZmqRunner.run(opt) }    
-    Thread.pass until Protobuf::Rpc::ZmqServer.running?
+    Thread.pass until Protobuf::Rpc::Zmq::Server.running?
   end
 
   def stop
     case
     when @options.server == Protobuf::Rpc::EventedServer then
       EventMachine.stop_server(@server_handle) if @server_handle
-    when @options.server == Protobuf::Rpc::ZmqServer then
+    when @options.server == Protobuf::Rpc::Zmq::Server then
       Protobuf::Rpc::ZmqRunner.stop
       Thread.kill(@zmq_server) if @zmq_server
     else

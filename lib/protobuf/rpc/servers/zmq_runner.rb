@@ -3,7 +3,7 @@ module Protobuf
     class ZmqRunner
 
       def self.stop
-        Protobuf::Rpc::ZmqServer.stop 
+        Protobuf::Rpc::Zmq::Server.stop 
         Protobuf::Logger.info 'Shutdown complete'
       end
 
@@ -20,7 +20,7 @@ module Protobuf
                           raise "Cannot parser Zmq Server - server options"
                         end
 
-        Protobuf::Rpc::ZmqServer.run(server_config)
+        Protobuf::Rpc::Zmq::Server.run(server_config)
       end
     end
 
