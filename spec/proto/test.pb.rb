@@ -16,7 +16,7 @@ module Spec
       optional :bool, :active, 2
     end
     class Resource < ::Protobuf::Message
-      optional :string, :name, 1
+      required :string, :name, 1
       optional :int64, :date_created, 2
       optional :StatusType, :status, 3
       repeated :StatusType, :repeated_enum, 4
