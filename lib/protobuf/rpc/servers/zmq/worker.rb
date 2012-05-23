@@ -42,7 +42,7 @@ module Protobuf
           while ::Protobuf::Rpc::Zmq::Server.running? do
             # poll for 100 milliseconds then continue looping
             # This lets us see whether we need to die
-            @poller.poll(100)
+            @poller.poll(1_000)
             @poller.readables.each do |socket|
               initialize_buffers
               handle_request(socket)

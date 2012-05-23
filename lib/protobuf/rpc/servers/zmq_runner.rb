@@ -4,7 +4,7 @@ module Protobuf
 
       def self.stop
         Protobuf::Rpc::Zmq::Server.stop 
-        Protobuf::Logger.info 'Shutdown complete'
+        Protobuf::Logger.info('Shutdown complete')
       end
 
       def self.run(server)

@@ -8,6 +8,9 @@ module Protobuf
         include ::Protobuf::Rpc::Zmq::Util
         attr_reader :frontend, :backend, :poller, :context
 
+        ## 
+        # Constructor
+        #
         def initialize(opts={})
           @context = ::ZMQ::Context.new
           @frontend = setup_frontend(opts)
@@ -15,6 +18,9 @@ module Protobuf
           @poller = setup_poller
         end
 
+        ##
+        # Instance Methods
+        #
         def poll
           log_debug { "[#{log_signature}] polling for data" }
           poller.poll(:blocking)
@@ -48,7 +54,7 @@ module Protobuf
           end
 
           def resolve_ip(hostname)
-            Resolv.getaddress(hostname)
+            ::Resolv.getaddress(hostname)
           end
 
           def setup_backend(opts={})
