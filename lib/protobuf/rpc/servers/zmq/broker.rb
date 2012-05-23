@@ -1,4 +1,6 @@
+require 'resolv'
 require 'protobuf/rpc/servers/zmq/util'
+
 module Protobuf
   module Rpc
     module Zmq
@@ -6,6 +8,9 @@ module Protobuf
         include ::Protobuf::Rpc::Zmq::Util
         attr_reader :frontend, :backend, :poller, :context
 
+        ## 
+        # Constructor
+        #
         def initialize(opts={})
           @context = ::ZMQ::Context.new
           @frontend = setup_frontend(opts)
@@ -13,25 +18,18 @@ module Protobuf
           @poller = setup_poller
         end
 
+        ##
+        # Instance Methods
+        #
         def poll
           log_debug { "[#{log_signature}] polling for data" }
           poller.poll(:blocking)
           poller.readables.each do |socket|
-            more = true
-
             case socket
             when frontend then
-              while more do
-                socket.recv_string(message = '')
-                more = socket.more_parts?
-                backend.send_string(message, more ? ::ZMQ::SNDMORE : 0)
-              end
+              move_to(backend, socket)
             when backend then
-              while more do
-                socket.recv_string(message = '')
-                more = socket.more_parts?
-                frontend.send_string(message, more ? ::ZMQ::SNDMORE : 0)
-              end
+              move_to(frontend, socket)
             end
           end
         end
@@ -43,6 +41,28 @@ module Protobuf
         end
 
         private
+
+          def move_to(frontend_or_backend, socket)
+            more_data = true
+
+            while more_data do
+              socket.recv_string(data = "")
+              more_data = socket.more_parts?
+              more_data_flag = (more_data ? ::ZMQ::SNDMORE : 0)
+              frontend_or_backend.send_string(data, more_data_flag)
+            end
+          end
+
+          def resolve_ip(hostname)
+            ::Resolv.getaddress(hostname)
+          end
+
+          def setup_backend(opts={})
+            zmq_backend = context.socket(::ZMQ::DEALER)
+            zmq_error_check(zmq_backend.bind("ipc://backend.ipc"))
+            zmq_backend
+          end
+
           def setup_frontend(opts={})
             host = opts.fetch(:host, "127.0.0.1")
             port = opts.fetch(:port, 9399)
@@ -53,22 +73,11 @@ module Protobuf
             zmq_frontend
           end
 
-          def setup_backend
-            zmq_backend = context.socket(::ZMQ::DEALER)
-            # needs a unique name
-            zmq_error_check(zmq_backend.bind("ipc://backend.ipc"))
-            zmq_backend
-          end
-
           def setup_poller
             zmq_poller = ::ZMQ::Poller.new
             zmq_poller.register(frontend, ::ZMQ::POLLIN)
             zmq_poller.register(backend, ::ZMQ::POLLIN)
             zmq_poller
-          end
-
-          def resolve_ip(hostname)
-            Socket.getaddrinfo(hostname, nil).select{|type| type[0] == 'AF_INET'}[0][3]
           end
       end
     end

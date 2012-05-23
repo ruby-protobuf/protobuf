@@ -8,6 +8,9 @@ module Protobuf
         include ::Protobuf::Rpc::Server
         include ::Protobuf::Rpc::Zmq::Util
 
+        ##
+        # Constructor
+        #
         def initialize
           @zmq_context = ::ZMQ::Context.new
           @poller = ::ZMQ::Poller.new
@@ -17,22 +20,9 @@ module Protobuf
           @poller.register(@socket, ::ZMQ::POLLIN)
         end
 
-        def run
-          while(Thread.current[:running])
-            # poll for 100 milliseconds then continue looping
-            # This lets us see whether we need to die
-            @poller.poll(100)
-            @poller.readables.each do |socket|
-              initialize_buffers
-              handle_request(socket)
-              handle_client unless(@request_buffer.data.nil?)
-            end
-          end
-        ensure
-          @socket.close
-          @zmq_context.terminate
-        end
-
+        ##
+        # Instance Methods
+        #
         def handle_request(socket)
           zmq_error_check(socket.recv_string(@request_buffer.data))
           @request_buffer.get_data_size
@@ -47,6 +37,22 @@ module Protobuf
           @response_buffer = ::Protobuf::Rpc::Buffer.new(:write)
           @stats = ::Protobuf::Rpc::Stat.new(:SERVER, true)
           log_debug { "[#{log_signature}] Post init, new read buffer created" }
+        end
+
+        def run
+          while ::Protobuf::Rpc::Zmq::Server.running? do
+            # poll for 100 milliseconds then continue looping
+            # This lets us see whether we need to die
+            @poller.poll(1_000)
+            @poller.readables.each do |socket|
+              initialize_buffers
+              handle_request(socket)
+              handle_client unless(@request_buffer.data.nil?)
+            end
+          end
+        ensure
+          @socket.close
+          @zmq_context.terminate
         end
 
         def send_data

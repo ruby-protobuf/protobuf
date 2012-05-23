@@ -36,8 +36,8 @@ module Protobuf
 
         def connect_to_rpc_server
           log_debug { "[client-#{self.class} Establishing connection: #{options[:host]}:#{options[:port]}" }
-          @zmq_context = ZMQ::Context.new
-          @socket = @zmq_context.socket(ZMQ::REQ)
+          @zmq_context = ::ZMQ::Context.new
+          @socket = @zmq_context.socket(::ZMQ::REQ)
           zmq_error_check(@socket.connect("tcp://#{options[:host]}:#{options[:port]}"))
           log_debug { "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}" }
         end

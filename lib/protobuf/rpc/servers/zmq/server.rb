@@ -1,5 +1,5 @@
-require 'protobuf/rpc/servers/zmq/worker'
 require 'protobuf/rpc/servers/zmq/broker'
+require 'protobuf/rpc/servers/zmq/worker'
 require 'protobuf/rpc/servers/zmq/util'
 require 'pry'
 
@@ -9,42 +9,41 @@ module Protobuf
       class Server
         include ::Protobuf::Rpc::Zmq::Util
 
+        ##
+        # Class Methods
+        #
         def self.run(opts = {})
           log_debug { "[#{log_signature}] initializing broker" }
           @broker = ::Protobuf::Rpc::Zmq::Broker.new(opts)
           local_worker_threads = opts.fetch(:threads, 10)
 
           log_debug { "[#{log_signature}] starting server workers" }
-          @threads = []
           local_worker_threads.times do
-            @threads << Thread.new do
-              Thread.current[:running] = true
-              ::Protobuf::Rpc::Zmq::Worker.new.run
-            end
+            @threads << Thread.new { ::Protobuf::Rpc::Zmq::Worker.new.run }
           end
           @running = true
 
-          while @running do
+          while self.running? do
             log_debug { "[#{log_signature}] server started" }
             @broker.poll
           end
-
         ensure
-          @broker.teardown if(@broker)
+          @broker.teardown if @broker
         end
 
         def self.running?
-          @running
+          !!@running
         end
 
         def self.stop
-          @threads.each do |t|
-            t[:running] = false
-            t.join
-          end if(@threads)
-
           @running = false
+
+          @threads.each do |t|
+            t.join
+          end
         end
+
+        @threads ||= []
       end
     end
   end

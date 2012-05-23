@@ -25,10 +25,9 @@ describe Protobuf::Rpc::Zmq::Server do
   end
 
   describe '.stop' do
-    it 'tells all threads to stop' do
+    it 'lets all threads stop' do
       thread_mock = double(Thread)
       thread_mock.should_receive(:join)
-      thread_mock.should_receive(:[]=).with(:running, false)
       described_class.instance_variable_set(:@threads, [thread_mock])
       described_class.stop
     end
