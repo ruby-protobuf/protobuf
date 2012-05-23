@@ -12,6 +12,7 @@ module Protobuf
           @zmq_context = ::ZMQ::Context.new
           @poller = ::ZMQ::Poller.new
           @socket = @zmq_context.socket(::ZMQ::REP)
+          # needs a unique name that matches the DEALER's name
           zmq_error_check(@socket.connect("ipc://backend.ipc"))
           @poller.register(@socket, ::ZMQ::POLLIN)
         end

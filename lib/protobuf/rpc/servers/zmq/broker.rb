@@ -9,7 +9,7 @@ module Protobuf
         def initialize(opts={})
           @context = ::ZMQ::Context.new
           @frontend = setup_frontend(opts)
-          @backend = setup_backend(opts)
+          @backend = setup_backend
           @poller = setup_poller
         end
 
@@ -53,8 +53,9 @@ module Protobuf
             zmq_frontend
           end
 
-          def setup_backend(opts={})
+          def setup_backend
             zmq_backend = context.socket(::ZMQ::DEALER)
+            # needs a unique name
             zmq_error_check(zmq_backend.bind("ipc://backend.ipc"))
             zmq_backend
           end
