@@ -39,7 +39,7 @@ module Protobuf
         end
 
         def run
-          while(Thread.current[:running])
+          while ::Protobuf::Rpc::Zmq::Server.running? do
             # poll for 100 milliseconds then continue looping
             # This lets us see whether we need to die
             @poller.poll(100)
