@@ -89,7 +89,7 @@ namespace :benchmark do
   end
 
   def zmq_client_zmq_server(number_tests, test_length, global_bench = nil)
-    StubServer.new(:port => 9399, :server => Protobuf::Rpc::ZmqServer) do |server| 
+    StubServer.new(:port => 9399, :server => Protobuf::Rpc::Zmq::Server) do |server| 
       with_constants "Protobuf::ClientType" => "Zmq" do
         client = Spec::Proto::TestService.client(:async => false, :port => 9399)
 
