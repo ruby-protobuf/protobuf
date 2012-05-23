@@ -30,7 +30,7 @@ module Protobuf
           end
 
         ensure
-          @broker.teardown if(@broker)
+          @broker.teardown if @broker
         end
 
         def self.running?

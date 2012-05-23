@@ -8,12 +8,34 @@ module Protobuf
         include ::Protobuf::Rpc::Server
         include ::Protobuf::Rpc::Zmq::Util
 
+        ##
+        # Constructor
+        #
         def initialize
           @zmq_context = ::ZMQ::Context.new
           @poller = ::ZMQ::Poller.new
           @socket = @zmq_context.socket(::ZMQ::REP)
           zmq_error_check(@socket.connect("ipc://backend.ipc"))
           @poller.register(@socket, ::ZMQ::POLLIN)
+        end
+
+        ##
+        # Instance Methods
+        #
+        def handle_request(socket)
+          zmq_error_check(socket.recv_string(@request_buffer.data))
+          @request_buffer.get_data_size
+          log_debug { "[#{log_signature}] handling request" }
+        end
+
+        def initialize_buffers
+          @did_respond = false
+          @request = ::Protobuf::Socketrpc::Request.new
+          @response = ::Protobuf::Socketrpc::Response.new
+          @request_buffer = ::Protobuf::Rpc::Buffer.new(:read)
+          @response_buffer = ::Protobuf::Rpc::Buffer.new(:write)
+          @stats = ::Protobuf::Rpc::Stat.new(:SERVER, true)
+          log_debug { "[#{log_signature}] Post init, new read buffer created" }
         end
 
         def run
@@ -30,22 +52,6 @@ module Protobuf
         ensure
           @socket.close
           @zmq_context.terminate
-        end
-
-        def handle_request(socket)
-          zmq_error_check(socket.recv_string(@request_buffer.data))
-          @request_buffer.get_data_size
-          log_debug { "[#{log_signature}] handling request" }
-        end
-
-        def initialize_buffers
-          @did_respond = false
-          @request = ::Protobuf::Socketrpc::Request.new
-          @response = ::Protobuf::Socketrpc::Response.new
-          @request_buffer = ::Protobuf::Rpc::Buffer.new(:read)
-          @response_buffer = ::Protobuf::Rpc::Buffer.new(:write)
-          @stats = ::Protobuf::Rpc::Stat.new(:SERVER, true)
-          log_debug { "[#{log_signature}] Post init, new read buffer created" }
         end
 
         def send_data

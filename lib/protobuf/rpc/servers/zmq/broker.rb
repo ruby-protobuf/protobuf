@@ -51,6 +51,12 @@ module Protobuf
             Resolv.getaddress(hostname)
           end
 
+          def setup_backend(opts={})
+            zmq_backend = context.socket(::ZMQ::DEALER)
+            zmq_error_check(zmq_backend.bind("ipc://backend.ipc"))
+            zmq_backend
+          end
+
           def setup_frontend(opts={})
             host = opts.fetch(:host, "127.0.0.1")
             port = opts.fetch(:port, 9399)
@@ -59,12 +65,6 @@ module Protobuf
             zmq_frontend = context.socket(::ZMQ::ROUTER)
             zmq_error_check(zmq_frontend.bind("#{protocol}://#{resolve_ip(host)}:#{port}"))
             zmq_frontend
-          end
-
-          def setup_backend(opts={})
-            zmq_backend = context.socket(::ZMQ::DEALER)
-            zmq_error_check(zmq_backend.bind("ipc://backend.ipc"))
-            zmq_backend
           end
 
           def setup_poller
