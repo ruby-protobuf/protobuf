@@ -35,7 +35,7 @@ module Protobuf
         def handle_request(socket)
           zmq_error_check(socket.recv_string(@request_buffer.data))
           @request_buffer.get_data_size
-          log_debug { "[#{log_signature}] handling request" }
+          log_debug { "[#{log_signature}] handling request" } if(!@request_buffer.data.nil?)
         end
 
         def initialize_buffers
