@@ -19,21 +19,11 @@ module Protobuf
           log_debug { "[#{log_signature}] polling for data" }
           poller.poll(:blocking)
           poller.readables.each do |socket|
-            more = true
-
             case socket
             when frontend then
-              while more do
-                socket.recv_string(message = '')
-                more = socket.more_parts?
-                backend.send_string(message, more ? ::ZMQ::SNDMORE : 0)
-              end
+              move_to(backend, socket)
             when backend then
-              while more do
-                socket.recv_string(message = '')
-                more = socket.more_parts?
-                frontend.send_string(message, more ? ::ZMQ::SNDMORE : 0)
-              end
+              move_to(frontend, socket)
             end
           end
         end
@@ -45,6 +35,17 @@ module Protobuf
         end
 
         private
+
+          def move_to(frontend_or_backend, socket)
+            more_data = true
+
+            while more_data do
+              socket.recv_string(data = "")
+              more_data = socket.more_parts?
+              more_data_flag = (more_data ? ::ZMQ::SNDMORE : 0)
+              frontend_or_backend.send_string(data, more_data_flag)
+            end
+          end
 
           def resolve_ip(hostname)
             Resolv.getaddress(hostname)
