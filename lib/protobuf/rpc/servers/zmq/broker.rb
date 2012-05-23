@@ -1,4 +1,6 @@
+require 'resolv'
 require 'protobuf/rpc/servers/zmq/util'
+
 module Protobuf
   module Rpc
     module Zmq
@@ -43,6 +45,11 @@ module Protobuf
         end
 
         private
+
+          def resolve_ip(hostname)
+            Resolv.getaddress(hostname)
+          end
+
           def setup_frontend(opts={})
             host = opts.fetch(:host, "127.0.0.1")
             port = opts.fetch(:port, 9399)
@@ -64,10 +71,6 @@ module Protobuf
             zmq_poller.register(frontend, ::ZMQ::POLLIN)
             zmq_poller.register(backend, ::ZMQ::POLLIN)
             zmq_poller
-          end
-
-          def resolve_ip(hostname)
-            Socket.getaddrinfo(hostname, nil).select{|type| type[0] == 'AF_INET'}[0][3]
           end
       end
     end
