@@ -16,6 +16,10 @@ module Protobuf
           @log_signature ||= "server-#{self.class}-#{object_id}"
         end
 
+        def resolve_ip(hostname)
+          ::Resolv.getaddress(hostname)
+        end
+
       end
 
     end

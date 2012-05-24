@@ -14,7 +14,7 @@ module Protobuf
         def initialize(opts={})
           @context = ::ZMQ::Context.new
           @frontend = setup_frontend(opts)
-          @backend = setup_backend
+          @backend = setup_backend(opts)
           @poller = setup_poller
         end
 
@@ -53,13 +53,14 @@ module Protobuf
             end
           end
 
-          def resolve_ip(hostname)
-            ::Resolv.getaddress(hostname)
-          end
-
           def setup_backend(opts={})
+            dealer_options = opts.merge(:port => opts.fetch(:port, 9399) + 1)
+            host = dealer_options.fetch(:host, "127.0.0.1")
+            port = dealer_options.fetch(:port, 9400)
+            protocol = dealer_options.fetch(:protocol, "tcp")
+
             zmq_backend = context.socket(::ZMQ::DEALER)
-            zmq_error_check(zmq_backend.bind("ipc://backend.ipc"))
+            zmq_error_check(zmq_backend.bind("#{protocol}://#{resolve_ip(host)}:#{port}"))
             zmq_backend
           end
 

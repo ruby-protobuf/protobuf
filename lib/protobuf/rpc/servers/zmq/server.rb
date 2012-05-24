@@ -17,9 +17,10 @@ module Protobuf
           @broker = ::Protobuf::Rpc::Zmq::Broker.new(opts)
           local_worker_threads = opts.fetch(:threads, 10)
 
+          worker_options = opts.merge(:port => opts.fetch(:port, 9399) + 1)
           log_debug { "[#{log_signature}] starting server workers" }
           local_worker_threads.times do
-            @threads << Thread.new { ::Protobuf::Rpc::Zmq::Worker.new.run }
+            @threads << Thread.new { ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run }
           end
           @running = true
 

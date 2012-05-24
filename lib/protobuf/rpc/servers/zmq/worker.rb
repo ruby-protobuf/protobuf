@@ -11,12 +11,18 @@ module Protobuf
         ##
         # Constructor
         #
-        def initialize
+        def initialize(opts={})
+
+          @options = opts
+          host = @options.fetch(:host, "127.0.0.1")
+          port = @options.fetch(:port, 9400)
+          protocol = @options.fetch(:protocol, "tcp")
+
           @zmq_context = ::ZMQ::Context.new
-          @poller = ::ZMQ::Poller.new
           @socket = @zmq_context.socket(::ZMQ::REP)
-          # needs a unique name that matches the DEALER's name
-          zmq_error_check(@socket.connect("ipc://backend.ipc"))
+          zmq_error_check(@socket.connect("#{protocol}://#{resolve_ip(host)}:#{port}"))
+
+          @poller = ::ZMQ::Poller.new
           @poller.register(@socket, ::ZMQ::POLLIN)
         end
 
@@ -41,7 +47,7 @@ module Protobuf
 
         def run
           while ::Protobuf::Rpc::Zmq::Server.running? do
-            # poll for 100 milliseconds then continue looping
+            # poll for 1_000 milliseconds then continue looping
             # This lets us see whether we need to die
             @poller.poll(1_000)
             @poller.readables.each do |socket|
