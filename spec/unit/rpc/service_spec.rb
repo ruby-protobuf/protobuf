@@ -20,9 +20,13 @@ describe Protobuf::Rpc::Service do
       client.options[:port].should == 12345
     end
   
-    it 'should be able to configure and read the host' do
-      Spec::Proto::TestService.configure :host => 'somehost.com'
-      Spec::Proto::TestService.host.should == 'somehost.com'
+    context 'configuring host' do
+      before(:each) { Spec::Proto::TestService.configure :host => 'somehost.com' }
+      after(:each) { Spec::Proto::TestService.configure :host => '127.0.0.1' }
+
+      it 'should be able to configure and read the host' do
+        Spec::Proto::TestService.host.should == 'somehost.com'
+      end
     end
   
     it 'should be able to configure and read the port' do
