@@ -29,12 +29,14 @@ module Protobuf
         end
 
         def close_connection
+          return if(@error)
           zmq_error_check(@socket.close)
           zmq_error_check(@zmq_context.terminate)
           log_debug { "[client-#{self.class}] Connector closed"  }
         end
 
         def connect_to_rpc_server
+          return if(@error)
           log_debug { "[client-#{self.class} Establishing connection: #{options[:host]}:#{options[:port]}" }
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REQ)
@@ -44,16 +46,18 @@ module Protobuf
 
         # Method to determine error state, must be used with Connector api
         def error?
-          false
+          !!@error
         end
 
         def read_response
+          return if(@error)
           zmq_error_check(@socket.recv_string(@response_buffer.data))
           @response_buffer.get_data_size
           parse_response
         end
 
         def send_data
+          return if(@error)
           log_debug { "[#{log_signature}] Sending Request: %s" % @request_buffer.write }
           @stats.request_size = @request_buffer.size
           zmq_error_check(@socket.send_string(@request_buffer.write))

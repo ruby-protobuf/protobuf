@@ -17,8 +17,6 @@ module Protobuf
           @failure_cb = failure_cb
           @options = DEFAULT_OPTIONS.merge(options)
           verify_options
-          initialize_stats
-          setup_connection
 
           log_debug "[#{log_signature}] Client Initialized: %s" % options.inspect
         rescue
@@ -32,6 +30,10 @@ module Protobuf
           options = DEFAULT_OPTIONS.merge(options)
           log_debug "[client-#{self}] Connecting to server: %s" % options.inspect
           EM.connect(options[:host], options[:port], self, options)
+        end
+
+        # turn post_init back into a no-op for event machine
+        def post_init
         end
 
         ##

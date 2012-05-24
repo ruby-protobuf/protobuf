@@ -105,6 +105,8 @@ module Protobuf
             :method_name => @options[:method].to_s,
             :request_proto => @options[:request].serialize_to_string
           )
+        rescue
+          fail :INVALID_REQUEST_PROTO, "Could not set request proto: #{$!.message}"
         end
 
         def setup_connection

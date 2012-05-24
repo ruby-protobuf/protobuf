@@ -16,6 +16,8 @@ module Protobuf
               cnxn.on_success(&success_cb) if success_cb
               cnxn.on_failure(&ensure_cb)
               cnxn.on_complete { resume_fiber(f) } unless async?
+              cnxn.setup_connection
+              cnxn.send_data
               log_debug "[#{log_signature}] Connection scheduled"
             end
 

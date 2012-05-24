@@ -58,14 +58,14 @@ describe Protobuf::Rpc::Service do
     
     it 'raises an undefined method name error when calling a method on a non-existant object' do
       expect {
-        req = mock('RequestWrapper', :request_proto => Spec::Proto::ResourceFindRequest.new.to_s)
+        req = mock('RequestWrapper', :request_proto => Spec::Proto::ResourceFindRequest.new(:name => 'mmeh').to_s)
         ::NewTestService.new.bad_method(req)
       }.to raise_error(NoMethodError)
     end
     
     it 'raises a name error when accessing a non-existant object' do
       expect {
-        req = mock('RequestWrapper', :request_proto => Spec::Proto::ResourceFindRequest.new.to_s)
+        req = mock('RequestWrapper', :request_proto => Spec::Proto::ResourceFindRequest.new(:name => 'mmeh').to_s)
         ::NewTestService.new.bad_var(req)
       }.to raise_error(NameError)
     end

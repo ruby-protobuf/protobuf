@@ -12,7 +12,7 @@ module Spec
       define :DELETED, 3
     end
     class ResourceFindRequest < ::Protobuf::Message
-      optional :string, :name, 1
+      required :string, :name, 1
       optional :bool, :active, 2
     end
     class Resource < ::Protobuf::Message

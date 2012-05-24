@@ -30,12 +30,14 @@ module Protobuf
         end
 
         def connect_to_rpc_server
+          return if(@error)
           @socket = TCPSocket.new(options[:host], options[:port])
           log_debug "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}" 
         end
 
         # Method to determine error state, must be used with Connector api
         def error?
+          return true if(@error)
           log_debug "[client-#{self.class}] Error state : #{@socket.closed?}" 
           @socket.closed?
         end
@@ -52,11 +54,13 @@ module Protobuf
         end
 
         def read_response
+          return if(@error)
           @response_buffer << read_data 
           parse_response if @response_buffer.flushed?
         end
 
         def send_data
+          return if(@error)
           @socket.write(@request_buffer.write)
           @socket.flush
           log_debug "[client-#{self.class}] write closed" 

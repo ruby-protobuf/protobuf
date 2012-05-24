@@ -8,7 +8,7 @@ enum StatusType {
 }
 
 message ResourceFindRequest {
-  optional string name = 1;
+  required string name = 1;
   optional bool active = 2;
 }
 
