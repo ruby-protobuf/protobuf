@@ -63,6 +63,8 @@ module Protobuf
         def send_data
           log_debug { "[#{log_signature}] sending data: #{@request_buffer.inspect}" }
           super(@request_buffer.write)
+        rescue
+          fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
         end
       
         # overwriting this method for java because it's broken in eventmachine. See https://github.com/eventmachine/eventmachine/issues/14
