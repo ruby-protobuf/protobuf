@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'spec/proto/test_service_impl'
-require 'pry'
 
 describe 'Functional EventMachine Client' do
   before(:each) do

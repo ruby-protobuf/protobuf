@@ -1,7 +1,6 @@
 require 'protobuf/rpc/servers/zmq/broker'
 require 'protobuf/rpc/servers/zmq/worker'
 require 'protobuf/rpc/servers/zmq/util'
-require 'pry'
 
 module Protobuf
   module Rpc
