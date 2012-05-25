@@ -19,26 +19,26 @@ module Protobuf
 
         def check_async
           if async?
-            log_error "[client-#{self.class}] Cannot run in async mode"
+            log_error { "[client-#{self.class}] Cannot run in async mode" }
             raise "Cannot use Socket client in async mode" 
           end
         end
 
         def close_connection
           @socket.close
-          log_debug "[client-#{self.class}] Connector closed" 
+          log_debug { "[client-#{self.class}] Connector closed"  }
         end
 
         def connect_to_rpc_server
           return if(@error)
           @socket = TCPSocket.new(options[:host], options[:port])
-          log_debug "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}" 
+          log_debug { "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}"  }
         end
 
         # Method to determine error state, must be used with Connector api
         def error?
           return true if(@error)
-          log_debug "[client-#{self.class}] Error state : #{@socket.closed?}" 
+          log_debug { "[client-#{self.class}] Error state : #{@socket.closed?}"  }
           @socket.closed?
         end
 
@@ -63,7 +63,7 @@ module Protobuf
           return if(@error)
           @socket.write(@request_buffer.write)
           @socket.flush
-          log_debug "[client-#{self.class}] write closed" 
+          log_debug { "[client-#{self.class}] write closed"  }
         end
 
       end

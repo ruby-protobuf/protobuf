@@ -18,7 +18,7 @@ module Protobuf
           @options = DEFAULT_OPTIONS.merge(options)
           verify_options
 
-          log_debug "[#{log_signature}] Client Initialized: %s" % options.inspect
+          log_debug { "[#{log_signature}] Client Initialized: %s" % options.inspect }
         rescue
           fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message)
         end
@@ -28,7 +28,7 @@ module Protobuf
         #
         def self.connect(options={})
           options = DEFAULT_OPTIONS.merge(options)
-          log_debug "[client-#{self}] Connecting to server: %s" % options.inspect
+          log_debug { "[client-#{self}] Connecting to server: %s" % options.inspect }
           EM.connect(options[:host], options[:port], self, options)
         end
 
@@ -55,7 +55,7 @@ module Protobuf
         end
 
         def receive_data(data)
-          log_debug "[#{log_signature}] receive_data: %s" % data
+          log_debug { "[#{log_signature}] receive_data: %s" % data }
           @response_buffer << data
           parse_response if @response_buffer.flushed?
         end

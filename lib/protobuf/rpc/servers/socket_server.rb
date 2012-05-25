@@ -40,7 +40,7 @@ module Protobuf
       end
 
       def self.run(opts = {})
-        log_debug "[#{log_signature}] Run"
+        log_debug { "[#{log_signature}] Run" }
         host = opts.fetch(:host, "127.0.0.1")
         port = opts.fetch(:port, 9399)
         backlog = opts.fetch(:backlog, 100)
@@ -65,13 +65,13 @@ module Protobuf
               when !running? then
                 # no-op
               when client == @server then 
-                log_debug "[#{log_signature}] Accepted new connection"
+                log_debug { "[#{log_signature}] Accepted new connection" }
                 client, sockaddr = @server.accept
                 @listen_fds << client
               else 
                 if !@working.include?(client)
                   @working << @listen_fds.delete(client)
-                  log_debug "[#{log_signature}] Working" 
+                  log_debug { "[#{log_signature}] Working"  }
                   @threads << { :thread => new_worker(client), :socket => client }
 
                   cleanup_threads if cleanup?
