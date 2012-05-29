@@ -28,6 +28,10 @@ module Protobuf
           @data = data
         end
 
+        # All failures should be routed through this method
+        #
+        # @param [Symbol] code The code we're using (see ::Protobuf::Socketrpc::ErrorReason)
+        # @param [String] message The error message
         def fail(code, message)
           @error =  ClientError.new
           @error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code

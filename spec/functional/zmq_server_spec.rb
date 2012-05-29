@@ -10,7 +10,6 @@ describe 'Functional ZMQ Client' do
   end
 
   after(:all) do
-    Protobuf::Rpc::ZmqRunner.stop
     Thread.kill(@server_thread)
   end
 

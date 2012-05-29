@@ -43,10 +43,11 @@ module Protobuf
         end
 
         def send_data
+          raise 'Socket closed unexpectedly' if(@socket.nil? || @socket.closed?)
           response_buffer = Protobuf::Rpc::Buffer.new(:write)
           response_buffer.set_data(@response)
           @stats.response_size = response_buffer.size
-          log_debug { "[#{log_signature}] sending data : %s" % response_buffer.write }
+          log_debug { "[#{log_signature}] sending data : %s" % response_buffer.data }
           @socket.write(response_buffer.write)
           @socket.flush
           @complete_cb.call(@socket)
