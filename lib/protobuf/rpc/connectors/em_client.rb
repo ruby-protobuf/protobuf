@@ -2,14 +2,14 @@
 module Protobuf
   module Rpc
     module Connectors
-    
+
       class EMClient < EM::Connection
         include Protobuf::Logger::LogMethods
         include Protobuf::Rpc::Connectors::Common
-      
+
         attr_reader :options, :request, :response
         attr_reader :error, :error_reason, :error_message
-      
+
         ##
         # Constructor
         #
@@ -48,25 +48,29 @@ module Protobuf
         def on_failure(&failure_cb)
           @failure_cb = failure_cb
         end
- 
+
         # Success callback registration
         def on_success(&success_cb)
           @success_cb = success_cb
         end
 
         def receive_data(data)
+          response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
           log_debug { "[#{log_signature}] receive_data: %s" % data }
-          @response_buffer << data
-          parse_response if @response_buffer.flushed?
+          response_buffer << data
+          @response_data = response_buffer.data
+          parse_response if response_buffer.flushed?
         end
 
         def send_data
-          log_debug { "[#{log_signature}] sending data: #{@request_buffer.inspect}" }
-          super(@request_buffer.write)
+          request_buffer = ::Protobuf::Rpc::Buffer.new(:read)
+          request_buffer.set_data(request_wrapper)
+          log_debug { "[#{log_signature}] sending data: #{request_buffer.inspect}" }
+          super(request_buffer.write)
         rescue
           fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
         end
-      
+
         # overwriting this method for java because it's broken in eventmachine. See https://github.com/eventmachine/eventmachine/issues/14
         if RUBY_PLATFORM =~ /java/
           def error?
