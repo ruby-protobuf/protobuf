@@ -20,7 +20,7 @@ module Protobuf
 
         # Startup and run the rpc server
         EM.schedule do
-          EventMachine.start_server(server.host, server.port, Protobuf::Rpc::EventedServer) && \
+          EventMachine.start_server(server.host, server.port, Protobuf::Rpc::Evented::Server) && \
             Protobuf::Logger.info('RPC Server listening at %s:%d in %s' % [server.host, server.port, server.env])
         end
 
