@@ -6,20 +6,18 @@ require 'protobuf/rpc/stat'
 
 module Protobuf
   module Rpc
-    module Server 
-      
+    module Server
+
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
-        @stats.request_size = @request_buffer.size
-       
         # Parse the protobuf request from the socket
         log_debug { "[#{log_signature}] Parsing request from client" }
         parse_request_from_buffer
-      
+
         # Determine the service class and method name from the request
         log_debug { "[#{log_signature}] Extracting procedure call info from request" }
         parse_service_info
-        
+
         # Call the service method
         log_debug { "[#{log_signature}] Dispatching client request to service" }
         invoke_rpc_method
@@ -42,12 +40,12 @@ module Protobuf
           ::Protobuf::Rpc::PbError.new(message, code).to_response(@response)
         end
       end
-      
+
       # Assuming all things check out, we can call the service method
       def invoke_rpc_method
         # Get a new instance of the service
         @service = @klass.new
-        
+
         # Define our response callback to perform the "successful" response to our client
         # This decouples the service's rpc method from our response to the client,
         # allowing the service to be the dictator for when the response should be sent back.
@@ -60,14 +58,14 @@ module Protobuf
             send_response
           end
         end
-        
+
         @service.on_rpc_failed do |error|
           unless @did_respond
             handle_error(error)
             send_response
           end
         end
-        
+
         # Call the service method
         log_debug { "[#{log_signature}] Invoking %s#%s with request %s" % [@klass.name, @method, @request.inspect] }
         @service.__send__(@method, @request)
@@ -76,11 +74,11 @@ module Protobuf
       def log_signature
         @log_signature ||= "server-#{self.class}"
       end
-      
+
       # Parse the incoming request object into our expected request object
       def parse_request_from_buffer
-        log_debug { "[#{log_signature}] parsing request from buffer: %s" % @request_buffer.data.inspect }
-        @request.parse_from_string(@request_buffer.data)
+        log_debug { "[#{log_signature}] parsing request from buffer: %s" % @request_data }
+        @request.parse_from_string(@request_data)
       rescue => error
         exc = ::Protobuf::Rpc::BadRequestData.new 'Unable to parse request: %s' % error.message
         log_error { exc.message }
@@ -92,12 +90,12 @@ module Protobuf
       # response to the protobuf response wrapper
       def parse_response_from_service(response)
         expected = @klass.rpcs[@klass][@method].response_type
-        
+
         # Cannibalize the response if it's a Hash
         response = expected.new(response) if response.is_a?(Hash)
         actual = response.class
         log_debug { "[#{log_signature}] response (should/actual): %s/%s" % [expected.name, actual.name] }
-        
+
         # Determine if the service tried to change response types on us
         if expected == actual
           serialize_response(response)
@@ -119,7 +117,7 @@ module Protobuf
         unless @klass.instance_methods.include?(@method)
           raise MethodNotFound, "Service method #{@request.method_name} is not defined by the service"
         end
-        
+
         @stats.service = @klass.name
         @stats.method = @method
       rescue NameError
@@ -130,9 +128,7 @@ module Protobuf
       def send_response
         raise 'Response already sent to client' if @did_respond
         log_debug { "[#{log_signature}] Sending response to client: %s" % @response.inspect }
-        @response_buffer.set_data(@response)
         send_data
-        @stats.response_size = @response_buffer.size
         @stats.end
         @stats.log_stats
         @did_respond = true

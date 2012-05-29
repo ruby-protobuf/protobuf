@@ -3,7 +3,7 @@ module Protobuf
     class SocketRunner 
 
       def self.stop
-        Protobuf::Rpc::SocketServer.stop 
+        Protobuf::Rpc::Socket::Server.stop 
         Protobuf::Logger.info 'Shutdown complete'
       end
 
@@ -20,7 +20,7 @@ module Protobuf
                           raise "Cannot parser Socket Server - server options"
                         end
 
-        Protobuf::Rpc::SocketServer.run(server_config)
+        Protobuf::Rpc::Socket::Server.run(server_config)
       end
     end
 
