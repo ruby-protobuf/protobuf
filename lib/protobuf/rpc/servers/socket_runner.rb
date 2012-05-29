@@ -8,7 +8,7 @@ module Protobuf
       end
 
       def self.run(server)
-        Protobuf::Logger.info "SocketServer Running"
+        Protobuf::Logger.info "Socket::Server Running"
         server_config = case 
                         when server.is_a?(OpenStruct) then 
                           server.marshal_dump

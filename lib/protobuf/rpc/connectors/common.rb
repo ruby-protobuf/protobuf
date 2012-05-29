@@ -96,20 +96,21 @@ module Protobuf
           fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
         end
 
-        def request_wrapper
+        def rpc_request_data
           validate_request_type
 
           return Protobuf::Socketrpc::Request.new(
             :service_name => @options[:service].name,
             :method_name => @options[:method].to_s,
             :request_proto => @options[:request].serialize_to_string
-          )
+          ).serialize_to_string
         rescue
           fail :INVALID_REQUEST_PROTO, "Could not set request proto: #{$!.message}"
         end
 
         def setup_connection
           initialize_stats
+          @request_data = rpc_request_data
         end
 
         def succeed(response)

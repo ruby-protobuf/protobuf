@@ -30,6 +30,7 @@ module Protobuf
         # Instance Methods
         #
         def handle_request(socket)
+          @request_data = ''
           zmq_error_check(socket.recv_string(@request_data))
           log_debug { "[#{log_signature}] handling request" } if(!@request_data.nil?)
         end

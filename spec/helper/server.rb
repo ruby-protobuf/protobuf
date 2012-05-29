@@ -1,7 +1,7 @@
 require 'ostruct'
 require 'protobuf/common/logger'
 require 'protobuf/rpc/server'
-require 'protobuf/rpc/servers/socket_server'
+require 'protobuf/rpc/servers/socket/server'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq/server'
 require 'protobuf/rpc/servers/zmq_runner'
@@ -12,7 +12,7 @@ Thread.abort_on_exception = true
 
 module StubProtobufServerFactory
   def self.build(delay)
-    new_server = Class.new(Protobuf::Rpc::EventedServer) do
+    new_server = Class.new(Protobuf::Rpc::Evented::Server) do
       def self.sleep_interval
         @sleep_interval
       end
@@ -43,7 +43,7 @@ class StubServer
         :host => "127.0.0.1", 
         :port => 9399, 
         :delay => 0, 
-        :server => Protobuf::Rpc::EventedServer
+        :server => Protobuf::Rpc::Evented::Server
       }.merge(opts))
 
     start
@@ -54,7 +54,7 @@ class StubServer
 
   def start
     case
-    when @options.server == Protobuf::Rpc::EventedServer then start_em_server
+    when @options.server == Protobuf::Rpc::Evented::Server then start_em_server
     when @options.server == Protobuf::Rpc::Zmq::Server then start_zmq_server
     else
       start_socket_server
@@ -74,7 +74,7 @@ class StubServer
   def start_socket_server
     @sock_server = Thread.new(@options) { |opt| Protobuf::Rpc::SocketRunner.run(opt) }
     @sock_server.abort_on_exception = true # Set for testing purposes
-    Thread.pass until Protobuf::Rpc::SocketServer.running?
+    Thread.pass until Protobuf::Rpc::Socket::Server.running?
   end
 
   def start_zmq_server
@@ -84,7 +84,7 @@ class StubServer
 
   def stop
     case
-    when @options.server == Protobuf::Rpc::EventedServer then
+    when @options.server == Protobuf::Rpc::Evented::Server then
       EventMachine.stop_server(@server_handle) if @server_handle
     when @options.server == Protobuf::Rpc::Zmq::Server then
       Protobuf::Rpc::ZmqRunner.stop

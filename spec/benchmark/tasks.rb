@@ -37,7 +37,7 @@ namespace :benchmark do
     EM.stop if EM.reactor_running?
 
     EventMachine.fiber_run do
-      StubServer.new(:server => Protobuf::Rpc::SocketServer, :port => 9399) do |server| 
+      StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server| 
         client = Spec::Proto::TestService.client(:async => false, :port => 9399)
 
         benchmark_wrapper(global_bench) do |bench|
@@ -54,7 +54,7 @@ namespace :benchmark do
   def sock_client_sock_server(number_tests, test_length, global_bench = nil)
     EM.stop if EM.reactor_running?
 
-    StubServer.new(:server => Protobuf::Rpc::SocketServer, :port => 9399) do |server| 
+    StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server| 
       with_constants "Protobuf::ClientType" => "Socket" do
         client = Spec::Proto::TestService.client(:async => false, :port => 9399)
 

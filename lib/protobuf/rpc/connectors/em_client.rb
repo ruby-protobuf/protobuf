@@ -59,12 +59,12 @@ module Protobuf
           log_debug { "[#{log_signature}] receive_data: %s" % data }
           response_buffer << data
           @response_data = response_buffer.data
-          parse_response if response_buffer.flushed?
+          parse_response if(!@response_data.nil?)
         end
 
         def send_data
-          request_buffer = ::Protobuf::Rpc::Buffer.new(:read)
-          request_buffer.set_data(request_wrapper)
+          request_buffer = ::Protobuf::Rpc::Buffer.new(:write)
+          request_buffer.set_data(@request_data)
           log_debug { "[#{log_signature}] sending data: #{request_buffer.inspect}" }
           super(request_buffer.write)
         rescue
@@ -74,7 +74,7 @@ module Protobuf
         # overwriting this method for java because it's broken in eventmachine. See https://github.com/eventmachine/eventmachine/issues/14
         if RUBY_PLATFORM =~ /java/
           def error?
-            false
+            !!@error
           end
         end
 

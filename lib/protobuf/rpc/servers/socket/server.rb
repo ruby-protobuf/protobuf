@@ -1,3 +1,5 @@
+require 'protobuf/rpc/server'
+require 'protobuf/rpc/servers/socket/worker'
 module Protobuf
   module Rpc
     module Socket
@@ -33,7 +35,7 @@ module Protobuf
 
         def self.new_worker(socket)
           Thread.new(socket) do |sock|
-            ::Protobuf::Rpc::SocketServer::Worker.new(sock) do |s|
+            ::Protobuf::Rpc::Socket::Worker.new(sock) do |s|
               s.close
             end
           end

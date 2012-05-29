@@ -30,7 +30,6 @@ module Protobuf
         end
 
         def connect_to_rpc_server
-          return if(@error)
           @socket = TCPSocket.new(options[:host], options[:port])
           log_debug { "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}"  }
         end
@@ -54,18 +53,19 @@ module Protobuf
         end
 
         def read_response
-          return if(@error)
+          log_debug { "[client-#{self.class}] error? is #{error?}" }
+          return if(error?)
           response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
           response_buffer << read_data
           @stats.response_size = response_buffer.size
-          @response_data = response_buffer.write
+          @response_data = response_buffer.data
           parse_response if response_buffer.flushed?
         end
 
         def send_data
-          return if(@error)
+          return if(error?)
           request_buffer = ::Protobuf::Rpc::Buffer.new(:write)
-          request_buffer.set_data(request_wrapper)
+          request_buffer.set_data(@request_data)
           @socket.write(request_buffer.write)
           @socket.flush
           log_debug { "[client-#{self.class}] write closed"  }

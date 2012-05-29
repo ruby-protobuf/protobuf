@@ -10,7 +10,7 @@ describe 'Functional EventMachine Client' do
     expect {
       EventMachine.fiber_run do
         StubServer.new do |server|
-          client = ::Spec::Proto::TestService.client(:async => false)
+          client = ::Spec::Proto::TestService.client(:async => false, :timeout => 5)
 
           client.find(:name => 'Test Name', :active => true) do |c|
             c.on_success do |succ|
