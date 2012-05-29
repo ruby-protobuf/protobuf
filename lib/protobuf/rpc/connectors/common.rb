@@ -1,8 +1,8 @@
 module Protobuf
-  module Rpc 
+  module Rpc
     module Connectors
-      module Common 
-        
+      module Common
+
         attr_reader :error
 
         def any_callbacks?
@@ -33,7 +33,7 @@ module Protobuf
           @error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
           @error.message = message
           log_debug { "[#{log_signature}] Server failed request (invoking on_failure): %s" % @error.inspect }
-          
+
           @failure_cb.call(@error) unless @failure_cb.nil?
         rescue
           log_error { "[#{log_signature}] Failure callback error encountered: %s" % $!.message }
@@ -49,7 +49,7 @@ module Protobuf
           @stats.service = @options[:service].name
           @stats.method = @options[:method].to_s
         rescue => ex
-          fail(:RPC_ERROR, "Invalid stats configuration. #{ex.message}") 
+          fail(:RPC_ERROR, "Invalid stats configuration. #{ex.message}")
         end
 
         def log_signature
@@ -61,11 +61,10 @@ module Protobuf
           close_connection
 
           log_debug { "[#{log_signature}] Parsing response from server (connection closed)" }
-          @stats.response_size = @response_buffer.size
 
           # Parse out the raw response
           response_wrapper = Protobuf::Socketrpc::Response.new
-          response_wrapper.parse_from_string(@response_buffer.data)
+          response_wrapper.parse_from_string(@response_data)
 
           # Determine success or failure based on parsed data
           if response_wrapper.has_field?(:error_reason)
@@ -111,9 +110,6 @@ module Protobuf
 
         def setup_connection
           initialize_stats
-          @response_buffer = Protobuf::Rpc::Buffer.new(:read)
-          @request_buffer = Protobuf::Rpc::Buffer.new(:write)
-          @request_buffer.set_data(request_wrapper)
         end
 
         def succeed(response)
@@ -123,7 +119,7 @@ module Protobuf
           log_error { "[#{log_signature}] Success callback error encountered: %s" % $!.message }
           log_error { "[#{log_signature}] %s" % $!.backtrace.join("\n") }
           fail :RPC_ERROR, 'An exception occurred while calling on_success: %s' % $!.message
-        ensure 
+        ensure
           complete
         end
 
