@@ -6,7 +6,7 @@ module Protobuf
       class Socket < Base
         include Protobuf::Rpc::Connectors::Common
         include Protobuf::Logger::LogMethods
-        
+
         def send_request
           check_async
           setup_connection
@@ -20,7 +20,7 @@ module Protobuf
         def check_async
           if async?
             log_error { "[client-#{self.class}] Cannot run in async mode" }
-            raise "Cannot use Socket client in async mode" 
+            raise "Cannot use Socket client in async mode"
           end
         end
 
@@ -55,13 +55,18 @@ module Protobuf
 
         def read_response
           return if(@error)
-          @response_buffer << read_data 
-          parse_response if @response_buffer.flushed?
+          response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
+          response_buffer << read_data
+          @stats.response_size = response_buffer.size
+          @response_data = response_buffer.write
+          parse_response if response_buffer.flushed?
         end
 
         def send_data
           return if(@error)
-          @socket.write(@request_buffer.write)
+          request_buffer = ::Protobuf::Rpc::Buffer.new(:write)
+          request_buffer.set_data(request_wrapper)
+          @socket.write(request_buffer.write)
           @socket.flush
           log_debug { "[client-#{self.class}] write closed"  }
         end
