@@ -15,6 +15,12 @@ describe Protobuf::Rpc::Zmq::Server do
   end
 
   describe '.stop' do
+    # keep threads instance variable from retaining any thread mocks we've
+    # created (breaks tests down the line, otherwise)
+    after(:each) do
+      described_class.instance_variable_set(:@threads, [])
+    end
+
     it 'lets all threads stop' do
       thread_mock = double(Thread)
       thread_mock.should_receive(:join)
