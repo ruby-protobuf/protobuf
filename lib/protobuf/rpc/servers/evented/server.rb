@@ -12,6 +12,9 @@ module Protobuf
           log_debug { '[server] Post init, new read buffer created' }
           @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
           @stats.client = ::Socket.unpack_sockaddr_in(get_peername)
+          @request_buffer = Protobuf::Rpc::Buffer.new(:read)
+          @request = ::Protobuf::Socketrpc::Request.new
+          @response = ::Protobuf::Socketrpc::Response.new
 
           @did_respond = false
         end
@@ -20,14 +23,11 @@ module Protobuf
         def receive_data(data)
           log_debug { '[server] receive_data: %s' % data }
 
-          request_buffer = Protobuf::Rpc::Buffer.new(:read)
-          request_buffer << data
-          @request_data = request_buffer.data
-          @stats.request_size = request_buffer.size
+          @request_buffer << data
+          @request_data = @request_buffer.data
+          @stats.request_size = @request_buffer.size
 
-          @request = ::Protobuf::Socketrpc::Request.new
-          @response = ::Protobuf::Socketrpc::Response.new
-          handle_client if request_buffer.flushed?
+          handle_client if @request_buffer.flushed?
         end
 
         def send_data

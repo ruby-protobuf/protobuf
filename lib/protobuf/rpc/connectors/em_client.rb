@@ -16,6 +16,7 @@ module Protobuf
         def initialize(options={}, &failure_cb)
           @failure_cb = failure_cb
           @options = DEFAULT_OPTIONS.merge(options)
+          @response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
           verify_options
 
           log_debug { "[#{log_signature}] Client Initialized: %s" % options.inspect }
@@ -55,11 +56,10 @@ module Protobuf
         end
 
         def receive_data(data)
-          response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
           log_debug { "[#{log_signature}] receive_data: %s" % data }
-          response_buffer << data
-          @response_data = response_buffer.data
-          parse_response if(!@response_data.nil?)
+          @response_buffer << data
+          @response_data = @response_buffer.data
+          parse_response if(!@response_data.nil? && @response_buffer.flushed?)
         end
 
         def send_data

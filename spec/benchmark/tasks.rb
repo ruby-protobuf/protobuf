@@ -2,6 +2,13 @@ require 'benchmark'
 require 'helper/all'
 require 'proto/test_service_impl'
 
+# Including a way to turn on debug logger for spec runs
+if ENV["DEBUG"]
+  puts 'debugging'
+  debug_log = File.expand_path('../debug_bench.log', File.dirname(__FILE__) )
+  Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
+end
+
 namespace :benchmark do
   include SilentConstants
 
@@ -89,6 +96,9 @@ namespace :benchmark do
   end
 
   def zmq_client_zmq_server(number_tests, test_length, global_bench = nil)
+    require 'ffi-rzmq'
+    require 'protobuf/rpc/connectors/zmq'
+    require 'protobuf/rpc/servers/zmq/server'
     StubServer.new(:port => 9399, :server => Protobuf::Rpc::Zmq::Server) do |server| 
       with_constants "Protobuf::ClientType" => "Zmq" do
         client = Spec::Proto::TestService.client(:async => false, :port => 9399)
