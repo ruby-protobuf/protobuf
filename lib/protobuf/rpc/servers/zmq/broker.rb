@@ -23,7 +23,7 @@ module Protobuf
         #
         def poll
           log_debug { "[#{log_signature}] polling for data" }
-          poller.poll(:blocking)
+          poller.poll(1000)
           poller.readables.each do |socket|
             case socket
             when frontend then

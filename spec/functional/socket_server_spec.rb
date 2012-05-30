@@ -11,7 +11,7 @@ describe 'Functional Socket Client' do
 
   after(:all) do
     Protobuf::Rpc::SocketRunner.stop
-    Thread.kill(@server_thread)
+    @server_thread.join
   end
 
   it 'runs fine when required fields are set' do

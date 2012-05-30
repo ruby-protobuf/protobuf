@@ -12,7 +12,7 @@ describe Protobuf::Rpc::Socket::Server do
 
   after(:all) do
     Protobuf::Rpc::SocketRunner.stop
-    Thread.kill(@server_thread)
+    @server_thread.join
   end
 
   it "Runner provides a stop method" do

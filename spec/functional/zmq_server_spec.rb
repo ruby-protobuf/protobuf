@@ -10,7 +10,8 @@ describe 'Functional ZMQ Client' do
   end
 
   after(:all) do
-    Thread.kill(@server_thread)
+    ::Protobuf::Rpc::Zmq::Server.stop
+    @server_thread.join
   end
 
   it 'runs fine when required fields are set' do

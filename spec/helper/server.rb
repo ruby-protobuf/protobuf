@@ -88,10 +88,10 @@ class StubServer
       EventMachine.stop_server(@server_handle) if @server_handle
     when @options.server == Protobuf::Rpc::Zmq::Server then
       Protobuf::Rpc::ZmqRunner.stop
-      Thread.kill(@zmq_server) if @zmq_server
+      @zmq_server.join if(@zmq_server)
     else
       Protobuf::Rpc::SocketRunner.stop
-      Thread.kill(@sock_server) if @sock_server
+      @sock_server.join if(@sock_server)
     end
 
     @running = false
