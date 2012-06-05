@@ -22,6 +22,14 @@ server = OpenStruct.new({
   :debug => false
 })
 
+class ClientServerParse
+  def self.parse_client(value)
+  end
+
+  def self.parse_server(value)
+  end
+end
+
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: rpc_server [options] app_file.rb"
 
@@ -73,6 +81,14 @@ parser = OptionParser.new do |opts|
     server.level = ::Logger::DEBUG if v === true
   end
 
+  opts.on("--client-type=CLIENT_TYPE", String, "Client Type to use (Socket or Zmq)") do |v|
+    ENV['CLIENT_TYPE'] = v
+  end
+
+  opts.on("--server-type=SERVER_TYPE", String, "Server Type to use (Socket or Zmq)") do |v|
+    ENV['SERVER_TYPE'] = v
+  end
+
   opts.separator ""
   opts.separator "Common options:"
 
@@ -88,6 +104,21 @@ parser = OptionParser.new do |opts|
 end
 
 parser.parse!
+
+if(ENV['CLIENT_TYPE'])
+  if(ENV['CLIENT_TYPE'] == "Zmq")
+    ::Protobuf::ServerType = ENV['CLIENT_TYPE']
+    server.runner = ::Protobuf::Rpc::ZmqRunner
+  end
+  ::Protobuf::ClientType = ENV['CLIENT_TYPE']
+elsif(ENV['SERVER_TYPE'])
+  if(ENV['SERVER_TYPE'] == "Zmq")
+    ::Protobuf::ClientType = ENV['SERVER_TYPE']
+    server.runner = ::Protobuf::Rpc::ZmqRunner
+  end
+  ::Protobuf::ServerType = ENV['SERVER_TYPE']
+end
+
 require 'protobuf'
 
 [:INT, :QUIT, :TERM].each do |sig|

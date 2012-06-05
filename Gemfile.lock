@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    protobuf (1.1.3)
+    protobuf (1.2.0)
       eventmachine
       eventually
       ffi-rzmq
@@ -19,7 +19,7 @@ GEM
     ffi (1.0.11-java)
     ffi-rzmq (0.9.3)
       ffi
-    json_pure (1.6.6)
+    json_pure (1.7.3)
     method_source (0.7.1)
     multi_json (1.2.0)
     pry (0.9.8.4)
