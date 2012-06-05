@@ -62,17 +62,18 @@ parser = OptionParser.new do |opts|
   end
 
   opts.on("-c", "--client_socket", "Socket Mode for client connections (No EventMachine)") do |v|
-    ::Protobuf::ClientType = "Socket"
+    ENV['PB_CLIENT_TYPE'] = "Socket"
   end
 
   opts.on("-s", "--socket", "Socket Server Mode (No EventMachine)") do |v|
-    ::Protobuf::ServerType = "Socket"
+    ENV['PB_SERVER_TYPE'] = "Socket"
     server.runner = ::Protobuf::Rpc::SocketRunner
   end
 
   opts.on("-z", "--zmq", "ZeroMQ Socket Mode for client and server connections (they must be used together)") do |v|
-    ::Protobuf::ClientType = "Zmq"
-    ::Protobuf::ServerType = "Zmq"
+    ENV['PB_CLIENT_TYPE'] = 'Zmq'
+    ENV['PB_SERVER_TYPE'] = 'Zmq'
+
     server.runner = ::Protobuf::Rpc::ZmqRunner
   end
   
@@ -81,12 +82,12 @@ parser = OptionParser.new do |opts|
     server.level = ::Logger::DEBUG if v === true
   end
 
-  opts.on("--client-type=CLIENT_TYPE", String, "Client Type to use (Socket or Zmq)") do |v|
-    ENV['CLIENT_TYPE'] = v
+  opts.on("--client-type=PB_CLIENT_TYPE", String, "Client Type to use (Socket or Zmq)") do |v|
+    ENV['PB_CLIENT_TYPE'] = v
   end
 
-  opts.on("--server-type=SERVER_TYPE", String, "Server Type to use (Socket or Zmq)") do |v|
-    ENV['SERVER_TYPE'] = v
+  opts.on("--server-type=PB_SERVER_TYPE", String, "Server Type to use (Socket or Zmq)") do |v|
+    ENV['PB_SERVER_TYPE'] = v
   end
 
   opts.separator ""
@@ -105,20 +106,22 @@ end
 
 parser.parse!
 
-if(ENV['CLIENT_TYPE'])
-  if(ENV['CLIENT_TYPE'] == "Zmq")
-    ::Protobuf::ServerType = ENV['CLIENT_TYPE']
-    server.runner = ::Protobuf::Rpc::ZmqRunner
-  end
-  ::Protobuf::ClientType = ENV['CLIENT_TYPE']
-elsif(ENV['SERVER_TYPE'])
-  if(ENV['SERVER_TYPE'] == "Zmq")
-    ::Protobuf::ClientType = ENV['SERVER_TYPE']
-    server.runner = ::Protobuf::Rpc::ZmqRunner
-  end
-  ::Protobuf::ServerType = ENV['SERVER_TYPE']
+# Used to ensure we set the PB_CLIENT_TYPE and PB_SERVER_TYPE to the same thing
+# if one of them is set to Zmq
+if(ENV['PB_CLIENT_TYPE'] == "Zmq")
+  # make server and client types the same if we're using Zmq
+  ENV['PB_SERVER_TYPE'] = ENV['PB_CLIENT_TYPE']
+  server.runner = ::Protobuf::Rpc::ZmqRunner
+elsif(ENV['PB_SERVER_TYPE'] == "Zmq")
+  # make server and client types the same if we're using Zmq
+  ENV['PB_CLIENT_TYPE'] = ENV['PB_SERVER_TYPE']
+  server.runner = ::Protobuf::Rpc::ZmqRunner
+elsif(ENV['PB_SERVER_TYPE'] == 'Socket')
+  server.runner = ::Protobuf::Rpc::SocketRunner
 end
 
+# protobuf.rb picks up PB_CLIENT_TYPE and PB_SERVER_TYPE and does something
+# useful with them
 require 'protobuf'
 
 [:INT, :QUIT, :TERM].each do |sig|
