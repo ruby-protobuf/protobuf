@@ -23,8 +23,8 @@ module Protobuf
           end
           @running = true
 
+          log_debug { "[#{log_signature}] server started" }
           while self.running? do
-            log_debug { "[#{log_signature}] server started" }
             @broker.poll
           end
         ensure

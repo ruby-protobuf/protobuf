@@ -22,7 +22,6 @@ module Protobuf
         # Instance Methods
         #
         def poll
-          log_debug { "[#{log_signature}] polling for data" }
           poller.poll(1000)
           poller.readables.each do |socket|
             case socket
