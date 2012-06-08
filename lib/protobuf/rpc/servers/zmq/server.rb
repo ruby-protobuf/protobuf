@@ -14,7 +14,7 @@ module Protobuf
         def self.run(opts = {})
           log_debug { "[#{log_signature}] initializing broker" }
           @broker = ::Protobuf::Rpc::Zmq::Broker.new(opts)
-          local_worker_threads = opts.fetch(:threads, 10)
+          local_worker_threads = opts.fetch(:threads, 5)
 
           worker_options = opts.merge(:port => opts.fetch(:port, 9399) + 1)
           log_debug { "[#{log_signature}] starting server workers" }
