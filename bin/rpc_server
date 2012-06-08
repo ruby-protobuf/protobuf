@@ -108,15 +108,15 @@ parser.parse!
 
 # Used to ensure we set the PB_CLIENT_TYPE and PB_SERVER_TYPE to the same thing
 # if one of them is set to Zmq
-if(ENV['PB_CLIENT_TYPE'] == "Zmq")
+if(ENV['PB_CLIENT_TYPE'] =~ /zmq/i)
   # make server and client types the same if we're using Zmq
   ENV['PB_SERVER_TYPE'] = ENV['PB_CLIENT_TYPE']
   server.runner = ::Protobuf::Rpc::ZmqRunner
-elsif(ENV['PB_SERVER_TYPE'] == "Zmq")
+elsif(ENV['PB_SERVER_TYPE'] =~ /zmq/i)
   # make server and client types the same if we're using Zmq
   ENV['PB_CLIENT_TYPE'] = ENV['PB_SERVER_TYPE']
   server.runner = ::Protobuf::Rpc::ZmqRunner
-elsif(ENV['PB_SERVER_TYPE'] == 'Socket')
+elsif(ENV['PB_SERVER_TYPE'] =~ /socket/i)
   server.runner = ::Protobuf::Rpc::SocketRunner
 end
 
