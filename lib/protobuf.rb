@@ -6,12 +6,23 @@ require 'stringio'
 module Protobuf
 end
 
-
 Protobuf::ClientType = ENV['PB_CLIENT_TYPE'] if ENV['PB_CLIENT_TYPE']
 Protobuf::ServerType = ENV['PB_SERVER_TYPE'] if ENV['PB_SERVER_TYPE']
 
+# Socket Client/Server loaded by default as it has no impact on cross-platform issues
+require 'protobuf/rpc/servers/socket/server'  
+require 'protobuf/rpc/connectors/socket'
+require 'protobuf/rpc/client'
+require 'protobuf/rpc/service'
+
 # When setting up a client
-unless defined?(Protobuf::ClientType) && Protobuf::ClientType == "Socket"
+case
+when defined?(Protobuf::ClientType) && Protobuf::ClientType =~ /\Asocket\Z/i then 
+  #no-op
+when defined?(Protobuf::ClientType) && Protobuf::ClientType =~ /\Azmq\Z/i then 
+  require 'ffi-rzmq'
+  require 'protobuf/rpc/connectors/zmq'
+else
   Protobuf::ClientType = "EventMachine"
   require 'eventmachine'
   require 'protobuf/ext/eventmachine'
@@ -19,14 +30,15 @@ unless defined?(Protobuf::ClientType) && Protobuf::ClientType == "Socket"
 end
 
 # For running the rpc_server
-unless defined?(Protobuf::ServerType) && Protobuf::ServerType == "SocketServer"
-  Protobuf::ServerType = "EventedServer"
+case
+when defined?(Protobuf::ServerType) && Protobuf::ServerType =~ /\Asocket\Z/i then
+  #no-op
+when defined?(Protobuf::ServerType) && Protobuf::ServerType =~ /\Azmq\Z/i then
+  require 'ffi-rzmq'
+  require 'protobuf/rpc/servers/zmq/server'
+else
+  Protobuf::ServerType = "Evented::Server"
   require 'eventmachine'
   require 'protobuf/ext/eventmachine'
-  require 'protobuf/rpc/servers/evented_server'
+  require 'protobuf/rpc/servers/evented/server'
 end
-
-require 'protobuf/rpc/client'
-require 'protobuf/rpc/connectors/socket'
-require 'protobuf/rpc/service'
-require 'protobuf/rpc/servers/socket_server'

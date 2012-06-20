@@ -7,6 +7,8 @@ module Protobuf
           case Protobuf::ClientType 
           when "Socket" then 
             ::Protobuf::Rpc::Connectors::Socket
+          when "Zmq" then
+            ::Protobuf::Rpc::Connectors::Zmq
           else
             ::Protobuf::Rpc::Connectors::EventMachine
           end

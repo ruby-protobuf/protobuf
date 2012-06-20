@@ -2,6 +2,9 @@ require 'spec_helper'
 require 'spec/proto/test_service_impl'
 
 describe Protobuf::Rpc::Client do
+  before(:each) do
+    ::Spec::Proto::TestService.configure(::Spec::Proto::TestService::DEFAULT_LOCATION)
+  end
 
   context "when using fiber based calls" do
     it "waits for response when running synchronously" do
@@ -55,17 +58,22 @@ describe Protobuf::Rpc::Client do
     end
 
     it "throws a timeout when client timeout is exceeded" do
-      subject = Proc.new do
+      error = nil
+      test_proc = Proc.new do
         EventMachine.fiber_run do
           StubServer.new(:delay => 2) do |server|
             client = Spec::Proto::TestService.client(:async => false, :timeout => 1)
-            client.find(:name => "Test Name", :active => true)
+            client.find(:name => "Test Name", :active => true) do |cl|
+              cl.on_success {}
+              cl.on_failure {|f| error = f}
+            end
           end
           EM.stop
         end
       end
 
-      subject.should raise_error(RuntimeError, /timeout/i)
+      test_proc.call
+      error.message.should =~ /timeout/i
     end
 
     context "without reactor_running?" do 

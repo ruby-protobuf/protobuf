@@ -130,7 +130,7 @@ module Protobuf
           log_error exc.message
           raise exc
         else
-          log_error "-------------- [#{log_signature}] %s#%s not rpc method, passing to super" % [self.class.name, m.to_s]
+          log_error { "-------------- [#{log_signature}] %s#%s not rpc method, passing to super" % [self.class.name, m.to_s] }
           super m, params
         end
       end
@@ -221,17 +221,17 @@ module Protobuf
         # Setup the response
         @response = rpcs[method].response_type.new
 
-        log_debug "[#{log_signature}] calling service method %s#%s" % [self.class, method]
+        log_debug { "[#{log_signature}] calling service method %s#%s" % [self.class, method] }
         # Call the aliased rpc method (e.g. :rpc_find for :find)
         __send__("rpc_#{method}".to_sym)
-        log_debug "[#{log_signature}] completed service method %s#%s" % [self.class, method]
+        log_debug { "[#{log_signature}] completed service method %s#%s" % [self.class, method] }
         
         # Pass the populated response back to the server
         # Note this will only get called if the rpc method didn't explode (by design)
         if @async_responder
-          log_debug "[#{log_signature}] async request, not sending response (yet)"
+          log_debug { "[#{log_signature}] async request, not sending response (yet)" }
         else
-          log_debug "[#{log_signature}] trigger server send_response"
+          log_debug { "[#{log_signature}] trigger server send_response" }
           send_response
         end
       end
