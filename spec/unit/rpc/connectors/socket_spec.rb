@@ -24,13 +24,12 @@ describe Protobuf::Rpc::Connectors::Socket do
 
     it "fills the buffer with data from the socket" do 
       socket = StringIO.new("#{data.bytesize}-#{data}")
-      subject.instance_variable_set(:@buffer, Protobuf::Rpc::Buffer.new(:read))
       subject.instance_variable_set(:@socket, socket)
+      subject.instance_variable_set(:@stats, OpenStruct.new)
       subject.should_receive(:parse_response).and_return(true)
 
       subject.__send__(:read_response)
-      subject.instance_variable_get(:@buffer).flushed?.should be_true
-      subject.instance_variable_get(:@buffer).data.should eq(data)
+      subject.instance_variable_get(:@response_data).should eq(data)
     end
   end
 
@@ -45,5 +44,4 @@ describe Protobuf::Rpc::Connectors::Socket do
       expect{ conn.__send__(:check_async) }.to_not raise_error
     end
   end
-
 end

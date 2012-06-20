@@ -20,9 +20,13 @@ describe Protobuf::Rpc::Service do
       client.options[:port].should == 12345
     end
   
-    it 'should be able to configure and read the host' do
-      Spec::Proto::TestService.configure :host => 'somehost.com'
-      Spec::Proto::TestService.host.should == 'somehost.com'
+    context 'configuring host' do
+      before(:each) { Spec::Proto::TestService.configure :host => 'somehost.com' }
+      after(:each) { Spec::Proto::TestService.configure :host => '127.0.0.1' }
+
+      it 'should be able to configure and read the host' do
+        Spec::Proto::TestService.host.should == 'somehost.com'
+      end
     end
   
     it 'should be able to configure and read the port' do
@@ -58,14 +62,14 @@ describe Protobuf::Rpc::Service do
     
     it 'raises an undefined method name error when calling a method on a non-existant object' do
       expect {
-        req = mock('RequestWrapper', :request_proto => Spec::Proto::ResourceFindRequest.new.to_s)
+        req = mock('RequestWrapper', :request_proto => Spec::Proto::ResourceFindRequest.new(:name => 'mmeh').to_s)
         ::NewTestService.new.bad_method(req)
       }.to raise_error(NoMethodError)
     end
     
     it 'raises a name error when accessing a non-existant object' do
       expect {
-        req = mock('RequestWrapper', :request_proto => Spec::Proto::ResourceFindRequest.new.to_s)
+        req = mock('RequestWrapper', :request_proto => Spec::Proto::ResourceFindRequest.new(:name => 'mmeh').to_s)
         ::NewTestService.new.bad_var(req)
       }.to raise_error(NameError)
     end

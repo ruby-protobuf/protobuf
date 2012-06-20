@@ -9,7 +9,7 @@ module Protobuf
       attr_reader :error_type
       
       def initialize message='An unknown RpcError occurred', error_type='RPC_ERROR'
-        @error_type = error_type.is_a?(String) ? Protobuf::Socketrpc::ErrorReason.const_get(error_type) : error_type
+        @error_type = error_type.is_a?(String) ? ::Protobuf::Socketrpc::ErrorReason.const_get(error_type) : error_type
         super message
       end
       
@@ -18,7 +18,6 @@ module Protobuf
         response.error_reason = @error_type
       end
     end
-    
   end
 end
 

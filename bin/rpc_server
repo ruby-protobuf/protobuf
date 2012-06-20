@@ -6,6 +6,7 @@ require 'logger'
 require 'protobuf/version'
 require 'protobuf/rpc/servers/evented_runner'
 require 'protobuf/rpc/servers/socket_runner'
+require 'protobuf/rpc/servers/zmq_runner'
 
 # Default options
 server = OpenStruct.new({
@@ -17,9 +18,17 @@ server = OpenStruct.new({
   :threshold => 100,
   :log => File.expand_path('./protobuf.log'),
   :level => ::Logger::INFO,
-  :runner => Protobuf::Rpc::EventedRunner, 
+  :runner => ::Protobuf::Rpc::EventedRunner, 
   :debug => false
 })
+
+class ClientServerParse
+  def self.parse_client(value)
+  end
+
+  def self.parse_server(value)
+  end
+end
 
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: rpc_server [options] app_file.rb"
@@ -53,17 +62,32 @@ parser = OptionParser.new do |opts|
   end
 
   opts.on("-c", "--client_socket", "Socket Mode for client connections (No EventMachine)") do |v|
-    Protobuf::ConnectorType = "Socket"
+    ENV['PB_CLIENT_TYPE'] = "Socket"
   end
 
   opts.on("-s", "--socket", "Socket Server Mode (No EventMachine)") do |v|
-    Protobuf::ServerType = "SocketServer"
-    server.runner = Protobuf::Rpc::SocketRunner
+    ENV['PB_SERVER_TYPE'] = "Socket"
+    server.runner = ::Protobuf::Rpc::SocketRunner
+  end
+
+  opts.on("-z", "--zmq", "ZeroMQ Socket Mode for client and server connections (they must be used together)") do |v|
+    ENV['PB_CLIENT_TYPE'] = 'Zmq'
+    ENV['PB_SERVER_TYPE'] = 'Zmq'
+
+    server.runner = ::Protobuf::Rpc::ZmqRunner
   end
   
   opts.on("-d", "--[no-]debug", "Debug Mode. Override log level to DEBUG.") do |v|
     server.debug = v
     server.level = ::Logger::DEBUG if v === true
+  end
+
+  opts.on("--client-type=PB_CLIENT_TYPE", String, "Client Type to use (Socket or Zmq)") do |v|
+    ENV['PB_CLIENT_TYPE'] = v
+  end
+
+  opts.on("--server-type=PB_SERVER_TYPE", String, "Server Type to use (Socket or Zmq)") do |v|
+    ENV['PB_SERVER_TYPE'] = v
   end
 
   opts.separator ""
@@ -75,12 +99,29 @@ parser = OptionParser.new do |opts|
   end
 
   opts.on_tail("--version", "Show version") do
-    puts Protobuf::VERSION
+    puts ::Protobuf::VERSION
     exit
   end
 end
 
 parser.parse!
+
+# Used to ensure we set the PB_CLIENT_TYPE and PB_SERVER_TYPE to the same thing
+# if one of them is set to Zmq
+if(ENV['PB_CLIENT_TYPE'] =~ /zmq/i)
+  # make server and client types the same if we're using Zmq
+  ENV['PB_SERVER_TYPE'] = ENV['PB_CLIENT_TYPE']
+  server.runner = ::Protobuf::Rpc::ZmqRunner
+elsif(ENV['PB_SERVER_TYPE'] =~ /zmq/i)
+  # make server and client types the same if we're using Zmq
+  ENV['PB_CLIENT_TYPE'] = ENV['PB_SERVER_TYPE']
+  server.runner = ::Protobuf::Rpc::ZmqRunner
+elsif(ENV['PB_SERVER_TYPE'] =~ /socket/i)
+  server.runner = ::Protobuf::Rpc::SocketRunner
+end
+
+# protobuf.rb picks up PB_CLIENT_TYPE and PB_SERVER_TYPE and does something
+# useful with them
 require 'protobuf'
 
 [:INT, :QUIT, :TERM].each do |sig|
@@ -99,12 +140,12 @@ begin
     raise 'Invalid app file specified (%s).' % server.app unless File.exists?(server.app)
   end
 
-  # Configure the Protobuf::Logger
-  Protobuf::Logger.configure :file => server.log, :level => server.debug ? ::Logger::DEBUG : server.level
+  # Configure the ::Protobuf::Logger
+  ::Protobuf::Logger.configure :file => server.log, :level => server.debug ? ::Logger::DEBUG : server.level
 
   # Output the server opts
-  Protobuf::Logger.debug 'Debugging options:'
-  Protobuf::Logger.debug server.inspect
+  ::Protobuf::Logger.debug 'Debugging options:'
+  ::Protobuf::Logger.debug server.inspect
   
   # Set the name of the process
   $0 = 'rpc_server %s:%d %s' % [server.host, server.port, server.app]
@@ -116,7 +157,7 @@ begin
 rescue
   msg = 'ERROR: RPC Server failed to start. %s' % $!.inspect
   $stderr.puts msg, *($!.backtrace)
-  Protobuf::Logger.error msg
-  Protobuf::Logger.error $!.backtrace.join("\n")
+  ::Protobuf::Logger.error msg
+  ::Protobuf::Logger.error $!.backtrace.join("\n")
   exit 1
 end
