@@ -1,7 +1,7 @@
 module Protobuf
   module Descriptor
     class FileDescriptor
-      class <<self
+      class << self
         def proto_type
           'Google::Protobuf::FileDescriptorProto'
         end

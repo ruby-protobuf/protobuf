@@ -11,6 +11,12 @@ $:.push File.expand_path('../lib', File.dirname(__FILE__))
 require 'protobuf'
 require 'protobuf/rpc/client'
 require File.dirname(__FILE__) + '/helper/all'
+require 'pry'
+
+# these aren't explicitly required in lib/protobuf.rb. We require them here for
+# testing purposes
+require 'ffi-rzmq'
+require 'protobuf/rpc/connectors/zmq'
 
 # Including a way to turn on debug logger for spec runs
 if ENV["DEBUG"]

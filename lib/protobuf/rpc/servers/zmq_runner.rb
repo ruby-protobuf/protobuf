@@ -1,26 +1,24 @@
 module Protobuf
   module Rpc
-    class SocketRunner 
+    class ZmqRunner
 
       def self.stop
-        Protobuf::Rpc::Socket::Server.stop 
-        Protobuf::Logger.info 'Shutdown complete'
+        Protobuf::Rpc::Zmq::Server.stop 
+        Protobuf::Logger.info('Shutdown complete')
       end
 
       def self.run(server)
-        Protobuf::Logger.info "Socket::Server Running"
+        Protobuf::Logger.info "ZmqServer Running"
         server_config = case 
                         when server.is_a?(OpenStruct) then 
                           server.marshal_dump
-                        when server.is_a?(Hash) then
-                          server
                         when server.respond_to?(:to_hash) then
                           server.to_hash
                         else
-                          raise "Cannot parser Socket Server - server options"
+                          raise "Cannot parser Zmq Server - server options"
                         end
 
-        Protobuf::Rpc::Socket::Server.run(server_config)
+        Protobuf::Rpc::Zmq::Server.run(server_config)
       end
     end
 
