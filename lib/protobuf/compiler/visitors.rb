@@ -105,7 +105,11 @@ module Protobuf
         unless File.exist?(rb_path)
           Compiler.compile(proto_file, @proto_dir, @out_dir)
         end
-        
+        if package
+          "./#{@out_dir}/#{package.join('')}/#{rb_path.sub(/\.rb$/, '')}"
+        else
+          rb_path.sub(/\.rb$/, '')
+        end
         rb_path.sub(/\.rb$/, '')
       end
 
