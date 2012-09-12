@@ -57,7 +57,7 @@ require 'protobuf/message/extend'
       end
 
       def accept_message_visitor(visitor)
-        visitor.write("require '#{visitor.required_message_from_proto(@path)}'")
+        visitor.write("require_relative '#{visitor.required_message_from_proto(@path)}'")
       end
 
       def accept_descriptor_visitor(visitor)
