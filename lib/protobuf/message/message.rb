@@ -346,20 +346,9 @@ module Protobuf
       Encoder.encode(stream, self)
     end
 
-    def merge_from(message)
-      # TODO
-      fields.each {|tag, field| merge_field(tag, message.__send__(field.name))}
-      extension_fields.each {|tag, field| merge_field(tag, message.__send__(field.name))}
-    end
-
     def set_field(tag, bytes)
       field = (get_field_by_tag(tag) || get_ext_field_by_tag(tag))
       field.set(self, bytes) if field
-    end
-
-    def merge_field(tag, value)
-      #get_field_by_tag(tag).merge self, bytes #TODO
-      (get_field_by_tag(tag) || get_ext_field_by_tag(tag)).merge(self, value)
     end
 
     def [](tag_or_name)
@@ -432,7 +421,7 @@ module Protobuf
     
     def to_hash
       result = {}
-      build_value = lambda {|field, value|
+      build_value = lambda { |field, value|
         if !field.optional? || (field.optional? && has_field?(field.name))
           case field
           when Field::MessageField then

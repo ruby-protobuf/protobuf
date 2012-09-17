@@ -120,15 +120,6 @@ module Protobuf
         raise NotImplementedError, "#{self.class.name}\#encode"
       end
 
-      # Merge +value+ with +message_instance+.
-      def merge(message_instance, value)
-        if repeated?
-          merge_array(message_instance, value)
-        else
-          merge_value(message_instance, value)
-        end
-      end
-
       def extension?
         !!@extension
       end
@@ -219,14 +210,6 @@ module Protobuf
             @values[field.name].replace(val)
           end
         end
-      end
-
-      def merge_array(message_instance, value)
-        message_instance.__send__(@name).concat(value)
-      end
-
-      def merge_value(message_instance, value)
-        message_instance.__send__("#{@name}=", value)
       end
 
       def typed_default_value
@@ -645,9 +628,6 @@ module Protobuf
         end
       end
 
-      def merge_value(message_instance, value)
-        message_instance.__send__(@name).merge_from(value)
-      end
     end
 
 
