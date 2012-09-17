@@ -76,7 +76,7 @@ describe Protobuf::Logger do
         subject.fatal 'No errors here'
         subject.add 'No errors here'
         subject.log 'No errors here'
-      }.should_not raise_error
+      }.to_not raise_error
     end
     
     it 'logs correctly when instance is valid' do

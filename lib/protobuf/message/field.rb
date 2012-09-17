@@ -131,17 +131,20 @@ module Protobuf
 
       # Is this a repeated field?
       def repeated?
-        @rule == :repeated
+        return @_repeated unless @_repeated.nil?
+        @_repeated = (@rule == :repeated)
       end
 
       # Is this a required field?
       def required?
-        @rule == :required
+        return @_required unless @_required.nil?
+        @_required = (@rule == :required)
       end
 
       # Is this a optional field?
       def optional?
-        @rule == :optional
+        return @_optional unless @_optional.nil?
+        @_optional = (@rule == :optional)
       end
 
       # Is this a packed repeated field?

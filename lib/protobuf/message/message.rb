@@ -51,14 +51,26 @@ module Protobuf
       # Define a field. Don't use this method directly.
       def define_field(rule, type, fname, tag, options)
         field_hash = options[:extension] ? extension_fields : fields
+        field_name_hash = options[:extension] ? extension_fields_by_name : fields_by_name
         if field_hash.keys.include?(tag)
           raise TagCollisionError, %!{Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
         end
-        field_hash[tag] = Field.build(self, rule, type, fname, tag, options)
+        field_definition = Field.build(self, rule, type, fname, tag, options)
+        field_name_hash[fname.to_sym] = field_definition
+        field_hash[tag] = field_definition
       end
 
       def extension_tag?(tag)
         extension_fields.include_tag?(tag)
+      end
+      
+      # An extension field object.
+      def extension_fields
+        @extension_fields ||= ExtensionFields.new
+      end
+
+      def extension_fields_by_name
+        @extension_fields_by_name ||= {}
       end
 
       # A collection of field object.
@@ -66,15 +78,14 @@ module Protobuf
         @fields ||= {}
       end
 
-      # An extension field object.
-      def extension_fields
-        @extension_fields ||= ExtensionFields.new
+      def fields_by_name
+        @field_by_name ||= {}
       end
 
       # Find a field object by +name+.
       def get_field_by_name(name)
-        name = name.to_sym
-        fields.values.find {|field| field.name == name}
+        # Check if the name has been used before, if not then set it to the sym value
+        fields_by_name[name] ||= fields_by_name[name.to_sym]
       end
 
       # Find a field object by +tag+ number.
@@ -93,8 +104,8 @@ module Protobuf
 
       #TODO merge to get_field_by_name
       def get_ext_field_by_name(name)
-        name = name.to_sym
-        extension_fields.values.find {|field| field.name == name}
+        # Check if the name has been used before, if not then set it to the sym value
+        extension_fields_by_name[name] ||= extension_fields_by_name[name.to_sym]
       end
 
       #TODO merge to get_field_by_tag
@@ -122,7 +133,11 @@ module Protobuf
       self.class.fields.each do |tag, field|
         unless field.ready?
           field = field.setup
-          self.class.class_eval {@fields[tag] = field}
+          self.class.class_eval {
+            fields[tag] = field
+            fields_by_name[field.name.to_sym] = field
+            fields_by_name[field.name] = field
+          }
         end
         if field.repeated?
           @values[field.name] = Field::FieldArray.new(field)
@@ -133,7 +148,11 @@ module Protobuf
       self.class.extension_fields.each do |tag, field|
         unless field.ready?
           field = field.setup
-          self.class.class_eval {@extension_fields[tag] = field}
+          self.class.class_eval {
+            extension_fields[tag] = field
+            extension_fields_by_name[field.name.to_sym] = field
+            extension_fields_by_name[field.name] = field
+          }
         end
         if field.repeated?
           @values[field.name] = Field::FieldArray.new(field)
@@ -314,6 +333,10 @@ module Protobuf
     end
 
     # Returns a hash; which key is a tag number, and value is a field object.
+    def all_fields
+      @all_fields ||= fields.merge(extension_fields).sort_by { |tag, _| tag }   
+    end
+
     def fields
       self.class.fields
     end
@@ -355,7 +378,7 @@ module Protobuf
     #     # do something
     #   end
     def each_field
-      fields.merge(extension_fields).sort_by {|tag, _| tag}.each do |_, field|
+      all_fields.each do |_, field|
         value = __send__(field.name)
         yield(field, value)
       end
