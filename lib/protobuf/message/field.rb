@@ -129,6 +129,10 @@ module Protobuf
         end
       end
 
+      def extension?
+        !!@extension
+      end
+
       # Is this a repeated field?
       def repeated?
         return @_repeated unless @_repeated.nil?

@@ -28,6 +28,14 @@ module Protobuf
     class << self
       include Protoable
 
+      def all_fields
+        @all_fields ||= begin
+            fields_hash = fields.merge(extension_fields)
+            ordered_keys = fields_hash.keys.sort
+            ordered_keys.map { |key| fields_hash[key] }
+          end
+      end
+
       # Reserve field numbers for extensions. Don't use this method directly.
       def extensions(range)
         @extension_fields = ExtensionFields.new(range)
@@ -48,13 +56,19 @@ module Protobuf
         define_field(:repeated, type, name, tag, options)
       end
 
+      def descriptor
+        @descriptor ||= Descriptor::Descriptor.new(self)
+      end
+
       # Define a field. Don't use this method directly.
       def define_field(rule, type, fname, tag, options)
         field_hash = options[:extension] ? extension_fields : fields
         field_name_hash = options[:extension] ? extension_fields_by_name : fields_by_name
+
         if field_hash.keys.include?(tag)
           raise TagCollisionError, %!{Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
         end
+
         field_definition = Field.build(self, rule, type, fname, tag, options)
         field_name_hash[fname.to_sym] = field_definition
         field_hash[tag] = field_definition
@@ -80,6 +94,14 @@ module Protobuf
 
       def fields_by_name
         @field_by_name ||= {}
+      end
+
+      def repeated_fields
+        @repeated_fields ||= []
+      end
+
+      def repeated_extension_fields
+        @repeated_extension_fields ||= []
       end
 
       # Find a field object by +name+.
@@ -122,44 +144,68 @@ module Protobuf
         end
       end
 
-      def descriptor
-        @descriptor ||= Descriptor::Descriptor.new(self)
+      def initialize_unready_fields
+        unless @unready_initialized
+          initialize_type_fields
+          initialize_type_extension_fields
+          @unready_initialized = true
+        end
+      end
+
+      def initialize_type_fields
+        fields.each do |tag, field|
+          unless field.ready?
+            field = field.setup
+            fields[tag] = field
+            fields_by_name[field.name.to_sym] = field
+            fields_by_name[field.name] = field
+          end
+        end
+      end
+
+      def initialize_type_extension_fields
+        extension_fields.each do |tag, field|
+          unless field.ready?
+            field = field.setup
+            extension_fields[tag] = field
+            extension_fields_by_name[field.name.to_sym] = field
+            extension_fields_by_name[field.name] = field
+          end
+        end
+      end
+
+      def setup_repeated_field_arrays
+        unless @repeated_fields_setup
+          all_fields.each do |field|
+            next unless field.repeated?
+
+            if field.extension?
+              repeated_extension_fields << field
+            else
+              repeated_fields << field
+            end
+          end
+
+          @repeated_fields_setup = true
+        end
       end
     end
 
     def initialize(values={})
       @values = {}
 
-      self.class.fields.each do |tag, field|
-        unless field.ready?
-          field = field.setup
-          self.class.class_eval {
-            fields[tag] = field
-            fields_by_name[field.name.to_sym] = field
-            fields_by_name[field.name] = field
-          }
-        end
-        if field.repeated?
-          @values[field.name] = Field::FieldArray.new(field)
-        end
+      self.class.initialize_unready_fields
+      self.class.setup_repeated_field_arrays
+
+      self.class.repeated_fields.each do |field|
+        @values[field.name] = Field::FieldArray.new(field)
       end
 
-      # TODO
-      self.class.extension_fields.each do |tag, field|
-        unless field.ready?
-          field = field.setup
-          self.class.class_eval {
-            extension_fields[tag] = field
-            extension_fields_by_name[field.name.to_sym] = field
-            extension_fields_by_name[field.name] = field
-          }
-        end
-        if field.repeated?
-          @values[field.name] = Field::FieldArray.new(field)
-        end
+      self.class.repeated_extension_fields.each do |field|
+        @values[field.name] = Field::FieldArray.new(field)
       end
 
-      values.each {|tag, val| self[tag] = val}
+      values.each { |tag, val| self[tag] = val}
     end
 
     def initialized?
@@ -334,7 +380,8 @@ module Protobuf
 
     # Returns a hash; which key is a tag number, and value is a field object.
     def all_fields
-      @all_fields ||= fields.merge(extension_fields).sort_by { |tag, _| tag }   
+#      self.class.all_fields
+      @all_fields ||= fields.merge(extension_fields).sort_by {|tag, _| tag}
     end
 
     def fields
