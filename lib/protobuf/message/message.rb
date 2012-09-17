@@ -380,8 +380,7 @@ module Protobuf
 
     # Returns a hash; which key is a tag number, and value is a field object.
     def all_fields
-#      self.class.all_fields
-      @all_fields ||= fields.merge(extension_fields).sort_by {|tag, _| tag}
+      self.class.all_fields
     end
 
     def fields
@@ -425,7 +424,7 @@ module Protobuf
     #     # do something
     #   end
     def each_field
-      all_fields.each do |_, field|
+      all_fields.each do |field|
         value = __send__(field.name)
         yield(field, value)
       end
