@@ -8,6 +8,20 @@ module Protobuf
   module Rpc
     module Server
 
+      def _gc_pause_request
+        @_gc_pause_request ||= begin
+                 defined?(::Protobuf::Rpc::GC_PAUSE_REQUEST) &&
+                   ::Protobuf::Rpc::GC_PAUSE_REQUEST
+               end
+      end
+
+      def _gc_pause_serialization
+        @_gc_pause_serialization ||= begin
+                 defined?(::Protobuf::Rpc::GC_PAUSE_SERIALIZATION) &&
+                   ::Protobuf::Rpc::GC_PAUSE_SERIALIZATION
+               end
+      end
+
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
         # Parse the protobuf request from the socket
@@ -20,6 +34,7 @@ module Protobuf
 
         # Call the service method
         log_debug { "[#{log_signature}] Dispatching client request to service" }
+        GC.disable if _gc_pause_request 
         invoke_rpc_method
       rescue => error
         # Ensure we're handling any errors that try to slip out the back door
@@ -132,13 +147,18 @@ module Protobuf
         @stats.end
         @stats.log_stats
         @did_respond = true
+      ensure
+        GC.enable if _gc_pause_request 
       end
 
       def serialize_response(response)
+        GC.disable if _gc_pause_serialization 
         log_debug { "[#{log_signature}] serializing response: %s" % response.inspect }
         @response.response_proto = response.serialize_to_string
       rescue
         raise BadResponseProto, $!.message
+      ensure
+        GC.enable if _gc_pause_serialization
       end
     end
   end
