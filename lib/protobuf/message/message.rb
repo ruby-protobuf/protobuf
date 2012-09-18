@@ -115,9 +115,13 @@ module Protobuf
         fields[tag]
       end
 
+      def field_cache
+        @field_cache ||= {}
+      end
+
       # Find a field object by +tag_or_name+.
       def get_field(tag_or_name)
-        case tag_or_name
+        field_cache[tag_or_name] ||= case tag_or_name
         when Integer        then get_field_by_tag(tag_or_name)
         when String, Symbol then get_field_by_name(tag_or_name)
         else                     raise TypeError, tag_or_name.class
