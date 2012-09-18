@@ -355,7 +355,7 @@ module Protobuf
       UINT32_MAX =  2**32 - 1
       UINT64_MAX =  2**64 - 1
 
-      class <<self
+      class << self
         def default
           0
         end

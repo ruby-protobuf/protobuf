@@ -373,11 +373,11 @@ module Protobuf
 
     # Returns a hash; which key is a tag number, and value is a field object.
     def all_fields
-      self.class.all_fields
+      @_all_fields ||= self.class.all_fields
     end
 
     def fields
-      self.class.fields
+      @_fields ||= self.class.fields
     end
 
     # Returns field object or +nil+.
