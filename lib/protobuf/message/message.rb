@@ -274,7 +274,7 @@ module Protobuf
     def inspect(indent=0)
       result = []
       i = '  ' * indent
-      field_value_to_string = lambda {|field, value|
+      field_value_to_string = lambda { |field, value|
         result << \
           if field.optional? && ! has_field?(field.name)
             ''
