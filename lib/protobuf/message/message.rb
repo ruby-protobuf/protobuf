@@ -1,3 +1,4 @@
+require 'set'
 require 'protobuf/descriptor/descriptor'
 require 'protobuf/message/decoder'
 require 'protobuf/message/encoder'
@@ -22,6 +23,18 @@ module Protobuf
 
       def include_tag?(tag)
         @key_range.include?(tag)
+      end
+    end
+
+    def self.inherited(klass)
+      @_children ||= Set.new
+      @_children << klass
+    end
+
+    def self.pre_cache_class_definitions
+      @_children ||= Set.new
+      @_children.each do |child_class|
+        child_class.new
       end
     end
 
