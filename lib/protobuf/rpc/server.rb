@@ -9,17 +9,13 @@ module Protobuf
     module Server
 
       def _gc_pause_request
-        @_gc_pause_request ||= begin
-                 defined?(::Protobuf::Rpc::GC_PAUSE_REQUEST) &&
-                   ::Protobuf::Rpc::GC_PAUSE_REQUEST
-               end
+        return @_gc_pause_request unless @_gc_pause_request.nil?
+        @_gc_pause_request ||= (defined?(::Protobuf::Rpc::GC_PAUSE_REQUEST) && ::Protobuf::Rpc::GC_PAUSE_REQUEST)
       end
 
       def _gc_pause_serialization
-        @_gc_pause_serialization ||= begin
-                 defined?(::Protobuf::Rpc::GC_PAUSE_SERIALIZATION) &&
-                   ::Protobuf::Rpc::GC_PAUSE_SERIALIZATION
-               end
+        return @_gc_pause_serialization unless @_gc_pause_serialization.nil?
+        @_gc_pause_serialization ||= (defined?(::Protobuf::Rpc::GC_PAUSE_SERIALIZATION) && ::Protobuf::Rpc::GC_PAUSE_SERIALIZATION)
       end
 
       # Invoke the service method dictated by the proto wrapper request object
