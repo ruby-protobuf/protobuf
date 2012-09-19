@@ -12,6 +12,8 @@ require 'protobuf/rpc/servers/zmq_runner'
 server = OpenStruct.new({
   :app => nil,
   :env => ENV['RPC_SERVER_ENV'] || 'development',
+  :gc_pause_during_request => false,
+  :gc_pause_during_serialization => false,
   :host => '127.0.0.1',
   :port => 9595,
   :backlog => 100,
@@ -76,6 +78,14 @@ parser = OptionParser.new do |opts|
 
     server.runner = ::Protobuf::Rpc::ZmqRunner
   end
+
+  opts.on("--[no-]gc-pause-request", "Enable/Disable GC pause during request.") do |v|
+    server.gc_pause_during_request = v
+  end
+
+  opts.on("--[no-]gc-pause-serialization", "Enable/Disable GC pause during serialization.") do |v|
+    server.gc_pause_during_serialization = v
+  end
   
   opts.on("-d", "--[no-]debug", "Debug Mode. Override log level to DEBUG.") do |v|
     server.debug = v
@@ -120,6 +130,13 @@ elsif(ENV['PB_SERVER_TYPE'] =~ /socket/i)
   server.runner = ::Protobuf::Rpc::SocketRunner
 end
 
+##
+# Setup GC settings
+# 
+::Protobuf::Rpc::GC_PAUSE_REQUEST = server.gc_pause_during_request
+# If we pause during request we don't need to pause in serialization
+::Protobuf::Rpc::GC_PAUSE_SERIALIZATION = (!server.gc_pause_during_request && server.gc_pause_during_serialization)
+
 # protobuf.rb picks up PB_CLIENT_TYPE and PB_SERVER_TYPE and does something
 # useful with them
 require 'protobuf'
@@ -141,11 +158,11 @@ begin
   end
 
   # Configure the ::Protobuf::Logger
-  ::Protobuf::Logger.configure :file => server.log, :level => server.debug ? ::Logger::DEBUG : server.level
+  ::Protobuf::Logger.configure(:file => server.log, :level => server.debug ? ::Logger::DEBUG : server.level)
 
   # Output the server opts
-  ::Protobuf::Logger.debug 'Debugging options:'
-  ::Protobuf::Logger.debug server.inspect
+  ::Protobuf::Logger.debug { 'Debugging options:' }
+  ::Protobuf::Logger.debug { server.inspect }
   
   # Set the name of the process
   $0 = 'rpc_server %s:%d %s' % [server.host, server.port, server.app]
@@ -156,8 +173,8 @@ begin
   server.runner.run(server)
 rescue
   msg = 'ERROR: RPC Server failed to start. %s' % $!.inspect
-  $stderr.puts msg, *($!.backtrace)
-  ::Protobuf::Logger.error msg
-  ::Protobuf::Logger.error $!.backtrace.join("\n")
+  $stderr.puts(msg, *($!.backtrace))
+  ::Protobuf::Logger.error { msg }
+  ::Protobuf::Logger.error { $!.backtrace.join("\n") }
   exit 1
 end

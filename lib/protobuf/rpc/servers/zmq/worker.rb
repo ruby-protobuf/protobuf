@@ -12,7 +12,6 @@ module Protobuf
         # Constructor
         #
         def initialize(opts={})
-
           @options = opts
           host = @options.fetch(:host, "127.0.0.1")
           port = @options.fetch(:port, 9400)
@@ -60,7 +59,7 @@ module Protobuf
         end
 
         def send_data
-          response_data = @response.is_a?(Protobuf::Message) ? @response.serialize_to_string : @response.to_s
+          response_data = @response.is_a?(::Protobuf::Message) ? @response.serialize_to_string : @response.to_s
           @stats.response_size = response_data.size
           zmq_error_check(@socket.send_string(response_data))
           @did_respond = true

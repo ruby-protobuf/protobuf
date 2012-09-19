@@ -3,12 +3,12 @@ module Protobuf
     class SocketRunner 
 
       def self.stop
-        Protobuf::Rpc::Socket::Server.stop 
-        Protobuf::Logger.info 'Shutdown complete'
+        ::Protobuf::Rpc::Socket::Server.stop 
+        ::Protobuf::Logger.info { 'Shutdown complete' }
       end
 
       def self.run(server)
-        Protobuf::Logger.info "Socket::Server Running"
+        ::Protobuf::Logger.info { "Socket::Server Running" }
         server_config = case 
                         when server.is_a?(OpenStruct) then 
                           server.marshal_dump
@@ -20,9 +20,9 @@ module Protobuf
                           raise "Cannot parser Socket Server - server options"
                         end
 
-        Protobuf::Rpc::Socket::Server.run(server_config)
+        ::Protobuf::Rpc::Socket::Server.run(server_config)
       end
-    end
 
+    end
   end
 end
