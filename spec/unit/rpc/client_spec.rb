@@ -161,7 +161,7 @@ describe Protobuf::Rpc::Client do
     it 'should respond to defined service methods' do
       client = Spec::Proto::TestService.client
       client.should_receive(:send_request).and_return(nil)
-      expect { client.find(nil) }.should_not raise_error
+      expect { client.find(nil) }.to_not raise_error
     end
 
     it 'raises a NameError when accessing a var that does not exist' do

@@ -9,3 +9,4 @@ doc
 .yardoc
 .DS_Store
 *.bin
+Gemfile.lock

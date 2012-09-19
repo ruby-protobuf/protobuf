@@ -4,7 +4,7 @@ require 'protobuf/message/protoable'
 
 module Protobuf
   class Enum
-    class <<self
+    class << self
       include Protoable
 
       attr_reader :values

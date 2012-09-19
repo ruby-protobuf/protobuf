@@ -120,28 +120,26 @@ module Protobuf
         raise NotImplementedError, "#{self.class.name}\#encode"
       end
 
-      # Merge +value+ with +message_instance+.
-      def merge(message_instance, value)
-        if repeated?
-          merge_array(message_instance, value)
-        else
-          merge_value(message_instance, value)
-        end
+      def extension?
+        !!@extension
       end
 
       # Is this a repeated field?
       def repeated?
-        @rule == :repeated
+        return @_repeated unless @_repeated.nil?
+        @_repeated = (@rule == :repeated)
       end
 
       # Is this a required field?
       def required?
-        @rule == :required
+        return @_required unless @_required.nil?
+        @_required = (@rule == :required)
       end
 
       # Is this a optional field?
       def optional?
-        @rule == :optional
+        return @_optional unless @_optional.nil?
+        @_optional = (@rule == :optional)
       end
 
       # Is this a packed repeated field?
@@ -183,11 +181,12 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method(field.name) do
-            if @values.has_key?(field.name)
-              @values[field.name]
-            else
-              field.default_value
-            end
+            @values[field.name] || field.default_value
+#            if @values.has_key?(field.name)
+#              @values[field.name]
+#            else
+#              field.default_value
+#            end
           end
         end
       end
@@ -212,14 +211,6 @@ module Protobuf
             @values[field.name].replace(val)
           end
         end
-      end
-
-      def merge_array(message_instance, value)
-        message_instance.__send__(@name).concat(value)
-      end
-
-      def merge_value(message_instance, value)
-        message_instance.__send__("#{@name}=", value)
       end
 
       def typed_default_value
@@ -365,7 +356,7 @@ module Protobuf
       UINT32_MAX =  2**32 - 1
       UINT64_MAX =  2**64 - 1
 
-      class <<self
+      class << self
         def default
           0
         end
@@ -638,9 +629,6 @@ module Protobuf
         end
       end
 
-      def merge_value(message_instance, value)
-        message_instance.__send__(@name).merge_from(value)
-      end
     end
 
 
