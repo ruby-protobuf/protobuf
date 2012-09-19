@@ -12,6 +12,7 @@ require 'protobuf/rpc/servers/zmq_runner'
 server = OpenStruct.new({
   :app => nil,
   :env => ENV['RPC_SERVER_ENV'] || 'development',
+  :pre_cache_definitions => false,
   :gc_pause_during_request => false,
   :gc_pause_during_serialization => false,
   :host => '127.0.0.1',
@@ -77,6 +78,10 @@ parser = OptionParser.new do |opts|
     ENV['PB_SERVER_TYPE'] = 'Zmq'
 
     server.runner = ::Protobuf::Rpc::ZmqRunner
+  end
+
+  opts.on("--[no-]pre-cache-definitions", "Enable/Disable Message class pre-caching") do |v|
+    server.pre_cache_definitions = v
   end
 
   opts.on("--[no-]gc-pause-request", "Enable/Disable GC pause during request.") do |v|
@@ -170,6 +175,7 @@ begin
   # Require the given application file
   require server.app
 
+  ::Protobuf::Message.pre_cache_class_definitions if server.pre_cache_definitions
   server.runner.run(server)
 rescue
   msg = 'ERROR: RPC Server failed to start. %s' % $!.inspect
