@@ -80,7 +80,7 @@ parser = OptionParser.new do |opts|
     server.runner = ::Protobuf::Rpc::ZmqRunner
   end
 
-  opts.on("--[no-]-pre-cache-definitions", "Enable/Disable Message class pre-caching") do |v|
+  opts.on("--[no-]pre-cache-definitions", "Enable/Disable Message class pre-caching") do |v|
     server.pre_cache_definitions = v
   end
 
