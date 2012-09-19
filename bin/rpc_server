@@ -175,7 +175,7 @@ begin
   # Require the given application file
   require server.app
 
-  ::Protobuf::Message::Message.pre_cache_class_definitions if server.pre_cache_definitions
+  ::Protobuf::Message.pre_cache_class_definitions if server.pre_cache_definitions
   server.runner.run(server)
 rescue
   msg = 'ERROR: RPC Server failed to start. %s' % $!.inspect
