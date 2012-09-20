@@ -181,12 +181,7 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method(field.name) do
-            @values[field.name] || field.default_value
-#            if @values.has_key?(field.name)
-#              @values[field.name]
-#            else
-#              field.default_value
-#            end
+            @values.fetch(field.name, field.default_value)
           end
         end
       end
