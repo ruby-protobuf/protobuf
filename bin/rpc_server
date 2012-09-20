@@ -22,7 +22,8 @@ server = OpenStruct.new({
   :log => File.expand_path('./protobuf.log'),
   :level => ::Logger::INFO,
   :runner => ::Protobuf::Rpc::EventedRunner, 
-  :debug => false
+  :debug => false,
+  :stopped_during_startup => false
 })
 
 class ClientServerParse
@@ -148,6 +149,7 @@ require 'protobuf'
 
 [:INT, :QUIT, :TERM].each do |sig|
   trap(sig) do
+    server.stopped_during_startup = true
     server.runner.stop
   end
 end
@@ -173,10 +175,13 @@ begin
   $0 = 'rpc_server %s:%d %s' % [server.host, server.port, server.app]
   
   # Require the given application file
-  require server.app
+  require server.app unless server.stopped_during_startup
 
-  ::Protobuf::Message.pre_cache_class_definitions if server.pre_cache_definitions
-  server.runner.run(server)
+  if server.pre_cache_definitions && !server.stopped_during_startup
+    ::Protobuf::Message.pre_cache_class_definitions 
+  end
+
+  server.runner.run(server) unless server.stopped_during_startup
 rescue
   msg = 'ERROR: RPC Server failed to start. %s' % $!.inspect
   $stderr.puts(msg, *($!.backtrace))
