@@ -108,11 +108,10 @@ module Protobuf
         log_debug { "[#{log_signature}] response (should/actual): %s/%s" % [expected.name, actual.name] }
 
         # Determine if the service tried to change response types on us
-        if expected == actual
-          serialize_response(response)
-        else
-          # response types do not match, throw the appropriate error
+        if expected != actual
           raise ::Protobuf::Rpc::BadResponseProto, 'Response proto changed from %s to %s' % [expected.name, actual.name]
+        else
+          @response.response_proto = response
         end
       rescue => error
         log_error error.message
@@ -145,16 +144,6 @@ module Protobuf
         @did_respond = true
       ensure
         GC.enable if _gc_pause_request 
-      end
-
-      def serialize_response(response)
-        GC.disable if _gc_pause_serialization 
-        log_debug { "[#{log_signature}] serializing response: %s" % response.inspect }
-        @response.response_proto = response.serialize_to_string
-      rescue
-        raise BadResponseProto, $!.message
-      ensure
-        GC.enable if _gc_pause_serialization
       end
     end
   end

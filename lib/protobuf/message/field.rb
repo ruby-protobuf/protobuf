@@ -319,8 +319,11 @@ module Protobuf
       end
 
       def acceptable?(val)
-        raise TypeError unless val.instance_of?(String)
-        true
+        if val.is_a?(::Protobuf::Message) || val.instance_of?(String)
+          return true
+        end
+
+        raise TypeError
       end
 
       def decode(bytes)
@@ -329,8 +332,13 @@ module Protobuf
       end
 
       def encode(value)
-        value = value.dup
-        value.force_encoding('ASCII-8BIT') if value.respond_to?(:force_encoding)
+        if value.is_a?(::Protobuf::Message)
+          value = value.serialize_to_string
+        else
+          value = value.dup
+          value.force_encoding('ASCII-8BIT') if value.respond_to?(:force_encoding)
+        end
+
         string_size = VarintField.encode(value.size)
         string_size << value
       end
