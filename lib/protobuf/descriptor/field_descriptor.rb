@@ -1,7 +1,7 @@
 module Protobuf
   module Descriptor
     class FieldDescriptor
-      def initialize(field_instance=nil)
+      def initialize(field_instance = nil)
         @field_instance = field_instance
       end
 
@@ -19,7 +19,7 @@ module Protobuf
         cls.define_field(rule, type, proto.name, proto.number, opts)
       end
 
-      def unbuild(parent_proto, extension=false)
+      def unbuild(parent_proto, extension = false)
         field_proto = Google::Protobuf::FieldDescriptorProto.new
         field_proto.name = @field_instance.name.to_s
         field_proto.number = @field_instance.tag

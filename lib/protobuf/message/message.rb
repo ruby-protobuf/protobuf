@@ -4,7 +4,6 @@ require 'protobuf/message/decoder'
 require 'protobuf/message/encoder'
 require 'protobuf/message/field'
 require 'protobuf/message/protoable'
-require 'json'
 
 module Protobuf
   OPTIONS = {}

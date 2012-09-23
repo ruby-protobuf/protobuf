@@ -18,9 +18,8 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
+  s.add_dependency 'activesupport'
   s.add_dependency 'eventmachine'
-  s.add_dependency 'eventually'
-  s.add_dependency 'json_pure'
   s.add_dependency 'ffi-rzmq'
 
   s.add_development_dependency 'rake'
