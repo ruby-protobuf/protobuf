@@ -1,4 +1,3 @@
-require 'protobuf/common/util'
 require 'protobuf/descriptor/descriptor_proto'
 
 module Protobuf
@@ -73,7 +72,7 @@ require 'protobuf/message/extend'
       def accept_message_visitor(visitor)
         visitor.package = @path_list.dup
         @path_list.each do |path|
-          visitor.write("module #{Util.camelize(path)}")
+          visitor.write("module #{path.camelize}")
           visitor.increment
         end
       end
@@ -251,7 +250,7 @@ require 'protobuf/message/extend'
           opts << ', :extension => true'
         end
         type = if @type.is_a?(Array)
-               then (@type.size > 1) ? "'#{@type.map{|e| Util.camelize(e) }.join('::')}'" : @type[0]
+               then (@type.size > 1) ? "'#{@type.map{ |e| e.camelize }.join('::')}'" : @type[0]
                else @type
                end
         visitor.write("#{@label} :#{type}, :#{@name}, #{@value}#{opts}")

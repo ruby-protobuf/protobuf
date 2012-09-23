@@ -121,8 +121,8 @@ module Protobuf
 
       # Parses and returns the service and method name from the request wrapper proto
       def parse_service_info
-        @klass = ::Protobuf::Util.constantize(@request.service_name)
-        @method = ::Protobuf::Util.underscore(@request.method_name).to_sym
+        @klass = @request.service_name.constantize
+        @method = @request.method_name.underscore.to_sym
 
         unless @klass.instance_methods.include?(@method)
           raise MethodNotFound, "Service method #{@request.method_name} is not defined by the service"

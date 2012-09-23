@@ -120,7 +120,7 @@ module Protobuf
       else 
         
         file = File.basename(filename)
-        message_module = Util.module_to_path(package.map{|p| p.to_s.capitalize}.join('::'))
+        message_module = (package.map{|p| p.to_s.capitalize}.join('::')).underscore
         filename = "#{out_dir}/#{message_module}/#{file}"
         
         if file_create
@@ -148,16 +148,19 @@ module Protobuf
       end
 
       def add_rpc(name, request, response)
-        (@services[@current_service] ||= []) << [name, Util.moduleize(request), Util.moduleize(response)]
+        request_module = request.gsub(".", "_").classify
+        response_module = request.gsub(".", "_").classify
+        
+        (@services[@current_service] ||= []) << [name, request_module, response_module]
       end
 
       def create_files(message_file, out_dir, create_file=true)
         @create_file = create_file
         @services.each do |service_name, rpcs|
-          underscored_name = Util.underscore(service_name.to_s)
-          message_module = package.map{|p| p.to_s.capitalize}.join('::')
+          underscored_name = "#{service_name}".underscore
+          message_module = package.map{ |p| p.to_s.capitalize}.join('::')
           required_file = [
-            Util.module_to_path(message_module),
+            message_module.underscore,
             File.basename(message_file, '.rb')
           ].join('/').gsub(/\/{2,}/, '/')
 
@@ -167,7 +170,7 @@ module Protobuf
       end
 
       def create_service(message_file, out_dir, underscored_name, module_name, service_name, rpcs, required_file)
-        service_filename = "#{out_dir}/#{Util.module_to_path(module_name)}/#{underscored_name}.rb"
+        service_filename = "#{out_dir}/#{module_name.underscore}/#{underscored_name}.rb"
         service_contents = template_erb('rpc_service_implementation').result(binding)
         create_file_with_backup(service_filename, service_contents) if @create_file
         @file_contents[service_filename] = service_contents

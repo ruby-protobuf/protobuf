@@ -1,11 +1,16 @@
 module Protobuf
   module Field
     class FieldArray < Array
-
+      ##
+      # Constructor
+      #
       def initialize(field)
         @field = field
       end
 
+      ## 
+      # Public Instance Methods
+      #
       def []=(nth, val)
         super(nth, normalize(val))
       end
@@ -31,12 +36,15 @@ module Protobuf
       def to_s
         "[#{@field.name}]"
       end
-
+      
       private
 
+      ##
+      # Private Instance Methods
+      #
       def normalize(val)
         raise TypeError unless @field.acceptable?(val)
-        if @field.is_a?(MessageField) && val.is_a?(Hash)
+        if @field.is_a?(::Protobuf::Field::MessageField) && val.is_a?(Hash)
           @field.type.new(val)
         else
           val

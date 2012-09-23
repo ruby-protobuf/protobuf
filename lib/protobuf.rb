@@ -2,6 +2,7 @@ require 'logger'
 require 'socket'
 require 'pp'
 require 'stringio'
+require 'active_support/all'
 
 module Protobuf
 end

@@ -3,10 +3,9 @@ require 'protobuf/field/base_field'
 module Protobuf
   module Field
     class MessageField < BaseField
-      def wire_type
-        WireType::LENGTH_DELIMITED
-      end
-
+      ##
+      # Public Instance Methods
+      #
       def acceptable?(val)
         raise TypeError unless val.instance_of?(type) || val.instance_of?(Hash)
         true
@@ -17,11 +16,15 @@ module Protobuf
         message.parse_from_string(bytes)
         message
       end
-
+      
       def encode(value)
         bytes = value.serialize_to_string
         result = VarintField.encode(bytes.size)
         result << bytes
+      end
+
+      def wire_type
+        ::WireType::LENGTH_DELIMITED
       end
 
       private

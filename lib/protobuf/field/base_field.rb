@@ -1,26 +1,29 @@
-require 'protobuf/field/field_array'
 require 'protobuf/common/wire_type'
 require 'protobuf/descriptor/field_descriptor'
+require 'protobuf/field/field_array'
 
 module Protobuf
   module Field
     class BaseField
-
-      attr_reader :message_class, :rule, :type, :name, :tag, :default
-      attr_reader :default_value
+      ##
+      # Attributes
+      #
+      attr_reader :message_class, :rule, :type, :name, :tag, :default, :default_value
       
-      def self.descriptor
-        @descriptor ||= ::Protobuf::Descriptor::FieldDescriptor.new
-      end
-
+      ##
+      # Class Methods
+      #
       def self.default
         nil
       end
 
-      def descriptor
-        @descriptor ||= ::Protobuf::Descriptor::FieldDescriptor.new(self)
+      def self.descriptor
+        @descriptor ||= ::Protobuf::Descriptor::FieldDescriptor.new
       end
 
+      ##
+      # Constructor
+      #
       def initialize(message_class, rule, type, name, tag, options)
         @message_class, @rule, @type, @name, @tag = \
           message_class, rule, type, name, tag
@@ -47,6 +50,17 @@ module Protobuf
           end
 
         define_accessor
+      end
+
+      ##
+      # Public Instance Methods
+      #
+      def acceptable?(value)
+        true
+      end
+
+      def descriptor
+        @descriptor ||= ::Protobuf::Descriptor::FieldDescriptor.new(self)
       end
 
       def ready?
@@ -136,10 +150,6 @@ module Protobuf
         self.class.min
       end
 
-      # Is a +value+ acceptable for this field?
-      def acceptable?(value)
-        true
-      end
 
       def to_s
         "#{@rule} #{@type} #{@name} = #{@tag} #{@default ? "[default=#{@default.inspect}]" : ''}"
@@ -147,12 +157,24 @@ module Protobuf
 
       private
 
+      ## 
+      # Private Instance Methods
+      #
       def define_accessor
         define_getter
         if repeated?
           define_array_setter
         else
           define_setter
+        end
+      end
+
+      def define_array_setter
+        field = self
+        @message_class.class_eval do
+          define_method("#{field.name}=") do |val|
+            @values[field.name].replace(val)
+          end
         end
       end
 
@@ -174,15 +196,6 @@ module Protobuf
             elsif field.acceptable?(val)
               @values[field.name] = val
             end
-          end
-        end
-      end
-
-      def define_array_setter
-        field = self
-        @message_class.class_eval do
-          define_method("#{field.name}=") do |val|
-            @values[field.name].replace(val)
           end
         end
       end
