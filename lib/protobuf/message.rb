@@ -21,172 +21,166 @@ module Protobuf
       end
     end
 
-    class << self
+    def self.all_fields
+      @all_fields ||= begin
+                        fields_hash = fields.merge(extension_fields)
+                        ordered_keys = fields_hash.keys.sort
+                        ordered_keys.map { |key| fields_hash[key] }
+                      end
+    end
 
-      def all_fields
-        @all_fields ||= begin
-            fields_hash = fields.merge(extension_fields)
-            ordered_keys = fields_hash.keys.sort
-            ordered_keys.map { |key| fields_hash[key] }
+    # Reserve field numbers for extensions. Don't use this method directly.
+    def self.extensions(range)
+      @extension_fields = ::Protobuf::Field::ExtensionFields.new(range)
+    end
+
+    # Define a required field. Don't use this method directly.
+    def self.required(type, name, tag, options={})
+      define_field(:required, type, name, tag, options)
+    end
+
+    # Define a optional field. Don't use this method directly.
+    def self.optional(type, name, tag, options={})
+      define_field(:optional, type, name, tag, options)
+    end
+
+    # Define a repeated field. Don't use this method directly.
+    def self.repeated(type, name, tag, options={})
+      define_field(:repeated, type, name, tag, options)
+    end
+
+    def self.descriptor
+      @descriptor ||= Descriptor::Descriptor.new(self)
+    end
+
+    # Define a field. Don't use this method directly.
+    def self.define_field(rule, type, fname, tag, options)
+      field_hash = options[:extension] ? extension_fields : fields
+      field_name_hash = options[:extension] ? extension_fields_by_name : fields_by_name
+
+      if field_hash.keys.include?(tag)
+        raise TagCollisionError, %!{Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
+      end
+
+      field_definition = Field.build(self, rule, type, fname, tag, options)
+      field_name_hash[fname.to_sym] = field_definition
+      field_hash[tag] = field_definition
+    end
+
+    def self.extension_tag?(tag)
+      extension_fields.include_tag?(tag)
+    end
+
+    # An extension field object.
+    def self.extension_fields
+      @extension_fields ||= ::Protobuf::Field::ExtensionFields.new
+    end
+
+    def self.extension_fields_by_name
+      @extension_fields_by_name ||= {}
+    end
+
+    # A collection of field object.
+    def self.fields
+      @fields ||= {}
+    end
+
+    def self.fields_by_name
+      @field_by_name ||= {}
+    end
+
+    def self.repeated_fields
+      @repeated_fields ||= []
+    end
+
+    def self.repeated_extension_fields
+      @repeated_extension_fields ||= []
+    end
+
+    # Find a field object by +name+.
+    def self.get_field_by_name(name)
+      # Check if the name has been used before, if not then set it to the sym value
+      fields_by_name[name] ||= fields_by_name[name.to_sym]
+    end
+
+    # Find a field object by +tag+ number.
+    def self.get_field_by_tag(tag)
+      fields[tag]
+    end
+
+    def self.field_cache
+      @field_cache ||= {}
+    end
+
+    # Find a field object by +tag_or_name+.
+    def self.get_field(tag_or_name)
+      field_cache[tag_or_name] ||= case tag_or_name
+                                   when Integer        then get_field_by_tag(tag_or_name)
+                                   when String, Symbol then get_field_by_name(tag_or_name)
+                                   else                     raise TypeError, tag_or_name.class
+                                   end
+    end
+
+    def self.get_ext_field_by_name(name)
+      # Check if the name has been used before, if not then set it to the sym value
+      extension_fields_by_name[name] ||= extension_fields_by_name[name.to_sym]
+    end
+
+    def self.get_ext_field_by_tag(tag)
+      extension_fields[tag]
+    end
+
+    def self.get_ext_field(tag_or_name)
+      case tag_or_name
+      when Integer        then get_ext_field_by_tag(tag_or_name)
+      when String, Symbol then get_ext_field_by_name(tag_or_name)
+      else                     raise TypeError, tag_or_name.class
+      end
+    end
+
+    def self.initialize_unready_fields
+      unless @unready_initialized
+        initialize_type_fields
+        initialize_type_extension_fields
+        @unready_initialized = true
+      end
+    end
+
+    def self.initialize_type_fields
+      fields.each do |tag, field|
+        unless field.ready?
+          field = field.setup
+          fields[tag] = field
+          fields_by_name[field.name.to_sym] = field
+          fields_by_name[field.name] = field
+        end
+      end
+    end
+
+    def self.initialize_type_extension_fields
+      extension_fields.each do |tag, field|
+        unless field.ready?
+          field = field.setup
+          extension_fields[tag] = field
+          extension_fields_by_name[field.name.to_sym] = field
+          extension_fields_by_name[field.name] = field
+        end
+      end
+    end
+
+    def self.setup_repeated_field_arrays
+      unless @repeated_fields_setup
+        all_fields.each do |field|
+          next unless field.repeated?
+
+          if field.extension?
+            repeated_extension_fields << field
+          else
+            repeated_fields << field
           end
-      end
-
-      # Reserve field numbers for extensions. Don't use this method directly.
-      def extensions(range)
-        @extension_fields = ::Protobuf::Field::ExtensionFields.new(range)
-      end
-
-      # Define a required field. Don't use this method directly.
-      def required(type, name, tag, options={})
-        define_field(:required, type, name, tag, options)
-      end
-
-      # Define a optional field. Don't use this method directly.
-      def optional(type, name, tag, options={})
-        define_field(:optional, type, name, tag, options)
-      end
-
-      # Define a repeated field. Don't use this method directly.
-      def repeated(type, name, tag, options={})
-        define_field(:repeated, type, name, tag, options)
-      end
-
-      def descriptor
-        @descriptor ||= Descriptor::Descriptor.new(self)
-      end
-
-      # Define a field. Don't use this method directly.
-      def define_field(rule, type, fname, tag, options)
-        field_hash = options[:extension] ? extension_fields : fields
-        field_name_hash = options[:extension] ? extension_fields_by_name : fields_by_name
-
-        if field_hash.keys.include?(tag)
-          raise TagCollisionError, %!{Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
         end
 
-        field_definition = Field.build(self, rule, type, fname, tag, options)
-        field_name_hash[fname.to_sym] = field_definition
-        field_hash[tag] = field_definition
-      end
-
-      def extension_tag?(tag)
-        extension_fields.include_tag?(tag)
-      end
-      
-      # An extension field object.
-      def extension_fields
-        @extension_fields ||= ::Protobuf::Field::ExtensionFields.new
-      end
-
-      def extension_fields_by_name
-        @extension_fields_by_name ||= {}
-      end
-
-      # A collection of field object.
-      def fields
-        @fields ||= {}
-      end
-
-      def fields_by_name
-        @field_by_name ||= {}
-      end
-
-      def repeated_fields
-        @repeated_fields ||= []
-      end
-
-      def repeated_extension_fields
-        @repeated_extension_fields ||= []
-      end
-
-      # Find a field object by +name+.
-      def get_field_by_name(name)
-        # Check if the name has been used before, if not then set it to the sym value
-        fields_by_name[name] ||= fields_by_name[name.to_sym]
-      end
-
-      # Find a field object by +tag+ number.
-      def get_field_by_tag(tag)
-        fields[tag]
-      end
-
-      def field_cache
-        @field_cache ||= {}
-      end
-
-      # Find a field object by +tag_or_name+.
-      def get_field(tag_or_name)
-        field_cache[tag_or_name] ||= case tag_or_name
-        when Integer        then get_field_by_tag(tag_or_name)
-        when String, Symbol then get_field_by_name(tag_or_name)
-        else                     raise TypeError, tag_or_name.class
-        end
-      end
-
-      #TODO merge to get_field_by_name
-      def get_ext_field_by_name(name)
-        # Check if the name has been used before, if not then set it to the sym value
-        extension_fields_by_name[name] ||= extension_fields_by_name[name.to_sym]
-      end
-
-      #TODO merge to get_field_by_tag
-      def get_ext_field_by_tag(tag)
-        extension_fields[tag]
-      end
-
-      #TODO merge to get_field
-      def get_ext_field(tag_or_name)
-        case tag_or_name
-        when Integer        then get_ext_field_by_tag(tag_or_name)
-        when String, Symbol then get_ext_field_by_name(tag_or_name)
-        else                     raise TypeError, tag_or_name.class
-        end
-      end
-
-      def initialize_unready_fields
-        unless @unready_initialized
-          initialize_type_fields
-          initialize_type_extension_fields
-          @unready_initialized = true
-        end
-      end
-
-      def initialize_type_fields
-        fields.each do |tag, field|
-          unless field.ready?
-            field = field.setup
-            fields[tag] = field
-            fields_by_name[field.name.to_sym] = field
-            fields_by_name[field.name] = field
-          end
-        end
-      end
-
-      def initialize_type_extension_fields
-        extension_fields.each do |tag, field|
-          unless field.ready?
-            field = field.setup
-            extension_fields[tag] = field
-            extension_fields_by_name[field.name.to_sym] = field
-            extension_fields_by_name[field.name] = field
-          end
-        end
-      end
-
-      def setup_repeated_field_arrays
-        unless @repeated_fields_setup
-          all_fields.each do |field|
-            next unless field.repeated?
-
-            if field.extension?
-              repeated_extension_fields << field
-            else
-              repeated_fields << field
-            end
-          end
-
-          @repeated_fields_setup = true
-        end
+        @repeated_fields_setup = true
       end
     end
 
@@ -250,7 +244,7 @@ module Protobuf
     end
 
     def copy_to(object, method)
-      duplicate = proc {|obj|
+      duplicate = proc { |obj|
         case obj
         when Message, String then obj.__send__(method)
         else                      obj
@@ -420,7 +414,7 @@ module Protobuf
         yield(field, value)
       end
     end
-    
+
     def to_hash
       result = {}
       build_value = lambda { |field, value|
@@ -452,7 +446,7 @@ module Protobuf
       end
       result
     end
-    
+
     def to_json
       to_hash.to_json
     end
