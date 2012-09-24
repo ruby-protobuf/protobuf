@@ -2,11 +2,17 @@ module Protobuf
   module Field
     class FieldProxy
 
+      ##
+      # Constructor
+      #
       def initialize(message_class, rule, type, name, tag, options)
         @message_class, @rule, @type, @name, @tag, @options =
           message_class, rule, type, name, tag, options
       end
 
+      ##
+      # Public Instance Methods
+      # 
       def ready?
         false
       end

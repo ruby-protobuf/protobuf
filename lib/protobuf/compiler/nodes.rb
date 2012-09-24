@@ -305,9 +305,6 @@ require 'protobuf/message/extend'
         @low, @high = low, high
       end
 
-      #def accept_message_visitor(visitor)
-      #end
-
       def to_s
         if @high.nil?
           @low.to_s
