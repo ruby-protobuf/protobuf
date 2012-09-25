@@ -20,52 +20,52 @@ namespace compiler {
 namespace ruby {
 
 class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
-  public:
-    RubyGenerator();
-    ~RubyGenerator();
+	public:
+		RubyGenerator();
+		~RubyGenerator();
 
-    // implemented Generate method from parent
-    bool Generate(const FileDescriptor* file,
-                    const string& parameter,
-                    GeneratorContext* context,
-                    string* error) const;
+		// implemented Generate method from parent
+		bool Generate(const FileDescriptor* file,
+			const string& parameter,
+			GeneratorContext* context,
+			string* error) const;
 
 
-  private:
-    mutable GeneratorContext* context_;
-    mutable io::Printer* printer_;
-    mutable const FileDescriptor* file_;
-    mutable string filename;
+	private:
+		mutable GeneratorContext* context_;
+		mutable io::Printer* printer_;
+		mutable const FileDescriptor* file_;
+		mutable string filename;
 		mutable vector<string> ns_vector;
 
-    GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RubyGenerator);
+		GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RubyGenerator);
 
 		void PrintEnclosingNamespaceModules() const;
 		void PrintEnclosingNamespaceModuleEnds() const;
 
-    void PrintMessagesForDescriptor(const Descriptor* descriptor, bool print_fields) const;
-    void PrintMessagesForFileDescriptor(const FileDescriptor* descriptor, bool print_fields) const;
-    void PrintMessageClass(const Descriptor* descriptor) const;
+		void PrintMessagesForDescriptor(const Descriptor* descriptor, bool print_fields) const;
+		void PrintMessagesForFileDescriptor(const FileDescriptor* descriptor, bool print_fields) const;
+		void PrintMessageClass(const Descriptor* descriptor) const;
 		void PrintExtensionRangesForDescriptor(const Descriptor* descriptor) const;
 		void PrintMessageFields(const Descriptor* descriptor) const;
-    void PrintMessageField(const FieldDescriptor* descriptor) const;
+		void PrintMessageField(const FieldDescriptor* descriptor) const;
 
-    void PrintEnumsForDescriptor(const Descriptor* descriptor, bool print_values) const;
-    void PrintEnumsForFileDescriptor(const FileDescriptor* descriptor, bool print_values) const;
-    void PrintEnumClass(const EnumDescriptor* descriptor) const;
-    void PrintEnumValues(const EnumDescriptor* descriptor) const;
-    void PrintEnumValue(const EnumValueDescriptor* descriptor) const;
+		void PrintEnumsForDescriptor(const Descriptor* descriptor, bool print_values) const;
+		void PrintEnumsForFileDescriptor(const FileDescriptor* descriptor, bool print_values) const;
+		void PrintEnumClass(const EnumDescriptor* descriptor) const;
+		void PrintEnumValues(const EnumDescriptor* descriptor) const;
+		void PrintEnumValue(const EnumValueDescriptor* descriptor) const;
 
-    void PrintServices() const;
-    void PrintService(const ServiceDescriptor* descriptor) const;
-    void PrintServiceMethod(const MethodDescriptor* descriptor) const;
+		void PrintServices() const;
+		void PrintService(const ServiceDescriptor* descriptor) const;
+		void PrintServiceMethod(const MethodDescriptor* descriptor) const;
 
-    void PrintGeneratedFileComment() const;
-    void PrintGenericRequires() const;
+		void PrintGeneratedFileComment() const;
+		void PrintGenericRequires() const;
 		void PrintImportRequires() const;
-    void PrintComment(string comment) const;
-    void PrintComment(string comment, bool as_header) const;
-    void PrintRequire(string lib_name) const;
+		void PrintComment(string comment) const;
+		void PrintComment(string comment, bool as_header) const;
+		void PrintRequire(string lib_name) const;
 		void PrintNewLine() const;
 
 		// Take the proto file name, strip ".proto"
@@ -79,22 +79,22 @@ class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
 			return StringReplace(proto_filename, ".proto", replacement, false);
 		}
 
-    static string ConvertIntToString(int number) {
-      stringstream stream;
-      stream << number;
-      return stream.str();
-    }
+		static string ConvertIntToString(int number) {
+			stringstream stream;
+			stream << number;
+			return stream.str();
+		}
 
 		static string ConvertDoubleToString(double number) {
-      stringstream stream;
-      stream << number;
-      return stream.str();
+			stringstream stream;
+			stream << number;
+			return stream.str();
 		}
 
 		static string ConvertFloatToString(float number) {
-      stringstream stream;
-      stream << number;
-      return stream.str();
+			stringstream stream;
+			stream << number;
+			return stream.str();
 		}
 
 		static string Constantize(string full_path) {
