@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'eventually'
   s.add_dependency 'json_pure'
   s.add_dependency 'ffi-rzmq'
+  s.add_dependency 'thor'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'pry'

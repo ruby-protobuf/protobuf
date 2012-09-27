@@ -6,6 +6,9 @@ require 'protobuf/rpc/stat'
 
 module Protobuf
   module Rpc
+		GC_PAUSE_REQUEST = false
+		GC_PAUSE_SERIALIZATION = false
+
     module Server
 
       def _gc_pause_request
