@@ -18,16 +18,16 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency 'eventmachine'
-  s.add_dependency 'eventually'
-  s.add_dependency 'json_pure'
-  s.add_dependency 'ffi-rzmq'
+  s.add_dependency 'multi_json'
   s.add_dependency 'thor'
 
-  s.add_development_dependency 'rake'
+  s.add_development_dependency 'eventmachine'
+  s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rake-compiler'
   s.add_development_dependency 'rspec'
-  s.add_development_dependency 'yard'
   s.add_development_dependency 'simplecov'
+  s.add_development_dependency 'yard'
 end
