@@ -158,4 +158,22 @@ class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
 } // namespace protobuf
 } // namespace google
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int _rprotoc_extern(int argc, char* argv[]) {
+  google::protobuf::compiler::CommandLineInterface cli;
+
+  google::protobuf::compiler::ruby::RubyGenerator ruby_generator;
+  cli.RegisterGenerator("--ruby_out", &ruby_generator,
+    "Generate Ruby-compatible protobuf message and service classes.");
+
+  return cli.Run(argc, argv);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // GOOGLE_PROTOBUF_COMPILER_RUBY_GENERATOR_H
