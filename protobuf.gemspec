@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
-  s.extensions = [] << File.join(File.dirname(__FILE__), 'ext', 'ruby_generator', 'extconf.rb')
+  s.extensions = [ File.join('ext', 'ruby_generator', 'extconf.rb') ]
 
   s.add_dependency 'ffi'
   s.add_dependency 'multi_json'
