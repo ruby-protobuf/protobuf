@@ -64,10 +64,6 @@ module Protobuf
         @_message = (self.class < ::Protobuf::Field::MessageField)
       end
 
-      def ready?
-        true
-      end
-
       def initialized?(message_instance)
         value = message_instance.__send__(@name)
         case @rule

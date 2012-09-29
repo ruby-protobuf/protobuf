@@ -19,7 +19,6 @@ require 'protobuf/field/sfixed32_field'
 require 'protobuf/field/sfixed64_field'
 require 'protobuf/field/fixed32_field'
 require 'protobuf/field/fixed64_field'
-require 'protobuf/field/field_proxy'
 require 'protobuf/field/extension_fields'
 
 module Protobuf
@@ -43,7 +42,7 @@ module Protobuf
     }.freeze
 
     def self.build(message_class, rule, type, name, tag, options={})
-      field_class = ::Protobuf::Field::PREDEFINED_TYPES.fetch(type, ::Protobuf::Field::FieldProxy)
+      field_class = ::Protobuf::Field::PREDEFINED_TYPES.fetch(type, type)
       field_class.new(message_class, rule, type, name, tag, options)
     end
 

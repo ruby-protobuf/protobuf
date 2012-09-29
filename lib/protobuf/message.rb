@@ -52,6 +52,7 @@ module Protobuf
     def self.define_field(rule, type, fname, tag, options)
       field_hash = options[:extension] ? extension_fields : fields
       field_name_hash = options[:extension] ? extension_fields_by_name : fields_by_name
+      repeated_collection = options[:extension] ? repeated_extension_fields : repeated_fields
 
       if field_hash.keys.include?(tag)
         raise TagCollisionError, %!{Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
@@ -59,6 +60,7 @@ module Protobuf
 
       field_definition = Field.build(self, rule, type, fname, tag, options)
       field_name_hash[fname.to_sym] = field_definition
+      repeated_collection << field_definition if field_definition.repeated?
       field_hash[tag] = field_definition
     end
 
