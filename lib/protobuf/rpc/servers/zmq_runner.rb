@@ -3,14 +3,12 @@ module Protobuf
     class ZmqRunner
 
       def self.stop
-        Protobuf::Rpc::Zmq::Server.stop 
-        Protobuf::Logger.info('Shutdown complete')
+        Protobuf::Rpc::Zmq::Server.stop
       end
 
       def self.run(server)
-        Protobuf::Logger.info "ZmqServer Running"
-        server_config = case 
-                        when server.is_a?(OpenStruct) then 
+        server_config = case
+                        when server.is_a?(OpenStruct) then
                           server.marshal_dump
                         when server.respond_to?(:to_hash) then
                           server.to_hash
@@ -18,6 +16,7 @@ module Protobuf
                           raise "Cannot parser Zmq Server - server options"
                         end
 
+				yield if block_given?
         Protobuf::Rpc::Zmq::Server.run(server_config)
       end
     end

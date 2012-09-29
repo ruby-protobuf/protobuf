@@ -1,46 +1,48 @@
 #!/usr/bin/env ruby
 
-require 'optparse'
+require 'rubygems'
+require 'ffi'
 
-if File.directory?("#{File.dirname(__FILE__)}/../lib")
-  $: << "#{File.dirname(__FILE__)}/../lib"
-else
-  require 'rubygems'
-  gem 'protobuf'
-end
-require 'protobuf'
-require 'protobuf/version'
-require 'protobuf/compiler/compiler'
+GENERATOR_FILE_PATH = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "ruby_generator.so"))
+unless File.exists?(GENERATOR_FILE_PATH)
+  $stdout << <<-WARNING
+    Cannot locate shared object to plugin to protocol buffers generator.
+    Thought the file would be located at #{GENERATOR_FILE_PATH}
 
-::Version = Protobuf::VERSION
+    If you are running on Windows you should compile protocol buffer
+    definitions on another VM and then use those definitions locally.
 
-options = {
-  :proto_path => '.',
-  :out => '.',
-}
-opts = OptionParser.new("#{$0} [OPTIONS] PROTO_FILE")
-opts.on('-p', '--proto_path <PATH>', 'Specify the directory in which to search for imports. The current directory is default.'){|v| options[:proto_path] = v}
-opts.on('-o', '--out <OUT_DIR>', 'Specify the directory in which Ruby source file is generated. The current directory is default.'){|v| options[:out] = v}
-opts.on_tail('-v', '--version', 'Show version.'){ puts(opts.ver); exit }
-opts.on_tail('-h', '--help', 'Show this message.'){ puts(opts.help); exit }
+    Only the compiler is restricted by this.  The definitions should work without issue.
+  WARNING
+  $stdout << $/
 
-begin
-  opts.order!
-rescue OptionParser::ParseError
-  $stderr.puts $!.to_s
   exit 1
 end
 
-unless ARGV.size > 0
-  puts opts
-  exit
-end
+module Protobuf
+  module RProtoC
+    extend FFI::Library
+    ffi_lib ::GENERATOR_FILE_PATH
+    attach_function :_rprotoc_extern, [:int32, :pointer], :int32
 
-begin
-  ARGV.each do |proto_file|
-    Protobuf::Compiler.compile(proto_file, options[:proto_path], options[:out])
+    def self.compile_proto(args)
+      args.unshift("rprotoc")
+      args << "--help" if args.size == 1
+
+      ptr_params = []
+      args.each do |param|
+        ptr_params << ::FFI::MemoryPointer.from_string(param)
+      end
+      ptr_params << nil
+
+      argv = ::FFI::MemoryPointer.new(:pointer, ptr_params.size)
+      ptr_params.each_with_index do |param_pointer, index|
+        argv[index].put_pointer(0, param_pointer)
+      end
+
+      self._rprotoc_extern(argv.size, argv)
+    end
   end
-rescue
-  $stderr.puts $!.message
-  exit 1
 end
+
+::Protobuf::RProtoC.compile_proto(ARGV.dup)
