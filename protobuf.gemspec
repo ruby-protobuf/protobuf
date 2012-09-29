@@ -17,7 +17,10 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
-  s.extensions << File.join('ext', 'ruby_generator', 'extconf.rb')
+
+  unless ENV['WITHOUT_PROTO_COMPILER']
+    s.extensions << File.join('ext', 'ruby_generator', 'extconf.rb')
+  end
 
   s.add_dependency 'ffi'
   s.add_dependency 'multi_json'
