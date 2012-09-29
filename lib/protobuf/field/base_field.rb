@@ -54,6 +54,16 @@ module Protobuf
         true
       end
 
+      def enum?
+        return @_enum unless @_enum.nil?
+        @_enum = (self.class < ::Protobuf::Field::EnumField)
+      end
+
+      def message?
+        return @_message unless @_message.nil?
+        @_message = (self.class < ::Protobuf::Field::MessageField)
+      end
+
       def ready?
         true
       end

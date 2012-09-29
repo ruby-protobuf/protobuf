@@ -133,60 +133,11 @@ module Protobuf
       end
     end
 
-    def self.initialize_unready_fields
-      unless @unready_initialized
-        initialize_type_fields
-        initialize_type_extension_fields
-        @unready_initialized = true
-      end
-    end
-
-    def self.initialize_type_fields
-      fields.each do |tag, field|
-        unless field.ready?
-          field = field.setup
-          fields[tag] = field
-          fields_by_name[field.name.to_sym] = field
-          fields_by_name[field.name] = field
-        end
-      end
-    end
-
-    def self.initialize_type_extension_fields
-      extension_fields.each do |tag, field|
-        unless field.ready?
-          field = field.setup
-          extension_fields[tag] = field
-          extension_fields_by_name[field.name.to_sym] = field
-          extension_fields_by_name[field.name] = field
-        end
-      end
-    end
-
-    def self.setup_repeated_field_arrays
-      unless @repeated_fields_setup
-        all_fields.each do |field|
-          next unless field.repeated?
-
-          if field.extension?
-            repeated_extension_fields << field
-          else
-            repeated_fields << field
-          end
-        end
-
-        @repeated_fields_setup = true
-      end
-    end
-
     ##
     # Constructor
     #
     def initialize(values={})
       @values = {}
-
-      self.class.initialize_unready_fields
-      self.class.setup_repeated_field_arrays
 
       self.class.repeated_fields.each do |field|
         @values[field.name] = Field::FieldArray.new(field)
