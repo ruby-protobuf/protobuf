@@ -1,3 +1,4 @@
+require 'rbconfig'
 # # # # # # # # #
 # by               Jan Lelis
 # e-mail:          mail@janlelis.de
@@ -7,73 +8,6 @@
 # license:         CC-BY (DE)
 #
 # (c) 2010 Jan Lelis.
-
-require 'rbconfig'
-module RubyEngine
-  class << self
-    # try to guess it
-    @interpreter = case
-    when RUBY_PLATFORM == 'parrot'
-      'cardinal'
-    when Object.constants.include?( :RUBY_ENGINE ) ||
-         Object.constants.include?( 'RUBY_ENGINE'  )
-      if RUBY_ENGINE == 'ruby'
-        if RUBY_DESCRIPTION =~ /Enterprise/
-          'ree'
-        else
-          'mri'
-        end
-      else
-        RUBY_ENGINE.to_s # jruby, rbx, ironruby, macruby, etc.
-      end
-    else # probably 1.8
-      'mri'
-    end
-
-    def is?(what)
-      what === @interpreter
-    end
-    alias is is?
-
-    def to_s
-      @interpreter
-    end
-  end
-
-module_function
-
-  def mri?
-    RubyEngine.is? 'mri'
-  end
-  alias official_ruby? mri?
-  alias ruby? mri?
-
-  def jruby?
-    RubyEngine.is? 'jruby'
-  end
-  alias java? jruby?
-
-  def rubinius?
-    RubyEngine.is? 'rbx'
-  end
-  alias rbx? rubinius?
-
-  def ree?
-    RubyEngine.is? 'ree'
-  end
-  alias enterprise? ree?
-
-  def ironruby?
-    RubyEngine.is? 'ironruby'
-  end
-  alias iron_ruby? ironruby?
-
-  def cardinal?
-    RubyEngine.is? 'cardinal'
-  end
-  alias parrot? cardinal?
-  alias perl? cardinal?
-end
 
 module OS
   class << self
@@ -113,19 +47,31 @@ module OS
     linux? or mac? or bsd? or solaris? or Process.respond_to?(:fork)
   end
 end
+  
+# Bail if windows or no compiler needed
+return if ::OS.windows? || ENV['WITHOUT_PROTO_COMPILER']
 
-# Bail if windows or jruby or no compiler needed
-return if (OS.windows? || RubyEngine.jruby? || ENV['WITHOUT_PROTO_COMPILER'])
+begin
+  require 'mkmf'
 
-require 'mkmf'
+  include_directory = File.expand_path(File.join(File.dirname(__FILE__), "..", "protobuf-2.4.1", "src"))
 
-include_directory = File.join(File.expand_path(File.dirname(__FILE__)), "..", "protobuf-2.4.1", "src")
+  $CPPFLAGS << " -I#{include_directory}"
+  $CPPFLAGS << " -Wall "
 
-$CPPFLAGS << " -I#{include_directory}"
-$CPPFLAGS << " -Wall "
+  have_library("pthread")
+  have_library("protoc")
+  have_library("protobuf")
 
-have_library("pthread")
-have_library("protoc")
-have_library("protobuf")
+  create_makefile('ruby_generator')
+rescue 
+  $stdout << <<-WARNING
+    Cannot compile native extension.
 
-create_makefile('ruby_generator')
+    If you are running on Jruby or Windows you should compile protocol buffer
+    definitions on another computer and then use those definitions locally.
+
+    Only the compiler is restricted by this.  The definitions should work without issue.
+  WARNING
+  $stdout << $/
+end

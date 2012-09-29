@@ -3,18 +3,18 @@
 require 'rubygems'
 require 'ffi'
 
-generator_file = File.join(File.expand_path(File.dirname(__FILE__)), "..", "lib", "ruby_generator.so")
-
-unless File.exists?(generator_file)
+GENERATOR_FILE_PATH = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "ruby_generator.so"))
+unless File.exists?(GENERATOR_FILE_PATH)
   $stdout << <<-WARNING
     Cannot locate shared object to plugin to protocol buffers generator.
-    Thought the file would be located at #{generator_file}
+    Thought the file would be located at #{GENERATOR_FILE_PATH}
 
-    If you are running on Jruby or Windows you should compile protocol buffer
-    definitions on another computer and then use those definitions locally.
+    If you are running on Windows you should compile protocol buffer
+    definitions on another VM and then use those definitions locally.
 
     Only the compiler is restricted by this.  The definitions should work without issue.
   WARNING
+  $stdout << $/
 
   exit 1
 end
@@ -22,11 +22,12 @@ end
 module Protobuf
   module RProtoC
     extend FFI::Library
-    ffi_lib generator_file
+    ffi_lib ::GENERATOR_FILE_PATH
     attach_function :_rprotoc_extern, [:int32, :pointer], :int32
 
     def self.compile_proto(args)
-      args.unshift("protoc-ruby")
+      args.unshift("rprotoc")
+      args << "--help" if args.size == 1
 
       ptr_params = []
       args.each do |param|
