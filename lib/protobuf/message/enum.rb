@@ -1,5 +1,4 @@
 require 'delegate'
-require 'protobuf/descriptor/enum_descriptor'
 require 'protobuf/message/protoable'
 
 module Protobuf
@@ -22,10 +21,6 @@ module Protobuf
 
       def valid_tag?(tag)
         !! name_by_value(tag)
-      end
-
-      def descriptor
-        @descriptor ||= Descriptor::EnumDescriptor.new(self)
       end
 
       private

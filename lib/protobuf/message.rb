@@ -1,6 +1,5 @@
 require 'set'
 require 'protobuf/field'
-require 'protobuf/descriptor/descriptor'
 require 'protobuf/message/decoder'
 require 'protobuf/message/encoder'
 require 'protobuf/message/protoable'
@@ -47,10 +46,6 @@ module Protobuf
     # Define a repeated field. Don't use this method directly.
     def self.repeated(type, name, tag, options={})
       define_field(:repeated, type, name, tag, options)
-    end
-
-    def self.descriptor
-      @descriptor ||= Descriptor::Descriptor.new(self)
     end
 
     # Define a field. Don't use this method directly.

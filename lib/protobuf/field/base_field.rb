@@ -1,5 +1,4 @@
 require 'protobuf/common/wire_type'
-require 'protobuf/descriptor/field_descriptor'
 require 'protobuf/field/field_array'
 
 module Protobuf
@@ -15,10 +14,6 @@ module Protobuf
       #
       def self.default
         nil
-      end
-
-      def self.descriptor
-        @descriptor ||= ::Protobuf::Descriptor::FieldDescriptor.new
       end
 
       ##
@@ -57,10 +52,6 @@ module Protobuf
       #
       def acceptable?(value)
         true
-      end
-
-      def descriptor
-        @descriptor ||= ::Protobuf::Descriptor::FieldDescriptor.new(self)
       end
 
       def ready?

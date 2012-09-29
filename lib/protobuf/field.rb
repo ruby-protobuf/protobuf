@@ -46,5 +46,6 @@ module Protobuf
       field_class = ::Protobuf::Field::PREDEFINED_TYPES.fetch(type, ::Protobuf::Field::FieldProxy)
       field_class.new(message_class, rule, type, name, tag, options)
     end
+
   end
 end
