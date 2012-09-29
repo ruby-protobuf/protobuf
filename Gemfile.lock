@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     protobuf (1.4.2)
+      ffi
       multi_json
       thor
 
