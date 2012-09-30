@@ -23,15 +23,17 @@ module Protobuf
   module RProtoC
     extend FFI::Library
     ffi_lib ::GENERATOR_FILE_PATH
-    attach_function :_rprotoc_extern, [:int32, :pointer], :int32
+    attach_function :_rprotoc_extern, [:int, :pointer], :int32
 
     def self.compile_proto(args)
+      GC.disable # Don't want strings to be GC'd while protoc has them
+      args = args.dup
       args.unshift("rprotoc")
       args << "--help" if args.size == 1
 
       ptr_params = []
       args.each do |param|
-        ptr_params << ::FFI::MemoryPointer.from_string(param)
+        ptr_params << ::FFI::MemoryPointer.from_string(param.dup)
       end
       ptr_params << nil
 
@@ -40,9 +42,11 @@ module Protobuf
         argv[index].put_pointer(0, param_pointer)
       end
 
-      self._rprotoc_extern(argv.size, argv)
+      self._rprotoc_extern(ptr_params.compact.size, argv)
+    ensure
+      GC.enable
     end
   end
 end
 
-::Protobuf::RProtoC.compile_proto(ARGV.dup)
+::Protobuf::RProtoC.compile_proto(ARGV)

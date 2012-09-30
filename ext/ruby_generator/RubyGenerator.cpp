@@ -167,7 +167,6 @@ void RubyGenerator::PrintMessageFields(const Descriptor* descriptor) const {
 
   PrintEnumsForDescriptor(descriptor, true);
   PrintMessagesForDescriptor(descriptor, true);
-  PrintNewLine();
 }
 
 // Print the given FieldDescriptor to the Message DSL methods.
@@ -255,7 +254,7 @@ void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
   }
 
   printer_->Print(data,
-    "$message_class$.$field_label$"
+    "$message_class$.$field_label$("
     "$data_type$, "
     ":$field_name$, "
     "$tag_number$"
@@ -263,7 +262,7 @@ void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
     "$packed_opt$"
     "$deprecated_opt$"
     "$extension_opt$"
-    "\n");
+    ")\n");
 }
 
 
