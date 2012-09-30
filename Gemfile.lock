@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     protobuf (1.4.2)
+      activesupport
       ffi
       multi_json
       thor
@@ -9,12 +10,16 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
+    activesupport (3.2.8)
+      i18n (~> 0.6)
+      multi_json (~> 1.0)
     coderay (1.0.7)
     diff-lcs (1.1.3)
     eventmachine (1.0.0)
     ffi (1.1.5)
     ffi-rzmq (0.9.6)
       ffi
+    i18n (0.6.1)
     method_source (0.8)
     multi_json (1.3.6)
     pry (0.9.10)

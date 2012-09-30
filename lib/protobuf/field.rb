@@ -23,27 +23,34 @@ require 'protobuf/field/extension_fields'
 
 module Protobuf
   module Field
-    PREDEFINED_TYPES = {
-      :double => ::Protobuf::Field::DoubleField,   
-      :float => ::Protobuf::Field::FloatField,
-      :int32 => ::Protobuf::Field::Int32Field,    
-      :int64 => ::Protobuf::Field::Int64Field,
-      :uint32 => ::Protobuf::Field::Uint32Field,   
-      :uint64 => ::Protobuf::Field::Uint64Field,
-      :sint32 => ::Protobuf::Field::Sint32Field,   
-      :sint64 => ::Protobuf::Field::Sint64Field,
-      :fixed32 => ::Protobuf::Field::Fixed32Field,
-      :fixed64 => ::Protobuf::Field::Fixed64Field,
-      :sfixed32 => ::Protobuf::Field::Sfixed32Field, 
-      :sfixed64 => ::Protobuf::Field::Sfixed64Field,
-      :string => ::Protobuf::Field::StringField,   
-      :bytes => ::Protobuf::Field::BytesField,
-      :bool => ::Protobuf::Field::BoolField
-    }.freeze
+    PREDEFINED_TYPES = [
+      ::Protobuf::Field::DoubleField,   
+      ::Protobuf::Field::FloatField,
+      ::Protobuf::Field::Int32Field,    
+      ::Protobuf::Field::Int64Field,
+      ::Protobuf::Field::Uint32Field,   
+      ::Protobuf::Field::Uint64Field,
+      ::Protobuf::Field::Sint32Field,   
+      ::Protobuf::Field::Sint64Field,
+      ::Protobuf::Field::Fixed32Field,
+      ::Protobuf::Field::Fixed64Field,
+      ::Protobuf::Field::Sfixed32Field, 
+      ::Protobuf::Field::Sfixed64Field,
+      ::Protobuf::Field::StringField,   
+      ::Protobuf::Field::BytesField,
+      ::Protobuf::Field::BoolField
+    ].freeze
 
     def self.build(message_class, rule, type, name, tag, options={})
-      field_class = ::Protobuf::Field::PREDEFINED_TYPES.fetch(type, type)
+      field_class = type_message_or_enum(type) 
       field_class.new(message_class, rule, type, name, tag, options)
+    end
+
+    def self.type_message_or_enum(defined_type)
+      return defined_type if ::Protobuf::Field::PREDEFINED_TYPES.include?(defined_type)
+      return EnumField if defined_type < Enum
+      return MessageField if defined_type < Message
+      raise "lost in the wilderness #{defined_type}"
     end
 
   end

@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
     s.extensions << File.join('ext', 'ruby_generator', 'extconf.rb')
   end
 
+  s.add_dependency 'activesupport'
   s.add_dependency 'ffi'
   s.add_dependency 'multi_json'
   s.add_dependency 'thor'

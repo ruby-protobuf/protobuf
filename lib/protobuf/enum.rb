@@ -23,8 +23,6 @@ module Protobuf
         !! name_by_value(tag)
       end
 
-      private
-
       def define(name, value)
         enum_value = EnumValue.new(self, name, value)
         const_set(name, enum_value)

@@ -47,7 +47,7 @@ module Spec
     ##
     # Services
     #
-    class TestService < ::Protobuf::Service
+    class TestService < ::Protobuf::Rpc::Service
       rpc :find, ::Spec::Proto::ResourceFindRequest, ::Spec::Proto::Resource
     end
   end

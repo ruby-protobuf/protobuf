@@ -1,5 +1,6 @@
 require 'set'
 require 'protobuf/field'
+require 'protobuf/enum'
 require 'protobuf/message/decoder'
 require 'protobuf/message/encoder'
 require 'protobuf/message/protoable'
@@ -60,7 +61,7 @@ module Protobuf
 
       field_definition = Field.build(self, rule, type, fname, tag, options)
       field_name_hash[fname.to_sym] = field_definition
-      repeated_collection << field_definition if field_definition.repeated?
+      repeated_collection << field_definition if rule == :repeated 
       field_hash[tag] = field_definition
     end
 

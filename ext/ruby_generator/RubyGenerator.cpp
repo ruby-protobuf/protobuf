@@ -344,7 +344,7 @@ void RubyGenerator::PrintService(const ServiceDescriptor* descriptor) const {
   map<string,string> data;
   data["class_name"] = descriptor->name();
 
-  printer_->Print(data, "class $class_name$ < ::Protobuf::Service");
+  printer_->Print(data, "class $class_name$ < ::Protobuf::Rpc::Service");
   PrintNewLine();
   printer_->Indent();
 
