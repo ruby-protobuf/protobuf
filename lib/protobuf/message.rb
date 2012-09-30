@@ -14,13 +14,6 @@ module Protobuf
       @_children << klass
     end
 
-    def self.pre_cache_class_definitions
-      @_children ||= Set.new
-      @_children.each do |child_class|
-        child_class.new
-      end
-    end
-
     def self.all_fields
       @all_fields ||= begin
                         fields_hash = fields.merge(extension_fields)
