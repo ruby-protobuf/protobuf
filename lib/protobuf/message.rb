@@ -3,12 +3,9 @@ require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/message/decoder'
 require 'protobuf/message/encoder'
-require 'protobuf/message/protoable'
 
 module Protobuf
   class Message
-    extend ::Protobuf::Protoable
-
     def self.inherited(klass)
       @_children ||= Set.new
       @_children << klass

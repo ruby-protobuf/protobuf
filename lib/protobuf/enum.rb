@@ -1,11 +1,8 @@
 require 'delegate'
-require 'protobuf/message/protoable'
 
 module Protobuf
   class Enum
     class << self
-      include Protoable
-
       attr_reader :values
 
       def name_by_value(value)
