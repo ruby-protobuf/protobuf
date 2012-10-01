@@ -147,7 +147,6 @@ module Protobuf
         self.class.min
       end
 
-
       def to_s
         "#{@rule} #{@type} #{@name} = #{@tag} #{@default ? "[default=#{@default.inspect}]" : ''}"
       end

@@ -10,32 +10,36 @@ module Protobuf
       UINT32_MAX =  2**32 - 1
       UINT64_MAX =  2**64 - 1
 
-      class << self
-        def default
-          0
-        end
-
-        def decode(bytes)
-          value = 0
-          bytes.each_with_index do |byte, index|
-            value |= byte << (7 * index)
-          end
-          value
-        end
-
-        def encode(value)
-          raise RangeError, "#{value} is negative" if value < 0
-          return [value].pack('C') if value < 128
-          bytes = []
-          until value == 0
-            bytes << (0x80 | (value & 0x7f))
-            value >>= 7
-          end
-          bytes[-1] &= 0x7f
-          bytes.pack('C*')
-        end
+      ##
+      # Class Methods
+      #
+      def self.default
+        0
       end
 
+      def self.decode(bytes)
+        value = 0
+        bytes.each_with_index do |byte, index|
+          value |= byte << (7 * index)
+        end
+        value
+      end
+
+      def self.encode(value)
+        raise RangeError, "#{value} is negative" if value < 0
+        return [value].pack('C') if value < 128
+        bytes = []
+        until value == 0
+          bytes << (0x80 | (value & 0x7f))
+          value >>= 7
+        end
+        bytes[-1] &= 0x7f
+        bytes.pack('C*')
+      end
+
+      ##
+      # Public Instance Methods
+      #
       def wire_type
         WireType::VARINT
       end
