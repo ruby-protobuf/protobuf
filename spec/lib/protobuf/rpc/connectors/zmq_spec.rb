@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'protobuf/zmq'
 
 describe ::Protobuf::Rpc::Connectors::Zmq do
   let(:socket_mock) do
@@ -22,6 +23,5 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       described_class.new(async: true).send_request
     }.to raise_error
   end
-
 
 end

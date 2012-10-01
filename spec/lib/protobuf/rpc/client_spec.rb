@@ -3,6 +3,7 @@ require 'spec/proto/test_service_impl'
 
 describe Protobuf::Rpc::Client do
   before(:each) do
+    load 'protobuf/evented.rb'
     ::Spec::Proto::TestService.configure(::Spec::Proto::TestService::DEFAULT_LOCATION)
   end
 
@@ -16,8 +17,8 @@ describe Protobuf::Rpc::Client do
           client.find(:name => "Test Name", :active => true) do |c|
             c.on_success do |succ|
               succ.name.should eq("Test Name")
-              succ.status.should eq(Spec::Proto::StatusType::ENABLED) 
-            end 
+              succ.status.should eq(Spec::Proto::StatusType::ENABLED)
+            end
 
             c.on_failure do |err|
               raise err.inspect
@@ -76,7 +77,7 @@ describe Protobuf::Rpc::Client do
       error.message.should =~ /timeout/i
     end
 
-    context "without reactor_running?" do 
+    context "without reactor_running?" do
 
       it "throws a timeout when client timeout is exceeded" do
         subject = Proc.new do
@@ -154,7 +155,7 @@ describe Protobuf::Rpc::Client do
 
   context 'when calling methods on a service client' do
 
-    # NOTE: we are assuming the service methods are accurately 
+    # NOTE: we are assuming the service methods are accurately
     # defined inside spec/proto/test_service.rb,
     # namely the :find method
 

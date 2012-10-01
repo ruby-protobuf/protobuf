@@ -1,4 +1,5 @@
 # Just a way to keep warnings from being flagged in rename of constants during tests
+=begin
 module Kernel
   def silence_warnings
     orig_verbosity = $VERBOSE
@@ -7,8 +8,10 @@ module Kernel
     $VERBOSE = orig_verbosity
   end
 end
+=end
 
 module SilentConstants
+=begin
   def parse(constant)
     source, _, constant_name = constant.to_s.rpartition('::')
     [Object.const_get(source.to_sym), constant_name.to_sym]
@@ -37,4 +40,5 @@ module SilentConstants
     end
   end
 
+=end
 end

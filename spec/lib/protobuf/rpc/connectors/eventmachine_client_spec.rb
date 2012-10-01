@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'protobuf/evented'
 
 describe ::Protobuf::Rpc::Connectors::EMClient do
   describe '#send_data' do

@@ -5,6 +5,7 @@ class UtilTest
 end
 
 describe ::Protobuf::Rpc::Zmq::Util do
+  before(:each) { load 'protobuf/zmq.rb' }
   subject { UtilTest.new }
   describe '#zmq_error_check' do
     it 'raises when the error code is less than 0' do

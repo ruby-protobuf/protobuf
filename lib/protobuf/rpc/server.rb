@@ -6,20 +6,7 @@ require 'protobuf/rpc/stat'
 
 module Protobuf
   module Rpc
-		GC_PAUSE_REQUEST = false
-		GC_PAUSE_SERIALIZATION = false
-
     module Server
-
-      def _gc_pause_request
-        return @_gc_pause_request unless @_gc_pause_request.nil?
-        @_gc_pause_request ||= (defined?(::Protobuf::Rpc::GC_PAUSE_REQUEST) && ::Protobuf::Rpc::GC_PAUSE_REQUEST)
-      end
-
-      def _gc_pause_serialization
-        return @_gc_pause_serialization unless @_gc_pause_serialization.nil?
-        @_gc_pause_serialization ||= (defined?(::Protobuf::Rpc::GC_PAUSE_SERIALIZATION) && ::Protobuf::Rpc::GC_PAUSE_SERIALIZATION)
-      end
 
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
@@ -33,7 +20,7 @@ module Protobuf
 
         # Call the service method
         log_debug { "[#{log_signature}] Dispatching client request to service" }
-        GC.disable if _gc_pause_request 
+        ::GC.disable if ::Protobuf.gc_pause_server_request
         invoke_rpc_method
       rescue => error
         # Ensure we're handling any errors that try to slip out the back door
@@ -146,7 +133,7 @@ module Protobuf
         @stats.log_stats
         @did_respond = true
       ensure
-        GC.enable if _gc_pause_request 
+        ::GC.enable if ::Protobuf.gc_pause_server_request
       end
     end
   end

@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe ::Protobuf::Rpc::Zmq::Worker do
+  before(:each) { load 'protobuf/zmq.rb' }
   after(:each) do
     subject.instance_variable_get(:@socket).close
     subject.instance_variable_get(:@zmq_context).terminate

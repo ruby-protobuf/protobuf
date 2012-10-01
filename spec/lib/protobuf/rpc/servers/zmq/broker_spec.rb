@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe ::Protobuf::Rpc::Zmq::Broker do
+  before(:each) { load 'protobuf/zmq.rb' }
   after(:each) do
     subject.teardown
   end

@@ -3,7 +3,7 @@ module Protobuf
     class EventedRunner
 
       def self.stop
-        EventMachine.stop_event_loop if EventMachine.reactor_running?
+        ::EventMachine.stop_event_loop if ::EventMachine.reactor_running?
       end
 
       def self.run(server)
@@ -19,13 +19,13 @@ module Protobuf
         #end
 
         # Startup and run the rpc server
-        EM.schedule do
-          EventMachine.start_server(server.host, server.port, Protobuf::Rpc::Evented::Server)
+        ::EventMachine.schedule do
+          ::EventMachine.start_server(server.host, server.port, ::Protobuf::Rpc::Evented::Server)
         end
 
         # Join or start the reactor
 				yield if block_given?
-        EM.reactor_running? ? EM.reactor_thread.join : EM.run
+        ::EM.reactor_running? ? ::EM.reactor_thread.join : ::EM.run
       end
     end
   end

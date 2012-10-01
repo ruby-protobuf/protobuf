@@ -39,12 +39,10 @@ class StubServer
 
   def initialize(opts = {})
     @running = true
-    @options = OpenStruct.new({
-        :host => "127.0.0.1", 
-        :port => 9399, 
-        :delay => 0, 
-        :server => Protobuf::Rpc::Evented::Server
-      }.merge(opts))
+    @options = OpenStruct.new({ :host => "127.0.0.1",
+                                :port => 9399,
+                                :delay => 0,
+                                :server => Protobuf::Rpc::Evented::Server }.merge(opts))
 
     start
     yield self
@@ -78,7 +76,7 @@ class StubServer
   end
 
   def start_zmq_server
-    @zmq_server = Thread.new(@options) { |opt| Protobuf::Rpc::ZmqRunner.run(opt) }    
+    @zmq_server = Thread.new(@options) { |opt| Protobuf::Rpc::ZmqRunner.run(opt) }
     Thread.pass until Protobuf::Rpc::Zmq::Server.running?
   end
 
