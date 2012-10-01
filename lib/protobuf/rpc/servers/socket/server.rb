@@ -52,6 +52,7 @@ module Protobuf
           @threads = []
           @thread_threshold = thread_threshold
           @server = ::TCPServer.new(host, port)
+          raise "blah" if @server.closed?
           @server.listen(backlog)
           @working = []
           @listen_fds = [@server]
@@ -90,7 +91,7 @@ module Protobuf
           raise
         rescue
           # Closing the server causes the loop to raise an exception here
-          raise if running?
+          raise #if running?
         end
 
         def self.running?
