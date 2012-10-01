@@ -7,7 +7,7 @@ module Protobuf
       ##
       # Attributes
       #
-      attr_reader :message_class, :rule, :type, :name, :tag, :default, :default_value
+      attr_reader :message_class, :rule, :type, :name, :tag, :default, :default_value, :setter_method_name, :getter_method_name
       
       ##
       # Class Methods
@@ -23,6 +23,8 @@ module Protobuf
         @message_class, @rule, @type, @name, @tag = \
           message_class, rule, type, name, tag
 
+        @getter_method_name = name
+        @setter_method_name = "#{name}=".to_sym
         @default   = options.delete(:default)
         @extension = options.delete(:extension)
         @packed    = repeated? && options.delete(:packed)
@@ -65,7 +67,7 @@ module Protobuf
       end
 
       def initialized?(message_instance)
-        value = message_instance.__send__(@name)
+        value = message_instance.__send__(getter_method_name)
         case @rule
         when :required then
           ! value.nil? && (! kind_of?(MessageField) || value.initialized?)
@@ -79,7 +81,7 @@ module Protobuf
       # Decode +bytes+ and pass to +message_instance+.
       def set(message_instance, bytes)
         if packed?
-          array = message_instance.__send__(@name)
+          array = message_instance.__send__(getter_method_name)
           method = \
             case wire_type
             when WireType::FIXED32 then :read_fixed32
@@ -93,9 +95,9 @@ module Protobuf
         else
           value = decode(bytes)
           if repeated?
-            message_instance.__send__(@name) << value
+            message_instance.__send__(getter_method_name) << value
           else
-            message_instance.__send__("#{@name}=", value)
+            message_instance.__send__(setter_method_name, value)
           end
         end
       end
@@ -168,7 +170,7 @@ module Protobuf
       def define_array_setter
         field = self
         @message_class.class_eval do
-          define_method("#{field.name}=") do |val|
+          define_method(field.setter_method_name) do |val|
             @values[field.name].replace(val)
           end
         end
@@ -177,7 +179,7 @@ module Protobuf
       def define_getter
         field = self
         @message_class.class_eval do
-          define_method(field.name) do
+          define_method(field.getter_method_name) do
             @values.fetch(field.name, field.default_value)
           end
         end
@@ -186,7 +188,7 @@ module Protobuf
       def define_setter
         field = self
         @message_class.class_eval do
-          define_method("#{field.name}=") do |val|
+          define_method(field.setter_method_name) do |val|
             if val.nil?
               @values.delete(field.name)
             elsif field.acceptable?(val)

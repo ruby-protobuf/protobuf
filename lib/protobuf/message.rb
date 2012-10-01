@@ -6,6 +6,8 @@ require 'protobuf/message/encoder'
 
 module Protobuf
   class Message
+    STRING_ENCODING = "ASCII-8BIT".freeze
+
     def self.inherited(klass)
       @_children ||= Set.new
       @_children << klass
@@ -244,16 +246,6 @@ module Protobuf
       parse_from(StringIO.new(string))
     end
 
-    def parse_from_file(filename)
-      if filename.is_a?(File)
-        parse_from(filename)
-      else
-        File.open(filename, 'rb') do |f|
-          parse_from(f)
-        end
-      end
-    end
-
     def parse_from(stream)
       Decoder.decode(stream, self)
     end
@@ -262,20 +254,10 @@ module Protobuf
       io = StringIO.new(string)
       serialize_to(io)
       result = io.string
-      result.force_encoding('ASCII-8BIT') if result.respond_to?(:force_encoding)
+      result.force_encoding(::Protobuf::Message::STRING_ENCODING) if result.respond_to?(:force_encoding)
       result
     end
     alias to_s serialize_to_string
-
-    def serialize_to_file(filename)
-      if filename.is_a?(File)
-        serialize_to(filename)
-      else
-        File.open(filename, 'wb') do |f|
-          serialize_to(f)
-        end
-      end
-    end
 
     def serialize_to(stream)
       Encoder.encode(stream, self)
@@ -296,7 +278,8 @@ module Protobuf
 
     def []=(tag_or_name, value)
       if field = get_field(tag_or_name) || get_ext_field(tag_or_name)
-        __send__("#{field.name}=", value)
+        # __send__("#{field.name}=", value)
+        __send__(field.setter_method_name, value)
       else
         raise NoMethodError, "No such field: #{tag_or_name.inspect}"
       end

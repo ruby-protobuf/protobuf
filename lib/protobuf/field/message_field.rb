@@ -24,7 +24,7 @@ module Protobuf
       end
 
       def wire_type
-        ::WireType::LENGTH_DELIMITED
+        ::Protobuf::WireType::LENGTH_DELIMITED
       end
 
       private

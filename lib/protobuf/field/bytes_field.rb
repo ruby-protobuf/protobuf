@@ -18,7 +18,7 @@ module Protobuf
       end
 
       def decode(bytes)
-        bytes.force_encoding('ASCII-8BIT') if bytes.respond_to?(:force_encoding)
+        bytes.force_encoding(::Protobuf::Message::STRING_ENCODING) if bytes.respond_to?(:force_encoding)
         bytes
       end
 
@@ -27,7 +27,7 @@ module Protobuf
           value = value.serialize_to_string
         else
           value = value.dup
-          value.force_encoding('ASCII-8BIT') if value.respond_to?(:force_encoding)
+          value.force_encoding(::Protobuf::Message::STRING_ENCODING) if value.respond_to?(:force_encoding)
         end
 
         string_size = VarintField.encode(value.size)

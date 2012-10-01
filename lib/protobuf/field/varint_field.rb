@@ -40,8 +40,10 @@ module Protobuf
       ##
       # Public Instance Methods
       #
-      def wire_type
-        WireType::VARINT
+      def acceptable?(val)
+        raise TypeError, val.class.name unless val.is_a?(Integer)
+        raise RangeError if val < min || max < val
+        true
       end
 
       def decode(value)
@@ -52,12 +54,10 @@ module Protobuf
         self.class.encode(value)
       end
 
-      def acceptable?(val)
-        raise TypeError, val.class.name unless val.is_a?(Integer)
-        raise RangeError if val < min || max < val
-        true
+      def wire_type
+        ::Protobuf::WireType::VARINT
       end
+
     end
   end
 end
-

@@ -4,7 +4,7 @@ module Protobuf
   module Field
     class Sfixed64Field < Int64Field
       def wire_type
-        ::WireType::FIXED64
+        ::Protobuf::WireType::FIXED64
       end
 
       def decode(bytes)

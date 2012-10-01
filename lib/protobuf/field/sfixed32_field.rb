@@ -4,7 +4,7 @@ module Protobuf
   module Field
     class Sfixed32Field < Int32Field
       def wire_type
-        ::WireType::FIXED32
+        ::Protobuf::WireType::FIXED32
       end
 
       def decode(bytes)
