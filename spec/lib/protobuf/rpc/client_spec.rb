@@ -4,6 +4,7 @@ require 'spec/proto/test_service_impl'
 describe Protobuf::Rpc::Client do
   before(:each) do
     load 'protobuf/evented.rb'
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
     ::Spec::Proto::TestService.configure(::Spec::Proto::TestService::DEFAULT_LOCATION)
   end
 

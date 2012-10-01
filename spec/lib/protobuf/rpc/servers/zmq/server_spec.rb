@@ -2,7 +2,11 @@ require 'spec_helper'
 require 'protobuf/rpc/servers/zmq/server'
 
 describe Protobuf::Rpc::Zmq::Server do
-  before(:each) { load 'protobuf/zmq.rb' }
+  before(:each) do 
+    load 'protobuf/zmq.rb'
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
+  end
+
   describe '.running?' do
     it 'returns true if running' do
       described_class.instance_variable_set(:@running, true)

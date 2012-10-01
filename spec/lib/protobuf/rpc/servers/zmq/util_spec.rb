@@ -5,7 +5,11 @@ class UtilTest
 end
 
 describe ::Protobuf::Rpc::Zmq::Util do
-  before(:each) { load 'protobuf/zmq.rb' }
+  before(:each) do
+    load 'protobuf/zmq.rb' 
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
+  end
+
   subject { UtilTest.new }
   describe '#zmq_error_check' do
     it 'raises when the error code is less than 0' do

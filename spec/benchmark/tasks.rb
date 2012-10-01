@@ -61,6 +61,7 @@ namespace :benchmark do
 
   def sock_client_sock_server(number_tests, test_length, global_bench = nil)
     load "protobuf/socket.rb"
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
     EM.stop if EM.reactor_running?
 
     StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server| 
@@ -76,6 +77,7 @@ namespace :benchmark do
 
   def sock_client_em_server(number_tests, test_length, global_bench = nil)
     load "protobuf/socket.rb"
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
     EM.stop if EM.reactor_running?
     em_thread = Thread.new { EM.run }
     Thread.pass until EM.reactor_running?
@@ -96,6 +98,7 @@ namespace :benchmark do
 
   def zmq_client_zmq_server(number_tests, test_length, global_bench = nil)
     load "protobuf/zmq.rb"
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
     StubServer.new(:port => 9399, :server => Protobuf::Rpc::Zmq::Server) do |server| 
       client = Spec::Proto::TestService.client(:async => false, :port => 9399)
 

@@ -5,9 +5,14 @@ require 'protobuf/evented'
 require 'protobuf/socket'
 
 describe Protobuf::Rpc::Socket::Server do
-  before(:each) { load 'protobuf/socket.rb' }
+  before(:each) do 
+    load 'protobuf/socket.rb' 
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
+  end
 
   before(:all) do
+    load 'protobuf/socket.rb' 
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
     Thread.abort_on_exception = true
     server = OpenStruct.new(:server => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
     @server_thread = Thread.new(server) { |s| Protobuf::Rpc::SocketRunner.run(s) }
@@ -35,25 +40,6 @@ describe Protobuf::Rpc::Socket::Server do
 
   it "signals the Server is running" do
     described_class.running?.should be_true
-  end
-
-  context "Eventmachine client" do
-    it "calls the service in the client request" do
-      ::Protobuf::Rpc::Connector.stub(:connector_for_client).and_return(::Protobuf::Rpc::Connectors::EventMachine)
-      client = Spec::Proto::TestService.client(:async => false, :port => 9399, :host => "127.0.0.1")
-
-      client.find(:name => "Test Name", :active => true) do |c|
-        c.on_success do |succ|
-          succ.name.should eq("Test Name")
-          succ.status.should eq(Spec::Proto::StatusType::ENABLED)
-        end
-
-        c.on_failure do |err|
-          raise err.inspect
-        end
-      end
-    end
-
   end
 
 end

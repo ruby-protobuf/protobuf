@@ -85,24 +85,6 @@ describe ::Protobuf::CLI do
 			end
 		end
 
-		context 'pre-cache options' do
-			let(:test_args) { [ '--pre_cache_definitions' ] }
-
-			it 'causes the message sub-classes to be pre-cached' do
-				::Protobuf::Message.should_receive(:pre_cache_class_definitions)
-				described_class.start(args)
-			end
-
-			context 'when pre-cache option is not present' do
-				let(:test_args) { [] }
-
-				it 'does not invoke the pre-cache call' do
-					::Protobuf::Message.should_not_receive(:pre_cache_class_definitions)
-					described_class.start(args)
-				end
-			end
-		end
-
 		context 'gc options' do
 
 			context 'when gc options are not present' do

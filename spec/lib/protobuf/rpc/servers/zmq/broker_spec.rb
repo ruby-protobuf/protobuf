@@ -1,7 +1,11 @@
 require 'spec_helper'
 
 describe ::Protobuf::Rpc::Zmq::Broker do
-  before(:each) { load 'protobuf/zmq.rb' }
+  before(:each) do 
+    load 'protobuf/zmq.rb' 
+    ::Protobuf::Rpc::Connector.connector_for_client(true)
+  end
+
   after(:each) do
     subject.teardown
   end
