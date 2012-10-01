@@ -44,7 +44,7 @@ module Protobuf
       end
 
       def set_data(data)
-        @data = data.is_a?(Protobuf::Message) ? data.serialize_to_string : data.to_s
+        @data = data.is_a?(::Protobuf::Message) ? data.serialize_to_string : data.to_s
         @size = @data.size
       end
 

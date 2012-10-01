@@ -1,6 +1,6 @@
 require 'test/unit'
 require 'protobuf/message/message'
-require 'protobuf/message/enum'
+require 'protobuf/enum'
 require 'test/proto/addressbook.pb'
 
 class StandardMessageTest < Test::Unit::TestCase

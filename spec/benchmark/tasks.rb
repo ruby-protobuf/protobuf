@@ -1,9 +1,10 @@
 require 'benchmark'
 require 'helper/all'
 require 'proto/test_service_impl'
+require 'perftools'
 
 # Including a way to turn on debug logger for spec runs
-if ENV["DEBUG"]
+if ENV["DEBUG"] 
   puts 'debugging'
   debug_log = File.expand_path('../debug_bench.log', File.dirname(__FILE__) )
   Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
@@ -117,6 +118,27 @@ namespace :benchmark do
   task :zmq_client_zmq_server, [:number, :length] do |t, args|
     args.with_defaults(:number => 1000, :length => 100)
     zmq_client_zmq_server(args[:number], args[:length])
+  end
+
+  desc "benchmark ZMQ client with ZMQ server and profile"
+  task :zmq_profile, [:number, :length, :profile_output] do |t, args|
+    args.with_defaults(:number => 1000, :length => 100, :profile_output => "/tmp/zmq_profiler_#{Time.now.to_i}")
+    ::PerfTools::CpuProfiler.start(args[:profile_output]) do 
+      zmq_client_zmq_server(args[:number], args[:length])
+    end
+
+    puts args[:profile_output]
+  end
+
+  desc "benchmark Protobuf Message #new"
+  task :profile_protobuf_new, [:number, :profile_output] do |t, args|
+    args.with_defaults(:number => 1000, :profile_output => "/tmp/profiler_new_#{Time.now.to_i}")
+    create_params = { :name => "The name that we set", :date_created => Time.now.to_i, :status => 2 }
+    ::PerfTools::CpuProfiler.start(args[:profile_output]) do 
+      args[:number].to_i.times { Spec::Proto::Resource.new(create_params) }
+    end
+
+    puts args[:profile_output]
   end
 
   desc "benchmark EventMachine client with EventMachine server"

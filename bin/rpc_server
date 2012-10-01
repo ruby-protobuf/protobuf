@@ -30,7 +30,6 @@ class RpcServer < ::Thor
   option :socket,                 :type => :boolean, :aliases => %w(-s), :desc => 'Raw Socket Server Mode.'
   option :zmq,                    :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for client and server connections (they must be used together).'
   option :debug,                  :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
-  option :pre_cache_definitions,  :type => :boolean, :default => false, :desc => 'Enable/Disable Message class pre-caching.'
   option :gc_pause_request,       :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
   option :gc_pause_serialization, :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during serialization.'
 
@@ -47,7 +46,6 @@ class RpcServer < ::Thor
     unless  @start_aborted
       say 'start was not aborted', :yellow
       require_application!(app_file)
-      pre_cache_application_protos! if options.pre_cache_definitions?
       configure_process_name(app_file)
       start_server!
     else
@@ -129,11 +127,6 @@ class RpcServer < ::Thor
       trap(:QUIT, &trap_block)
       say 'registering TERM', :blue
       trap(:TERM, &trap_block)
-    end
-
-    def pre_cache_application_protos!
-      say 'pre-caching app protos', :yellow
-      ::Protobuf::Message.pre_cache_class_definitions
     end
 
     def require_application!(app_file)
