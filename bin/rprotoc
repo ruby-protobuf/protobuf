@@ -3,7 +3,17 @@
 require 'rubygems'
 require 'ffi'
 
-GENERATOR_FILE_PATH = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib", "ruby_generator.so"))
+base_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+
+GENERATOR_FILE_PATH = case
+                      when File.exists?(File.join(base_dir, "ruby_generator.bundle")) then
+                        File.join(base_dir, "ruby_generator.bundle")
+                      when File.exists?(File.join(base_dir, "ruby_generator.dll")) then
+                        File.join(base_dir, "ruby_generator.dll")
+                      else
+                        File.join(base_dir, "ruby_generator.so")
+                      end
+
 unless File.exists?(GENERATOR_FILE_PATH)
   $stdout << <<-WARNING
     Cannot locate shared object to plugin to protocol buffers generator.
