@@ -12,3 +12,5 @@ doc
 *.bin
 Gemfile.lock
 tmp/*
+ext/defs
+ext/out
