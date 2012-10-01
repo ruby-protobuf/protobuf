@@ -4,29 +4,23 @@ SimpleCov.start
 require 'rubygems'
 require 'bundler'
 Bundler.setup :default, :development, :test
-
-$:.push File.expand_path('..', File.dirname(__FILE__))
-$:.push File.expand_path('../lib', File.dirname(__FILE__))
-
-require 'protobuf'
-require 'protobuf/rpc/client'
-require File.dirname(__FILE__) + '/helper/all'
 require 'pry'
 
-# these aren't explicitly required in lib/protobuf.rb. We require them here for
-# testing purposes
-require 'ffi-rzmq'
-require 'protobuf/rpc/connectors/zmq'
+$: << ::File.expand_path('..', File.dirname(__FILE__))
+#$: << ::File.expand_path('../lib', File.dirname(__FILE__))
+
+require 'protobuf'
+require ::File.dirname(__FILE__) + '/support/all'
 
 # Including a way to turn on debug logger for spec runs
 if ENV["DEBUG"]
-  debug_log = File.expand_path('../debug_specs.log', File.dirname(__FILE__) )
-  Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
+  debug_log = ::File.expand_path('../debug_specs.log', File.dirname(__FILE__) )
+  ::Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
 end
 
-RSpec.configure do |c|
-  c.include(SilentConstants)
-  c.include(Sander6::CustomMatchers)
+::RSpec.configure do |c|
+  c.include(::SilentConstants)
+  c.include(::Sander6::CustomMatchers)
   c.mock_with :rspec
 end
 

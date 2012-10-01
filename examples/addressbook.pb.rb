@@ -26,7 +26,7 @@
 # }
 
 require 'protobuf/message/message'
-require 'protobuf/message/enum'
+require 'protobuf/enum'
 require 'protobuf/message/extend'
 
 module Tutorial

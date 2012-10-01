@@ -8,16 +8,6 @@ module Protobuf
   module Rpc
     module Server
 
-      def _gc_pause_request
-        return @_gc_pause_request unless @_gc_pause_request.nil?
-        @_gc_pause_request ||= (defined?(::Protobuf::Rpc::GC_PAUSE_REQUEST) && ::Protobuf::Rpc::GC_PAUSE_REQUEST)
-      end
-
-      def _gc_pause_serialization
-        return @_gc_pause_serialization unless @_gc_pause_serialization.nil?
-        @_gc_pause_serialization ||= (defined?(::Protobuf::Rpc::GC_PAUSE_SERIALIZATION) && ::Protobuf::Rpc::GC_PAUSE_SERIALIZATION)
-      end
-
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
         # Parse the protobuf request from the socket
@@ -30,7 +20,7 @@ module Protobuf
 
         # Call the service method
         log_debug { "[#{log_signature}] Dispatching client request to service" }
-        GC.disable if _gc_pause_request 
+        ::GC.disable if ::Protobuf.gc_pause_server_request
         invoke_rpc_method
       rescue => error
         # Ensure we're handling any errors that try to slip out the back door
@@ -108,11 +98,10 @@ module Protobuf
         log_debug { "[#{log_signature}] response (should/actual): %s/%s" % [expected.name, actual.name] }
 
         # Determine if the service tried to change response types on us
-        if expected == actual
-          serialize_response(response)
-        else
-          # response types do not match, throw the appropriate error
+        if expected != actual
           raise ::Protobuf::Rpc::BadResponseProto, 'Response proto changed from %s to %s' % [expected.name, actual.name]
+        else
+          @response.response_proto = response
         end
       rescue => error
         log_error error.message
@@ -122,8 +111,8 @@ module Protobuf
 
       # Parses and returns the service and method name from the request wrapper proto
       def parse_service_info
-        @klass = ::Protobuf::Util.constantize(@request.service_name)
-        @method = ::Protobuf::Util.underscore(@request.method_name).to_sym
+        @klass = @request.service_name.constantize
+        @method = @request.method_name.underscore.to_sym
 
         unless @klass.instance_methods.include?(@method)
           raise MethodNotFound, "Service method #{@request.method_name} is not defined by the service"
@@ -144,17 +133,7 @@ module Protobuf
         @stats.log_stats
         @did_respond = true
       ensure
-        GC.enable if _gc_pause_request 
-      end
-
-      def serialize_response(response)
-        GC.disable if _gc_pause_serialization 
-        log_debug { "[#{log_signature}] serializing response: %s" % response.inspect }
-        @response.response_proto = response.serialize_to_string
-      rescue
-        raise BadResponseProto, $!.message
-      ensure
-        GC.enable if _gc_pause_serialization
+        ::GC.enable if ::Protobuf.gc_pause_server_request
       end
     end
   end
