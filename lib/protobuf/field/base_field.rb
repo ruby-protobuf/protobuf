@@ -159,11 +159,21 @@ module Protobuf
       # Private Instance Methods
       #
       def define_accessor
-        define_getter
         if repeated?
+          define_array_getter
           define_array_setter
         else
+          define_getter
           define_setter
+        end
+      end
+
+      def define_array_getter
+        field = self
+        @message_class.class_eval do
+          define_method(field.getter_method_name) do
+            @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
+          end
         end
       end
 
@@ -171,6 +181,7 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method(field.setter_method_name) do |val|
+            @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
             @values[field.name].replace(val)
           end
         end
