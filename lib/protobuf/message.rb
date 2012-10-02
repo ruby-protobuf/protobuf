@@ -229,7 +229,7 @@ module Protobuf
       if field = get_field_by_name(name) || get_ext_field_by_name(name)
         __send__(field.name)
       else
-        raise NoMethodError, "No such field: #{tag_or_name.inspect}"
+        raise NoMethodError, "No such field: #{name.inspect}"
       end
     end
 
@@ -237,7 +237,7 @@ module Protobuf
       if field = get_field_by_name(name) || get_ext_field_by_name(name)
         __send__(field.setter_method_name, value)
       else
-        raise NoMethodError, "No such field: #{tag_or_name.inspect}"
+        raise NoMethodError, "No such field: #{name.inspect}"
       end
     end
 
