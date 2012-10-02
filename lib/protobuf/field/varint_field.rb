@@ -4,8 +4,8 @@ module Protobuf
   module Field
     class VarintField < BaseField
       INT32_MAX  =  2**31 - 1
-      INT32_MIN  = -2**31
-      INT64_MAX  =  2**63 - 1
+      INT32_MIN  = -2**31 
+      INT64_MAX  =  2**63 - 1 
       INT64_MIN  = -2**63
       UINT32_MAX =  2**32 - 1
       UINT64_MAX =  2**64 - 1
@@ -26,8 +26,8 @@ module Protobuf
       end
 
       def self.encode(value)
-        raise RangeError, "#{value} is negative" if value < 0
         return [value].pack('C') if value < 128
+
         bytes = []
         until value == 0
           bytes << (0x80 | (value & 0x7f))
@@ -41,9 +41,7 @@ module Protobuf
       # Public Instance Methods
       #
       def acceptable?(val)
-        raise TypeError, val.class.name unless val.is_a?(Integer)
-        raise RangeError if val < min || max < val
-        true
+        (val > min || val < max) rescue false
       end
 
       def decode(value)

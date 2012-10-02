@@ -219,6 +219,8 @@ module Protobuf
               @values.delete(field.name)
             elsif field.acceptable?(val)
               @values[field.name] = val
+            else
+              raise TypeError, "unacceptable value #{val} for type #{field.type}"
             end
           end
         end

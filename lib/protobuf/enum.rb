@@ -2,30 +2,33 @@ require 'delegate'
 
 module Protobuf
   class Enum
+
+    def self.name_by_value(value)
+      @names[value]
+    end
+
+    def self.valid_tag?(tag)
+      !! name_by_value(tag)
+    end
+
+    def self.define(name, value)
+      enum_value = EnumValue.new(self, name, value)
+      const_set(name, enum_value)
+      @values ||= {}
+      @names ||= []
+      @values[name] = enum_value
+      @names[value] = name
+    end
+
+    def self.values
+      @values
+    end
+
+    ##
+    # Class Aliases
+    #
     class << self
-      attr_reader :values
-
-      def name_by_value(value)
-        if not defined?(@values)
-          constants.find {|c| const_get(c) == value}  # for compatibility
-        else
-          @values_index ||= @values.inject({}) {|hash, (n, v)| hash[v.value] = n; hash }
-          @values_index[value]
-        end
-      end
-
-      alias get_name_by_tag name_by_value
-
-      def valid_tag?(tag)
-        !! name_by_value(tag)
-      end
-
-      def define(name, value)
-        enum_value = EnumValue.new(self, name, value)
-        const_set(name, enum_value)
-        @values ||= {}
-        @values[name] = enum_value
-      end
+      alias_method :get_name_by_tag, :name_by_value
     end
   end
 
