@@ -1,10 +1,10 @@
 module Protobuf
   module Field
-    class ExtensionFields < Hash
+    class ExtensionFields < Array
       ##
       # Constructor
       #
-      def initialize(key_range=0..-1)
+      def initialize(key_range = 0..-1)
         @key_range = key_range
       end
 
