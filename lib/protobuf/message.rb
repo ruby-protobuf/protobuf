@@ -23,7 +23,7 @@ module Protobuf
 
     # Reserve field numbers for extensions. Don't use this method directly.
     def self.extensions(range)
-      @extension_fields = ::Protobuf::Field::ExtensionFields.new(range)
+      extension_fields.add_range(range)
     end
 
     # Define a required field. Don't use this method directly.
@@ -53,7 +53,7 @@ module Protobuf
 
       field_definition = Field.build(self, rule, type, fname, tag, options)
       field_name_hash[fname.to_sym] = field_definition
-      repeated_collection << field_definition if rule == :repeated 
+      repeated_collection << field_definition if rule == :repeated
       field_hash[tag] = field_definition
     end
 
