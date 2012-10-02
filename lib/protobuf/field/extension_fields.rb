@@ -1,6 +1,6 @@
 module Protobuf
   module Field
-    class ExtensionFields < Hash
+    class ExtensionFields < Array
       ##
       # Constructor
       #
