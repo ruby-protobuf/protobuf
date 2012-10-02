@@ -20,7 +20,7 @@ module Protobuf
 
         # Call the service method
         log_debug { "[#{log_signature}] Dispatching client request to service" }
-        ::GC.disable if ::Protobuf.gc_pause_server_request
+        ::GC.disable if ::Protobuf.gc_pause_server_request?
         invoke_rpc_method
       rescue => error
         # Ensure we're handling any errors that try to slip out the back door
@@ -133,7 +133,7 @@ module Protobuf
         @stats.log_stats
         @did_respond = true
       ensure
-        ::GC.enable if ::Protobuf.gc_pause_server_request
+        ::GC.enable if ::Protobuf.gc_pause_server_request?
       end
     end
   end

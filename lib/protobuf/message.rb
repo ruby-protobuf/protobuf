@@ -372,5 +372,6 @@ module Protobuf
     def to_json
       to_hash.to_json
     end
+
   end
 end

@@ -8,7 +8,7 @@ module Protobuf
       # Attributes
       #
       attr_reader :message_class, :rule, :type, :name, :tag, :default, :default_value, :setter_method_name, :getter_method_name
-      
+
       ##
       # Class Methods
       #
@@ -28,6 +28,7 @@ module Protobuf
         @default   = options.delete(:default)
         @extension = options.delete(:extension)
         @packed    = repeated? && options.delete(:packed)
+        @deprecated = options.delete(:deprecated)
         unless options.empty?
           warn "WARNING: Invalid options: #{options.inspect} (in #{@message_class.name.split('::').last}.#{@name})"
         end
@@ -134,9 +135,14 @@ module Protobuf
         @_optional = (@rule == :optional)
       end
 
+      # Is this a deprecated field?
+      def deprecated?
+        !! @deprecated
+      end
+
       # Is this a packed repeated field?
       def packed?
-        !!@packed
+        !! @packed
       end
 
       # Upper limit for this field.
@@ -153,9 +159,15 @@ module Protobuf
         "#{@rule} #{@type} #{@name} = #{@tag} #{@default ? "[default=#{@default.inspect}]" : ''}"
       end
 
+      def warn_if_deprecated
+        if ::Protobuf.print_deprecation_warnings? && deprecated?
+          $stderr.puts("[WARNING] #{@message_class.name}##{@name} field usage is deprecated.")
+        end
+      end
+
       private
 
-      ## 
+      ##
       # Private Instance Methods
       #
       def define_accessor
@@ -171,6 +183,7 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method(field.setter_method_name) do |val|
+            field.warn_if_deprecated
             @values[field.name].replace(val)
           end
         end
@@ -180,6 +193,7 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method(field.getter_method_name) do
+            field.warn_if_deprecated
             @values.fetch(field.name, field.default_value)
           end
         end
@@ -189,6 +203,7 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method(field.setter_method_name) do |val|
+            field.warn_if_deprecated
             if val.nil?
               @values.delete(field.name)
             elsif field.acceptable?(val)
@@ -205,6 +220,7 @@ module Protobuf
           @default
         end
       end
-    end 
+
+    end
   end
 end
