@@ -3,6 +3,15 @@ require 'delegate'
 module Protobuf
   class Enum
 
+    def self.define(name, value)
+      enum_value = EnumValue.new(self, name, value)
+      const_set(name, enum_value)
+      @values ||= {}
+      @names ||= []
+      @values[name] = enum_value
+      @names[value] = name
+    end
+
     def self.name_by_value(value)
       @names[value]
     end
@@ -11,13 +20,8 @@ module Protobuf
       !! name_by_value(tag)
     end
 
-    def self.define(name, value)
-      enum_value = EnumValue.new(self, name, value)
-      const_set(name, enum_value)
-      @values ||= {}
-      @names ||= []
-      @values[name] = enum_value
-      @names[value] = name
+    def self.value_by_name(name)
+      @values[name]
     end
 
     def self.values
