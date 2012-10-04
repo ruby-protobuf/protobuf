@@ -161,42 +161,8 @@ module Protobuf
     end
     private :copy_to
 
-    def inspect(indent=0)
-      result = []
-      i = '  ' * indent
-      field_value_to_string = lambda { |field, value|
-        result << \
-          if field.optional? && ! has_field?(field.name)
-            ''
-          else
-            case field
-            when Field::MessageField then
-              if value.nil?
-                "#{i}#{field.name} {}\n"
-              else
-                "#{i}#{field.name} {\n#{value.inspect(indent + 1)}#{i}}\n"
-              end
-            when Field::EnumField then
-              if value.is_a?(EnumValue)
-                "#{i}#{field.name}: #{value.name}\n"
-              else
-                "#{i}#{field.name}: #{field.type.name_by_value(value)}\n"
-              end
-            else
-              "#{i}#{field.name}: #{value.inspect}\n"
-            end
-          end
-      }
-      each_field do |field, value|
-        if field.repeated?
-          value.each do |v|
-            field_value_to_string.call(field, v)
-          end
-        else
-          field_value_to_string.call(field, value)
-        end
-      end
-      result.join
+    def inspect
+      to_hash.inspect
     end
 
     def parse_from_string(string)
@@ -284,37 +250,19 @@ module Protobuf
       end
     end
 
+    # Return a hash-representation of the given fields for this message type.
     def to_hash
-      result = {}
-      build_value = lambda { |field, value|
-        if !field.optional? || (field.optional? && has_field?(field.name))
-          case field
-          when Field::MessageField then
-            value.to_hash
-          when Field::EnumField then
-            if value.is_a?(EnumValue)
-              value.to_i
-            elsif value.is_a?(Symbol)
-              field.type[value].to_i
-            else
-              value
-            end
-          else
-            value
-          end
-        end
-      }
-      each_field do |field, value|
-        if field.repeated?
-          result[field.name] = value.map do |v|
-            build_value.call(field, v)
-          end
-        else
-          result[field.name] = build_value.call(field, value)
-        end
+      result = Hash.new
+
+      @values.keys.each do |field_name|
+        value = __send__(field_name)
+        hashed_value = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
+        result.merge!(field_name => hashed_value)
       end
-      result
+
+      return result
     end
+    alias_method :to_hash_value, :to_hash
 
     def to_json
       to_hash.to_json
