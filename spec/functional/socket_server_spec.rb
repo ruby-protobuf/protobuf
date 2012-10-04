@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'spec/proto/test_service_impl'
+require 'spec/support/test/resource_service'
 
 describe 'Functional Socket Client' do
   before(:all) do
@@ -18,12 +18,12 @@ describe 'Functional Socket Client' do
 
   it 'runs fine when required fields are set' do
     expect {
-      client = ::Spec::Proto::TestService.client(:async => false)
+      client = ::Test::ResourceService.client(:async => false)
 
       client.find(:name => 'Test Name', :active => true) do |c|
         c.on_success do |succ|
           succ.name.should eq("Test Name")
-          succ.status.should eq(::Spec::Proto::StatusType::ENABLED)
+          succ.status.should eq(::Test::StatusType::ENABLED)
         end
 
         c.on_failure do |err|
@@ -35,8 +35,8 @@ describe 'Functional Socket Client' do
 
   it 'calls the on_failure callback when a message is malformed' do
     error = nil
-    request = ::Spec::Proto::ResourceFindRequest.new(:active => true)
-    client = ::Spec::Proto::TestService.client(:async => false)
+    request = ::Test::ResourceFindRequest.new(:active => true)
+    client = ::Test::ResourceService.client(:async => false)
 
     client.find(request) do |c|
       c.on_success { raise "shouldn't pass"}
@@ -47,8 +47,8 @@ describe 'Functional Socket Client' do
 
   it 'calls the on_failure callback when the request type is wrong' do
     error = nil
-    request = ::Spec::Proto::Resource.new(:name => 'Test Name')
-    client = ::Spec::Proto::TestService.client(:async => false)
+    request = ::Test::Resource.new(:name => 'Test Name')
+    client = ::Test::ResourceService.client(:async => false)
 
     client.find(request) do |c|
       c.on_success { raise "shouldn't pass"}

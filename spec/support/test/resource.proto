@@ -1,4 +1,4 @@
-package spec.proto;
+package test;
 
 enum StatusType {
   PENDING = 0;
@@ -26,6 +26,6 @@ message Nested {
   optional StatusType status = 4;
 }
 
-service TestService {
+service ResourceService {
   rpc Find (ResourceFindRequest) returns (Resource);
 }

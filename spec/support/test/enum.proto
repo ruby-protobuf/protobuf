@@ -1,0 +1,12 @@
+package test;
+
+enum EnumTestType {
+  ONE = 1;
+  TWO = 2;
+}
+
+message EnumTestMessage {
+  optional EnumTestType non_default_enum = 1;
+  optional EnumTestType default_enum = 2 [default=ONE];
+  repeated EnumTestType repeated_enums = 3;
+}
