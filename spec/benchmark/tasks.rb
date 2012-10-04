@@ -1,6 +1,6 @@
 require 'benchmark'
 require 'support/all'
-require 'proto/test_service_impl'
+require 'support/test/resource_service'
 require 'perftools'
 
 # Including a way to turn on debug logger for spec runs
@@ -11,7 +11,6 @@ if ENV["DEBUG"]
 end
 
 namespace :benchmark do
-  include SilentConstants
 
   def benchmark_wrapper(global_bench = nil)
     if global_bench
@@ -28,7 +27,7 @@ namespace :benchmark do
 
     EventMachine.fiber_run do 
       StubServer.new do |server|
-        client = Spec::Proto::TestService.client(:async => false)
+        client = ::Test::ResourceService.client(:async => false)
 
         benchmark_wrapper(global_bench) do |bench|
           bench.report("ES / EC") do 
@@ -46,7 +45,7 @@ namespace :benchmark do
 
     EventMachine.fiber_run do
       StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server| 
-        client = Spec::Proto::TestService.client(:async => false, :port => 9399)
+        client = ::Test::ResourceService.client(:async => false, :port => 9399)
 
         benchmark_wrapper(global_bench) do |bench|
           bench.report("SS / EC") do 
@@ -65,7 +64,7 @@ namespace :benchmark do
     EM.stop if EM.reactor_running?
 
     StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server| 
-      client = Spec::Proto::TestService.client(:async => false, :port => 9399)
+      client = ::Test::ResourceService.client(:async => false, :port => 9399)
 
       benchmark_wrapper(global_bench) do |bench|
         bench.report("SS / SC") do 
@@ -83,7 +82,7 @@ namespace :benchmark do
     Thread.pass until EM.reactor_running?
 
     StubServer.new(:port => 9399) do |server| 
-      client = Spec::Proto::TestService.client(:async => false, :port => 9399)
+      client = ::Test::ResourceService.client(:async => false, :port => 9399)
 
       benchmark_wrapper(global_bench) do |bench|
         bench.report("ES / SC") do 
@@ -100,7 +99,7 @@ namespace :benchmark do
     load "protobuf/zmq.rb"
     ::Protobuf::Rpc::Connector.connector_for_client(true)
     StubServer.new(:port => 9399, :server => Protobuf::Rpc::Zmq::Server) do |server| 
-      client = Spec::Proto::TestService.client(:async => false, :port => 9399)
+      client = ::Test::ResourceService.client(:async => false, :port => 9399)
 
       benchmark_wrapper(global_bench) do |bench|
         bench.report("ZS / ZC") do 
@@ -132,7 +131,7 @@ namespace :benchmark do
     args.with_defaults(:number => 1000, :profile_output => "/tmp/profiler_new_#{Time.now.to_i}")
     create_params = { :name => "The name that we set", :date_created => Time.now.to_i, :status => 2 }
     ::PerfTools::CpuProfiler.start(args[:profile_output]) do 
-      args[:number].to_i.times { Spec::Proto::Resource.new(create_params) }
+      args[:number].to_i.times { Test::Resource.new(create_params) }
     end
 
     puts args[:profile_output]

@@ -16,22 +16,22 @@ module Protobuf
 
     desc 'start APP_FILE', 'Run the RPC server in the given mode, preloading the given APP_FILE. This is the default task.'
 
-    option :host,                   :type => :string, :default => '127.0.0.1', :aliases => %w(-o), :desc => 'Host to bind.'
-    option :port,                   :type => :numeric, :default => 9595, :aliases => %w(-p), :desc => 'Port to bind.'
+    option :host,                       :type => :string, :default => '127.0.0.1', :aliases => %w(-o), :desc => 'Host to bind.'
+    option :port,                       :type => :numeric, :default => 9595, :aliases => %w(-p), :desc => 'Port to bind.'
 
-    option :backlog,                :type => :numeric, :default => 100, :aliases => %w(-b), :desc => 'Backlog for listening socket when using Socket Server.'
-    option :threshold,              :type => :numeric, :default => 100, :aliases => %w(-t), :desc => 'Multi-threaded Socket Server cleanup threshold.'
+    option :backlog,                    :type => :numeric, :default => 100, :aliases => %w(-b), :desc => 'Backlog for listening socket when using Socket Server.'
+    option :threshold,                  :type => :numeric, :default => 100, :aliases => %w(-t), :desc => 'Multi-threaded Socket Server cleanup threshold.'
 
-    option :log,                    :type => :string, :aliases => %w(-l), :desc => 'Log file or device. Default is STDOUT.'
-    option :level,                  :type => :numeric, :default => ::Logger::INFO, :aliases => %w(-v), :desc => 'Log level to use, 0-5 (see http://www.ruby-doc.org/stdlib/libdoc/logger/rdoc/)'
+    option :log,                        :type => :string, :aliases => %w(-l), :desc => 'Log file or device. Default is STDOUT.'
+    option :level,                      :type => :numeric, :default => ::Logger::INFO, :aliases => %w(-v), :desc => 'Log level to use, 0-5 (see http://www.ruby-doc.org/stdlib/libdoc/logger/rdoc/)'
 
-    option :socket,                 :type => :boolean, :aliases => %w(-s), :desc => 'Socket Mode for server and client connections.'
-    option :evented,                :type => :boolean, :aliases => %w(-m), :desc => 'Evented Mode for server and client connections (uses EventMachine).'
-    option :zmq,                    :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
+    option :socket,                     :type => :boolean, :aliases => %w(-s), :desc => 'Socket Mode for server and client connections.'
+    option :evented,                    :type => :boolean, :aliases => %w(-m), :desc => 'Evented Mode for server and client connections (uses EventMachine).'
+    option :zmq,                        :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
 
-    option :debug,                  :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
-    option :gc_pause_request,       :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
-    option :gc_pause_serialization, :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during serialization.'
+    option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
+    option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
+    option :print_deprecation_warnings, :type => :boolean, :default => true, :desc => 'Cause use of deprecated fields to be printed or ignored.'
 
     def start(app_file)
       debug_say 'Configuring the rpc_server process'
@@ -42,6 +42,7 @@ module Protobuf
       configure_server_mode
       require_protobuf!
       configure_gc
+      configure_deprecation_warnings
 
       run_if_no_abort { require_application!(app_file) }
       run_if_no_abort { configure_process_name(app_file) }
@@ -58,11 +59,15 @@ module Protobuf
 
     no_tasks do
 
+      # Tell protobuf how to handle the printing of deprecated field usage.
+      def configure_deprecation_warnings
+        ::Protobuf.print_deprecation_warnings = options.print_deprecation_warnings?
+      end
+
       # If we pause during request we don't need to pause in serialization
       def configure_gc
         debug_say 'Configuring gc'
         ::Protobuf.gc_pause_server_request = options.gc_pause_request?
-        ::Protobuf.gc_pause_server_serialization = (!options.gc_pause_request? && options.gc_pause_serialization?)
       end
 
       # Setup the protobuf logger.

@@ -32,23 +32,15 @@ module Protobuf
       def define_setter
         field = self
         @message_class.class_eval do
-          define_method("#{field.name}=") do |val|
-            if val.nil?
+          define_method("#{field.name}=") do |value|
+            orig_value = value
+            if value.nil?
               @values.delete(field.name)
             else
-              val = \
-                case val
-                when Symbol then
-                  field.type.const_get(val) rescue nil
-                when Integer then
-                  field.type.const_get(field.type.name_by_value(val)) rescue nil
-                when EnumValue then
-                  raise TypeError, "Invalid value: #{val.inspect} for #{field.name}" if val.parent_class != field.type
-                  val
-                end
-              raise TypeError, "Invalid value: #{val.inspect} for #{field.name}" unless val
+              value = field.type.fetch(value)
+              raise TypeError, "Invalid ENUM value: #{orig_value.inspect} for #{field.name}" unless value
 
-              @values[field.name] = val
+              @values[field.name] = value
             end
           end
         end

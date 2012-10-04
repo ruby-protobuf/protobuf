@@ -14,3 +14,4 @@ Gemfile.lock
 tmp/*
 ext/defs
 ext/out
+ext/ruby_generator/protoc-ruby

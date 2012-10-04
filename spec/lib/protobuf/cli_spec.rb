@@ -92,8 +92,7 @@ describe ::Protobuf::CLI do
 
 				it 'sets both request and serialization pausing to false' do
 					described_class.start(args)
-					::Protobuf.gc_pause_server_request.should be_false
-					::Protobuf.gc_pause_server_serialization.should be_false
+					::Protobuf.gc_pause_server_request?.should be_false
 				end
 			end
 
@@ -102,18 +101,38 @@ describe ::Protobuf::CLI do
 
 				it 'sets the configuration option to GC pause server request' do
 					described_class.start(args)
-					::Protobuf.gc_pause_server_request.should be_true
+					::Protobuf.gc_pause_server_request?.should be_true
 				end
 			end
+		end
 
-			context 'serialization pausing' do
-				let(:test_args) { [ '--gc_pause_serialization' ] }
+		context 'deprecation options' do
+      context 'when not given' do
+        let(:test_args) { [] }
 
-				it 'sets the configuration option to GC pause server serializations' do
-					described_class.start(args)
-					::Protobuf.gc_pause_server_serialization.should be_true
-				end
-			end
+        it 'sets the deprecation warning flag to its default value' do
+          described_class.start(args)
+					::Protobuf.print_deprecation_warnings?.should be_true
+        end
+      end
+
+      context 'when enabled' do
+        let(:test_args) { [ '--print_deprecation_warnings' ] }
+
+        it 'sets the deprecation warning flag to true' do
+          described_class.start(args)
+					::Protobuf.print_deprecation_warnings?.should be_true
+        end
+      end
+
+      context 'when disabled' do
+        let(:test_args) { [ '--no-print_deprecation_warnings' ] }
+
+        it 'sets the deprecation warning flag to false' do
+          described_class.start(args)
+					::Protobuf.print_deprecation_warnings?.should be_false
+        end
+      end
 		end
 
 		context 'run modes' do
