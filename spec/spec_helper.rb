@@ -19,9 +19,20 @@ if ENV["DEBUG"]
 end
 
 ::RSpec.configure do |c|
-  c.include(::SilentConstants)
   c.include(::Sander6::CustomMatchers)
   c.mock_with :rspec
+
+  c.before(:suite) do
+    unless ENV['NO_COMPILE_TEST_PROTOS']
+      $stdout.puts 'Compiling test protos (use NO_COMPILE_TEST_PROTOS=1 to skip)'
+      proto_path = File.expand_path("../support/", __FILE__)
+      %x{ rprotoc --proto_path=#{proto_path} --ruby_out=#{proto_path} #{File.join(proto_path, '**', '*.proto')} }
+    end
+  end
+end
+
+Dir[File.expand_path('../support/**/*.pb.rb', __FILE__)].each do |proto_file|
+  require proto_file
 end
 
 class ::Protobuf::Rpc::Client

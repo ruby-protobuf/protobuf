@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'spec/proto/test_service_impl'
+require 'spec/support/test/resource_service'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/evented'
 require 'protobuf/socket'

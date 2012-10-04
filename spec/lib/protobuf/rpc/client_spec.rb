@@ -1,24 +1,24 @@
 require 'spec_helper'
-require 'spec/proto/test_service_impl'
+require 'spec/support/test/resource_service'
 
 describe Protobuf::Rpc::Client do
   before(:each) do
     load 'protobuf/evented.rb'
     ::Protobuf::Rpc::Connector.connector_for_client(true)
-    ::Spec::Proto::TestService.configure(::Spec::Proto::TestService::DEFAULT_LOCATION)
+    ::Test::ResourceService.configure(::Test::ResourceService::DEFAULT_LOCATION)
   end
 
   context "when using fiber based calls" do
     it "waits for response when running synchronously" do
       EventMachine.fiber_run do
         StubServer.new(:delay => 3) do |server|
-          client = Spec::Proto::TestService.client(:async => false)
+          client = Test::ResourceService.client(:async => false)
           start = now
 
           client.find(:name => "Test Name", :active => true) do |c|
             c.on_success do |succ|
               succ.name.should eq("Test Name")
-              succ.status.should eq(Spec::Proto::StatusType::ENABLED)
+              succ.status.should eq(Test::StatusType::ENABLED)
             end
 
             c.on_failure do |err|
@@ -36,7 +36,7 @@ describe Protobuf::Rpc::Client do
     it "doesn't wait for response when running async call inside fiber" do
       EventMachine.fiber_run do
         StubServer.new(:delay => 3) do |server|
-          client = Spec::Proto::TestService.client(:async => true)
+          client = Test::ResourceService.client(:async => true)
           start = now
           client.find(:name => "Test Name", :active => true)
 
@@ -50,7 +50,7 @@ describe Protobuf::Rpc::Client do
       subject = Proc.new do
         EventMachine.run do
           StubServer.new(:delay => 1) do |server|
-            client = Spec::Proto::TestService.client(:async => false)
+            client = Test::ResourceService.client(:async => false)
             client.find(:name => "Test Name", :active => true)
           end
         end
@@ -64,7 +64,7 @@ describe Protobuf::Rpc::Client do
       test_proc = Proc.new do
         EventMachine.fiber_run do
           StubServer.new(:delay => 2) do |server|
-            client = Spec::Proto::TestService.client(:async => false, :timeout => 1)
+            client = Test::ResourceService.client(:async => false, :timeout => 1)
             client.find(:name => "Test Name", :active => true) do |cl|
               cl.on_success {}
               cl.on_failure {|f| error = f}
@@ -83,7 +83,7 @@ describe Protobuf::Rpc::Client do
       it "throws a timeout when client timeout is exceeded" do
         subject = Proc.new do
           StubServer.new(:delay => 2) do |server|
-            client = Spec::Proto::TestService.client(:async => false, :timeout => 1)
+            client = Test::ResourceService.client(:async => false, :timeout => 1)
             client.find(:name => "Test Name", :active => true)
           end
         end
@@ -96,7 +96,7 @@ describe Protobuf::Rpc::Client do
 
         subject = Proc.new do
           StubServer.new(:delay => 2) do |server|
-            client = Spec::Proto::TestService.client(:async => false, :timeout => 1)
+            client = Test::ResourceService.client(:async => false, :timeout => 1)
             client.find(:name => "Test Name", :active => true) do |c|
               c.on_failure do |f|
                 failure_message = f.message
@@ -116,38 +116,38 @@ describe Protobuf::Rpc::Client do
   context 'when creating a client from a service' do
 
     it 'should be able to get a client through the Service#client helper method' do
-      Spec::Proto::TestService.client(:port => 9191).should eq(Protobuf::Rpc::Client.new(:service => Spec::Proto::TestService, :port => 9191))
+      Test::ResourceService.client(:port => 9191).should eq(Protobuf::Rpc::Client.new(:service => Test::ResourceService, :port => 9191))
     end
 
     it "should be able to override a service location's host and port" do
-      Spec::Proto::TestService.located_at 'somewheregreat.com:12345'
-      clean_client = Spec::Proto::TestService.client
+      Test::ResourceService.located_at 'somewheregreat.com:12345'
+      clean_client = Test::ResourceService.client
       clean_client.options[:host].should eq('somewheregreat.com')
       clean_client.options[:port].should eq(12345)
 
-      updated_client = Spec::Proto::TestService.client(:host => 'amazing.com', :port => 54321)
+      updated_client = Test::ResourceService.client(:host => 'amazing.com', :port => 54321)
       updated_client.options[:host].should eq('amazing.com')
       updated_client.options[:port].should eq(54321)
     end
 
     it 'should be able to define the syncronicity of the client request' do
-      client = Spec::Proto::TestService.client(:async => false)
+      client = Test::ResourceService.client(:async => false)
       client.options[:async].should be_false
       client.async?.should be_false
 
-      client = Spec::Proto::TestService.client(:async => true)
+      client = Test::ResourceService.client(:async => true)
       client.options[:async].should be_true
       client.async?.should be_true
     end
 
     it 'should be able to define which service to create itself for' do
-      client = Protobuf::Rpc::Client.new :service => Spec::Proto::TestService
-      client.options[:service].should eq(Spec::Proto::TestService)
+      client = Protobuf::Rpc::Client.new :service => Test::ResourceService
+      client.options[:service].should eq(Test::ResourceService)
     end
 
     it 'should have a hard default for host and port on a service that has not been configured' do
-      reset_service_location Spec::Proto::TestService
-      client = Spec::Proto::TestService.client
+      reset_service_location Test::ResourceService
+      client = Test::ResourceService.client
       client.options[:host].should eq(Protobuf::Rpc::Service::DEFAULT_LOCATION[:host])
       client.options[:port].should eq(Protobuf::Rpc::Service::DEFAULT_LOCATION[:port])
     end
@@ -161,7 +161,7 @@ describe Protobuf::Rpc::Client do
     # namely the :find method
 
     it 'should respond to defined service methods' do
-      client = Spec::Proto::TestService.client
+      client = Test::ResourceService.client
       client.should_receive(:send_request).and_return(nil)
       expect { client.find(nil) }.to_not raise_error
     end
@@ -173,7 +173,7 @@ describe Protobuf::Rpc::Client do
     it 'should be able to set and get local variables within client response blocks' do
       outer_value = 'OUTER'
       inner_value = 'INNER'
-      client = Spec::Proto::TestService.client(:async => true)
+      client = Test::ResourceService.client(:async => true)
 
       EM.should_receive(:reactor_running?).and_return(true)
       EM.stub!(:next_tick) do
@@ -194,10 +194,10 @@ describe Protobuf::Rpc::Client do
   context 'when receiving request objects' do
 
     it 'should be able to create the correct request object if passed a hash' do
-      client = Spec::Proto::TestService.client
+      client = Test::ResourceService.client
       client.should_receive(:send_request)
       client.find({:name => 'Test Name', :active => false})
-      client.options[:request].should be_a(Spec::Proto::ResourceFindRequest)
+      client.options[:request].should be_a(Test::ResourceFindRequest)
       client.options[:request].name.should eq('Test Name')
       client.options[:request].active.should eq(false)
     end
