@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    protobuf (2.0.0.rc2)
+    protobuf (2.0.0.rc3)
       activesupport
       ffi
       multi_json
