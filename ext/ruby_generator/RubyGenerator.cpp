@@ -42,9 +42,7 @@ bool RubyGenerator::Generate(const FileDescriptor* file,
   PrintNewLine();
 
   PrintEnumsForFileDescriptor(file_, true);
-  PrintNewLine();
   PrintMessagesForFileDescriptor(file_, true);
-  PrintNewLine();
 
   PrintServices();
 
@@ -100,37 +98,77 @@ void RubyGenerator::PrintMessagesForFileDescriptor(const FileDescriptor* descrip
     }
 
     for (int i = 0; i < descriptor->message_type_count(); i++) {
-      if (print_fields) {
-        PrintMessageFields(descriptor->message_type(i));
-      }
-      else {
-        PrintMessageClass(descriptor->message_type(i));
-      }
+      PrintMessage(descriptor->message_type(i), print_fields);
     }
   }
 }
 
 void RubyGenerator::PrintMessagesForDescriptor(const Descriptor* descriptor, bool print_fields) const {
   for (int i = 0; i < descriptor->nested_type_count(); i++) {
-    if (print_fields) {
-      PrintMessageFields(descriptor->nested_type(i));
-    }
-    else {
-      PrintMessageClass(descriptor->nested_type(i));
-    }
+    PrintMessage(descriptor->nested_type(i), print_fields);
   }
 }
 //
 // Print out the given descriptor message as a Ruby class.
-void RubyGenerator::PrintMessageClass(const Descriptor* descriptor) const {
+void RubyGenerator::PrintMessage(const Descriptor* descriptor, bool print_fields) const {
   map<string,string> data;
   data["class_name"] = descriptor->name();
 
-  printer_->Print(data, "class $class_name$ < ::Protobuf::Message; end");
-  PrintNewLine();
+  if (print_fields) {
+    printer_->Print(data, "class $class_name$");
+    PrintNewLine();
+    printer_->Indent();
 
-  PrintEnumsForDescriptor(descriptor, false);
-  PrintMessagesForDescriptor(descriptor, false);
+    if (descriptor->enum_type_count() > 0) {
+      PrintEnumsForDescriptor(descriptor, true);
+    }
+
+    if (descriptor->nested_type_count() > 0) {
+      PrintMessagesForDescriptor(descriptor, true);
+    }
+
+    PrintExtensionRangesForDescriptor(descriptor);
+
+    // Print Fields
+    if (descriptor->field_count() > 0) {
+      for (int i = 0; i < descriptor->field_count(); i++) {
+        PrintMessageField(descriptor->field(i));
+      }
+    }
+
+    // Print Extension Fields
+    if (descriptor->extension_count() > 0) {
+      for (int i = 0; i < descriptor->extension_count(); i++) {
+        PrintMessageField(descriptor->extension(i));
+      }
+    }
+
+    printer_->Outdent();
+    printer_->Print(data, "end");
+    PrintNewLine();
+  }
+  else if (DescriptorHasNestedTypes(descriptor)) {
+    printer_->Print(data, "class $class_name$ < ::Protobuf::Message");
+    PrintNewLine();
+    printer_->Indent();
+
+    if (descriptor->enum_type_count() > 0) {
+      PrintEnumsForDescriptor(descriptor, false);
+    }
+
+    if (descriptor->nested_type_count() > 0) {
+      PrintMessagesForDescriptor(descriptor, false);
+    }
+
+    printer_->Outdent();
+    printer_->Print(data, "end");
+    PrintNewLine();
+  }
+  else {
+    printer_->Print(data, "class $class_name$ < ::Protobuf::Message; end");
+  }
+
+  PrintNewLine();
 }
 
 void RubyGenerator::PrintExtensionRangesForDescriptor(const Descriptor* descriptor) const {
@@ -141,38 +179,16 @@ void RubyGenerator::PrintExtensionRangesForDescriptor(const Descriptor* descript
       data["message_class"] = Constantize(descriptor->full_name());
       data["start"] = SimpleItoa(range->start);
       data["end"] = SimpleItoa(range->end);
-      printer_->Print(data, "$message_class$.extensions $start$...$end$");
+      printer_->Print(data, "extensions $start$...$end$");
       PrintNewLine();
     }
   }
 }
 
-// Print out the given descriptor message as a Ruby class.
-void RubyGenerator::PrintMessageFields(const Descriptor* descriptor) const {
-  PrintExtensionRangesForDescriptor(descriptor);
-
-  if (descriptor->field_count() > 0) {
-    for (int i = 0; i < descriptor->field_count(); i++) {
-      PrintMessageField(descriptor->field(i));
-    }
-
-    // Print Extension Fields
-    if (descriptor->extension_count() > 0) {
-      for (int i = 0; i < descriptor->extension_count(); i++) {
-        PrintMessageField(descriptor->extension(i));
-      }
-    }
-    PrintNewLine();
-  }
-
-  PrintEnumsForDescriptor(descriptor, true);
-  PrintMessagesForDescriptor(descriptor, true);
-}
-
 // Print the given FieldDescriptor to the Message DSL methods.
 void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
   map<string,string> data;
-  data["message_class"] = Constantize(descriptor->containing_type()->full_name());
+  data["field_presence"] = "";
   data["field_name"] = descriptor->lowercase_name();
   data["tag_number"] = SimpleItoa(descriptor->number());
   data["data_type"] = "";
@@ -182,13 +198,13 @@ void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
   data["extension_opt"] = "";
 
   if (descriptor->is_required()) {
-    data["field_label"] = "required";
+    data["field_presence"] = "required";
   }
   else if (descriptor->is_optional()) {
-    data["field_label"] = "optional";
+    data["field_presence"] = "optional";
   }
   else if (descriptor->is_repeated()) {
-    data["field_label"] = "repeated";
+    data["field_presence"] = "repeated";
   }
 
   switch (descriptor->type()) {
@@ -232,7 +248,7 @@ void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
       case FieldDescriptor::CPPTYPE_DOUBLE: value = SimpleDtoa(descriptor->default_value_double()); break;
       case FieldDescriptor::CPPTYPE_FLOAT:  value = SimpleFtoa(descriptor->default_value_float()); break;
       case FieldDescriptor::CPPTYPE_BOOL:   value = descriptor->default_value_bool() ? "true" : "false"; break;
-      case FieldDescriptor::CPPTYPE_ENUM:   value = Constantize(descriptor->default_value_enum()->full_name()); break;
+      case FieldDescriptor::CPPTYPE_ENUM:   value = FullEnumNamespace(descriptor->default_value_enum()); break;
       case FieldDescriptor::CPPTYPE_STRING: value = "\"" + descriptor->default_value_string() + "\""; break;
       default: break;
     }
@@ -254,15 +270,15 @@ void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
   }
 
   printer_->Print(data,
-    "$message_class$.$field_label$("
+    "$field_presence$ "
     "$data_type$, "
     ":$field_name$, "
     "$tag_number$"
     "$default_opt$"
     "$packed_opt$"
     "$deprecated_opt$"
-    "$extension_opt$"
-    ")\n");
+    "$extension_opt$");
+  PrintNewLine();
 }
 
 
@@ -272,12 +288,7 @@ void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
 
 void RubyGenerator::PrintEnumsForDescriptor(const Descriptor* descriptor, bool print_values) const {
   for (int i = 0; i < descriptor->enum_type_count(); i++) {
-    if (print_values) {
-      PrintEnumValues(descriptor->enum_type(i));
-    }
-    else {
-      PrintEnumClass(descriptor->enum_type(i));
-    }
+    PrintEnum(descriptor->enum_type(i), print_values);
   }
 }
 
@@ -291,39 +302,43 @@ void RubyGenerator::PrintEnumsForFileDescriptor(const FileDescriptor* descriptor
     }
 
     for (int i = 0; i < descriptor->enum_type_count(); i++) {
-      if (print_values) {
-        PrintEnumValues(descriptor->enum_type(i));
-      }
-      else {
-        PrintEnumClass(descriptor->enum_type(i));
-      }
+      PrintEnum(descriptor->enum_type(i), print_values);
     }
   }
 }
 
 // Print the given enum descriptor as a Ruby class.
-void RubyGenerator::PrintEnumClass(const EnumDescriptor* descriptor) const {
+void RubyGenerator::PrintEnum(const EnumDescriptor* descriptor, bool print_values) const {
   map<string,string> data;
   data["class_name"] = descriptor->name();
-  printer_->Print(data, "class $class_name$ < ::Protobuf::Enum; end");
-  PrintNewLine();
-}
 
-// Print the given enum descriptor as a Ruby class.
-void RubyGenerator::PrintEnumValues(const EnumDescriptor* descriptor) const {
-  for (int i = 0; i < descriptor->value_count(); i++) {
-    PrintEnumValue(descriptor->value(i));
+  if (print_values) {
+    printer_->Print(data, "class $class_name$");
+    printer_->Indent();
+    PrintNewLine();
+
+    for (int i = 0; i < descriptor->value_count(); i++) {
+      PrintEnumValue(descriptor->value(i));
+    }
+
+    printer_->Outdent();
+    printer_->Print(data, "end");
+    PrintNewLine();
   }
+  else {
+    printer_->Print(data, "class $class_name$ < ::Protobuf::Enum; end");
+  }
+
   PrintNewLine();
 }
 
 // Print the given enum value to the Enum class DSL methods.
 void RubyGenerator::PrintEnumValue(const EnumValueDescriptor* descriptor) const {
   map<string,string> data;
-  data["enum_class"] = Constantize(descriptor->type()->full_name());
   data["name"] = descriptor->name();
   data["number"] = ConvertIntToString(descriptor->number());
-  printer_->Print(data, "$enum_class$.define :$name$, $number$\n");
+  printer_->Print(data, "define :$name$, $number$");
+  PrintNewLine();
 }
 
 //

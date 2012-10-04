@@ -46,15 +46,13 @@ class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
 
 		void PrintMessagesForDescriptor(const Descriptor* descriptor, bool print_fields) const;
 		void PrintMessagesForFileDescriptor(const FileDescriptor* descriptor, bool print_fields) const;
-		void PrintMessageClass(const Descriptor* descriptor) const;
+		void PrintMessage(const Descriptor* descriptor, bool print_fields) const;
 		void PrintExtensionRangesForDescriptor(const Descriptor* descriptor) const;
-		void PrintMessageFields(const Descriptor* descriptor) const;
 		void PrintMessageField(const FieldDescriptor* descriptor) const;
 
 		void PrintEnumsForDescriptor(const Descriptor* descriptor, bool print_values) const;
 		void PrintEnumsForFileDescriptor(const FileDescriptor* descriptor, bool print_values) const;
-		void PrintEnumClass(const EnumDescriptor* descriptor) const;
-		void PrintEnumValues(const EnumDescriptor* descriptor) const;
+		void PrintEnum(const EnumDescriptor* descriptor, bool print_values) const;
 		void PrintEnumValue(const EnumValueDescriptor* descriptor) const;
 
 		void PrintServices() const;
@@ -152,6 +150,17 @@ class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
 			return underscored.str();
 		}
 
+    static string FullEnumNamespace(const EnumValueDescriptor* descriptor) {
+      string parent_enum_type = Constantize(descriptor->type()->full_name());
+      string enum_name = descriptor->name();
+
+      return strings::Substitute("$0::$1", parent_enum_type, enum_name);
+    }
+
+    static bool DescriptorHasNestedTypes(const Descriptor* descriptor) {
+      return (descriptor->enum_type_count() > 0 || descriptor->nested_type_count() > 0);
+    }
+
 }; // class RubyGenerator
 
 } // namespace ruby
@@ -172,6 +181,16 @@ int _rprotoc_extern(int argc, char* argv[]) {
 
   return cli.Run(argc, argv);
 }
+
+/*
+
+Use for testing:
+
+int main(int argc, char* argv[]) {
+  return _rprotoc_extern(argc, argv);
+}
+
+*/
 
 #ifdef __cplusplus
 }
