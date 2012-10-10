@@ -1,5 +1,5 @@
-require 'protobuf/common/wire_type'
-require 'protobuf/common/exceptions'
+require 'protobuf/wire_type'
+require 'protobuf/exceptions'
 
 module Protobuf
 

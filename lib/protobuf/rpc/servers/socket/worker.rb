@@ -1,3 +1,6 @@
+require 'protobuf/rpc/server'
+require 'protobuf/logger'
+
 module Protobuf
   module Rpc
     module Socket

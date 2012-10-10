@@ -1,4 +1,4 @@
-require 'protobuf/common/logger'
+require 'protobuf/logger'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'
 require 'protobuf/rpc/error'

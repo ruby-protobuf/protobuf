@@ -1,5 +1,5 @@
 require 'date'
-require 'protobuf/common/logger'
+require 'protobuf/logger'
 
 module Protobuf
   module Rpc

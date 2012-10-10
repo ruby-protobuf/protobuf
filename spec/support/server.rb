@@ -1,5 +1,5 @@
 require 'ostruct'
-require 'protobuf/common/logger'
+require 'protobuf/logger'
 require 'protobuf/rpc/server'
 require 'protobuf/rpc/servers/socket/server'
 require 'protobuf/rpc/servers/socket_runner'

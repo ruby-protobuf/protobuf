@@ -13,12 +13,12 @@ module Protobuf
 
         def complete
           @stats.end
-          @stats.log_stats
-          log_debug { "[#{log_signature}] Response proceessing complete" }
+          log_info { @stats.to_s }
+          log_debug { sign_message('Response proceessing complete') }
           @complete_cb.call(self) unless @complete_cb.nil?
-        rescue
-          log_error { "[#{log_signature}] Complete callback error encountered: %s" % $!.message }
-          log_error { "[#{log_signature}] %s" % $!.backtrace.join("\n") }
+        rescue => e
+          log_error { sign_message('Complete callback error encountered') }
+          log_exception(e)
           raise
         end
 
