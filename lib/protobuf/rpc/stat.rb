@@ -4,14 +4,14 @@ require 'protobuf/logger'
 module Protobuf
   module Rpc
     class Stat
-      TYPES = [:SERVER, :CLIENT]
-      
-      def initialize type=:SERVER, do_start=true
-        @type = type
-        start if do_start
       attr_accessor :mode, :start_time, :end_time, :request_size, :dispatcher
       attr_accessor :response_size, :client, :server, :service, :method
 
+      MODES = [:SERVER, :CLIENT].freeze
+
+      def initialize(mode = :SERVER)
+        @mode = mode
+        start
       end
 
       def client=(peer)
@@ -21,8 +21,8 @@ module Protobuf
       def client
         @client ? "#{@client[:ip]}:#{@client[:port]}" : nil
       end
-      
-      def server= peer
+
+      def server=(peer)
         @server = {:port => peer[0], :ip => peer[1]}
       end
 
@@ -61,11 +61,11 @@ module Protobuf
 
       def to_s
         [
-          @type == :SERVER ? "[SRV-#{self.class}]" : "[CLT-#{self.class}]",
+          server? ? "[SRV-#{self.class}]" : "[CLT-#{self.class}]",
           rpc,
           elapsed_time,
           sizes,
-          @type == :SERVER ? server : client
+          server? ? server : client
         ].compact.join(' - ')
       end
 

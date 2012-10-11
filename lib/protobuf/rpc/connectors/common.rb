@@ -28,7 +28,7 @@ module Protobuf
           @data = data
         end
 
-        # All failures should be routed through this method
+        # All failures should be routed through this method.
         #
         # @param [Symbol] code The code we're using (see ::Protobuf::Socketrpc::ErrorReason)
         # @param [String] message The error message
@@ -48,7 +48,7 @@ module Protobuf
         end
 
         def initialize_stats
-          @stats = Protobuf::Rpc::Stat.new(:CLIENT, true)
+          @stats = Protobuf::Rpc::Stat.new(:CLIENT)
           @stats.server = [@options[:port], @options[:host]]
           @stats.service = @options[:service].name
           @stats.method = @options[:method].to_s
