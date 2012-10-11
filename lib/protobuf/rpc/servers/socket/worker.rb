@@ -20,18 +20,14 @@ module Protobuf
           log_debug { "[#{log_signature}] Post init, new read buffer created" }
 
           @stats.client = ::Socket.unpack_sockaddr_in(@socket.getpeername)
-          log_debug { "stats are #{@stats.to_s}" }
+          log_debug { sign_message("stats are #{@stats.to_s}") }
           request_buffer << read_data
           @request_data = request_buffer.data
 
           @stats.request_size = request_buffer.size
 
-          log_debug { "[#{log_signature}] handling request" }
+          log_debug { sign_message("handling request") }
           handle_client if request_buffer.flushed?
-        end
-
-        def log_signature
-          @log_signature ||= "server-#{self.class}-#{object_id}"
         end
 
         def read_data
@@ -50,10 +46,14 @@ module Protobuf
           response_buffer = Protobuf::Rpc::Buffer.new(:write)
           response_buffer.set_data(@response)
           @stats.response_size = response_buffer.size
-          log_debug { "[#{log_signature}] sending data : %s" % response_buffer.data }
+          log_debug { sign_message("sending data : #{response_buffer.data}") }
           @socket.write(response_buffer.write)
           @socket.flush
           @complete_cb.call(@socket)
+        end
+
+        def log_signature
+          @_log_signature ||= "server-#{self.class}-#{object_id}"
         end
       end
 

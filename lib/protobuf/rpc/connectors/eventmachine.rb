@@ -12,6 +12,7 @@ module Protobuf
 
             ::EM.next_tick do
               log_debug { "[#{log_signature}] Scheduling EventMachine client request to be created on next tick" }
+              log_debug { sign_message('Scheduling EventMachine client request to be created on next tick') }
               cnxn = EMClient.connect(options, &ensure_cb)
               cnxn.on_success(&success_cb) if success_cb
               cnxn.on_failure(&ensure_cb)
@@ -19,6 +20,7 @@ module Protobuf
               cnxn.setup_connection
               cnxn.send_data
               log_debug { "[#{log_signature}] Connection scheduled" }
+              log_debug { sign_message('Connection scheduled') }
             end
 
             async? ? true : set_timeout_and_validate_fiber
@@ -37,6 +39,7 @@ module Protobuf
 
         def log_signature
           @log_signature ||= "client-#{self.class}"
+          @_log_signature ||= "client-#{self.class}"
         end
 
         private
@@ -59,6 +62,7 @@ module Protobuf
           fib.resume(true)
         rescue => ex
           message = 'Synchronous client failed: %s' % ex.message
+          log_exception(ex)
           error_stop_reactor(message)
         end
 
@@ -69,7 +73,8 @@ module Protobuf
           end
 
           Fiber.yield
-        rescue FiberError
+        rescue FiberError => ex
+          log_exception(ex)
           message = "Synchronous calls must be in 'EM.fiber_run' block"
           error_stop_reactor(message)
         end

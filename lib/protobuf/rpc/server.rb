@@ -23,16 +23,14 @@ module Protobuf
         ::GC.disable if ::Protobuf.gc_pause_server_request?
         invoke_rpc_method
       rescue => error
-        # Ensure we're handling any errors that try to slip out the back door
-        log_error(error.message)
-        log_error(error.backtrace.join("\n"))
+        log_exception(error)
         handle_error(error)
         send_response
       end
 
       # Client error handler. Receives an exception object and writes it into the @response
       def handle_error(error)
-        log_debug { "[#{log_signature}] handle_error: %s" % error.inspect }
+        log_debug { sign_message("handle_error: #{error.inspect}") }
         if error.respond_to?(:to_response)
           error.to_response(@response)
         else
@@ -73,12 +71,12 @@ module Protobuf
       end
 
       def log_signature
-        @log_signature ||= "server-#{self.class}"
+        @_log_signature ||= "[server-#{self.class.name}]"
       end
 
       # Parse the incoming request object into our expected request object
       def parse_request_from_buffer
-        log_debug { "[#{log_signature}] parsing request from buffer: %s" % @request_data }
+        log_debug { sign_message("Parsing request from buffer: #{@request_data}") }
         @request.parse_from_string(@request_data)
       rescue => error
         exc = ::Protobuf::Rpc::BadRequestData.new 'Unable to parse request: %s' % error.message
@@ -127,11 +125,10 @@ module Protobuf
       # Write the response wrapper to the client
       def send_response
         raise 'Response already sent to client' if @did_respond
-        log_debug { "[#{log_signature}] Sending response to client: %s" % @response.inspect }
+        log_debug { sign_message("Sending response to client: #{@response.inspect}") }
         send_data
-        @stats.end
-        @stats.log_stats
         @did_respond = true
+        @stats.stop && log_info { @stats.to_s }
       ensure
         ::GC.enable if ::Protobuf.gc_pause_server_request?
       end

@@ -57,7 +57,7 @@ class StubServer
     else
       start_socket_server
     end
-    log_debug { "[stub-server] Server started #{@options.host}:#{@options.port}" }
+    log_debug { sign_message("Server started #{@options.host}:#{@options.port}") }
   rescue => ex
     if ex =~ /no acceptor/ # Means EM didn't shutdown in the next_tick yet
       stop
@@ -93,5 +93,9 @@ class StubServer
     end
 
     @running = false
+  end
+
+  def log_signature
+    @_log_signature ||= "[stub-server]"
   end
 end

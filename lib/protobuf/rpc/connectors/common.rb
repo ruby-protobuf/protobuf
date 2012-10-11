@@ -12,7 +12,7 @@ module Protobuf
         end
 
         def complete
-          @stats.end
+          @stats.stop
           log_info { @stats.to_s }
           log_debug { sign_message('Response proceessing complete') }
           @complete_cb.call(self) unless @complete_cb.nil?
@@ -23,7 +23,7 @@ module Protobuf
         end
 
         def data_callback(data)
-          log_debug { "[#{log_signature}] Using data_callback" }
+          log_debug { sign_message('Using data_callback') }
           @used_data_callback = true
           @data = data
         end
@@ -36,12 +36,12 @@ module Protobuf
           @error =  ClientError.new
           @error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
           @error.message = message
-          log_debug { "[#{log_signature}] Server failed request (invoking on_failure): %s" % @error.inspect }
+          log_debug { sign_message("Server failed request (invoking on_failure): #{@error.inspect}") }
 
           @failure_cb.call(@error) unless @failure_cb.nil?
-        rescue
-          log_error { "[#{log_signature}] Failure callback error encountered: %s" % $!.message }
-          log_error { "[#{log_signature}] %s" % $!.backtrace.join("\n") }
+        rescue => e
+          log_error { sign_message("Failure callback error encountered") }
+          log_exception(e)
           raise
         ensure
           complete
@@ -53,18 +53,19 @@ module Protobuf
           @stats.service = @options[:service].name
           @stats.method = @options[:method].to_s
         rescue => ex
+          log_exception(ex)
           fail(:RPC_ERROR, "Invalid stats configuration. #{ex.message}")
         end
 
         def log_signature
-          @log_signature ||= "client-#{self.class}"
+          @_log_signature ||= "client-#{self.class}"
         end
 
         def parse_response
           # Close up the connection as we no longer need it
           close_connection
 
-          log_debug { "[#{log_signature}] Parsing response from server (connection closed)" }
+          log_debug { sign_message("Parsing response from server (connection closed)") }
 
           # Parse out the raw response
           response_wrapper = Protobuf::Socketrpc::Response.new
@@ -72,13 +73,13 @@ module Protobuf
 
           # Determine success or failure based on parsed data
           if response_wrapper.has_field?(:error_reason)
-            log_debug { "[#{log_signature}] Error response parsed" }
+            log_debug { sign_message("Error response parsed") }
 
             # fail the call if we already know the client is failed
             # (don't try to parse out the response payload)
             fail(response_wrapper.error_reason, response_wrapper.error)
           else
-            log_debug { "[#{log_signature}] Successful response parsed" }
+            log_debug { sign_message("Successful response parsed") }
 
             # Ensure client_response is an instance
             response_type = @options[:response_type].new
@@ -118,12 +119,12 @@ module Protobuf
         end
 
         def succeed(response)
-          log_debug { "[#{log_signature}] Server succeeded request (invoking on_success)" }
+          log_debug { sign_message("Server succeeded request (invoking on_success)") }
           @success_cb.call(response) unless @success_cb.nil?
-        rescue
-          log_error { "[#{log_signature}] Success callback error encountered: %s" % $!.message }
-          log_error { "[#{log_signature}] %s" % $!.backtrace.join("\n") }
-          fail :RPC_ERROR, 'An exception occurred while calling on_success: %s' % $!.message
+        rescue => e
+          log_error { sign_message("Success callback error encountered") }
+          log_exception(e)
+          fail(:RPC_ERROR, "An exception occurred while calling on_success: #{e.message}")
         ensure
           complete
         end
@@ -138,7 +139,7 @@ module Protobuf
 
         def verify_callbacks
           if !any_callbacks?
-            log_debug { "[#{log_signature}] No callbacks set, using data_callback" }
+            log_debug { sign_message("No callbacks set, using data_callback") }
             @success_cb = @failure_cb = self.method(:data_callback)
           end
         end

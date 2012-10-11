@@ -22,22 +22,26 @@ module Protobuf
             log_error { "[client-#{self.class}] Cannot run in async mode" }
             raise "Cannot use Socket client in async mode"
           end
+        def log_signature
+          @_log_signature ||= "[client-#{self.class}]"
         end
+
+        private
 
         def close_connection
           @socket.close
-          log_debug { "[client-#{self.class}] Connector closed"  }
+          log_debug { sign_message('Connector closed')  }
         end
 
         def connect_to_rpc_server
           @socket = TCPSocket.new(options[:host], options[:port])
-          log_debug { "[client-#{self.class}] Connection established #{options[:host]}:#{options[:port]}"  }
+          log_debug { sign_message("Connection established #{options[:host]}:#{options[:port]}")  }
         end
 
         # Method to determine error state, must be used with Connector api
         def error?
           return true if(@error)
-          log_debug { "[client-#{self.class}] Error state : #{@socket.closed?}"  }
+          log_debug { sign_message("Error state : #{@socket.closed?}")  }
           @socket.closed?
         end
 
@@ -53,8 +57,8 @@ module Protobuf
         end
 
         def read_response
-          log_debug { "[client-#{self.class}] error? is #{error?}" }
           return if(error?)
+          log_debug { sign_message("error? is #{error?}") }
           response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
           response_buffer << read_data
           @stats.response_size = response_buffer.size
@@ -68,7 +72,7 @@ module Protobuf
           request_buffer.set_data(@request_data)
           @socket.write(request_buffer.write)
           @socket.flush
-          log_debug { "[client-#{self.class}] write closed"  }
+          log_debug { sign_message("write closed") }
         end
 
       end

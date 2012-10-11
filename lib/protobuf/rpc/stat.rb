@@ -38,6 +38,8 @@ module Protobuf
       end
       
       def end
+
+      def stop
         start if !@start_time
         @end_time ||= Time.now
       end
@@ -49,9 +51,13 @@ module Protobuf
       def elapsed_time
         (start_time && end_time ? '%ss' % (end_time - start_time).round(4) : nil)
       end
-      
-      def log_stats
-        Protobuf::Logger.info(self.to_s)
+
+      def server?
+        @mode == :SERVER
+      end
+
+      def client?
+        @mode == :CLIENT
       end
       
       def to_s
