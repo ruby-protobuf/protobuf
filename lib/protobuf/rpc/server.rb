@@ -79,7 +79,7 @@ module Protobuf
         log_debug { sign_message("Parsing request from buffer: #{@request_data}") }
         @request.parse_from_string(@request_data)
       rescue => error
-        exc = ::Protobuf::Rpc::BadRequestData.new 'Unable to parse request: %s' % error.message
+        exc = ::Protobuf::Rpc::BadRequestData.new("Unable to parse request: #{error.message}")
         log_error { exc.message }
         raise exc
       end

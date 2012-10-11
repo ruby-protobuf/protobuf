@@ -33,7 +33,7 @@ module Protobuf
         def read_data
           size_io = StringIO.new
 
-          while((size_reader = @socket.getc) != "-")
+          until (size_reader = @socket.getc) == "-"
             size_io << size_reader
           end
           str_size_io = size_io.string
@@ -42,7 +42,7 @@ module Protobuf
         end
 
         def send_data
-          raise 'Socket closed unexpectedly' if(@socket.nil? || @socket.closed?)
+          raise 'Socket closed unexpectedly' unless socket_writable?
           response_buffer = Protobuf::Rpc::Buffer.new(:write)
           response_buffer.set_data(@response)
           @stats.response_size = response_buffer.size
@@ -54,6 +54,10 @@ module Protobuf
 
         def log_signature
           @_log_signature ||= "server-#{self.class}-#{object_id}"
+        end
+
+        def socket_writable?
+          ! @socket.nil? && ! @socket.closed?
         end
       end
 

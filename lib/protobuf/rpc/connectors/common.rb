@@ -97,8 +97,8 @@ module Protobuf
 
         def post_init
           send_data unless error?
-        rescue
-          fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
+        rescue => e
+          fail(:RPC_ERROR, "Connection error: #{e.message}")
         end
 
         def rpc_request_data
@@ -109,8 +109,8 @@ module Protobuf
             :method_name => @options[:method].to_s,
             :request_proto => @options[:request].serialize_to_string
           ).serialize_to_string
-        rescue
-          fail :INVALID_REQUEST_PROTO, "Could not set request proto: #{$!.message}"
+        rescue => e
+          fail(:INVALID_REQUEST_PROTO, "Could not set request proto: #{e.message}")
         end
 
         def setup_connection
@@ -133,7 +133,7 @@ module Protobuf
           unless @options[:request].class == @options[:request_type]
             expected = @options[:request_type].name
             actual = @options[:request].class.name
-            fail :INVALID_REQUEST_PROTO, 'Expected request type to be type of %s, got %s instead' % [expected, actual]
+            fail(:INVALID_REQUEST_PROTO, "Expected request type to be type of #{expected}, got #{actual} instead")
           end
         end
 

@@ -34,11 +34,10 @@ module Protobuf
         # don't want to swallow the black holes.
         #
         def ensure_cb
-          @ensure_cb ||= (@failure_cb || lambda { |error| raise '%s: %s' % [error.code.name, error.message] } )
+          @ensure_cb ||= (@failure_cb || lambda { |error| raise "#{error.code.name}: #{error.message}" })
         end
 
         def log_signature
-          @log_signature ||= "client-#{self.class}"
           @_log_signature ||= "client-#{self.class}"
         end
 
@@ -61,14 +60,14 @@ module Protobuf
           ::EM::cancel_timer(@timeout_timer)
           fib.resume(true)
         rescue => ex
-          message = 'Synchronous client failed: %s' % ex.message
           log_exception(ex)
+          message = "Synchronous client failed: #{ex.message}"
           error_stop_reactor(message)
         end
 
         def set_timeout_and_validate_fiber
           @timeout_timer = ::EM::add_timer(@options[:timeout]) do
-            message = 'Client timeout of %d seconds expired' % @options[:timeout]
+            message = "Client timeout of #{@options[:timeout]} seconds expired"
             error_stop_reactor(message)
           end
 

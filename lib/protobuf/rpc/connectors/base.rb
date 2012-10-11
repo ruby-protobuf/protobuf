@@ -22,14 +22,14 @@ module Protobuf
 
       class Base
         include Protobuf::Logger::LogMethods
-        
+
         attr_reader :options
         attr_accessor :success_cb, :failure_cb, :complete_cb
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
         end
-        
+
         def send_request
           raise 'If you inherit a Connector from Base you must implement send_request'
         end

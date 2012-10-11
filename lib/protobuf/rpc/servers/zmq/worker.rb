@@ -13,9 +13,9 @@ module Protobuf
         #
         def initialize(opts={})
           @options = opts
-          host = @options.fetch(:host, "127.0.0.1")
-          port = @options.fetch(:port, 9400)
-          protocol = @options.fetch(:protocol, "tcp")
+          host = @options.fetch(:host) { "127.0.0.1" }
+          port = @options.fetch(:port) { 9400 }
+          protocol = @options.fetch(:protocol) { "tcp" }
 
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REP)
@@ -50,7 +50,7 @@ module Protobuf
             @poller.readables.each do |socket|
               initialize_buffers
               handle_request(socket)
-              handle_client unless(@request_data.nil?)
+              handle_client unless @request_data.nil?
             end
           end
         ensure

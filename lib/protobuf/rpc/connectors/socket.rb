@@ -40,7 +40,7 @@ module Protobuf
 
         # Method to determine error state, must be used with Connector api
         def error?
-          return true if(@error)
+          return true if @error
           log_debug { sign_message("Error state : #{@socket.closed?}")  }
           @socket.closed?
         end
@@ -48,7 +48,7 @@ module Protobuf
         def read_data
           size_io = StringIO.new
 
-          while((size_reader = @socket.getc) != "-")
+          until (size_reader = @socket.getc) == "-"
             size_io << size_reader
           end
           str_size_io = size_io.string
@@ -57,8 +57,8 @@ module Protobuf
         end
 
         def read_response
-          return if(error?)
           log_debug { sign_message("error? is #{error?}") }
+          return if error?
           response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
           response_buffer << read_data
           @stats.response_size = response_buffer.size
@@ -67,7 +67,7 @@ module Protobuf
         end
 
         def send_data
-          return if(error?)
+          return if error?
           request_buffer = ::Protobuf::Rpc::Buffer.new(:write)
           request_buffer.set_data(@request_data)
           @socket.write(request_buffer.write)
