@@ -67,7 +67,7 @@ module Protobuf
 
       def on_failure=(callable)
         if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
-          raise "callable must take a single argument and respond to :call"
+          raise "Callable must take a single argument and respond to :call"
         end
 
         @connector.failure_cb = callable
@@ -87,7 +87,7 @@ module Protobuf
 
       def on_success=(callable)
         if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
-          raise "callable must take a single argument and respond to :call"
+          raise "Callable must take a single argument and respond to :call"
         end
 
         @connector.success_cb = callable
@@ -107,12 +107,13 @@ module Protobuf
       #
       def method_missing(method, *params)
         service = options[:service]
-        unless service.rpcs[service].keys.include?(method)
+        unless service.rpc_method?(method)
           log_error { sign_message("#{service.name}##{method.to_s} not rpc method, passing to super") }
           super(method, *params)
         else
-          rpc = service.rpcs[service][method.to_sym]
           log_debug { sign_message("#{service.name}##{method.to_s}") }
+          rpc = service.rpcs[method.to_sym]
+
           options[:request_type] = rpc.request_type
           log_debug { sign_message("Request Type: #{options[:request_type].name}") }
 

@@ -5,7 +5,6 @@ describe 'Functional EventMachine Client' do
   before(:each) do
     load 'protobuf/evented.rb'
     ::Protobuf::Rpc::Connector.connector_for_client(true)
-    ::Test::ResourceService.configure(::Test::ResourceService::DEFAULT_LOCATION)
   end
 
   it 'runs fine when required fields are set' do

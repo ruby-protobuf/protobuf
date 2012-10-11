@@ -5,7 +5,6 @@ describe Protobuf::Rpc::Client do
   before(:each) do
     load 'protobuf/evented.rb'
     ::Protobuf::Rpc::Connector.connector_for_client(true)
-    ::Test::ResourceService.configure(::Test::ResourceService::DEFAULT_LOCATION)
   end
 
   context "when using fiber based calls" do
@@ -114,6 +113,7 @@ describe Protobuf::Rpc::Client do
   end
 
   context 'when creating a client from a service' do
+    before { reset_service_location(Test::ResourceService) }
 
     it 'should be able to get a client through the Service#client helper method' do
       Test::ResourceService.client(:port => 9191).should eq(Protobuf::Rpc::Client.new(:service => Test::ResourceService, :port => 9191))
@@ -146,10 +146,9 @@ describe Protobuf::Rpc::Client do
     end
 
     it 'should have a hard default for host and port on a service that has not been configured' do
-      reset_service_location Test::ResourceService
       client = Test::ResourceService.client
-      client.options[:host].should eq(Protobuf::Rpc::Service::DEFAULT_LOCATION[:host])
-      client.options[:port].should eq(Protobuf::Rpc::Service::DEFAULT_LOCATION[:port])
+      client.options[:host].should eq(Protobuf::Rpc::Service::DEFAULT_HOST)
+      client.options[:port].should eq(Protobuf::Rpc::Service::DEFAULT_PORT)
     end
 
   end

@@ -1,5 +1,4 @@
 require 'thor'
-require 'pry'
 require 'protobuf/version'
 require 'protobuf/logger'
 require 'protobuf/rpc/servers/evented_runner'

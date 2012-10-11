@@ -22,12 +22,20 @@ module Protobuf
         @client ? "#{@client[:ip]}:#{@client[:port]}" : nil
       end
 
+      def method
+        @method ||= @dispatcher.try(:method).try(:name)
+      end
+
       def server=(peer)
         @server = {:port => peer[0], :ip => peer[1]}
       end
 
       def server
         @server ? "#{@server[:ip]}:#{@server[:port]}" : nil
+      end
+
+      def service
+        @service ||= @dispatcher.try(:service).try(:name)
       end
 
       def sizes
