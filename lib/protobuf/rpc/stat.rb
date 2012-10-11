@@ -23,7 +23,7 @@ module Protobuf
       end
 
       def method
-        @method ||= @dispatcher.try(:method).try(:name)
+        @method ||= @dispatcher.try(:callable_method).try(:name)
       end
 
       def server=(peer)
@@ -35,7 +35,7 @@ module Protobuf
       end
 
       def service
-        @service ||= @dispatcher.try(:service).try(:name)
+        @service ||= @dispatcher.try(:service).class.name
       end
 
       def sizes
