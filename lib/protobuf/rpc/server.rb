@@ -8,6 +8,17 @@ module Protobuf
   module Rpc
     module Server
 
+      def initialize_request!
+        log_debug { sign_message('Post init') }
+        @request = ::Protobuf::Socketrpc::Request.new
+        @response = ::Protobuf::Socketrpc::Response.new
+        @stats = Protobuf::Rpc::Stat.new(:SERVER)
+        set_peer
+      end
+
+      # no-op, implemented by including class if desired.
+      def set_peer; end
+
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
         # Parse the protobuf request from the socket
@@ -35,7 +46,7 @@ module Protobuf
           error.to_response(@response)
         else
           message = error.respond_to?(:message) ? error.message : error.to_s
-          code = error.respond_to?(:code) ? error.code.to_s : "RPC_ERROR"
+          code = error.respond_to?(:code) ? error.code : 'RPC_ERROR'
           ::Protobuf::Rpc::PbError.new(message, code).to_response(@response)
         end
       end

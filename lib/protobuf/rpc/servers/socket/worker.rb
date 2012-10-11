@@ -10,16 +10,12 @@ module Protobuf
         include ::Protobuf::Logger::LogMethods
 
         def initialize(sock, &complete_cb)
-          @did_response = false
           @socket = sock
-          @request = Protobuf::Socketrpc::Request.new
-          @response = Protobuf::Socketrpc::Response.new
-          request_buffer = Protobuf::Rpc::Buffer.new(:read)
-          @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
-          @complete_cb = complete_cb
-          log_debug { "[#{log_signature}] Post init, new read buffer created" }
+          initialize_request!
 
-          @stats.client = ::Socket.unpack_sockaddr_in(@socket.getpeername)
+          request_buffer = Protobuf::Rpc::Buffer.new(:read)
+          @complete_cb = complete_cb
+
           log_debug { sign_message("stats are #{@stats.to_s}") }
           request_buffer << read_data
           @request_data = request_buffer.data
@@ -54,6 +50,10 @@ module Protobuf
 
         def log_signature
           @_log_signature ||= "server-#{self.class}-#{object_id}"
+        end
+
+        def set_peer
+          @stats.client = ::Socket.unpack_sockaddr_in(@socket.getpeername)
         end
 
         def socket_writable?

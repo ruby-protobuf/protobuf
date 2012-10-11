@@ -33,12 +33,14 @@ module Protobuf
         private
 
         def close_connection
+          return if @error
           zmq_error_check(@socket.close)
           zmq_error_check(@zmq_context.terminate)
           log_debug { sign_message("Connector closed")  }
         end
 
         def connect_to_rpc_server
+          return if @error
           log_debug { sign_message("Establishing connection: #{options[:host]}:#{options[:port]}") }
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REQ)
