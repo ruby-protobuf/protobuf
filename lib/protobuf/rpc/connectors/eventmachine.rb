@@ -11,18 +11,17 @@ module Protobuf
             f = Fiber.current
 
             ::EM.next_tick do
-              log_debug { "[#{log_signature}] Scheduling EventMachine client request to be created on next tick" }
               log_debug { sign_message('Scheduling EventMachine client request to be created on next tick') }
               cnxn = EMClient.connect(options, &ensure_cb)
               cnxn.on_success(&success_cb) if success_cb
               cnxn.on_failure(&ensure_cb)
-              cnxn.on_complete { resume_fiber(f) } unless async?
+              cnxn.on_complete { resume_fiber(f) }
               cnxn.setup_connection
               cnxn.send_data
               log_debug { sign_message('Connection scheduled') }
             end
 
-            async? ? true : set_timeout_and_validate_fiber
+            set_timeout_and_validate_fiber
           end
         end
 

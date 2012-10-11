@@ -11,7 +11,7 @@ describe 'Functional EventMachine Client' do
     expect {
       EventMachine.fiber_run do
         StubServer.new do |server|
-          client = ::Test::ResourceService.client(:async => false, :timeout => 5)
+          client = ::Test::ResourceService.client(:timeout => 5)
 
           client.find(:name => 'Test Name', :active => true) do |c|
             c.on_success do |succ|
@@ -34,7 +34,7 @@ describe 'Functional EventMachine Client' do
     EventMachine.fiber_run do
       StubServer.new do |server|
         request = ::Test::ResourceFindRequest.new(:active => true)
-        client = ::Test::ResourceService.client(:async => false)
+        client = ::Test::ResourceService.client
 
         client.find(request) do |c|
           c.on_success { raise "shouldn't pass"}
@@ -51,7 +51,7 @@ describe 'Functional EventMachine Client' do
     EventMachine.fiber_run do
       StubServer.new do |server|
         request = ::Test::Resource.new(:name => 'Test Name')
-        client = ::Test::ResourceService.client(:async => false)
+        client = ::Test::ResourceService.client
 
         client.find(request) do |c|
           c.on_success { raise "shouldn't pass"}

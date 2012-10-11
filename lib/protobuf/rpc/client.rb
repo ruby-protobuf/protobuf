@@ -10,7 +10,7 @@ module Protobuf
       extend Forwardable
       include Protobuf::Logger::LogMethods
 
-      delegate [:options, :complete_cb, :success_cb, :failure_cb, :async?] => :@connector
+      delegate [:options, :complete_cb, :success_cb, :failure_cb] => :@connector
       attr_reader :connector
 
       # Create a new client with default options (defined in ClientConnection)
@@ -56,7 +56,6 @@ module Protobuf
       # Set a failure callback on the client to return the
       # error returned by the service, if any. If this callback
       # is called, success_cb will NOT be called.
-      # Callback is called regardless of :async setting.
       #
       #   client = Client.new(:service => WidgetService)
       #   client.on_failure {|err| ... }
@@ -76,7 +75,6 @@ module Protobuf
       # Set a success callback on the client to return the
       # successful response from the service when it is returned.
       # If this callback is called, failure_cb will NOT be called.
-      # Callback is called regardless of :async setting.
       #
       #   client = Client.new(:service => WidgetService)
       #   client.on_success {|res| ... }

@@ -16,7 +16,6 @@ module Protobuf
         :request        => nil,           # The request object sent by the client
         :request_type   => nil,           # The request type expected by the client
         :response_type  => nil,           # The response type expected by the client
-        :async          => false,         # Whether or not to block a client call, this is actually handled by client.rb
         :timeout        => 30             # The default timeout for the request, also handled by client.rb
       }
 
@@ -32,10 +31,6 @@ module Protobuf
 
         def send_request
           raise 'If you inherit a Connector from Base you must implement send_request'
-        end
-        
-        def async?
-          !!@options[:async]
         end
       end
     end

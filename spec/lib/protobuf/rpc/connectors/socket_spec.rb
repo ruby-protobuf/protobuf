@@ -33,16 +33,4 @@ describe Protobuf::Rpc::Connectors::Socket do
       subject.instance_variable_get(:@response_data).should eq(data)
     end
   end
-
-  context "#check_async" do
-    it "raises an error when trying to execute asynchronously" do
-      conn = described_class.new(:async => true)
-      expect{ conn.__send__(:check_async) }.to raise_error
-    end
-
-    it "allows execution when synchronous" do
-      conn = described_class.new(:async => false)
-      expect{ conn.__send__(:check_async) }.to_not raise_error
-    end
-  end
 end

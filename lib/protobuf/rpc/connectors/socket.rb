@@ -8,20 +8,12 @@ module Protobuf
         include Protobuf::Logger::LogMethods
 
         def send_request
-          check_async
           setup_connection
           connect_to_rpc_server
           post_init
           read_response
         end
 
-        private
-
-        def check_async
-          if async?
-            log_error { "[client-#{self.class}] Cannot run in async mode" }
-            raise "Cannot use Socket client in async mode"
-          end
         def log_signature
           @_log_signature ||= "[client-#{self.class}]"
         end
