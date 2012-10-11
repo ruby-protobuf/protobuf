@@ -141,30 +141,6 @@ describe Protobuf::Rpc::Client do
       client.should_receive(:send_request).and_return(nil)
       expect { client.find(nil) }.to_not raise_error
     end
-
-    it 'raises a NameError when accessing a var that does not exist' do
-      pending
-    end
-
-    it 'should be able to set and get local variables within client response blocks' do
-      outer_value = 'OUTER'
-      inner_value = 'INNER'
-      client = Test::ResourceService.client
-
-      EM.should_receive(:reactor_running?).and_return(true)
-      EM.stub!(:next_tick) do
-        client.success_cb.call(inner_value)
-      end
-
-      client.find(nil) do |c|
-        c.on_success do |response|
-          outer_value.should eq('OUTER')
-          outer_value = response
-        end
-      end
-      outer_value.should eq(inner_value)
-    end
-
   end
 
   context 'when receiving request objects' do
