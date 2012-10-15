@@ -36,8 +36,8 @@ module Protobuf
       # will not have to configure the location each time.
       #
       def self.configure(config = {})
-        self.host = config.delete(:host) if config.key?(:host)
-        self.port = config.delete(:port) if config.key?(:port)
+        self.host = config[:host] if config.key?(:host)
+        self.port = config[:port] if config.key?(:port)
       end
 
       # The host location of the service.
