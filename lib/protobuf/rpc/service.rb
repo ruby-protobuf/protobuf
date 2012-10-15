@@ -147,6 +147,7 @@ module Protobuf
       def respond_with(candidate)
         @_response = candidate
       end
+      alias_method :return_from_whence_you_came, :respond_with
 
       # Automatically fail a service method.
       #
