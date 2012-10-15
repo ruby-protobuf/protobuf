@@ -11,6 +11,8 @@ module Protobuf
     class Service
       include Protobuf::Logger::LogMethods
 
+      attr_reader :response
+
       DEFAULT_HOST = '127.0.0.1'.freeze
       DEFAULT_PORT = 9399
 
@@ -97,16 +99,23 @@ module Protobuf
       # Instance Methods
       #
 
+      # Initialize a service with the rpc endpoint name and the bytes
+      # for the request.
+      def initialize(rpc, request_bytes)
+        @rpc = rpc
+        @request_bytes = request_bytes
+      end
+
       # Register a failure callback for use when rpc_failed is invoked.
       #
       def on_rpc_failed(callable)
-        @rpc_failed_callback = callable
+        @rpc_failed_callback ||= callable
       end
 
-      # Automatically fail a service method.
+      # Response object for this rpc cycle. Not assignable.
       #
-      def rpc_failed(message)
-        @rpc_failed_callback.call(message)
+      def response
+        @_response ||= rpcs[@rpc].response_type.new
       end
 
       # Convenience method to get back to class method.
@@ -119,6 +128,30 @@ module Protobuf
       #
       def rpcs
         self.class.rpcs
+      end
+
+      private
+
+      # Request object for this rpc cycle. Not assignable.
+      #
+      def request
+        @_request ||= rpcs[@rpc].request_type.new.parse_from_string(@request_bytes)
+      rescue => e
+        raise BadRequestProto, "Unable to parse request: #{e.message}"
+      end
+
+      # Sugar to make an rpc method feel like a controller method.
+      # If this method is not called, the response will be the memoized
+      # object returned by the response reader.
+      #
+      def respond_with(candidate)
+        @_response = candidate
+      end
+
+      # Automatically fail a service method.
+      #
+      def rpc_failed(message)
+        @rpc_failed_callback.call(message)
       end
 
     end

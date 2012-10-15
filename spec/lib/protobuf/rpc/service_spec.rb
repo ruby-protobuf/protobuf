@@ -98,21 +98,24 @@ describe Protobuf::Rpc::Service do
   end
 
   context 'instance methods' do
-    subject { Test::ResourceService.new }
-
     context 'when invoking a service call' do
       before(:all) do
         class ::NewTestService < Protobuf::Rpc::Service
-          rpc :find, Test::ResourceFindRequest, Test::Resource
-          def find(request, response)
-            response
+          rpc :find_with_implied_response, Test::ResourceFindRequest, Test::Resource
+          def find_with_implied_response
+            response.name = 'Implicit response'
+          end
+
+          rpc :find_with_respond_with, Test::ResourceFindRequest, Test::Resource
+          def find_with_respond_with
+            custom = Test::Resource.new(:name => 'Custom response')
+            respond_with(custom)
           end
 
           rpc :find_with_rpc_failed, Test::ResourceFindRequest, Test::Resource
-          def find_with_rpc_failed(request, response)
+          def find_with_rpc_failed
             rpc_failed('This is a failed endpoint')
             response.name = 'Name will still be set'
-            return response
           end
         end
       end
@@ -126,17 +129,34 @@ describe Protobuf::Rpc::Service do
         Test::Resource.new
       end
 
-      subject { NewTestService.new(:find) }
-      specify { subject.find(request, response).should eq response }
+
+      context 'when calling the rpc method' do
+        context 'when response is implied' do
+          subject { NewTestService.new(:find_with_implied_response, request.serialize_to_string) }
+
+          before { subject.find_with_implied_response }
+          its(:response) { should be_a(Test::Resource) }
+          specify { subject.response.name.should eq 'Implicit response' }
+        end
+
+        context 'when using respond_with paradigm' do
+          subject { NewTestService.new(:find_with_respond_with, request.serialize_to_string) }
+
+          before { subject.find_with_respond_with }
+          its(:response) { should be_a(Test::Resource) }
+          specify { subject.response.name.should eq 'Custom response' }
+        end
+      end
 
       context 'when calling rpc_failed in the method' do
+        subject { NewTestService.new(:find_with_rpc_failed, request.serialize_to_string) }
+
         it 'invokes the rpc_failed callback with the error' do
           error = nil
-          service = NewTestService.new(:find_with_rpc_failed)
-          service.on_rpc_failed(lambda { |err| error = err })
-          returned_response = service.find_with_rpc_failed(request, response)
+          subject.on_rpc_failed(lambda { |err| error = err })
+          subject.find_with_rpc_failed
           error.should eq 'This is a failed endpoint'
-          returned_response.name.should eq 'Name will still be set'
+          subject.response.name.should eq 'Name will still be set'
         end
       end
     end

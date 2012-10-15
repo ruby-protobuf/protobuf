@@ -49,25 +49,25 @@ describe Protobuf::Rpc::ServiceDispatcher do
 
   describe '#invoke!' do
     context 'regular invocation' do
-      before { subject.callable_method.should_receive(:call).with(request, response).and_return(response) }
+      before { subject.callable_method.should_receive(:call) }
+      before { subject.service.stub(:response).and_return(response) }
       before { subject.invoke! }
-      its(:request) { should be_instance_of Test::ResourceFindRequest }
       its(:response) { should be_instance_of Test::Resource }
       its(:success?) { should be_true }
     end
 
     context 'when service responds with' do
       context 'a hash object' do
-        let(:returned_response) { { :name => 'returned' } }
-        before { subject.callable_method.should_receive(:call).and_return(returned_response) }
+        before { subject.callable_method.should_receive(:call) }
+        before { subject.service.stub(:response).and_return({ :name => 'returned' }) }
         before { subject.invoke! }
         its(:success?) { should be_true }
         its(:response) { should eq Test::Resource.new(:name => 'returned') }
       end
 
       context 'a type not identified by the rpc definition' do
-        let(:invalid_response) { "I'm not a valid response" }
-        before { subject.callable_method.should_receive(:call).and_return(invalid_response) }
+        before { subject.callable_method.should_receive(:call) }
+        before { subject.service.stub(:response).and_return("I'm not a valid response") }
         before { subject.invoke! }
         its(:error) { should be_instance_of(Protobuf::Rpc::BadResponseProto) }
       end
@@ -77,14 +77,14 @@ describe Protobuf::Rpc::ServiceDispatcher do
       before(:all) do
         class Test::ResourceService
           rpc :find_with_rpc_failed, Test::ResourceFindRequest, Test::Resource
-          def find_with_rpc_failed(request, response)
+          def find_with_rpc_failed
             rpc_failed('Find failed')
           end
         end
       end
 
       let(:method_name) { 'find_with_rpc_failed' }
-      before { subject.service.find_with_rpc_failed(request, response) }
+      before { subject.service.find_with_rpc_failed }
 
       its(:success?) { should be_false }
       its(:error) { should be_instance_of(Protobuf::Rpc::RpcFailed) }

@@ -5,10 +5,9 @@ module Test
 
     # request -> Test::ResourceFindRequest
     # response -> Test::Resource
-    def find(request, response)
+    def find
       response.name = request.name
       response.status = request.active ? 1 : 0
-      return response
     end
 
   end

@@ -6,38 +6,38 @@ module Protobuf
 
       include ::Protobuf::Logger::LogMethods
 
-      attr_accessor :service, :callable_method, :outer_request, :definition
-      attr_accessor :request, :response, :error
+      attr_accessor :service, :service_klass, :callable_method, :outer_request
+      attr_accessor :definition, :response, :error
 
       def initialize(wrapper_request)
         self.error = nil
         self.outer_request = wrapper_request
 
         init_service
-        if service.present?
-          init_method
-          register_rpc_failed
-        end
-
-        if definition.present?
-          init_request
-          init_response
-        end
+        init_method if service_klass.present?
+        register_rpc_failed if service.present?
       end
 
       # Call the given service method. If we get to this point and an error
       # has already occurred, do not invoke the method and simply respond.
+      #
       def invoke!
-        validate_response(callable_method.call(request, response)) unless error?
+        unless error?
+          callable_method.call
+          validate_response
+        end
+
         return error || response
       end
 
       # We're successful if the error is not populated.
+      #
       def success?
         error.nil?
       end
 
       # We're in error if the error is populated.
+      #
       def error?
         ! success?
       end
@@ -49,9 +49,11 @@ module Protobuf
       end
 
       # Get the method for the current request.
+      #
       def init_method
         method_name = outer_request.method_name.underscore.to_sym
-        if service.rpc_method?(method_name)
+        if service_klass.rpc_method?(method_name)
+          self.service = service_klass.new(method_name, outer_request.request_proto)
           self.callable_method = service.method(method_name)
           self.definition = service.rpcs[method_name]
         else
@@ -62,50 +64,47 @@ module Protobuf
         assign_error(MethodNotFound, "#{service.class.name}##{method_name} is not implemented.")
       end
 
-      # Initialize the request and parse it from the bytes buffer.
-      def init_request
-        self.request = definition.request_type.new.parse_from_string(outer_request.request_proto)
-      rescue => e
-        log_exception(e)
-        assign_error(BadRequestProto, "Unable to parse request: #{e.message}")
-      end
-
-      # Initialize an empty response for the current method.
-      def init_response
-        self.response = definition.response_type.new
-      end
-
-      # Get the service for the current request.
+      # Constantize the service for this request. Initialization of the service
+      # happens when we verify that the method is callable for this service.
+      #
       def init_service
-        self.service = outer_request.service_name.constantize.new
+        self.service_klass = outer_request.service_name.constantize
       rescue NameError => e
         log_exception(e)
         assign_error(ServiceNotFound, "Service class #{outer_request.service_name} is not defined.")
       end
 
       # Make sure we get rpc errors back.
+      #
       def register_rpc_failed
-        service.on_rpc_failed(method(:rpc_failed))
+        service.on_rpc_failed(method(:rpc_failed_callback))
       end
 
-      def rpc_failed(message)
+      # Receive the failure message from the service. This method is registered
+      # as the callable to the service when an `rpc_failed` call is invoked.
+      #
+      def rpc_failed_callback(message)
         assign_error(RpcFailed, (message.respond_to?(:message) ? message.message : message))
         log_error { sign_message("RPC Failed: #{error.message}") }
       end
 
-      def validate_response(object)
+      # Ensure that the response candidate we've been given is of the type
+      # we expect so that deserialization on the client side works.
+      #
+      def validate_response
         expected = definition.response_type
 
-        # Cannibalize the response if it's a Hash
-        object = expected.new(object) if object.is_a?(Hash)
-        actual = object.class
+        candidate = service.response
+        candidate = expected.new(candidate) if candidate.is_a?(Hash)
+
+        actual = candidate.class
         log_debug { sign_message("response (should/actual): #{expected.name}/#{actual.name}") }
 
         # Determine if the service tried to change response types on us
         if expected != actual
           assign_error(BadResponseProto, "Response proto changed from #{expected.name} to #{actual.name}")
         else
-          self.response = object
+          self.response = candidate
         end
       end
 
