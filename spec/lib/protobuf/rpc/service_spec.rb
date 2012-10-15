@@ -3,75 +3,162 @@ require 'spec/support/test/resource_service'
 
 describe Protobuf::Rpc::Service do
 
-  context 'when configuring' do
+  context 'class methods' do
+    subject { Test::ResourceService }
+
     before :each do
       reset_service_location Test::ResourceService
     end
 
-    it 'should have a default location configured' do
-      Test::ResourceService.host.should == Protobuf::Rpc::Service::DEFAULT_LOCATION[:host]
-      Test::ResourceService.port.should == Protobuf::Rpc::Service::DEFAULT_LOCATION[:port]
+    describe '.host' do
+      its(:host) { should eq described_class::DEFAULT_HOST }
     end
 
-    it "should be able to pre-configure a service location for clients" do
-      Test::ResourceService.located_at 'google.com:12345'
-      client = Test::ResourceService.client
-      client.options[:host].should == 'google.com'
-      client.options[:port].should == 12345
+    describe '.host=' do
+      before { subject.host = 'mynewhost.com' }
+      its(:host) { should eq 'mynewhost.com' }
     end
 
-    context 'configuring host' do
-      before(:each) { Test::ResourceService.configure :host => 'somehost.com' }
-      after(:each) { Test::ResourceService.configure :host => '127.0.0.1' }
+    describe '.port' do
+      its(:port) { should eq described_class::DEFAULT_PORT }
+    end
 
-      it 'should be able to configure and read the host' do
-        Test::ResourceService.host.should == 'somehost.com'
+    describe '.port=' do
+      before { subject.port = 12345 }
+      its(:port) { should eq 12345 }
+    end
+
+    describe '.configure' do
+      context 'when providing a host' do
+        before { subject.configure(:host => 'mynewhost.com') }
+        its(:host) { should eq 'mynewhost.com' }
+      end
+
+      context 'when providing a port' do
+        before { subject.configure(:port => 12345) }
+        its(:port) { should eq 12345 }
       end
     end
 
-    it 'should be able to configure and read the port' do
-      Test::ResourceService.configure :port => 12345
-      Test::ResourceService.port.should == 12345
+    describe '.located_at' do
+      context 'when given location is empty' do
+        before { subject.located_at(nil) }
+        its(:host) { should eq described_class::DEFAULT_HOST }
+        its(:port) { should eq described_class::DEFAULT_PORT }
+      end
+
+      context 'when given location is invalid' do
+        before { subject.located_at('i like pie') }
+        its(:host) { should eq described_class::DEFAULT_HOST }
+        its(:port) { should eq described_class::DEFAULT_PORT }
+      end
+
+      context 'when given location contains a host and port' do
+        before { subject.located_at('mynewdomain.com:12345') }
+        its(:host) { should eq 'mynewdomain.com' }
+        its(:port) { should eq 12345 }
+      end
     end
 
-    it 'should skip configuring location if the location passed does not match host:port syntax' do
-      invalid_locations = [nil, 'myhost:', ':9939', 'badhost123']
-      invalid_locations.each do |location|
-        Test::ResourceService.located_at location
-        Test::ResourceService.host.should == Protobuf::Rpc::Service::DEFAULT_LOCATION[:host]
-        Test::ResourceService.port.should == Protobuf::Rpc::Service::DEFAULT_LOCATION[:port]
+    describe '.client' do
+      it 'initializes a client object for this service' do
+        client = double('client')
+        ::Protobuf::Rpc::Client.should_receive(:new)
+                                .with(hash_including({ :service => subject,
+                                                       :host => subject.host,
+                                                       :port => subject.port }))
+                                .and_return(client)
+        subject.client.should eq client
+      end
+    end
+
+    describe '.rpc' do
+      before { Test::ResourceService.rpc(:update, Test::ResourceFindRequest, Test::Resource) }
+      subject { Test::ResourceService.rpcs[:update] }
+      its(:method) { should eq :update }
+      its(:request_type) { should eq Test::ResourceFindRequest }
+      its(:response_type) { should eq Test::Resource }
+    end
+
+    describe '.rpc_method?' do
+      before { Test::ResourceService.rpc(:delete, Test::Resource, Test::Resource) }
+
+      context 'when given name is a pre-defined rpc method' do
+        it 'returns true' do
+          subject.rpc_method?(:delete).should be_true
+        end
+      end
+
+      context 'when given name is not a pre-defined rpc method' do
+        it 'returns false' do
+          subject.rpc_method?(:zoobaboo).should be_false
+        end
       end
     end
   end
 
-  context 'when server calls the service method' do
+  context 'instance methods' do
+    context 'when invoking a service call' do
+      before(:all) do
+        class ::NewTestService < Protobuf::Rpc::Service
+          rpc :find_with_implied_response, Test::ResourceFindRequest, Test::Resource
+          def find_with_implied_response
+            response.name = 'Implicit response'
+          end
 
-    before(:all) do
-      class ::NewTestService < Protobuf::Rpc::Service
-        rpc :bad_method, Test::ResourceFindRequest, Test::Resource
-        rpc :bad_var, Test::ResourceFindRequest, Test::Resource
-        def bad_method
-          hash = {}
-          hash[:one].explode
-        end
-        def bad_var
-          invalidvar
+          rpc :find_with_respond_with, Test::ResourceFindRequest, Test::Resource
+          def find_with_respond_with
+            custom = Test::Resource.new(:name => 'Custom response')
+            respond_with(custom)
+          end
+
+          rpc :find_with_rpc_failed, Test::ResourceFindRequest, Test::Resource
+          def find_with_rpc_failed
+            rpc_failed('This is a failed endpoint')
+            response.name = 'Name will still be set'
+          end
         end
       end
-    end
 
-    it 'raises an undefined method name error when calling a method on a non-existant object' do
-      expect {
-        req = mock('RequestWrapper', :request_proto => Test::ResourceFindRequest.new(:name => 'mmeh').to_s)
-        ::NewTestService.new.bad_method(req)
-      }.to raise_error(NoMethodError)
-    end
 
-    it 'raises a name error when accessing a non-existant object' do
-      expect {
-        req = mock('RequestWrapper', :request_proto => Test::ResourceFindRequest.new(:name => 'mmeh').to_s)
-        ::NewTestService.new.bad_var(req)
-      }.to raise_error(NameError)
+      let(:request) do
+        Test::ResourceFindRequest.new(:name => 'resource')
+      end
+
+      let(:response) do
+        Test::Resource.new
+      end
+
+
+      context 'when calling the rpc method' do
+        context 'when response is implied' do
+          subject { NewTestService.new(:find_with_implied_response, request.serialize_to_string) }
+
+          before { subject.find_with_implied_response }
+          its(:response) { should be_a(Test::Resource) }
+          specify { subject.response.name.should eq 'Implicit response' }
+        end
+
+        context 'when using respond_with paradigm' do
+          subject { NewTestService.new(:find_with_respond_with, request.serialize_to_string) }
+
+          before { subject.find_with_respond_with }
+          its(:response) { should be_a(Test::Resource) }
+          specify { subject.response.name.should eq 'Custom response' }
+        end
+      end
+
+      context 'when calling rpc_failed in the method' do
+        subject { NewTestService.new(:find_with_rpc_failed, request.serialize_to_string) }
+
+        it 'invokes the rpc_failed callback with the error' do
+          error = nil
+          subject.on_rpc_failed(lambda { |err| error = err })
+          subject.find_with_rpc_failed
+          error.should eq 'This is a failed endpoint'
+          subject.response.name.should eq 'Name will still be set'
+        end
+      end
     end
 
   end

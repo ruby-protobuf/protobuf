@@ -1,4 +1,4 @@
-require 'protobuf/common/wire_type'
+require 'protobuf/wire_type'
 require 'protobuf/field/field_array'
 
 module Protobuf

@@ -1,6 +1,6 @@
 require 'forwardable'
 require 'protobuf'
-require 'protobuf/common/logger'
+require 'protobuf/logger'
 require 'protobuf/rpc/error'
 require 'protobuf/rpc/connector'
 
@@ -10,7 +10,7 @@ module Protobuf
       extend Forwardable
       include Protobuf::Logger::LogMethods
 
-      delegate [:options, :complete_cb, :success_cb, :failure_cb, :async?] => :@connector
+      delegate [:options, :complete_cb, :success_cb, :failure_cb] => :@connector
       attr_reader :connector
 
       # Create a new client with default options (defined in ClientConnection)
@@ -29,15 +29,14 @@ module Protobuf
       def initialize(opts={})
         raise "Invalid client configuration. Service must be defined." if opts[:service].nil?
         @connector = Connector.connector_for_client.new(opts)
-        log_debug { "[#{log_signature}] Initialized with options: %s" % opts.inspect }
+        log_debug { sign_message("Initialized with options: #{opts.inspect}") }
       end
 
       def log_signature
-        @log_signature ||= "client-#{self.class}"
+        @_log_signature ||= "client-#{self.class}"
       end
 
       # Set a complete callback on the client to return the object (self).
-      # Callback is called regardless of :async setting.
       #
       #   client = Client.new(:service => WidgetService)
       #   client.on_complete {|obj| ... }
@@ -57,7 +56,6 @@ module Protobuf
       # Set a failure callback on the client to return the
       # error returned by the service, if any. If this callback
       # is called, success_cb will NOT be called.
-      # Callback is called regardless of :async setting.
       #
       #   client = Client.new(:service => WidgetService)
       #   client.on_failure {|err| ... }
@@ -68,7 +66,7 @@ module Protobuf
 
       def on_failure=(callable)
         if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
-          raise "callable must take a single argument and respond to :call"
+          raise "Callable must take a single argument and respond to :call"
         end
 
         @connector.failure_cb = callable
@@ -77,7 +75,6 @@ module Protobuf
       # Set a success callback on the client to return the
       # successful response from the service when it is returned.
       # If this callback is called, failure_cb will NOT be called.
-      # Callback is called regardless of :async setting.
       #
       #   client = Client.new(:service => WidgetService)
       #   client.on_success {|res| ... }
@@ -88,7 +85,7 @@ module Protobuf
 
       def on_success=(callable)
         if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
-          raise "callable must take a single argument and respond to :call"
+          raise "Callable must take a single argument and respond to :call"
         end
 
         @connector.success_cb = callable
@@ -108,26 +105,29 @@ module Protobuf
       #
       def method_missing(method, *params)
         service = options[:service]
-        unless service.rpcs[service].keys.include?(method)
-          log_error { "[#{log_signature}] %s#%s not rpc method, passing to super" % [service.name, method.to_s] }
+        unless service.rpc_method?(method)
+          log_error { sign_message("#{service.name}##{method.to_s} not rpc method, passing to super") }
           super(method, *params)
         else
-          log_debug { "[#{log_signature}] %s#%s" % [service.name, method.to_s] }
-          rpc = service.rpcs[service][method.to_sym]
+          log_debug { sign_message("#{service.name}##{method.to_s}") }
+          rpc = service.rpcs[method.to_sym]
+
           options[:request_type] = rpc.request_type
-          log_debug { "[#{log_signature}] Request Type: %s" % options[:request_type].name }
+          log_debug { sign_message("Request Type: #{options[:request_type].name}") }
+
           options[:response_type] = rpc.response_type
-          log_debug { "[#{log_signature}] Response Type: %s" % options[:response_type].name }
+          log_debug { sign_message("Response Type: #{options[:response_type].name}") }
+
           options[:method] = method.to_s
           options[:request] = params[0].is_a?(Hash) ? options[:request_type].new(params[0]) : params[0]
-          log_debug { "[#{log_signature}] Request Data: %s" % options[:request].inspect }
+          log_debug { sign_message("Request Data: #{options[:request].inspect}") }
 
           # Call client to setup on_success and on_failure event callbacks
           if block_given?
-            log_debug { "[#{log_signature}] client setup callback given, invoking" }
+            log_debug { sign_message("client setup callback given, invoking") }
             yield(self)
           else
-            log_debug { "[#{log_signature}] no block given for callbacks" }
+            log_debug { sign_message("no block given for callbacks") }
           end
 
           send_request

@@ -18,7 +18,7 @@ describe 'Functional Socket Client' do
 
   it 'runs fine when required fields are set' do
     expect {
-      client = ::Test::ResourceService.client(:async => false)
+      client = ::Test::ResourceService.client
 
       client.find(:name => 'Test Name', :active => true) do |c|
         c.on_success do |succ|
@@ -36,7 +36,7 @@ describe 'Functional Socket Client' do
   it 'calls the on_failure callback when a message is malformed' do
     error = nil
     request = ::Test::ResourceFindRequest.new(:active => true)
-    client = ::Test::ResourceService.client(:async => false)
+    client = ::Test::ResourceService.client
 
     client.find(request) do |c|
       c.on_success { raise "shouldn't pass"}
@@ -48,7 +48,7 @@ describe 'Functional Socket Client' do
   it 'calls the on_failure callback when the request type is wrong' do
     error = nil
     request = ::Test::Resource.new(:name => 'Test Name')
-    client = ::Test::ResourceService.client(:async => false)
+    client = ::Test::ResourceService.client
 
     client.find(request) do |c|
       c.on_success { raise "shouldn't pass"}

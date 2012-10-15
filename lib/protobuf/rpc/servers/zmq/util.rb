@@ -13,7 +13,7 @@ module Protobuf
         end
 
         def log_signature
-          @log_signature ||= "server-#{self.class}-#{object_id}"
+          @_log_signature ||= "server-#{self.class}-#{object_id}"
         end
 
         def resolve_ip(hostname)

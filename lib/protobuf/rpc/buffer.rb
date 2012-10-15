@@ -32,7 +32,7 @@ module Protobuf
         end
 
         @size = @data.length
-        '%d-%s' % [@size, @data]
+        "#{@size}-#{@data}"
       end
 
       def <<(data)
@@ -63,7 +63,7 @@ module Protobuf
       def get_data_size
         if @size == 0 || @data.match(SIZE_REGEX)
           sliced_size = @data.slice!(SIZE_REGEX)
-          @size = sliced_size.gsub('-', '').to_i unless(sliced_size.nil?)
+          @size = sliced_size.gsub('-', '').to_i unless sliced_size.nil?
         end
       end
 

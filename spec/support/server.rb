@@ -1,5 +1,5 @@
 require 'ostruct'
-require 'protobuf/common/logger'
+require 'protobuf/logger'
 require 'protobuf/rpc/server'
 require 'protobuf/rpc/servers/socket/server'
 require 'protobuf/rpc/servers/socket_runner'
@@ -57,7 +57,7 @@ class StubServer
     else
       start_socket_server
     end
-    log_debug { "[stub-server] Server started #{@options.host}:#{@options.port}" }
+    log_debug { sign_message("Server started #{@options.host}:#{@options.port}") }
   rescue => ex
     if ex =~ /no acceptor/ # Means EM didn't shutdown in the next_tick yet
       stop
@@ -86,12 +86,16 @@ class StubServer
       EventMachine.stop_server(@server_handle) if @server_handle
     when @options.server == Protobuf::Rpc::Zmq::Server then
       Protobuf::Rpc::ZmqRunner.stop
-      @zmq_server.join if(@zmq_server)
+      @zmq_server.join if @zmq_server
     else
       Protobuf::Rpc::SocketRunner.stop
-      @sock_server.join if(@sock_server)
+      @sock_server.join if @sock_server
     end
 
     @running = false
+  end
+
+  def log_signature
+    @_log_signature ||= "[stub-server]"
   end
 end

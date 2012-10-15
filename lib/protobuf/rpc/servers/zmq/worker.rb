@@ -13,9 +13,9 @@ module Protobuf
         #
         def initialize(opts={})
           @options = opts
-          host = @options.fetch(:host, "127.0.0.1")
-          port = @options.fetch(:port, 9400)
-          protocol = @options.fetch(:protocol, "tcp")
+          host = @options.fetch(:host) { "127.0.0.1" }
+          port = @options.fetch(:port) { 9400 }
+          protocol = @options.fetch(:protocol) { "tcp" }
 
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REP)
@@ -31,15 +31,7 @@ module Protobuf
         def handle_request(socket)
           @request_data = ''
           zmq_error_check(socket.recv_string(@request_data))
-          log_debug { "[#{log_signature}] handling request" } if(!@request_data.nil?)
-        end
-
-        def initialize_buffers
-          @did_respond = false
-          @request = ::Protobuf::Socketrpc::Request.new
-          @response = ::Protobuf::Socketrpc::Response.new
-          @stats = ::Protobuf::Rpc::Stat.new(:SERVER, true)
-          log_debug { "[#{log_signature}] Post init" }
+          log_debug { sign_message("handling request") } if !@request_data.nil?
         end
 
         def run
@@ -48,9 +40,9 @@ module Protobuf
             # This lets us see whether we need to die
             @poller.poll(1_000)
             @poller.readables.each do |socket|
-              initialize_buffers
+              initialize_request!
               handle_request(socket)
-              handle_client unless(@request_data.nil?)
+              handle_client unless @request_data.nil?
             end
           end
         ensure
@@ -62,7 +54,6 @@ module Protobuf
           response_data = @response.is_a?(::Protobuf::Message) ? @response.serialize_to_string : @response.to_s
           @stats.response_size = response_data.size
           zmq_error_check(@socket.send_string(response_data))
-          @did_respond = true
         end
       end
 
