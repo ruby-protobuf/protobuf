@@ -36,13 +36,14 @@ Dir[File.expand_path('../support/**/*.pb.rb', __FILE__)].each do |proto_file|
 end
 
 class ::Protobuf::Rpc::Client
-  def == other
+  def ==(other)
     connector.options == other.options && \
       success_cb == other.success_cb && \
       failure_cb == other.failure_cb
   end
 end
 
-def reset_service_location service
-  service.instance_variable_set :@locations, nil
+def reset_service_location(service)
+  service.host = nil
+  service.port = nil
 end

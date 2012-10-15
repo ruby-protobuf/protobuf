@@ -19,9 +19,9 @@ module Protobuf
           @response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
           verify_options
 
-          log_debug { "[#{log_signature}] Client Initialized: %s" % options.inspect }
-        rescue
-          fail(:RPC_ERROR, 'Failed to initialize connection: %s' % $!.message)
+          log_debug { sign_message("Client Initialized: #{options.inspect}") }
+        rescue => e
+          fail(:RPC_ERROR, "Failed to initialize connection: #{e.message}")
         end
 
         ##
@@ -29,7 +29,7 @@ module Protobuf
         #
         def self.connect(options={})
           options = DEFAULT_OPTIONS.merge(options)
-          log_debug { "[client-#{self}] Connecting to server: %s" % options.inspect }
+          log_debug { sign_message("Connecting to server: #{options.inspect}") }
           EM.connect(options[:host], options[:port], self, options)
         end
 
@@ -56,19 +56,19 @@ module Protobuf
         end
 
         def receive_data(data)
-          log_debug { "[#{log_signature}] receive_data: %s" % data }
+          log_debug { sign_message("receive_data: #{data}") }
           @response_buffer << data
           @response_data = @response_buffer.data
-          parse_response if(!@response_data.nil? && @response_buffer.flushed?)
+          parse_response if !@response_data.nil? && @response_buffer.flushed?
         end
 
         def send_data
           request_buffer = ::Protobuf::Rpc::Buffer.new(:write)
           request_buffer.set_data(@request_data)
-          log_debug { "[#{log_signature}] sending data: #{request_buffer.inspect}" }
+          log_debug { sign_message("sending data: #{request_buffer.inspect}") }
           super(request_buffer.write)
-        rescue
-          fail(:RPC_ERROR, 'Connection error: %s' % $!.message)
+        rescue => e
+          fail(:RPC_ERROR, "Connection error: #{e.message}")
         end
 
         # overwriting this method for java because it's broken in eventmachine. See https://github.com/eventmachine/eventmachine/issues/14

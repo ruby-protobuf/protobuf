@@ -9,19 +9,13 @@ module Protobuf
 
         # Initialize a new read buffer for storing client request info
         def post_init
-          log_debug { '[server] Post init, new read buffer created' }
-          @stats = Protobuf::Rpc::Stat.new(:SERVER, true)
-          @stats.client = ::Socket.unpack_sockaddr_in(get_peername)
+          initialize_request!
           @request_buffer = Protobuf::Rpc::Buffer.new(:read)
-          @request = ::Protobuf::Socketrpc::Request.new
-          @response = ::Protobuf::Socketrpc::Response.new
-
-          @did_respond = false
         end
 
         # Receive a chunk of data, potentially flushed to handle_client
         def receive_data(data)
-          log_debug { '[server] receive_data: %s' % data }
+          log_debug { sign_message("receive_data: #{data}") }
 
           @request_buffer << data
           @request_data = @request_buffer.data
@@ -34,8 +28,12 @@ module Protobuf
           response_buffer = Protobuf::Rpc::Buffer.new(:write)
           response_buffer.set_data(@response)
           @stats.response_size = response_buffer.size
-          log_debug { "[#{log_signature}] sending data: #{response_buffer.inspect}" }
+          log_debug { sign_message("sending data: #{response_buffer.inspect}") }
           super(response_buffer.write)
+        end
+
+        def set_peer
+          @stats.client = ::Socket.unpack_sockaddr_in(get_peername)
         end
       end
     end

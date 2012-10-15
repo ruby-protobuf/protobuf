@@ -18,10 +18,5 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
     ::ZMQ::Context.stub(:new).and_return(zmq_context_mock)
   end
 
-  it 'raises if async is true' do
-    expect {
-      described_class.new(async: true).send_request
-    }.to raise_error
-  end
-
+  pending
 end

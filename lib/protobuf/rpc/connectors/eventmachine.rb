@@ -11,17 +11,17 @@ module Protobuf
             f = Fiber.current
 
             ::EM.next_tick do
-              log_debug { "[#{log_signature}] Scheduling EventMachine client request to be created on next tick" }
+              log_debug { sign_message('Scheduling EventMachine client request to be created on next tick') }
               cnxn = EMClient.connect(options, &ensure_cb)
               cnxn.on_success(&success_cb) if success_cb
               cnxn.on_failure(&ensure_cb)
-              cnxn.on_complete { resume_fiber(f) } unless async?
+              cnxn.on_complete { resume_fiber(f) }
               cnxn.setup_connection
               cnxn.send_data
-              log_debug { "[#{log_signature}] Connection scheduled" }
+              log_debug { sign_message('Connection scheduled') }
             end
 
-            async? ? true : set_timeout_and_validate_fiber
+            set_timeout_and_validate_fiber
           end
         end
 
@@ -32,11 +32,11 @@ module Protobuf
         # don't want to swallow the black holes.
         #
         def ensure_cb
-          @ensure_cb ||= (@failure_cb || lambda { |error| raise '%s: %s' % [error.code.name, error.message] } )
+          @ensure_cb ||= (@failure_cb || lambda { |error| raise "#{error.code.name}: #{error.message}" })
         end
 
         def log_signature
-          @log_signature ||= "client-#{self.class}"
+          @_log_signature ||= "client-#{self.class}"
         end
 
         private
@@ -58,18 +58,20 @@ module Protobuf
           ::EM::cancel_timer(@timeout_timer)
           fib.resume(true)
         rescue => ex
-          message = 'Synchronous client failed: %s' % ex.message
+          log_exception(ex)
+          message = "Synchronous client failed: #{ex.message}"
           error_stop_reactor(message)
         end
 
         def set_timeout_and_validate_fiber
           @timeout_timer = ::EM::add_timer(@options[:timeout]) do
-            message = 'Client timeout of %d seconds expired' % @options[:timeout]
+            message = "Client timeout of #{@options[:timeout]} seconds expired"
             error_stop_reactor(message)
           end
 
           Fiber.yield
-        rescue FiberError
+        rescue FiberError => ex
+          log_exception(ex)
           message = "Synchronous calls must be in 'EM.fiber_run' block"
           error_stop_reactor(message)
         end

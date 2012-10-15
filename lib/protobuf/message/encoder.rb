@@ -1,5 +1,5 @@
-require 'protobuf/common/wire_type'
-require 'protobuf/common/exceptions'
+require 'protobuf/wire_type'
+require 'protobuf/exceptions'
 
 module Protobuf
 
@@ -10,8 +10,10 @@ module Protobuf
     # Encode +message+ and write to +stream+.
     def encode(stream, message)
       # FIXME make this not as ghetto
-      raise NotInitializedError, "Message %s is not initialized (one or more fields is improperly set): %s" % [message.class.name, JSON.parse(message.to_json)] unless message.initialized?
-      
+      unless message.initialized?
+        raise NotInitializedError, "Message #{message.class.name} is not initialized (one or more fields is improperly set): #{JSON.parse(message.to_json)}"
+      end
+
       message.each_field do |field, value|
         next unless message.has_field?(field.name)
 

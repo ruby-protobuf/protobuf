@@ -1,7 +1,6 @@
 require 'thor'
-require 'pry'
 require 'protobuf/version'
-require 'protobuf/common/logger'
+require 'protobuf/logger'
 require 'protobuf/rpc/servers/evented_runner'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq_runner'
