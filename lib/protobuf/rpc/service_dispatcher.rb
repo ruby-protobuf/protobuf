@@ -48,6 +48,22 @@ module Protobuf
         self.error = error_klass.new(message)
       end
 
+      # Prod the object to see if we can produce a proto object as a response
+      # candidate. Either way, return the candidate for validation.
+      def coerced_response
+        candidate = service.response
+
+        if candidate.is_a?(Hash)
+          candidate = definition.response_type.new(candidate)
+        elsif candidate.respond_to?(:to_hash)
+          candidate = definition.response_type.new(candidate.to_hash)
+        elsif candidate.respond_to?(:to_proto)
+          candidate = candidate.to_proto
+        end
+
+        candidate
+      end
+
       # Get the method for the current request.
       #
       def init_method
@@ -92,19 +108,14 @@ module Protobuf
       # we expect so that deserialization on the client side works.
       #
       def validate_response
+        candidate = coerced_response
         expected = definition.response_type
-
-        candidate = service.response
-        candidate = expected.new(candidate) if candidate.is_a?(Hash)
-
         actual = candidate.class
-        log_debug { sign_message("response (should/actual): #{expected.name}/#{actual.name}") }
 
-        # Determine if the service tried to change response types on us
-        if expected != actual
-          assign_error(BadResponseProto, "Response proto changed from #{expected.name} to #{actual.name}")
-        else
+        if expected == actual
           self.response = candidate
+        else
+          assign_error(BadResponseProto, "Response proto changed from #{expected.name} to #{actual.name}")
         end
       end
 

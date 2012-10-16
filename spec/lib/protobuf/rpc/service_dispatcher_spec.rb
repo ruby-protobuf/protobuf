@@ -65,6 +65,28 @@ describe Protobuf::Rpc::ServiceDispatcher do
         its(:response) { should eq Test::Resource.new(:name => 'returned') }
       end
 
+      context 'an object that responds to to_hash but is not a hash' do
+        let(:hashable) do
+          mock('hashable', :to_hash => { :name => 'hashable' })
+        end
+        before { subject.callable_method.should_receive(:call) }
+        before { subject.service.stub(:response).and_return(hashable) }
+        before { subject.invoke! }
+        its(:success?) { should be_true }
+        its(:response) { should eq Test::Resource.new(:name => 'hashable') }
+      end
+
+      context 'an object that responds to to_proto' do
+        let(:protoable) do
+          mock('protoable', :to_proto => Test::Resource.new(:name => 'protoable'))
+        end
+        before { subject.callable_method.should_receive(:call) }
+        before { subject.service.stub(:response).and_return(protoable) }
+        before { subject.invoke! }
+        its(:success?) { should be_true }
+        its(:response) { should eq Test::Resource.new(:name => 'protoable') }
+      end
+
       context 'a type not identified by the rpc definition' do
         before { subject.callable_method.should_receive(:call) }
         before { subject.service.stub(:response).and_return("I'm not a valid response") }

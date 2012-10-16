@@ -129,7 +129,6 @@ describe Protobuf::Rpc::Service do
         Test::Resource.new
       end
 
-
       context 'when calling the rpc method' do
         context 'when response is implied' do
           subject { NewTestService.new(:find_with_implied_response, request.serialize_to_string) }
