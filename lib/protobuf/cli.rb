@@ -20,6 +20,7 @@ module Protobuf
 
     option :backlog,                    :type => :numeric, :default => 100, :aliases => %w(-b), :desc => 'Backlog for listening socket when using Socket Server.'
     option :threshold,                  :type => :numeric, :default => 100, :aliases => %w(-t), :desc => 'Multi-threaded Socket Server cleanup threshold.'
+    option :threads,                    :type => :numeric, :default => 5, :aliases => %w(-r), :desc => 'Number of worker threads to run. Only applicable in --zmq mode.'
 
     option :log,                        :type => :string, :aliases => %w(-l), :desc => 'Log file or device. Default is STDOUT.'
     option :level,                      :type => :numeric, :default => ::Logger::INFO, :aliases => %w(-v), :desc => 'Log level to use, 0-5 (see http://www.ruby-doc.org/stdlib/libdoc/logger/rdoc/)'
@@ -33,6 +34,7 @@ module Protobuf
     option :print_deprecation_warnings, :type => :boolean, :default => true, :desc => 'Cause use of deprecated fields to be printed or ignored.'
 
     def start(app_file)
+      puts 'RUNNING FROM LOCAL'
       debug_say 'Configuring the rpc_server process'
       @start_aborted = false
 
@@ -153,6 +155,14 @@ module Protobuf
         yield unless @start_aborted
       end
 
+      def runner_options
+        { :host => options.host,
+          :port => options.port,
+          :backlog => options.backlog,
+          :treshold => options.threshold,
+          :threads => options.threads }
+      end
+
       def say_and_exit!(message, exception = nil)
         message = set_color(message, :red) if ::Protobuf::Logger.file == STDOUT
 
@@ -168,7 +178,7 @@ module Protobuf
       # Start the runner and log the relevant options.
       def start_server!
         debug_say 'Invoking server start'
-        @runner.run(options.dup) do
+        @runner.run(runner_options) do
           Protobuf::Logger.info { "pid #{::Process.pid} -- #{@mode} RPC Server listening at #{options.host}:#{options.port}" }
         end
       end
