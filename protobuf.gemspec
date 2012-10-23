@@ -8,10 +8,10 @@ Gem::Specification.new do |s|
   s.date          = Time.now.strftime('%Y-%m-%d')
 
   s.authors       = ['BJ Neilsen', 'Brandon Dewitt']
-  s.email         = ["bj.neilsen@gmail.com", "brandonsdewitt+protobuf@gmail.com"]
-  s.homepage      = %q{https://github.com/localshred/protobuf}
-  s.summary       = 'Ruby implementation for Protocol Buffers. Works with other protobuf rpc implementations (e.g. Java, Python, C++).'
-  s.description   = s.summary + "\n\nThis gem has diverged from https://github.com/macks/ruby-protobuf. All credit for serialization and rprotoc work most certainly goes to the original authors. All RPC implementation code (client/server/service) was written and is maintained by this author. Attempts to reconcile the original codebase with the current RPC implementation went unsuccessful."
+  s.email         = ["bj.neilsen+protobuf@gmail.com", "brandonsdewitt+protobuf@gmail.com"]
+  s.homepage      = "https://github.com/localshred/protobuf"
+  s.summary       = "Google Protocol Buffers v#{Protobuf::PROTOC_VERSION} Serialization and RPC implementation for Ruby."
+  s.description   = s.summary
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
