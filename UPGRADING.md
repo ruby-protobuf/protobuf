@@ -1,0 +1,60 @@
+# Upgrading from 1.X to 2.0
+
+I'm sure I'm missing quite a few of the smaller changes that have been made, but here is a list of changes that should affect any external programs or applications using `protobuf`.
+
+## `rprotoc` changes
+
+* New option `--ruby_out` to specify the output directory to place generated ruby files. If not provided, ruby code will not be generated.
+* Extends `libprotoc` to hook in directly to google's provided compiler mechanism.
+* Removed all previous compiler code including the racc parser, node visitors, etc.
+* See `protoc --help` for default options.
+
+## `rprotoc` generated files changes
+
+* Import `require`s now occur outside of any module or class declaration which solves ruby vm warnings previously seen.
+* Empty inherited Message and Enum classes are pre-defined in the file, then reopened and their fields applied. This solves the issue of recursive field dependencies of two or more types in the same file.
+* Generated DSL lines for message fields include the fully qualified name of the type (e.g. optional `::Protobuf::Field::StringField`, :name, 1)
+* Support for any combination of `packed`, `deprecated`, and `default` as options to pass to a field definition.
+* Services are now generated in the corresponding `.pb.rb` file instead of their own `*_service.rb` files as before.
+
+## `rpc_server` changes
+
+* Removed `--env` option. The running application or program is solely in charge of ensuring it's environment is properly loaded.
+* Removed reading of `PB_CLIENT_TYPE`, `PB_SERVER_TYPE` environment variables. Should use mode switches or custom requires (see below) instead.
+* Removed `--client_socket` in favor of using mode switches. This also means client calls made by the `rpc_server` will run as the same connector type as the given mode (socket, zmq, or evented).
+* Removed `--pre-cache-definitions` switch in favor of always pre-caching for performance.
+* Removed `--gc-pause-serialization` since using `--gc-pause-request` in conjunction was redundant.
+* Removed `--client-type` in favor of mode switches.
+* Removed `--server-type` in favor of mode switches.
+* Added mode switch `--evented`.
+* Added `--threads` to specify number of ZMQ Worker threads to use. Ignored if mode is not zmq.
+* Added `--print-deprecation-warnings` switch to tell the server whether or not to print deprecation warnings on field usage. Enabled by default.
+* See `rpc_server help start` for all options and usage. Note: the `start` task is the default and not necessary when running the `rpc_server`.
+
+## Message changes
+
+* `Message#get_field` usage should now specify either `Message#get_field_by_name` or `Message#get_field_by_tag`, depending on your lookup criteria.
+* Support for STDERR output when accessing a message field which has been defined as `[deprecated=true]`. Deprecated warnings can be skipped by running your application or program with `PB_IGNORE_DEPRECATIONS=1`.
+* Significant internal refactoring which provides huge boosts in speed and efficiency both in accessing/writing Message field values, as well as serialization and deserialization routines.
+* Refactor `Message#to_hash` to delegate hash representations to the field values, simply collecting the display values and returning a hash of fields that are set. This also affects `to_json` output.
+
+## Enum changes
+
+* Add `Enum.fetch` class method to polymorphically retrieve an `EnumValue` object.
+* Add `Enum.value_by_name` to retrieve the corresponding `EnumValue` to the given symbol name.
+* Add `Enum.enum_by_value` to retrieve the corresponding `EnumValue` to the given integer value.
+
+## RPC Service changes
+
+* `async_responder` paradigm is no longer supported.
+* `self.response=` paradigm should be converted to using `respond_with(object)`.
+* Significant internal changes that should not bleed beyond the API but which make maintaining the code much easier.
+
+## RPC Client changes
+
+* In the absence of `PB_CLIENT_TYPE` environment var, you should be requiring the specific connector type specifically. For instance, if you wish to run in zmq mode for client requests, update your Gemfile: `gem 'protobuf', :require => 'protobuf/zmq'`.
+* `:async` option on client calls is no longer recognized.
+
+##  Other changes
+
+* Moved files out of `lib/protobuf/common` folder into `lib/protobuf`. Files affected are logger, wire_type, util. The only update would need to be the require path to these files since the modules were always `Protobuf::{TYPE}`.
