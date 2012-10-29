@@ -69,7 +69,7 @@ module Protobuf
 
       def to_s
         [
-          server? ? "[SRV-#{self.class}]" : "[CLT-#{self.class}]",
+          server? ? "[SRV]" : "[CLT]",
           rpc,
           elapsed_time,
           sizes,

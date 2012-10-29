@@ -78,8 +78,9 @@ module Protobuf
       def send_response
         log_debug { sign_message("Sending response to client: #{@response.inspect}") }
         send_data
-        @stats.stop && log_info { @stats.to_s }
       ensure
+        @stats.stop
+        log_info { @stats.to_s }
         enable_gc!
       end
     end

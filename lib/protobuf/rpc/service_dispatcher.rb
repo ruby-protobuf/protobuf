@@ -53,12 +53,15 @@ module Protobuf
       def coerced_response
         candidate = service.response
 
-        if candidate.is_a?(Hash)
-          candidate = definition.response_type.new(candidate)
-        elsif candidate.respond_to?(:to_hash)
-          candidate = definition.response_type.new(candidate.to_hash)
-        elsif candidate.respond_to?(:to_proto)
+        case
+        when candidate.is_a?(::Protobuf::Message) then
+          # no-op
+        when candidate.respond_to?(:to_proto) then
           candidate = candidate.to_proto
+        when candidate.respond_to?(:to_proto_hash) then
+          candidate = definition.response_type.new(candidate.to_proto_hash)
+        when candidate.respond_to?(:to_hash) then
+          candidate = definition.response_type.new(candidate.to_hash)
         end
 
         candidate
