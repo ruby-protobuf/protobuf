@@ -15,33 +15,40 @@ module Test
   #
   class ResourceFindRequest < ::Protobuf::Message; end
   class Resource < ::Protobuf::Message; end
+  class Extended < ::Protobuf::Message; end
   class Nested < ::Protobuf::Message; end
   
   ##
   # Enum Values
   #
-  ::Test::StatusType.define :PENDING, 0
-  ::Test::StatusType.define :ENABLED, 1
-  ::Test::StatusType.define :DISABLED, 2
-  ::Test::StatusType.define :DELETED, 3
-  
+  class StatusType
+    define :PENDING, 0
+    define :ENABLED, 1
+    define :DISABLED, 2
+    define :DELETED, 3
+  end
   
   ##
   # Message Fields
   #
-  ::Test::ResourceFindRequest.required(::Protobuf::Field::StringField, :name, 1)
-  ::Test::ResourceFindRequest.optional(::Protobuf::Field::BoolField, :active, 2)
+  class ResourceFindRequest
+    required ::Protobuf::Field::StringField, :name, 1
+    optional ::Protobuf::Field::BoolField, :active, 2
+  end
   
-  ::Test::Resource.required(::Protobuf::Field::StringField, :name, 1)
-  ::Test::Resource.optional(::Protobuf::Field::Int64Field, :date_created, 2)
-  ::Test::Resource.optional(::Test::StatusType, :status, 3)
-  ::Test::Resource.repeated(::Test::StatusType, :repeated_enum, 4)
+  class Resource
+    required ::Protobuf::Field::StringField, :name, 1
+    optional ::Protobuf::Field::Int64Field, :date_created, 2
+    optional ::Test::StatusType, :status, 3
+    repeated ::Test::StatusType, :repeated_enum, 4
+  end
   
-  ::Test::Nested.optional(::Protobuf::Field::StringField, :name, 1)
-  ::Test::Nested.optional(::Test::Resource, :resource, 2)
-  ::Test::Nested.repeated(::Test::Resource, :multiple_resources, 3)
-  ::Test::Nested.optional(::Test::StatusType, :status, 4)
-  
+  class Nested
+    optional ::Protobuf::Field::StringField, :name, 1
+    optional ::Test::Resource, :resource, 2
+    repeated ::Test::Resource, :multiple_resources, 3
+    optional ::Test::StatusType, :status, 4
+  end
   
   ##
   # Services

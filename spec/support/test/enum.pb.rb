@@ -17,16 +17,18 @@ module Test
   ##
   # Enum Values
   #
-  ::Test::EnumTestType.define :ONE, 1
-  ::Test::EnumTestType.define :TWO, 2
-  
+  class EnumTestType
+    define :ONE, 1
+    define :TWO, 2
+  end
   
   ##
   # Message Fields
   #
-  ::Test::EnumTestMessage.optional(::Test::EnumTestType, :non_default_enum, 1)
-  ::Test::EnumTestMessage.optional(::Test::EnumTestType, :default_enum, 2, :default => ::Test::EnumTestType::ONE)
-  ::Test::EnumTestMessage.repeated(::Test::EnumTestType, :repeated_enums, 3)
-  
+  class EnumTestMessage
+    optional ::Test::EnumTestType, :non_default_enum, 1
+    optional ::Test::EnumTestType, :default_enum, 2, :default => ::Test::EnumTestType::ONE
+    repeated ::Test::EnumTestType, :repeated_enums, 3
+  end
   
 end

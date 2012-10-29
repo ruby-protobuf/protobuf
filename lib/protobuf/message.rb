@@ -6,6 +6,9 @@ require 'protobuf/message/encoder'
 
 module Protobuf
   class Message
+
+    class FieldNotDefinedError < StandardError; end
+
     STRING_ENCODING = "ASCII-8BIT".freeze
 
     def self.all_fields
@@ -80,16 +83,25 @@ module Protobuf
     def self.get_field_by_name(name)
       # Check if the name has been used before, if not then set it to the sym value
       fields[field_name_to_tag[name]]
+    rescue TypeError => e
+      name = 'nil' if name.nil?
+      raise FieldNotDefinedError.new("Field '#{name}' is not defined on message '#{self.name}'")
     end
 
     # Find a field object by +tag+ number.
     def self.get_field_by_tag(tag)
       fields[tag]
+    rescue TypeError => e
+      tag = tag.nil? ? 'nil' : tag.to_s
+      raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
     end
 
     def self.get_ext_field_by_name(name)
       # Check if the name has been used before, if not then set it to the sym value
       extension_fields[extension_field_name_to_tag[name]]
+    rescue TypeError => e
+      name = 'nil' if name.nil?
+      raise FieldNotDefinedError.new("Field '#{name}' is not defined on message '#{self.name}'")
     end
 
     def self.get_ext_field_by_tag(tag)

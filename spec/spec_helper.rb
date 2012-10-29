@@ -26,7 +26,9 @@ end
     unless ENV['NO_COMPILE_TEST_PROTOS']
       $stdout.puts 'Compiling test protos (use NO_COMPILE_TEST_PROTOS=1 to skip)'
       proto_path = File.expand_path("../support/", __FILE__)
-      %x{ rprotoc --proto_path=#{proto_path} --ruby_out=#{proto_path} #{File.join(proto_path, '**', '*.proto')} }
+      cmd = %Q{ rprotoc --proto_path=#{proto_path} --ruby_out=#{proto_path} #{File.join(proto_path, '**', '*.proto')} }
+      puts cmd
+      %x{#{cmd}}
     end
   end
 end
