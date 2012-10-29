@@ -184,6 +184,7 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method(field.getter_method_name) do
+            field.warn_if_deprecated
             @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
           end
         end

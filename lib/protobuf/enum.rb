@@ -32,7 +32,7 @@ module Protobuf
     end
 
     def self.name_by_value(value)
-      @names[value]
+      value.nil? ? nil : @names[value]
     end
 
     def self.valid_tag?(tag)

@@ -51,6 +51,12 @@ describe Protobuf::Enum do
     it 'gets the name of the enum corresponding to the given value (tag)' do
       Test::EnumTestType.name_by_value(tag).should eq name
     end
+
+    context 'when given name is nil' do
+      it 'returns a nil' do
+        Test::EnumTestType.name_by_value(nil).should be_nil
+      end
+    end
   end
 
   describe '.valid_tag?' do
