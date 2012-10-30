@@ -34,7 +34,6 @@ module Protobuf
     option :print_deprecation_warnings, :type => :boolean, :default => true, :desc => 'Cause use of deprecated fields to be printed or ignored.'
 
     def start(app_file)
-      puts 'RUNNING FROM LOCAL'
       debug_say 'Configuring the rpc_server process'
       @start_aborted = false
 
@@ -159,7 +158,7 @@ module Protobuf
         { :host => options.host,
           :port => options.port,
           :backlog => options.backlog,
-          :treshold => options.threshold,
+          :threshold => options.threshold,
           :threads => options.threads }
       end
 
@@ -168,6 +167,9 @@ module Protobuf
 
         ::Protobuf::Logger.error { message }
         if exception
+          $stderr.puts "[#{exception.class.name}] #{exception.message}" 
+          $stderr.puts exception.backtrace.join("\n")
+
           ::Protobuf::Logger.error { "[#{exception.class.name}] #{exception.message}" }
           ::Protobuf::Logger.debug { exception.backtrace.join("\n") }
         end

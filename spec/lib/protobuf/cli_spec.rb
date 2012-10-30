@@ -23,7 +23,7 @@ describe ::Protobuf::CLI do
 
 			it 'sends the host option to the runner' do
 				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options.host.should eq '123.123.123.123'
+					options[:host].should eq '123.123.123.123'
 				end
 				described_class.start(args)
 			end
@@ -34,7 +34,18 @@ describe ::Protobuf::CLI do
 
 			it 'sends the port option to the runner' do
 				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options.port.should eq 12345
+					options[:port].should eq 12345
+				end
+				described_class.start(args)
+			end
+		end
+
+		context 'threads option' do
+			let(:test_args) { [ '--threads=500' ] }
+
+			it 'sends the threads option to the runner' do
+				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
+					options[:threads].should eq 500
 				end
 				described_class.start(args)
 			end
@@ -45,7 +56,7 @@ describe ::Protobuf::CLI do
 
 			it 'sends the backlog option to the runner' do
 				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options.backlog.should eq 500
+					options[:backlog].should eq 500
 				end
 				described_class.start(args)
 			end
@@ -56,7 +67,7 @@ describe ::Protobuf::CLI do
 
 			it 'sends the backlog option to the runner' do
 				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options.threshold.should eq 500
+					options[:threshold].should eq 500
 				end
 				described_class.start(args)
 			end
