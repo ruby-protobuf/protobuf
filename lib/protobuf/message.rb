@@ -82,8 +82,8 @@ module Protobuf
     # Find a field object by +name+.
     def self.get_field_by_name(name)
       # Check if the name has been used before, if not then set it to the sym value
-      fields[field_name_to_tag[name]]
-    rescue TypeError => e
+      fields[field_name_to_tag[name.to_sym]]
+    rescue TypeError, NoMethodError => e
       name = 'nil' if name.nil?
       raise FieldNotDefinedError.new("Field '#{name}' is not defined on message '#{self.name}'")
     end
@@ -98,8 +98,8 @@ module Protobuf
 
     def self.get_ext_field_by_name(name)
       # Check if the name has been used before, if not then set it to the sym value
-      extension_fields[extension_field_name_to_tag[name]]
-    rescue TypeError => e
+      extension_fields[extension_field_name_to_tag[name.to_sym]]
+    rescue TypeError, NoMethodError => e
       name = 'nil' if name.nil?
       raise FieldNotDefinedError.new("Field '#{name}' is not defined on message '#{self.name}'")
     end
