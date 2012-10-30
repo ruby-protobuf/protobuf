@@ -6,6 +6,8 @@ module Protobuf
       def self.default; 0.0; end
       def self.max;  1.0/0; end
       def self.min; -1.0/0; end
+      def max;  1.0/0; end
+      def min; -1.0/0; end
 
       def wire_type
         WireType::FIXED32
