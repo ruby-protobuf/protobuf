@@ -112,6 +112,7 @@ module Protobuf
     # Constructor
     #
     def initialize(values={})
+      values = values.to_hash
       @values = {}
 
       values.each { |name, val| self[name] = val}

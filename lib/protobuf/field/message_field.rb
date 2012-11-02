@@ -3,11 +3,13 @@ require 'protobuf/field/base_field'
 module Protobuf
   module Field
     class MessageField < BaseField
+      RAISE_TYPE = lambda { |field, val| raise TypeError, "Expected value of type '#{field.type}', but got '#{val.class}'" }
+
       ##
       # Public Instance Methods
       #
       def acceptable?(val)
-        raise TypeError unless val.instance_of?(type) || val.instance_of?(Hash)
+        RAISE_TYPE.call(self, val) unless val.instance_of?(type) || val.respond_to?(:to_hash)
         true
       end
 
@@ -33,15 +35,15 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method("#{field.name}=") do |val|
-            case val
-            when nil then
+            case 
+            when val.nil? then
               @values.delete(field.name)
-            when Hash then
-              @values[field.name] = field.type.new(val)
-            when field.type then
+            when val.is_a?(field.type) then
               @values[field.name] = val
+            when val.respond_to?(:to_hash) then
+              @values[field.name] = field.type.new(val.to_hash)
             else
-              raise TypeError, "Expected value of type '#{field.type}', but got '#{val.class}'"
+              RAISE_TYPE.call(field, val)
             end
           end
         end
