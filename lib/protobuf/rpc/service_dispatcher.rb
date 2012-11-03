@@ -73,7 +73,7 @@ module Protobuf
         method_name = outer_request.method_name.underscore.to_sym
         if service_klass.rpc_method?(method_name)
           self.service = service_klass.new(method_name, outer_request.request_proto)
-          self.callable_method = service.method(method_name)
+          self.callable_method = service.callable_rpc_method(method_name)
           self.definition = service.rpcs[method_name]
         else
           assign_error(MethodNotFound, "#{service.class.name}##{method_name} is not a defined rpc method.")
