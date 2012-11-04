@@ -12,73 +12,145 @@ class ServiceWithHooks
       __send__("#{key}=", value)
     end
   end
+
+  def endpoint
+    @called << :endpoint
+  end
+
+  def self.clear_filters!
+    @defined_filters = nil
+    @filters = nil
+  end
 end
 
 describe Protobuf::Rpc::ServiceCallbacks do
   subject { ServiceWithHooks.new(params) }
+  after(:each) { ServiceWithHooks.clear_filters! }
 
   describe '#before_filter' do
+    let(:params) do
+      { :called => [],
+        :before_filter_calls => 0 }
+    end
+
     before(:all) do
       class ServiceWithHooks
         def verify_before
-          @before_filter_called = true
+          @called << :verify_before
+          @before_filter_calls += 1
+        end
+
+        def foo
+          @called << :foo
         end
       end
     end
 
-    after(:all) do
-      class ServiceWithHooks
-        undef :verify_before
-      end
+    before do
+      ServiceWithHooks.before_filter(:verify_before)
+      ServiceWithHooks.before_filter(:verify_before)
+      ServiceWithHooks.before_filter(:foo)
     end
 
-    let(:params) { { :before_filter_called => false } }
-    before { ServiceWithHooks.before_filter(:verify_before) }
-
-    context 'when defining a before filter' do
-      before { subject.run_before_filters! }
-
-      its('class.before_filters') { should include(:verify_before) }
-      its(:before_filter_called) { should be_true }
-    end
-
-    context 'when multiple methods are defined' do
-      pending
-    end
-
-    context 'when same method is added' do
-      before { ServiceWithHooks.before_filter(:verify_before) }
-      before { ServiceWithHooks.before_filter(:verify_before) }
-      before { ServiceWithHooks.before_filter(:verify_before) }
-
-      it 'calls the method callback a single time' do
-        subject.should_receive(:verify_before).once
-        subject.run_before_filters!
-      end
+    it 'calls filters in the order they were defined' do
+      subject.__send__(:run_filters) { subject.endpoint }
+      subject.called.should eq [ :verify_before, :foo, :endpoint ]
+      subject.before_filter_calls.should eq 1
     end
   end
 
   describe '#after_filter' do
+    let(:params) do
+      { :called => [],
+        :after_filter_calls => 0 }
+    end
+
     before(:all) do
       class ServiceWithHooks
         def verify_after
-          @after_filter_called = true
+          @called << :verify_after
+          @after_filter_calls += 1
+        end
+
+        def foo
+          @called << :foo
         end
       end
     end
 
-    after(:all) do
+    before do
+      ServiceWithHooks.after_filter(:verify_after)
+      ServiceWithHooks.after_filter(:verify_after)
+      ServiceWithHooks.after_filter(:foo)
+    end
+
+    it 'calls filters in the order they were defined' do
+      subject.__send__(:run_filters) { subject.endpoint }
+      subject.called.should eq [ :endpoint, :verify_after, :foo ]
+      subject.after_filter_calls.should eq 1
+    end
+  end
+
+  describe '#around_filter' do
+    let(:params) do
+      { :called => [] }
+    end
+
+    before(:all) do
       class ServiceWithHooks
-        undef :verify_after
+        def outer_around
+          @called << :outer_around_top
+          yield
+          @called << :outer_around_bottom
+        end
+
+        def inner_around
+          @called << :inner_around_top
+          yield
+          @called << :inner_around_bottom
+        end
       end
     end
 
-    let(:params) { { :after_filter_called => false } }
+    before do
+      ServiceWithHooks.around_filter(:outer_around)
+      ServiceWithHooks.around_filter(:inner_around)
+      ServiceWithHooks.around_filter(:outer_around)
+      ServiceWithHooks.around_filter(:inner_around)
+    end
 
-    before { ServiceWithHooks.after_filter(:verify_after) }
-    before { subject.run_after_filters! }
+    it 'calls filters in the order they were defined' do
+      subject.__send__(:run_filters) { subject.endpoint }
+      subject.called.should eq([ :outer_around_top,
+                                 :inner_around_top,
+                                 :endpoint,
+                                 :inner_around_bottom,
+                                 :outer_around_bottom ])
+    end
 
-    its('class.after_filters') { should include(:verify_after) }
-    its(:after_filter_called) { should be_true }
+    context 'when around_filter does not yield' do
+      before do
+        class ServiceWithHooks
+          def inner_around
+            @called << :inner_around
+          end
+        end
+      end
+
+      before do
+        ServiceWithHooks.around_filter(:outer_around)
+        ServiceWithHooks.around_filter(:inner_around)
+      end
+
+      it 'calls filters in the order they were defined' do
+        subject.should_not_receive(:endpoint)
+        subject.__send__(:run_filters) { subject.endpoint }
+        subject.called.should eq([ :outer_around_top,
+                                   :inner_around,
+                                   :outer_around_bottom ])
+      end
+
+    end
   end
+
 end

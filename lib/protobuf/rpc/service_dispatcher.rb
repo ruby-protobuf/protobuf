@@ -79,6 +79,8 @@ module Protobuf
           assign_error(MethodNotFound, "#{service.class.name}##{method_name} is not a defined rpc method.")
         end
       rescue NameError => e
+        # FIXME I think this is no longer applicable since the method extract
+        # is now wrapped in a lambda (@see Service#callable_rpc_method).
         log_exception(e)
         assign_error(MethodNotFound, "#{service.class.name}##{method_name} is not implemented.")
       end
