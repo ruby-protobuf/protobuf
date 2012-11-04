@@ -51,7 +51,7 @@ module Protobuf
           @stats = Protobuf::Rpc::Stat.new(:CLIENT)
           @stats.server = [@options[:port], @options[:host]]
           @stats.service = @options[:service].name
-          @stats.method = @options[:method].to_s
+          @stats.method_name = @options[:method].to_s
         rescue => ex
           log_exception(ex)
           fail(:RPC_ERROR, "Invalid stats configuration. #{ex.message}")

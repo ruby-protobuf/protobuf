@@ -6,16 +6,16 @@ require 'protobuf/rpc/service_callbacks'
 module Protobuf
   module Rpc
 
-    include Protobuf::Rpc::ServiceCallbacks
-
     # Object to encapsulate the request/response types for a given service method
     #
     RpcMethod = Struct.new("RpcMethod", :method, :request_type, :response_type)
 
     class Service
+      include Protobuf::Rpc::ServiceCallbacks
       include Protobuf::Logger::LogMethods
 
-      attr_reader :response
+
+      attr_reader :response, :rpc
 
       DEFAULT_HOST = '127.0.0.1'.freeze
       DEFAULT_PORT = 9399

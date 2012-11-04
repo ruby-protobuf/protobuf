@@ -103,14 +103,14 @@ module Protobuf
       #     c.on_failure {|err| ... }
       #   end
       #
-      def method_missing(method, *params)
+      def method_missing(method_name, *params)
         service = options[:service]
-        unless service.rpc_method?(method)
-          log_error { sign_message("#{service.name}##{method.to_s} not rpc method, passing to super") }
-          super(method, *params)
+        unless service.rpc_method?(method_name)
+          log_error { sign_message("#{service.name}##{method_name.to_s} not rpc method, passing to super") }
+          super(method_name, *params)
         else
-          log_debug { sign_message("#{service.name}##{method.to_s}") }
-          rpc = service.rpcs[method.to_sym]
+          log_debug { sign_message("#{service.name}##{method_name.to_s}") }
+          rpc = service.rpcs[method_name.to_sym]
 
           options[:request_type] = rpc.request_type
           log_debug { sign_message("Request Type: #{options[:request_type].name}") }
@@ -118,7 +118,7 @@ module Protobuf
           options[:response_type] = rpc.response_type
           log_debug { sign_message("Response Type: #{options[:response_type].name}") }
 
-          options[:method] = method.to_s
+          options[:method] = method_name.to_s
           options[:request] = params[0].is_a?(Hash) ? options[:request_type].new(params[0]) : params[0]
           log_debug { sign_message("Request Data: #{options[:request].inspect}") }
 
