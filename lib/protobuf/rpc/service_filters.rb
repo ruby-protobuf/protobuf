@@ -152,8 +152,8 @@ module Protobuf
         def run_unwrapped_filters(unwrapped_filters, rpc_method, stop_on_false_return = false)
           unwrapped_filters.each do |filter|
             if invoke_filter?(rpc_method, filter)
-              rv = call_or_send(filter[:callable])
-              return false if stop_on_false_return && rv === false
+              return_value = call_or_send(filter[:callable])
+              return false if stop_on_false_return && return_value == false
             end
           end
 
@@ -216,24 +216,24 @@ module Protobuf
         # __send__ assuming that we respond_to it. Return the call's return value.
         #
         def call_or_send(callable, &block)
-          rv = case
-               when callable.respond_to?(:call) then
-                 if callable.arity == 1
-                   callable.call(self, &block)
-                 else
-                   callable.call(&block)
-                 end
-               when respond_to?(callable, true) then
-                 if method(callable).arity == 1
-                   __send__(callable, self, &block)
-                 else
-                   __send__(callable, &block)
-                 end
-               else
-                 raise "Object #{callable} is not callable"
-               end
+          return_value = case
+                         when callable.respond_to?(:call) then
+                           if callable.arity == 1
+                             callable.call(self, &block)
+                           else
+                             callable.call(&block)
+                           end
+                         when respond_to?(callable, true) then
+                           if method(callable).arity == 1
+                             __send__(callable, self, &block)
+                           else
+                             __send__(callable, &block)
+                           end
+                         else
+                           raise "Object #{callable} is not callable"
+                         end
 
-          return rv
+          return return_value
         end
 
       end
