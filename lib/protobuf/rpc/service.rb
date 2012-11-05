@@ -1,17 +1,21 @@
 require 'protobuf/logger'
 require 'protobuf/rpc/client'
 require 'protobuf/rpc/error'
+require 'protobuf/rpc/service_filters'
 
 module Protobuf
   module Rpc
+
     # Object to encapsulate the request/response types for a given service method
     #
     RpcMethod = Struct.new("RpcMethod", :method, :request_type, :response_type)
 
     class Service
+      include Protobuf::Rpc::ServiceFilters
       include Protobuf::Logger::LogMethods
 
-      attr_reader :response
+
+      attr_reader :response, :rpc
 
       DEFAULT_HOST = '127.0.0.1'.freeze
       DEFAULT_PORT = 9399
@@ -128,6 +132,15 @@ module Protobuf
       #
       def rpcs
         self.class.rpcs
+      end
+
+      # Get a callable object that will be used by the dispatcher
+      # to invoke the specified rpc method. Facilitates callback dispatch.
+      # The returned lambda is expected to be called at a later time (which
+      # is why we wrap the method call).
+      #
+      def callable_rpc_method(method_name)
+        lambda { run_filters(method_name) }
       end
 
       private
