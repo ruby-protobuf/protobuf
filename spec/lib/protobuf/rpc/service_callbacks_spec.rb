@@ -53,9 +53,67 @@ describe Protobuf::Rpc::ServiceCallbacks do
     end
 
     it 'calls filters in the order they were defined' do
-      subject.__send__(:run_filters) { subject.endpoint }
+      subject.__send__(:run_filters, :endpoint)
       subject.called.should eq [ :verify_before, :foo, :endpoint ]
       subject.before_filter_calls.should eq 1
+    end
+
+    context 'when filter is configured with "only"' do
+      before(:all) do
+        class ServiceWithHooks
+          def endpoint_with_verify
+            @called << :endpoint_with_verify
+          end
+        end
+      end
+
+      before do
+        ServiceWithHooks.clear_filters!
+        ServiceWithHooks.before_filter(:verify_before, :only => :endpoint_with_verify)
+      end
+
+      context 'when invoking a method defined in "only" option' do
+        it 'invokes the filter' do
+          subject.__send__(:run_filters, :endpoint_with_verify)
+          subject.called.should eq [ :verify_before, :endpoint_with_verify ]
+        end
+      end
+
+      context 'when invoking a method not defined by "only" option' do
+        it 'does not invoke the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :endpoint ]
+        end
+      end
+    end
+
+    context 'when filter is configured with "except"' do
+      before(:all) do
+        class ServiceWithHooks
+          def endpoint_without_verify
+            @called << :endpoint_without_verify
+          end
+        end
+      end
+
+      before do
+        ServiceWithHooks.clear_filters!
+        ServiceWithHooks.before_filter(:verify_before, :except => :endpoint_without_verify)
+      end
+
+      context 'when invoking a method not defined in "except" option' do
+        it 'invokes the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :verify_before, :endpoint ]
+        end
+      end
+
+      context 'when invoking a method defined by "except" option' do
+        it 'does not invoke the filter' do
+          subject.__send__(:run_filters, :endpoint_without_verify)
+          subject.called.should eq [ :endpoint_without_verify ]
+        end
+      end
     end
   end
 
@@ -85,7 +143,7 @@ describe Protobuf::Rpc::ServiceCallbacks do
     end
 
     it 'calls filters in the order they were defined' do
-      subject.__send__(:run_filters) { subject.endpoint }
+      subject.__send__(:run_filters, :endpoint)
       subject.called.should eq [ :endpoint, :verify_after, :foo ]
       subject.after_filter_calls.should eq 1
     end
@@ -120,7 +178,7 @@ describe Protobuf::Rpc::ServiceCallbacks do
     end
 
     it 'calls filters in the order they were defined' do
-      subject.__send__(:run_filters) { subject.endpoint }
+      subject.__send__(:run_filters, :endpoint)
       subject.called.should eq([ :outer_around_top,
                                  :inner_around_top,
                                  :endpoint,
@@ -144,7 +202,7 @@ describe Protobuf::Rpc::ServiceCallbacks do
 
       it 'calls filters in the order they were defined' do
         subject.should_not_receive(:endpoint)
-        subject.__send__(:run_filters) { subject.endpoint }
+        subject.__send__(:run_filters, :endpoint)
         subject.called.should eq([ :outer_around_top,
                                    :inner_around,
                                    :outer_around_bottom ])

@@ -29,6 +29,11 @@ module Protobuf
 
         private
 
+        def define_filter(type, filter, options = {})
+          return if filter_defined?(type, filter)
+          filters[type] << options.merge({ :name => filter })
+          remember_filter(type, filter)
+        end
 
         def defined_filters
           @defined_filters ||= Hash.new { |h,k| h[k] = Set.new }
@@ -51,11 +56,9 @@ module Protobuf
         # TODO add support for only/except sub-filters
         #
         def set_filters(type, *args)
-          opts = args.last.is_a?(Hash) ? args.pop : {}
+          options = args.last.is_a?(Hash) ? args.pop : {}
           args.each do |filter|
-            next if filter_defined?(type, filter)
-            filters[type] << filter
-            remember_filter(type, filter)
+            define_filter(type, filter, options)
           end
         end
 
@@ -65,23 +68,34 @@ module Protobuf
 
         private
 
-        # Enumerator block given to Set#each to simply call the given filter.
-        # See #run_after_filters, #run_before_filters
-        #
-        def enumerated_filter_call
-          lambda { |filter| __send__(filter) }
-        end
-
         # Get back to class filters.
         #
         def filters
           self.class.filters
         end
 
-        # Loop over the after filters and invoke them.
+        def invoke_filter?(rpc_method, filter)
+          return invoke_via_only?(rpc_method, filter) \
+            && invoke_via_except?(rpc_method, filter)
+        end
+
+        def invoke_via_except?(rpc_method, filter)
+          except = [ filter.fetch(:except) { [] } ].flatten
+          return except.empty? || ! except.include?(rpc_method)
+        end
+
+        def invoke_via_only?(rpc_method, filter)
+          only = [ filter.fetch(:only) { [] } ].flatten
+          return only.empty? || only.include?(rpc_method)
+        end
+
+        # Loop over the unwrapped filters and invoke them. An unwrapped filter
+        # is either a before or after filter, not an around filter.
         #
-        def run_after_filters
-          filters[:after].each(&enumerated_filter_call)
+        def run_unwrapped_filters(unwrapped_filters, rpc_method)
+          unwrapped_filters.each do |filter|
+            __send__(filter[:name]) if invoke_filter?(rpc_method, filter)
+          end
         end
 
         # Reverse build a chain of around filters. To implement an around chain,
@@ -113,26 +127,25 @@ module Protobuf
         #     end
         #   end
         #
-        def run_around_filters(final)
+        def run_around_filters(rpc_method)
+          final = lambda { __send__(rpc_method) }
           filters[:around].reverse.inject(final) { |previous, filter|
-            lambda { __send__(filter, &previous) }
+            if invoke_filter?(rpc_method, filter)
+              lambda { __send__(filter[:name], &previous) }
+            else
+              previous
+            end
           }.call
-        end
-
-        # Loop over the before filters and invoke them.
-        #
-        def run_before_filters
-          filters[:before].each(&enumerated_filter_call)
         end
 
 
         # Entry method to call each filter type in the appropriate order. This should
         # be used instead of the other run methods directly.
         #
-        def run_filters(&final)
-          run_before_filters
-          run_around_filters(final)
-          run_after_filters
+        def run_filters(rpc_method)
+          run_unwrapped_filters(filters[:before], rpc_method)
+          run_around_filters(rpc_method)
+          run_unwrapped_filters(filters[:after], rpc_method)
         end
 
       end
