@@ -1,12 +1,11 @@
 module Protobuf
   module Rpc
-    module ServiceCallbacks
-      include ActiveSupport::Callbacks
+    module ServiceFilters
 
       def self.included(other)
         other.class_eval do
-          extend Protobuf::Rpc::ServiceCallbacks::ClassMethods
-          include Protobuf::Rpc::ServiceCallbacks::InstanceMethods
+          extend Protobuf::Rpc::ServiceFilters::ClassMethods
+          include Protobuf::Rpc::ServiceFilters::InstanceMethods
         end
       end
 

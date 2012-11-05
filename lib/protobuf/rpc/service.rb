@@ -1,7 +1,7 @@
 require 'protobuf/logger'
 require 'protobuf/rpc/client'
 require 'protobuf/rpc/error'
-require 'protobuf/rpc/service_callbacks'
+require 'protobuf/rpc/service_filters'
 
 module Protobuf
   module Rpc
@@ -11,7 +11,7 @@ module Protobuf
     RpcMethod = Struct.new("RpcMethod", :method, :request_type, :response_type)
 
     class Service
-      include Protobuf::Rpc::ServiceCallbacks
+      include Protobuf::Rpc::ServiceFilters
       include Protobuf::Logger::LogMethods
 
 

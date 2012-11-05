@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class ServiceWithHooks
-  include Protobuf::Rpc::ServiceCallbacks
+  include Protobuf::Rpc::ServiceFilters
 
   # Initialize the hash keys as instance vars
   def initialize(ivar_hash)
@@ -23,7 +23,7 @@ class ServiceWithHooks
   end
 end
 
-describe Protobuf::Rpc::ServiceCallbacks do
+describe Protobuf::Rpc::ServiceFilters do
   subject { ServiceWithHooks.new(params) }
   after(:each) { ServiceWithHooks.clear_filters! }
 
