@@ -35,6 +35,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
     before(:all) do
       class FilterTest
+        private
         def verify_before
           @called << :verify_before
           @before_filter_calls += 1
@@ -61,6 +62,7 @@ describe Protobuf::Rpc::ServiceFilters do
     context 'when filter is configured with "only"' do
       before(:all) do
         class FilterTest
+          private
           def endpoint_with_verify
             @called << :endpoint_with_verify
           end
@@ -90,6 +92,7 @@ describe Protobuf::Rpc::ServiceFilters do
     context 'when filter is configured with "except"' do
       before(:all) do
         class FilterTest
+          private
           def endpoint_without_verify
             @called << :endpoint_without_verify
           end
@@ -116,9 +119,128 @@ describe Protobuf::Rpc::ServiceFilters do
       end
     end
 
+    context 'when filter is configured with "if"' do
+      before(:all) do
+        class FilterTest
+          private
+          def check_true; return true; end
+          def check_false; return false; end
+          def verify_before; @called << :verify_before; end
+        end
+      end
+
+      context 'when "if" option is a method that returns true' do
+        before do
+          FilterTest.clear_filters!
+          FilterTest.before_filter(:verify_before, :if => :check_true)
+        end
+
+        it 'invokes the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :verify_before, :endpoint ]
+        end
+      end
+
+      context 'when "if" option is a callable that returns true' do
+        before do
+          FilterTest.clear_filters!
+          FilterTest.before_filter(:verify_before, :if => lambda { |service| true })
+        end
+
+        it 'invokes the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :verify_before, :endpoint ]
+        end
+      end
+
+      context 'when "if" option is a method that returns false' do
+        before do
+          FilterTest.clear_filters!
+          FilterTest.before_filter(:verify_before, :if => :check_false)
+        end
+
+        it 'skips the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :endpoint ]
+        end
+      end
+
+      context 'when "if" option is a callable that returns false' do
+        before do
+          FilterTest.clear_filters!
+          FilterTest.before_filter(:verify_before, :if => lambda { |service| false })
+        end
+
+        it 'skips the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :endpoint ]
+        end
+      end
+    end
+
+    context 'when filter is configured with "unless"' do
+      before(:all) do
+        class FilterTest
+          private
+          def check_true; return true; end
+          def check_false; return false; end
+          def verify_before; @called << :verify_before; end
+        end
+      end
+
+      context 'when "unless" option is a method that returns false' do
+        before do
+          FilterTest.clear_filters!
+          FilterTest.before_filter(:verify_before, :unless => :check_false)
+        end
+
+        it 'invokes the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :verify_before, :endpoint ]
+        end
+      end
+
+      context 'when "unless" option is a callable that returns true' do
+        before do
+          FilterTest.clear_filters!
+          FilterTest.before_filter(:verify_before, :unless => lambda { |service| false })
+        end
+
+        it 'invokes the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :verify_before, :endpoint ]
+        end
+      end
+
+      context 'when "unless" option is a method that returns false' do
+        before do
+          FilterTest.clear_filters!
+          FilterTest.before_filter(:verify_before, :unless => :check_true)
+        end
+
+        it 'skips the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :endpoint ]
+        end
+      end
+
+      context 'when "unless" option is a callable that returns false' do
+        before do
+          FilterTest.clear_filters!
+          FilterTest.before_filter(:verify_before, :unless => lambda { |service| true })
+        end
+
+        it 'skips the filter' do
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq [ :endpoint ]
+        end
+      end
+    end
+
     context 'when filter returns false' do
       before(:all) do
         class FilterTest
+          private
           def short_circuit_filter
             @called << :short_circuit_filter
             return false
@@ -144,6 +266,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
     before(:all) do
       class FilterTest
+        private
         def verify_after
           @called << :verify_after
           @after_filter_calls += 1
@@ -173,6 +296,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
     before(:all) do
       class FilterTest
+        private
         def outer_around
           @called << :outer_around_top
           yield
@@ -206,6 +330,7 @@ describe Protobuf::Rpc::ServiceFilters do
     context 'when around_filter does not yield' do
       before do
         class FilterTest
+          private
           def inner_around
             @called << :inner_around
           end
@@ -217,7 +342,7 @@ describe Protobuf::Rpc::ServiceFilters do
         FilterTest.around_filter(:inner_around)
       end
 
-      it 'calls filters in the order they were defined' do
+      it 'cancels calling the rest of the filters and the endpoint' do
         subject.should_not_receive(:endpoint)
         subject.__send__(:run_filters, :endpoint)
         subject.called.should eq([ :outer_around_top,

@@ -30,7 +30,7 @@ module Protobuf
 
         def define_filter(type, filter, options = {})
           return if filter_defined?(type, filter)
-          filters[type] << options.merge({ :name => filter })
+          filters[type] << options.merge({ :callable => filter })
           remember_filter(type, filter)
         end
 
@@ -73,19 +73,77 @@ module Protobuf
           self.class.filters
         end
 
+        # Predicate which uses the filter options to determine if the filter
+        # should be called. Specifically checks the :if, :unless, :only, and :except
+        # options for every filter. Each option check is expected to return false
+        # if the filter should not be invoked, true if invocation should occur.
+        #
         def invoke_filter?(rpc_method, filter)
           return invoke_via_only?(rpc_method, filter) \
-            && invoke_via_except?(rpc_method, filter)
+            && invoke_via_except?(rpc_method, filter) \
+            && invoke_via_if?(rpc_method, filter) \
+            && invoke_via_unless?(rpc_method, filter)
         end
 
+        # If the target rpc endpoint method is listed under an :except option,
+        # return false to indicate that the filter should not be invoked. Any
+        # other target rpc endpoint methods not listed should be invoked.
+        # This option is the opposite of :only.
+        #
+        # Value should be a symbol/string or an array of symbols/strings.
+        #
         def invoke_via_except?(rpc_method, filter)
           except = [ filter.fetch(:except) { [] } ].flatten
           return except.empty? || ! except.include?(rpc_method)
         end
 
+        # Invoke the given :if callable (if any) and return its return value.
+        # Used by `invoke_filter?` which expects a true/false
+        # return value to determine if we should invoke the target filter.
+        #
+        # Value can either be a symbol/string indicating an instance method to call
+        # or an object that responds to `call`.
+        #
+        def invoke_via_if?(rpc_method, filter)
+          if_check = filter.fetch(:if) { lambda { |service| return true } }
+          do_invoke = case
+                      when if_check.nil? then
+                        true
+                      else
+                        call_or_send(if_check)
+                      end
+
+          return do_invoke
+        end
+
+        # If the target rpc endpoint method is listed in the :only option,
+        # it should be invoked. Any target rpc endpoint methods not listed in this
+        # option should not be invoked. This option is the opposite of :except.
+        #
+        # Value should be a symbol/string or an array of symbols/strings.
+        #
         def invoke_via_only?(rpc_method, filter)
           only = [ filter.fetch(:only) { [] } ].flatten
           return only.empty? || only.include?(rpc_method)
+        end
+
+        # Invoke the given :unless callable (if any) and return the opposite
+        # of it's return value. Used by `invoke_filter?` which expects a true/false
+        # return value to determine if we should invoke the target filter.
+        #
+        # Value can either be a symbol/string indicating an instance method to call
+        # or an object that responds to `call`.
+        #
+        def invoke_via_unless?(rpc_method, filter)
+          unless_check = filter.fetch(:unless) { lambda { |service| return false } }
+          skip_invoke = case
+                        when unless_check.nil? then
+                          false
+                        else
+                          call_or_send(unless_check)
+                        end
+
+          return ! skip_invoke
         end
 
         # Loop over the unwrapped filters and invoke them. An unwrapped filter
@@ -94,7 +152,7 @@ module Protobuf
         def run_unwrapped_filters(unwrapped_filters, rpc_method, stop_on_false_return = false)
           unwrapped_filters.each do |filter|
             if invoke_filter?(rpc_method, filter)
-              rv = __send__(filter[:name])
+              rv = call_or_send(filter[:callable])
               return false if stop_on_false_return && rv === false
             end
           end
@@ -135,7 +193,7 @@ module Protobuf
           final = lambda { __send__(rpc_method) }
           filters[:around].reverse.inject(final) { |previous, filter|
             if invoke_filter?(rpc_method, filter)
-              lambda { __send__(filter[:name], &previous) }
+              lambda { call_or_send(filter[:callable], &previous) }
             else
               previous
             end
@@ -152,6 +210,30 @@ module Protobuf
             run_around_filters(rpc_method)
             run_unwrapped_filters(filters[:after], rpc_method)
           end
+        end
+
+        # Call the object if it is callable, otherwise invoke the method using
+        # __send__ assuming that we respond_to it. Return the call's return value.
+        #
+        def call_or_send(callable, &block)
+          rv = case
+               when callable.respond_to?(:call) then
+                 if callable.arity == 1
+                   callable.call(self, &block)
+                 else
+                   callable.call(&block)
+                 end
+               when respond_to?(callable, true) then
+                 if method(callable).arity == 1
+                   __send__(callable, self, &block)
+                 else
+                   __send__(callable, &block)
+                 end
+               else
+                 raise "Object #{callable} is not callable"
+               end
+
+          return rv
         end
 
       end
