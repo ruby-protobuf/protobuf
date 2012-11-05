@@ -115,6 +115,28 @@ describe Protobuf::Rpc::ServiceFilters do
         end
       end
     end
+
+    context 'when filter returns false' do
+      before(:all) do
+        class FilterTest
+          def short_circuit_filter
+            @called << :short_circuit_filter
+            return false
+          end
+        end
+      end
+
+      before do
+        FilterTest.clear_filters!
+        FilterTest.before_filter(:short_circuit_filter)
+      end
+
+      it 'does not invoke the rpc method' do
+        subject.should_not_receive(:endpoint)
+        subject.__send__(:run_filters, :endpoint)
+        subject.called.should eq [ :short_circuit_filter ]
+      end
+    end
   end
 
   describe '#after_filter' do

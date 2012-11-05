@@ -91,10 +91,15 @@ module Protobuf
         # Loop over the unwrapped filters and invoke them. An unwrapped filter
         # is either a before or after filter, not an around filter.
         #
-        def run_unwrapped_filters(unwrapped_filters, rpc_method)
+        def run_unwrapped_filters(unwrapped_filters, rpc_method, stop_on_false_return = false)
           unwrapped_filters.each do |filter|
-            __send__(filter[:name]) if invoke_filter?(rpc_method, filter)
+            if invoke_filter?(rpc_method, filter)
+              rv = __send__(filter[:name])
+              return false if stop_on_false_return && rv === false
+            end
           end
+
+          return true
         end
 
         # Reverse build a chain of around filters. To implement an around chain,
@@ -142,9 +147,11 @@ module Protobuf
         # be used instead of the other run methods directly.
         #
         def run_filters(rpc_method)
-          run_unwrapped_filters(filters[:before], rpc_method)
-          run_around_filters(rpc_method)
-          run_unwrapped_filters(filters[:after], rpc_method)
+          continue = run_unwrapped_filters(filters[:before], rpc_method, true)
+          if continue
+            run_around_filters(rpc_method)
+            run_unwrapped_filters(filters[:after], rpc_method)
+          end
         end
 
       end
