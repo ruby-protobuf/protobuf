@@ -1,10 +1,13 @@
 require 'spec_helper'
 
-class ServiceWithHooks
+class FilterTest
   include Protobuf::Rpc::ServiceFilters
+
+  attr_accessor :called
 
   # Initialize the hash keys as instance vars
   def initialize(ivar_hash)
+    @called = []
     ivar_hash.each_pair do |key, value|
       self.class.class_eval do
         attr_accessor key
@@ -24,17 +27,14 @@ class ServiceWithHooks
 end
 
 describe Protobuf::Rpc::ServiceFilters do
-  subject { ServiceWithHooks.new(params) }
-  after(:each) { ServiceWithHooks.clear_filters! }
+  subject { FilterTest.new(params) }
+  after(:each) { FilterTest.clear_filters! }
 
   describe '#before_filter' do
-    let(:params) do
-      { :called => [],
-        :before_filter_calls => 0 }
-    end
+    let(:params) { { :before_filter_calls => 0 } }
 
     before(:all) do
-      class ServiceWithHooks
+      class FilterTest
         def verify_before
           @called << :verify_before
           @before_filter_calls += 1
@@ -47,9 +47,9 @@ describe Protobuf::Rpc::ServiceFilters do
     end
 
     before do
-      ServiceWithHooks.before_filter(:verify_before)
-      ServiceWithHooks.before_filter(:verify_before)
-      ServiceWithHooks.before_filter(:foo)
+      FilterTest.before_filter(:verify_before)
+      FilterTest.before_filter(:verify_before)
+      FilterTest.before_filter(:foo)
     end
 
     it 'calls filters in the order they were defined' do
@@ -60,7 +60,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
     context 'when filter is configured with "only"' do
       before(:all) do
-        class ServiceWithHooks
+        class FilterTest
           def endpoint_with_verify
             @called << :endpoint_with_verify
           end
@@ -68,8 +68,8 @@ describe Protobuf::Rpc::ServiceFilters do
       end
 
       before do
-        ServiceWithHooks.clear_filters!
-        ServiceWithHooks.before_filter(:verify_before, :only => :endpoint_with_verify)
+        FilterTest.clear_filters!
+        FilterTest.before_filter(:verify_before, :only => :endpoint_with_verify)
       end
 
       context 'when invoking a method defined in "only" option' do
@@ -89,7 +89,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
     context 'when filter is configured with "except"' do
       before(:all) do
-        class ServiceWithHooks
+        class FilterTest
           def endpoint_without_verify
             @called << :endpoint_without_verify
           end
@@ -97,8 +97,8 @@ describe Protobuf::Rpc::ServiceFilters do
       end
 
       before do
-        ServiceWithHooks.clear_filters!
-        ServiceWithHooks.before_filter(:verify_before, :except => :endpoint_without_verify)
+        FilterTest.clear_filters!
+        FilterTest.before_filter(:verify_before, :except => :endpoint_without_verify)
       end
 
       context 'when invoking a method not defined in "except" option' do
@@ -118,13 +118,10 @@ describe Protobuf::Rpc::ServiceFilters do
   end
 
   describe '#after_filter' do
-    let(:params) do
-      { :called => [],
-        :after_filter_calls => 0 }
-    end
+    let(:params) { { :after_filter_calls => 0 } }
 
     before(:all) do
-      class ServiceWithHooks
+      class FilterTest
         def verify_after
           @called << :verify_after
           @after_filter_calls += 1
@@ -137,9 +134,9 @@ describe Protobuf::Rpc::ServiceFilters do
     end
 
     before do
-      ServiceWithHooks.after_filter(:verify_after)
-      ServiceWithHooks.after_filter(:verify_after)
-      ServiceWithHooks.after_filter(:foo)
+      FilterTest.after_filter(:verify_after)
+      FilterTest.after_filter(:verify_after)
+      FilterTest.after_filter(:foo)
     end
 
     it 'calls filters in the order they were defined' do
@@ -150,12 +147,10 @@ describe Protobuf::Rpc::ServiceFilters do
   end
 
   describe '#around_filter' do
-    let(:params) do
-      { :called => [] }
-    end
+    let(:params) { {} }
 
     before(:all) do
-      class ServiceWithHooks
+      class FilterTest
         def outer_around
           @called << :outer_around_top
           yield
@@ -171,10 +166,10 @@ describe Protobuf::Rpc::ServiceFilters do
     end
 
     before do
-      ServiceWithHooks.around_filter(:outer_around)
-      ServiceWithHooks.around_filter(:inner_around)
-      ServiceWithHooks.around_filter(:outer_around)
-      ServiceWithHooks.around_filter(:inner_around)
+      FilterTest.around_filter(:outer_around)
+      FilterTest.around_filter(:inner_around)
+      FilterTest.around_filter(:outer_around)
+      FilterTest.around_filter(:inner_around)
     end
 
     it 'calls filters in the order they were defined' do
@@ -188,7 +183,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
     context 'when around_filter does not yield' do
       before do
-        class ServiceWithHooks
+        class FilterTest
           def inner_around
             @called << :inner_around
           end
@@ -196,8 +191,8 @@ describe Protobuf::Rpc::ServiceFilters do
       end
 
       before do
-        ServiceWithHooks.around_filter(:outer_around)
-        ServiceWithHooks.around_filter(:inner_around)
+        FilterTest.around_filter(:outer_around)
+        FilterTest.around_filter(:inner_around)
       end
 
       it 'calls filters in the order they were defined' do
