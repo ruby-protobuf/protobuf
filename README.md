@@ -169,6 +169,69 @@ end
 
 This means that the client's `on_failure` callback will be invoked instead of the `on_success` callback. Read more below on client callbacks. One drawback to the `rpc_failed` approach is that it does not short-circuit the rest of the method. This means that you must explicitly return from the method if you do not wish the remainder to be executed.
 
+### Service Filters
+
+Service Filters provides ActionController-style filter support to service instances, specifically adding `before_filter`, `after_filter`, and `around_filter`.
+
+```ruby
+class Foo::UserService < ::Protobuf::Rpc::Service
+  before_filter :start_request_timer
+  after_filter :end_request_timer
+  around_filter :benchmark_request
+
+  # Provide a list of rpc methods to call (or exclude calling) for the given filter(s).
+  # The following two filters are essentially equivalent.
+  before_filter :verify_user_present, :only => [ :update, :delete ]
+  before_filter :verify_user_present, :except => [ :find, :create ]
+
+  # Using if/unless filters options to achieve the same goal, reporting a login after the login has been processed.
+  # Note that you can provide a method name or lambda, but you must return a boolean value.
+  after_filter :report_login, :only => :login, :if => :user_found?
+  after_filter :report_login, :only => :login, :if => lambda { |service| service.response.user_guid.present? }
+  after_filter :report_login, :only => :login, :unless => :user_missing?
+  after_filter :report_login, :only => :login, :unless => lambda { |service| service.response.user_guid.empty? }
+
+  #... rpc instance methods
+
+  private
+
+  def start_request_timer
+    @time_start = Time.now
+  end
+
+  def end_request_timer
+    @time_end = Time.now
+    log_info { ... }
+  end
+
+  def benchmark_request
+    Benchmark.benchmark do
+      yield
+    end
+  end
+end
+```
+
+#### Halting execution of rpc request inside a filter
+
+__Around Filters__ – Inside of an around filter, if you wish to halt request processing and return, simply do not `yield` the block. Since the filter is implemented as an instance method, you can use `rpc_failed` or `respond_with` just like you can in the endpoint methods.
+
+__Before Filters__ – Returning `false` from a before filter will cancel any other filter calls which would run afterwards, as well as canceling invocation of the service method. Note: You must actually return false, not just a "falsey" value such as nil.
+
+__After Filters__ – There is no request shortcutting since the after filter runs after the request. Duh.
+
+#### Filter options
+
+The following options can be applied to any of the filters as the final argument in the filter configuration. (See example above).
+
+__:if__ – The object supplied to `:if` can either be a symbol/string indicating the instance method to call, or, an object that responds to `call`. The method or callable should return true or false indicating if the filter should be invoked or not. Akin to the `if` keyword.
+
+__:unless__ – The opposite of the `:if` option is `:unless`. Accepts the same object types. The method or callable should return true or false indicating if the filter should be invoked or not. Akin to the `unless` keyword.
+
+__:only__ – A string/symbol or Array of strings/symbols values that reference instance methods. The names of these methods should be the rpc method you wish to invoke the filter for. Methods not identified in this list would not have the filter applied.
+
+__:except__ – The opposite of the `:only` option. A string/symbol or Array of strings/symbols values that reference instance methods. The names of these methods should be the rpc method you wish to skip invokation of the given filter. Methods not identified in this list would have the filter applied.
+
 ### Servers
 
 A service is nothing without being hooked up to a socket. It's the nerdy kid waiting by the telephone for someone to call without knowing that the phone company disconnected their house. Sad and pathetic. So hook the phone lines!
