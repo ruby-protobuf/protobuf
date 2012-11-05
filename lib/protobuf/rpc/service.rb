@@ -140,7 +140,7 @@ module Protobuf
       # is why we wrap the method call).
       #
       def callable_rpc_method(method_name)
-        lambda { run_filters { __send__(method_name) } }
+        lambda { run_filters(method_name) }
       end
 
       private
