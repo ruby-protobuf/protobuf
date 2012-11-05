@@ -18,7 +18,7 @@ describe Protobuf::Rpc::ServiceDispatcher do
 
   context 'creating a new dispatcher' do
     its(:service) { should be_instance_of service_name.constantize }
-    its(:callable_method) { should be_a(Method) }
+    its(:callable_method) { should respond_to(:call)}
     its(:outer_request) { should eq wrapper }
     its(:error) { should be_nil }
 

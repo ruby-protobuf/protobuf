@@ -5,7 +5,7 @@ module Protobuf
   module Rpc
     class Stat
       attr_accessor :mode, :start_time, :end_time, :request_size, :dispatcher
-      attr_accessor :response_size, :client, :server, :service, :method
+      attr_accessor :response_size, :client, :server, :service, :method_name
 
       MODES = [:SERVER, :CLIENT].freeze
 
@@ -22,8 +22,8 @@ module Protobuf
         @client ? "#{@client[:ip]}:#{@client[:port]}" : nil
       end
 
-      def method
-        @method ||= @dispatcher.try(:callable_method).try(:name)
+      def method_name
+        @method_name ||= @dispatcher.try(:service).try(:rpc)
       end
 
       def server=(peer)
@@ -52,7 +52,7 @@ module Protobuf
       end
 
       def rpc
-        service && method ? "#{service}##{method}" : nil
+        service && method_name ? "#{service}##{method_name}" : nil
       end
 
       def elapsed_time
