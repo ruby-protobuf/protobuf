@@ -6,8 +6,7 @@ end
 
 describe ::Protobuf::Rpc::Zmq::Util do
   before(:each) do
-    load 'protobuf/zmq.rb' 
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
+    load 'protobuf/zmq.rb'
   end
 
   subject { UtilTest.new }

@@ -4,7 +4,6 @@ require 'protobuf/rpc/servers/zmq/server'
 describe Protobuf::Rpc::Zmq::Server do
   before(:each) do 
     load 'protobuf/zmq.rb'
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
   end
 
   describe '.running?' do

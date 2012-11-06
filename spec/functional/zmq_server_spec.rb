@@ -4,7 +4,6 @@ require 'spec/support/test/resource_service'
 describe 'Functional ZMQ Client' do
   before(:all) do
     load "protobuf/zmq.rb"
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
     Thread.abort_on_exception = true
     server = OpenStruct.new(:host => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100, :threads => 5)
     @server_thread = Thread.new(server) { |s| Protobuf::Rpc::ZmqRunner.run(s) }

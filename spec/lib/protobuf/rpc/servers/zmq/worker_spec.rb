@@ -3,7 +3,6 @@ require 'spec_helper'
 describe ::Protobuf::Rpc::Zmq::Worker do
   before(:each) do 
     load 'protobuf/zmq.rb'
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
   end
 
   after(:each) do
