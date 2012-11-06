@@ -107,19 +107,15 @@ module Protobuf
       # TODO add signal handling for hot-reloading the application.
       def configure_traps
         debug_say 'Configuring traps'
-        trap_block = proc {
-          ::Protobuf::Logger.info { 'RPC Server shutting down...' }
-          @start_aborted = true
-          @runner.stop
-          ::Protobuf::Logger.info { 'Shutdown complete' }
-        }
-
-        debug_say 'Registering INT', :blue
-        trap(:INT, &trap_block)
-        debug_say 'Registering QUIT', :blue
-        trap(:QUIT, &trap_block)
-        debug_say 'Registering TERM', :blue
-        trap(:TERM, &trap_block)
+        [:INT, :QUIT, :TERM].each do |signal|
+          debug_say "Registering signal trap for #{signal}", :blue
+          trap(signal) do
+            ::Protobuf::Logger.info { 'RPC Server shutting down...' }
+            @start_aborted = true
+            @runner.stop
+            ::Protobuf::Logger.info { 'Shutdown complete' }
+          end
+        end
       end
 
       # Say something if we're in debug mode.
