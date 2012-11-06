@@ -4,7 +4,6 @@ require 'spec/support/test/resource_service'
 describe 'Functional EventMachine Client' do
   before(:each) do
     load 'protobuf/evented.rb'
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
   end
 
   it 'runs fine when required fields are set' do

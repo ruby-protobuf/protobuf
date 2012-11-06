@@ -29,17 +29,17 @@ module Protobuf
     end
 
     # Define a required field. Don't use this method directly.
-    def self.required(type, name, tag, options={})
+    def self.required(type, name, tag, options = {})
       define_field(:required, type, name, tag, options)
     end
 
     # Define a optional field. Don't use this method directly.
-    def self.optional(type, name, tag, options={})
+    def self.optional(type, name, tag, options = {})
       define_field(:optional, type, name, tag, options)
     end
 
     # Define a repeated field. Don't use this method directly.
-    def self.repeated(type, name, tag, options={})
+    def self.repeated(type, name, tag, options = {})
       define_field(:repeated, type, name, tag, options)
     end
 
@@ -111,7 +111,7 @@ module Protobuf
     ##
     # Constructor
     #
-    def initialize(values={})
+    def initialize(values = {})
       values = values.to_hash
       @values = {}
 

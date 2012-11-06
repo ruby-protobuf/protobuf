@@ -7,10 +7,10 @@ require 'active_support/all'
 module Protobuf
 
   # See Protobuf#connector_type documentation.
-  VALID_CONNECTOR_TYPES = [ :socket, :zmq, :evented ].freeze
+  CONNECTORS = [ :socket, :zmq, :evented ].freeze
 
   # Default is Socket as it has no external dependencies.
-  DEFAULT_CONNECTOR_TYPE = :socket
+  DEFAULT_CONNECTOR = :socket
 
 	module_function
 
@@ -21,14 +21,13 @@ module Protobuf
   # Symbol value which denotes the type of connector to use
   # during client requests to an RPC server.
   def self.connector_type
-    @_connector_type ||= DEFAULT_CONNECTOR_TYPE
+    @_connector_type ||= DEFAULT_CONNECTOR
   end
 
   def self.connector_type=(type)
-    raise ArgumentError, 'Invalid connector type given' unless VALID_CONNECTOR_TYPES.include?(type)
+    raise ArgumentError, 'Invalid connector type given' unless CONNECTORS.include?(type)
     @_connector_type = type
   end
-
 
   # GC Pause during server requests
   #
@@ -70,4 +69,18 @@ end
 
 require 'protobuf/rpc/client'
 require 'protobuf/rpc/service'
-require 'protobuf/socket'
+
+env_connector_type = ENV.fetch('PB_CLIENT_TYPE') {
+  ::Protobuf::DEFAULT_CONNECTOR
+}.to_s.downcase.strip.to_sym
+
+if ::Protobuf::CONNECTORS.include?(env_connector_type)
+  require "protobuf/#{env_connector_type}"
+else
+  $stderr.puts <<-WARN
+    [WARNING] Require attempted on an invalid connector type '#{env_connector_type}'.
+              Falling back to default '#{::Protobuf::DEFAULT_CONNECTOR}' connector.
+  WARN
+
+  require "protobuf/#{::Protobuf::DEFAULT_CONNECTOR}"
+end

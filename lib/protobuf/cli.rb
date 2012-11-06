@@ -16,7 +16,7 @@ module Protobuf
     desc 'start APP_FILE', 'Run the RPC server in the given mode, preloading the given APP_FILE. This is the default task.'
 
     option :host,                       :type => :string, :default => '127.0.0.1', :aliases => %w(-o), :desc => 'Host to bind.'
-    option :port,                       :type => :numeric, :default => 9595, :aliases => %w(-p), :desc => 'Port to bind.'
+    option :port,                       :type => :numeric, :default => 9399, :aliases => %w(-p), :desc => 'Master Port to bind.'
 
     option :backlog,                    :type => :numeric, :default => 100, :aliases => %w(-b), :desc => 'Backlog for listening socket when using Socket Server.'
     option :threshold,                  :type => :numeric, :default => 100, :aliases => %w(-t), :desc => 'Multi-threaded Socket Server cleanup threshold.'
@@ -107,19 +107,15 @@ module Protobuf
       # TODO add signal handling for hot-reloading the application.
       def configure_traps
         debug_say 'Configuring traps'
-        trap_block = proc {
-          ::Protobuf::Logger.info { 'RPC Server shutting down...' }
-          @start_aborted = true
-          @runner.stop
-          ::Protobuf::Logger.info { 'Shutdown complete' }
-        }
-
-        debug_say 'Registering INT', :blue
-        trap(:INT, &trap_block)
-        debug_say 'Registering QUIT', :blue
-        trap(:QUIT, &trap_block)
-        debug_say 'Registering TERM', :blue
-        trap(:TERM, &trap_block)
+        [:INT, :QUIT, :TERM].each do |signal|
+          debug_say "Registering signal trap for #{signal}", :blue
+          trap(signal) do
+            ::Protobuf::Logger.info { 'RPC Server shutting down...' }
+            @start_aborted = true
+            @runner.stop
+            ::Protobuf::Logger.info { 'Shutdown complete' }
+          end
+        end
       end
 
       # Say something if we're in debug mode.

@@ -11,15 +11,13 @@ module Protobuf
         ##
         # Constructor
         #
-        def initialize(opts={})
-          @options = opts
-          host = @options.fetch(:host) { "127.0.0.1" }
-          port = @options.fetch(:port) { 9400 }
-          protocol = @options.fetch(:protocol) { "tcp" }
+        def initialize(options = {})
+          host = options[:host]
+          port = options[:port]
 
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REP)
-          zmq_error_check(@socket.connect("#{protocol}://#{resolve_ip(host)}:#{port}"))
+          zmq_error_check(@socket.connect("tcp://#{resolve_ip(host)}:#{port}"))
 
           @poller = ::ZMQ::Poller.new
           @poller.register(@socket, ::ZMQ::POLLIN)
