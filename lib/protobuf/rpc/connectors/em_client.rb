@@ -13,7 +13,7 @@ module Protobuf
         ##
         # Constructor
         #
-        def initialize(options={}, &failure_cb)
+        def initialize(options = {}, &failure_cb)
           @failure_cb = failure_cb
           @options = DEFAULT_OPTIONS.merge(options)
           @response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
@@ -27,7 +27,7 @@ module Protobuf
         ##
         # Class Methods
         #
-        def self.connect(options={})
+        def self.connect(options = {})
           options = DEFAULT_OPTIONS.merge(options)
           log_debug { sign_message("Connecting to server: #{options.inspect}") }
           EM.connect(options[:host], options[:port], self, options)

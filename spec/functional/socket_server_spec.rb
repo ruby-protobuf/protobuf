@@ -4,9 +4,8 @@ require 'spec/support/test/resource_service'
 describe 'Functional Socket Client' do
   before(:all) do
     load "protobuf/socket.rb"
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
     Thread.abort_on_exception = true
-    server = OpenStruct.new(:server => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
+    server = OpenStruct.new(:host => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
     @server_thread = Thread.new(server) { |s| Protobuf::Rpc::SocketRunner.run(s) }
     Thread.pass until Protobuf::Rpc::Socket::Server.running?
   end

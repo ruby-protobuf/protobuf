@@ -5,14 +5,12 @@ require 'protobuf/evented'
 require 'protobuf/socket'
 
 describe Protobuf::Rpc::Socket::Server do
-  before(:each) do 
-    load 'protobuf/socket.rb' 
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
+  before(:each) do
+    load 'protobuf/socket.rb'
   end
 
   before(:all) do
-    load 'protobuf/socket.rb' 
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
+    load 'protobuf/socket.rb'
     Thread.abort_on_exception = true
     server = OpenStruct.new(:server => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
     @server_thread = Thread.new(server) { |s| Protobuf::Rpc::SocketRunner.run(s) }

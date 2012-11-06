@@ -26,10 +26,10 @@ module Protobuf
       #     :request => request
       #   })
       #
-      def initialize(opts={})
-        raise "Invalid client configuration. Service must be defined." if opts[:service].nil?
-        @connector = Connector.connector_for_client.new(opts)
-        log_debug { sign_message("Initialized with options: #{opts.inspect}") }
+      def initialize(options = {})
+        raise "Invalid client configuration. Service must be defined." if options[:service].nil?
+        @connector = Connector.connector_for_client.new(options)
+        log_debug { sign_message("Initialized with options: #{options.inspect}") }
       end
 
       def log_signature

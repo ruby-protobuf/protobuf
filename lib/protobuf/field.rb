@@ -41,7 +41,7 @@ module Protobuf
       ::Protobuf::Field::BoolField
     ].freeze
 
-    def self.build(message_class, rule, type, name, tag, options={})
+    def self.build(message_class, rule, type, name, tag, options = {})
       field_class = type_message_or_enum(type)
       field_class.new(message_class, rule, type, name, tag, options)
     end

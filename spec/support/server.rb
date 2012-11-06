@@ -37,12 +37,12 @@ class StubServer
 
   attr_accessor :options
 
-  def initialize(opts = {})
+  def initialize(options = {})
     @running = true
     @options = OpenStruct.new({ :host => "127.0.0.1",
                                 :port => 9399,
                                 :delay => 0,
-                                :server => Protobuf::Rpc::Evented::Server }.merge(opts))
+                                :server => Protobuf::Rpc::Evented::Server }.merge(options))
 
     start
     yield self

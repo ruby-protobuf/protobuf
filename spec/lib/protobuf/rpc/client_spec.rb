@@ -4,7 +4,6 @@ require 'spec/support/test/resource_service'
 describe Protobuf::Rpc::Client do
   before(:each) do
     load 'protobuf/evented.rb'
-    ::Protobuf::Rpc::Connector.connector_for_client(true)
   end
 
   context "when using fiber based calls" do

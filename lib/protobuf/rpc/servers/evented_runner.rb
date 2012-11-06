@@ -6,10 +6,10 @@ module Protobuf
         ::EventMachine.stop_event_loop if ::EventMachine.reactor_running?
       end
 
-      def self.run(server)
+      def self.run(options)
         # Startup and run the rpc server
         ::EventMachine.schedule do
-          ::EventMachine.start_server(server.host, server.port, ::Protobuf::Rpc::Evented::Server)
+          ::EventMachine.start_server(options[:host], options[:port], ::Protobuf::Rpc::Evented::Server)
         end
 
         # Join or start the reactor

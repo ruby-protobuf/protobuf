@@ -11,12 +11,12 @@ module Protobuf
         ##
         # Class Methods
         #
-        def self.run(opts = {})
+        def self.run(options = {})
           log_debug { sign_message("initializing broker") }
-          @broker = ::Protobuf::Rpc::Zmq::Broker.new(opts)
-          local_worker_threads = opts.fetch(:threads, 5)
+          @broker = ::Protobuf::Rpc::Zmq::Broker.new(options)
+          local_worker_threads = options[:threads]
 
-          worker_options = opts.merge(:port => opts.fetch(:port, 9399) + 1)
+          worker_options = options.merge(:port => options[:port] + 1)
           log_debug { sign_message("starting server workers") }
           local_worker_threads.times do
             @threads << Thread.new { ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run }
