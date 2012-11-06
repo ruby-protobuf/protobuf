@@ -16,7 +16,7 @@ module Protobuf
     desc 'start APP_FILE', 'Run the RPC server in the given mode, preloading the given APP_FILE. This is the default task.'
 
     option :host,                       :type => :string, :default => '127.0.0.1', :aliases => %w(-o), :desc => 'Host to bind.'
-    option :port,                       :type => :numeric, :default => 9595, :aliases => %w(-p), :desc => 'Port to bind.'
+    option :port,                       :type => :numeric, :default => 9399, :aliases => %w(-p), :desc => 'Master Port to bind.'
 
     option :backlog,                    :type => :numeric, :default => 100, :aliases => %w(-b), :desc => 'Backlog for listening socket when using Socket Server.'
     option :threshold,                  :type => :numeric, :default => 100, :aliases => %w(-t), :desc => 'Multi-threaded Socket Server cleanup threshold.'

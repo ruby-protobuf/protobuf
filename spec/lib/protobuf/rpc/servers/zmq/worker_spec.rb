@@ -11,6 +11,10 @@ describe ::Protobuf::Rpc::Zmq::Worker do
     subject.instance_variable_get(:@zmq_context).terminate
   end
 
+  subject do
+    described_class.new({ :host => '127.0.0.1', :port => 9400 })
+  end
+
   it 'sets the context' do
     subject.instance_variable_get(:@zmq_context).should be_a(::ZMQ::Context)
   end

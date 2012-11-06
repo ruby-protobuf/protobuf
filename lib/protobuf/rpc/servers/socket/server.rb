@@ -9,9 +9,11 @@ module Protobuf
         include ::Protobuf::Rpc::Server
         include ::Protobuf::Logger::LogMethods
 
+        AUTO_COLLECT_TIMEOUT = 20 # seconds
+
         def self.cleanup?
           # every 10 connections run a cleanup routine after closing the response
-          @threads.size > (@thread_threshold - 1) && (@threads.size % @thread_threshold) == 0
+          @threads.size > (@threshold - 1) && (@threads.size % @threshold) == 0
         end
 
         def self.cleanup_threads
@@ -42,18 +44,17 @@ module Protobuf
           end
         end
 
-        def self.run(opts = {})
+        def self.run(options = {})
           log_debug { sign_message("Run") }
-          host = opts.fetch(:host, "127.0.0.1")
-          port = opts.fetch(:port, 9399)
-          backlog = opts.fetch(:backlog, 100)
-          thread_threshold = opts.fetch(:thread_threshold, 100)
-          auto_collect_timeout = opts.fetch(:auto_collect_timeout, 20)
+          host = options[:host]
+          port = options[:port]
+          backlog = options[:backlog]
+          @threshold = options[:threshold]
 
           @threads = []
-          @thread_threshold = thread_threshold
           @server = ::TCPServer.new(host, port)
-          raise "blah" if @server.closed?
+          raise "The server was unable to start properly." if @server.closed?
+
           @server.listen(backlog)
           @working = []
           @listen_fds = [@server]
@@ -62,7 +63,7 @@ module Protobuf
           while running?
             log_debug { sign_message("Waiting for connections") }
 
-            if ready_cnxns = IO.select(@listen_fds, [], [], auto_collect_timeout)
+            if ready_cnxns = IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT)
               cnxns = ready_cnxns.first
               cnxns.each do |client|
                 case

@@ -1,13 +1,17 @@
 require 'spec_helper'
 
 describe ::Protobuf::Rpc::Zmq::Broker do
-  before(:each) do 
-    load 'protobuf/zmq.rb' 
+  before(:each) do
+    load 'protobuf/zmq.rb'
     ::Protobuf::Rpc::Connector.connector_for_client(true)
   end
 
   after(:each) do
     subject.teardown
+  end
+
+  subject do
+    described_class.new({ :host => '127.0.0.1', :port => 9399 })
   end
 
   it 'sets up a context' do

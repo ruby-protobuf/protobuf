@@ -8,13 +8,13 @@ module Protobuf
         include ::Protobuf::Rpc::Zmq::Util
         attr_reader :frontend, :backend, :poller, :context
 
-        ## 
+        ##
         # Constructor
         #
-        def initialize(opts={})
+        def initialize(options = {})
           @context = ::ZMQ::Context.new
-          @frontend = setup_frontend(opts)
-          @backend = setup_backend(opts)
+          @frontend = setup_frontend(options)
+          @backend = setup_backend(options)
           @poller = setup_poller
         end
 
@@ -52,25 +52,27 @@ module Protobuf
             end
           end
 
-          def setup_backend(opts={})
-            dealer_options = opts.merge(:port => opts.fetch(:port, 9399) + 1)
-            host = dealer_options.fetch(:host, "127.0.0.1")
-            port = dealer_options.fetch(:port, 9400)
-            protocol = dealer_options.fetch(:protocol, "tcp")
+          def setup_backend(options = {})
+            dealer_options = options.merge(:port => options[:port] + 1)
+            host = dealer_options[:host]
+            port = dealer_options[:port]
 
             zmq_backend = context.socket(::ZMQ::DEALER)
-            zmq_error_check(zmq_backend.bind("#{protocol}://#{resolve_ip(host)}:#{port}"))
+            zmq_error_check(zmq_backend.bind(bind_address(host, port)))
             zmq_backend
           end
 
-          def setup_frontend(opts={})
-            host = opts.fetch(:host, "127.0.0.1")
-            port = opts.fetch(:port, 9399)
-            protocol = opts.fetch(:protocol, "tcp")
+          def setup_frontend(options = {})
+            host = options[:host]
+            port = options[:port]
 
             zmq_frontend = context.socket(::ZMQ::ROUTER)
-            zmq_error_check(zmq_frontend.bind("#{protocol}://#{resolve_ip(host)}:#{port}"))
+            zmq_error_check(zmq_frontend.bind(bind_address(host, port)))
             zmq_frontend
+          end
+
+          def bind_address(host, port)
+            "tcp://#{resolve_ip(host)}:#{port}"
           end
 
           def setup_poller
