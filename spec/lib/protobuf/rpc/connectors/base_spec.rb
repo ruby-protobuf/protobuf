@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe Protobuf::Rpc::Connectors::Base do
 
-  let(:opts) do
+  let(:options) do
     { :timeout => 60 }
   end
 
-  subject { Protobuf::Rpc::Connectors::Base.new(opts) }
+  subject { Protobuf::Rpc::Connectors::Base.new(options) }
 
   describe "#send_request" do
     it "raising an error when 'send_request' is not overridden" do
@@ -14,14 +14,14 @@ describe Protobuf::Rpc::Connectors::Base do
     end
 
     it "does not raise error when 'send_request' is overridden" do
-      new_sub = Class.new(subject.class){ def send_request; end }.new(opts)
+      new_sub = Class.new(subject.class){ def send_request; end }.new(options)
       expect{ new_sub.send_request }.to_not raise_error
     end
   end
 
   describe '.new' do
     it 'assigns passed options and initializes success/failure callbacks' do
-      subject.options.should eq(Protobuf::Rpc::Connectors::DEFAULT_OPTIONS.merge(opts))
+      subject.options.should eq(Protobuf::Rpc::Connectors::DEFAULT_OPTIONS.merge(options))
       subject.success_cb.should be_nil
       subject.failure_cb.should be_nil
     end
