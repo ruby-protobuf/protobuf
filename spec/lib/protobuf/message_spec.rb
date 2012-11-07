@@ -2,6 +2,24 @@ require 'spec_helper'
 
 describe Protobuf::Message do
 
+  describe '#initialize' do 
+    it "does not try to set attributes which have nil values" do 
+      Test::EnumTestMessage.any_instance.should_not_receive("non_default_enum=")
+      test_enum = Test::EnumTestMessage.new(:non_default_enum => nil)
+    end
+
+    it "takes a hash as an initialization argument" do 
+      test_enum = Test::EnumTestMessage.new(:non_default_enum => 2)
+      test_enum.non_default_enum.should eq(2)
+    end
+
+    it "initializes with an object that responds to #to_hash" do 
+      hashie_object = OpenStruct.new(:to_hash => { :non_default_enum => 2 })      
+      test_enum = Test::EnumTestMessage.new(hashie_object)
+      test_enum.non_default_enum.should eq(2)
+    end
+  end
+
   describe '#to_hash' do
     context 'generating values for an ENUM field' do
       it 'converts the enum to its tag representation' do
