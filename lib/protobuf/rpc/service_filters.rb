@@ -26,6 +26,20 @@ module Protobuf
           @filters ||= Hash.new { |h,k| h[k] = [] }
         end
 
+        # Filters hash keyed based on filter type (e.g. :before, :after, :around),
+        # whose values are Sets.
+        #
+        def rescue_filters
+          @rescue_filters ||= {}
+        end
+
+        def rescue_from(*ex_klasses, &block)
+          options = ex_klasses.last.is_a?(Hash) ? ex_klasses.pop : {}
+          callable = options.delete(:with) { block }
+          raise ArgumentError, 'Option :with missing from rescue_from options' if callable.nil?
+          ex_klasses.each { |ex_klass| rescue_filters[ex_klass] = callable }
+        end
+
         private
 
         def define_filter(type, filter, options = {})
@@ -146,6 +160,10 @@ module Protobuf
           return ! skip_invoke
         end
 
+        def rescue_filters
+          self.class.rescue_filters
+        end
+
         # Loop over the unwrapped filters and invoke them. An unwrapped filter
         # is either a before or after filter, not an around filter.
         #
@@ -205,30 +223,36 @@ module Protobuf
         # be used instead of the other run methods directly.
         #
         def run_filters(rpc_method)
-          continue = run_unwrapped_filters(filters[:before], rpc_method, true)
-          if continue
-            run_around_filters(rpc_method)
-            run_unwrapped_filters(filters[:after], rpc_method)
+          run_rescue_filters do
+            continue = run_unwrapped_filters(filters[:before], rpc_method, true)
+            if continue
+              run_around_filters(rpc_method)
+              run_unwrapped_filters(filters[:after], rpc_method)
+            end
+          end
+        end
+
+        def run_rescue_filters
+          if rescue_filters.keys.empty?
+            yield
+          else
+            begin
+              yield
+            rescue *rescue_filters.keys => ex
+              call_or_send(rescue_filters[ex.class], ex)
+            end
           end
         end
 
         # Call the object if it is callable, otherwise invoke the method using
         # __send__ assuming that we respond_to it. Return the call's return value.
         #
-        def call_or_send(callable, &block)
+        def call_or_send(callable, *args, &block)
           return_value = case
                          when callable.respond_to?(:call) then
-                           if callable.arity == 1
-                             callable.call(self, &block)
-                           else
-                             callable.call(&block)
-                           end
+                           callable.call(self, *args, &block)
                          when respond_to?(callable, true) then
-                           if method(callable).arity == 1
-                             __send__(callable, self, &block)
-                           else
-                             __send__(callable, &block)
-                           end
+                           __send__(callable, *args, &block)
                          else
                            raise "Object #{callable} is not callable"
                          end

@@ -23,10 +23,12 @@ class FilterTest
   def self.clear_filters!
     @defined_filters = nil
     @filters = nil
+    @rescue_filters = nil
   end
 end
 
 describe Protobuf::Rpc::ServiceFilters do
+  let(:params) { {} }
   subject { FilterTest.new(params) }
   after(:each) { FilterTest.clear_filters! }
 
@@ -350,6 +352,99 @@ describe Protobuf::Rpc::ServiceFilters do
                                    :outer_around_bottom ])
       end
 
+    end
+  end
+
+  describe '#rescue_from' do
+    before do
+      class CustomError1 < StandardError; end
+      class CustomError2 < StandardError; end
+      class CustomError3 < StandardError; end
+    end
+
+    before do
+      class FilterTest
+        private
+
+        def filter_with_error1
+          @called << :filter_with_error1
+          raise CustomError1, 'Filter 1 failed'
+        end
+
+        def filter_with_error2
+          @called << :filter_with_error2
+          raise CustomError1, 'Filter 2 failed'
+        end
+
+        def filter_with_error3
+          @called << :filter_with_error3
+          raise CustomError3, 'Filter 3 failed'
+        end
+
+        def custom_error_occurred(ex)
+          @ex_class = ex.class
+          @called << :custom_error_occurred
+        end
+      end
+    end
+
+    let(:params) { { :ex_class => nil } }
+
+    context 'when defining multiple errors with a given callback' do
+      before do
+        FilterTest.rescue_from(CustomError1, CustomError2, CustomError3, :with => :custom_error_occurred)
+      end
+      before { FilterTest.before_filter(:filter_with_error3) }
+
+      it 'short-circuits the call stack' do
+        expect {
+          subject.should_not_receive(:endpoint)
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq([ :filter_with_error3, :custom_error_occurred ])
+          subject.ex_class.should eq CustomError3
+        }.to_not raise_error(CustomError3)
+      end
+    end
+
+    context 'when defined with options' do
+      context 'when :with option is not given' do
+        specify do
+          expect { FilterTest.rescue_from(CustomError1) }.to raise_error(ArgumentError, /with/)
+        end
+      end
+
+      context 'when error occurs inside filter' do
+        before { FilterTest.rescue_from(CustomError1, :with => :custom_error_occurred) }
+        before { FilterTest.before_filter(:filter_with_error1) }
+
+        it 'short-circuits the call stack' do
+          expect {
+            subject.should_not_receive(:endpoint)
+            subject.__send__(:run_filters, :endpoint)
+            subject.called.should eq([ :filter_with_error1, :custom_error_occurred ])
+            subject.ex_class.should eq CustomError1
+          }.to_not raise_error(CustomError1)
+        end
+      end
+    end
+
+    context 'when defined with block' do
+      before do
+        FilterTest.rescue_from(CustomError1) do |service, ex|
+          service.ex_class = ex.class
+          service.called << :block_rescue_handler
+        end
+      end
+      before { FilterTest.before_filter(:filter_with_error1) }
+
+      it 'short-circuits the call stack' do
+        expect {
+          subject.should_not_receive(:endpoint)
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq([ :filter_with_error1, :block_rescue_handler ])
+          subject.ex_class.should eq CustomError1
+        }.to_not raise_error(CustomError1)
+      end
     end
   end
 
