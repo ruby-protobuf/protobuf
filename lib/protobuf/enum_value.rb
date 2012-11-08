@@ -6,6 +6,11 @@ module Protobuf
 
     attr_reader :parent_class, :name, :value
 
+    # Overriding the class so ActiveRecord/Arel visitor will visit the enum as a Fixnum
+    def class
+      Fixnum
+    end
+
     def initialize(parent_class, name, value)
       @parent_class = parent_class
       @name = name
@@ -14,7 +19,7 @@ module Protobuf
     end
 
     def inspect
-      "\#<#{self.class} #{@parent_class}::#{@name}=#{@value}>"
+      "\#<Protobuf::EnumValue #{@parent_class}::#{@name}=#{@value}>"
     end
 
     def to_hash_value
@@ -22,7 +27,7 @@ module Protobuf
     end
 
     def to_s
-      @name.to_s
+      to_hash_value.to_s
     end
   end
 end
