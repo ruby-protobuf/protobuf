@@ -20,6 +20,26 @@ describe Protobuf::Message do
     end
   end
 
+  describe "boolean predicate methods" do 
+    subject { Test::ResourceFindRequest.new(:name => "resource") }
+
+    it { should respond_to(:active?) }
+
+    it "sets the predicate to true when the boolean value is true" do 
+      subject.active = true
+      subject.active?.should be_true
+    end
+
+    it "sets the predicate to false when the boolean value is false" do 
+      subject.active = false
+      subject.active?.should be_false
+    end
+
+    it "does not put predicate methods on non-boolean fields" do 
+      Test::ResourceFindRequest.new(:name => "resource").should_not respond_to(:name?)
+    end
+  end
+
   describe "#respond_to_and_has?" do 
     subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
 
