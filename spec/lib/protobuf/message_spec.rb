@@ -20,6 +20,58 @@ describe Protobuf::Message do
     end
   end
 
+  describe "#respond_to_and_has?" do 
+    subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
+
+    it "is false when the message does not have the field" do 
+      subject.respond_to_and_has?(:other_field).should be_false
+    end
+
+    it "is true when the message has the field" do 
+      subject.respond_to_and_has?(:non_default_enum).should be_true
+    end
+  end
+
+  describe "#respond_to_has_and_present?" do 
+    subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
+
+    it "is false when the message does not have the field" do 
+      subject.respond_to_and_has_and_present?(:other_field).should be_false
+    end
+
+    it "is false when the field is repeated and a value is not present" do 
+      subject.respond_to_and_has_and_present?(:repeated_enums).should be_false
+    end
+
+    it "is false when the field is repeated and the value is empty array" do 
+      subject.repeated_enums = []
+      subject.respond_to_and_has_and_present?(:repeated_enums).should be_false
+    end
+
+    it "is true when the field is repeated and a value is present" do 
+      subject.repeated_enums = [2]
+      subject.respond_to_and_has_and_present?(:repeated_enums).should be_true
+    end
+
+    it "is true when the message has the field" do 
+      subject.respond_to_and_has_and_present?(:non_default_enum).should be_true
+    end
+
+    context "#API" do 
+      subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
+        
+      it { should respond_to(:respond_to_and_has_and_present?) }
+      it { should respond_to(:responds_to_and_has_and_present?) }
+      it { should respond_to(:responds_to_has?) }
+      it { should respond_to(:respond_to_has?) }
+      it { should respond_to(:respond_to_has_present?) }
+      it { should respond_to(:responds_to_has_present?) }
+      it { should respond_to(:respond_to_and_has_present?) }
+      it { should respond_to(:responds_to_and_has_present?) }
+    end
+   
+  end
+
   describe '#to_hash' do
     context 'generating values for an ENUM field' do
       it 'converts the enum to its tag representation' do

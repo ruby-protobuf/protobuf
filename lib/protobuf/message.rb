@@ -6,11 +6,19 @@ require 'protobuf/message/encoder'
 
 module Protobuf
   class Message
-
+    ##
+    # Error Classes
+    #
     class FieldNotDefinedError < StandardError; end
 
+    ##
+    # Constants
+    #
     STRING_ENCODING = "ASCII-8BIT".freeze
 
+    ##
+    # Class Methods
+    #
     def self.all_fields
       @all_fields ||= begin
                         all_fields_array = []
@@ -21,26 +29,6 @@ module Protobuf
                         all_fields_array.compact!
                         all_fields_array
                       end
-    end
-
-    # Reserve field numbers for extensions. Don't use this method directly.
-    def self.extensions(range)
-      extension_fields.add_range(range)
-    end
-
-    # Define a required field. Don't use this method directly.
-    def self.required(type, name, tag, options = {})
-      define_field(:required, type, name, tag, options)
-    end
-
-    # Define a optional field. Don't use this method directly.
-    def self.optional(type, name, tag, options = {})
-      define_field(:optional, type, name, tag, options)
-    end
-
-    # Define a repeated field. Don't use this method directly.
-    def self.repeated(type, name, tag, options = {})
-      define_field(:repeated, type, name, tag, options)
     end
 
     # Define a field. Don't use this method directly.
@@ -57,8 +45,13 @@ module Protobuf
       field_array[tag] = field_definition
     end
 
-    def self.extension_tag?(tag)
-      extension_fields.include_tag?(tag)
+    # Reserve field numbers for extensions. Don't use this method directly.
+    def self.extensions(range)
+      extension_fields.add_range(range)
+    end
+    
+    def self.extension_field_name_to_tag
+      @extension_fields_by_name ||= {}
     end
 
     # An extension field object.
@@ -66,8 +59,8 @@ module Protobuf
       @extension_fields ||= ::Protobuf::Field::ExtensionFields.new
     end
 
-    def self.extension_field_name_to_tag
-      @extension_fields_by_name ||= {}
+    def self.extension_tag?(tag)
+      extension_fields.include_tag?(tag)
     end
 
     # A collection of field object.
@@ -77,6 +70,18 @@ module Protobuf
 
     def self.field_name_to_tag
       @field_name_to_tag ||= {}
+    end
+
+    def self.get_ext_field_by_name(name)
+      # Check if the name has been used before, if not then set it to the sym value
+      extension_fields[extension_field_name_to_tag[name.to_sym]]
+    rescue TypeError, NoMethodError => e
+      name = 'nil' if name.nil?
+      raise FieldNotDefinedError.new("Field '#{name}' is not defined on message '#{self.name}'")
+    end
+
+    def self.get_ext_field_by_tag(tag)
+      extension_fields[tag]
     end
 
     # Find a field object by +name+.
@@ -96,16 +101,19 @@ module Protobuf
       raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
     end
 
-    def self.get_ext_field_by_name(name)
-      # Check if the name has been used before, if not then set it to the sym value
-      extension_fields[extension_field_name_to_tag[name.to_sym]]
-    rescue TypeError, NoMethodError => e
-      name = 'nil' if name.nil?
-      raise FieldNotDefinedError.new("Field '#{name}' is not defined on message '#{self.name}'")
+    # Define a optional field. Don't use this method directly.
+    def self.optional(type, name, tag, options = {})
+      define_field(:optional, type, name, tag, options)
     end
 
-    def self.get_ext_field_by_tag(tag)
-      extension_fields[tag]
+    # Define a repeated field. Don't use this method directly.
+    def self.repeated(type, name, tag, options = {})
+      define_field(:repeated, type, name, tag, options)
+    end
+
+    # Define a required field. Don't use this method directly.
+    def self.required(type, name, tag, options = {})
+      define_field(:required, type, name, tag, options)
     end
 
     ##
@@ -117,20 +125,11 @@ module Protobuf
       values.each { |name, val| self[name] = val unless val.nil? }
     end
 
-    def initialized?
-      all_fields.all? { |field| field.initialized?(self) }
-    end
-
-    def has_field?(name)
-      @values.has_key?(name)
-    end
-
-    def ==(obj)
-      return false unless obj.is_a?(self.class)
-      each_field do |field, value|
-        return false unless value == obj.__send__(field.name)
-      end
-      true
+    ##
+    # Public Instance Methods
+    #
+    def all_fields
+      self.class.all_fields
     end
 
     def clear!
@@ -145,33 +144,59 @@ module Protobuf
       self
     end
 
-    def dup
-      copy_to(super, :dup)
-    end
-
     def clone
       copy_to(super, :clone)
     end
 
-    def copy_to(object, method)
-      duplicate = proc { |obj|
-        case obj
-        when Message, String then obj.__send__(method)
-        else                      obj
-        end
-      }
-
-      object.__send__(:initialize)
-      @values.each do |name, value|
-        if value.is_a?(Field::FieldArray)
-          object.__send__(name).replace(value.map {|v| duplicate.call(v)})
-        else
-          object.__send__("#{name}=", duplicate.call(value))
-        end
-      end
-      object
+    def dup
+      copy_to(super, :dup)
     end
-    private :copy_to
+
+    # Iterate over a field collection.
+    #   message.each_field do |field_object, value|
+    #     # do something
+    #   end
+    def each_field
+      all_fields.each do |field|
+        value = __send__(field.name)
+        yield(field, value)
+      end
+    end
+
+    # Returns extension fields. See Message#fields method.
+    def extension_fields
+      self.class.extension_fields
+    end
+
+    def fields
+      self.class.fields
+    end
+
+    def get_ext_field_by_name(name) # :nodoc:
+      self.class.get_ext_field_by_name(name)
+    end
+
+    def get_ext_field_by_tag(tag) # :nodoc:
+      self.class.get_ext_field_by_tag(tag)
+    end
+
+    # Returns field object or +nil+.
+    def get_field_by_name(name)
+      self.class.get_field_by_name(name)
+    end
+
+    # Returns field object or +nil+.
+    def get_field_by_tag(tag)
+      self.class.get_field_by_tag(tag)
+    end
+
+    def has_field?(name)
+      @values.has_key?(name)
+    end
+
+    def initialized?
+      all_fields.all? { |field| field.initialized?(self) }
+    end
 
     def inspect
       to_hash.inspect
@@ -185,6 +210,19 @@ module Protobuf
       Decoder.decode(stream, self)
     end
 
+    def respond_to_has?(key)
+      self.respond_to?(key) && self.has_field?(key)
+    end
+
+    def respond_to_has_and_present?(key)
+      self.respond_to_has?(key) && 
+        (self.__send__(key).present? || [true, false].include?(self.__send__(key)))
+    end
+
+    def serialize_to(stream)
+      Encoder.encode(stream, self)
+    end
+
     def serialize_to_string(string='')
       io = StringIO.new(string)
       serialize_to(io)
@@ -192,15 +230,35 @@ module Protobuf
       result.force_encoding(::Protobuf::Message::STRING_ENCODING) if result.respond_to?(:force_encoding)
       result
     end
-    alias to_s serialize_to_string
-
-    def serialize_to(stream)
-      Encoder.encode(stream, self)
-    end
 
     def set_field(tag, bytes)
       field = (get_field_by_tag(tag) || get_ext_field_by_tag(tag))
       field.set(self, bytes) if field
+    end
+
+    # Return a hash-representation of the given fields for this message type.
+    def to_hash
+      result = Hash.new
+
+      @values.keys.each do |field_name|
+        value = __send__(field_name)
+        hashed_value = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
+        result.merge!(field_name => hashed_value)
+      end
+
+      return result
+    end
+
+    def to_json
+      to_hash.to_json
+    end
+
+    def ==(obj)
+      return false unless obj.is_a?(self.class)
+      each_field do |field, value|
+        return false unless value == obj.__send__(field.name)
+      end
+      true
     end
 
     def [](name)
@@ -219,65 +277,43 @@ module Protobuf
       end
     end
 
-    # Returns a hash; which key is a tag number, and value is a field object.
-    def all_fields
-      self.class.all_fields
-    end
-
-    def fields
-      self.class.fields
-    end
-
-    # Returns field object or +nil+.
-    def get_field_by_name(name)
-      self.class.get_field_by_name(name)
-    end
-
-    # Returns field object or +nil+.
-    def get_field_by_tag(tag)
-      self.class.get_field_by_tag(tag)
-    end
-
-    # Returns extension fields. See Message#fields method.
-    def extension_fields
-      self.class.extension_fields
-    end
-
-    def get_ext_field_by_name(name) # :nodoc:
-      self.class.get_ext_field_by_name(name)
-    end
-
-    def get_ext_field_by_tag(tag) # :nodoc:
-      self.class.get_ext_field_by_tag(tag)
-    end
-
-    # Iterate over a field collection.
-    #   message.each_field do |field_object, value|
-    #     # do something
-    #   end
-    def each_field
-      all_fields.each do |field|
-        value = __send__(field.name)
-        yield(field, value)
-      end
-    end
-
-    # Return a hash-representation of the given fields for this message type.
-    def to_hash
-      result = Hash.new
-
-      @values.keys.each do |field_name|
-        value = __send__(field_name)
-        hashed_value = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
-        result.merge!(field_name => hashed_value)
-      end
-
-      return result
-    end
+    ##
+    # Instance Aliases
+    #
     alias_method :to_hash_value, :to_hash
+    alias_method :to_s, :serialize_to_string
+    alias_method :responds_to_has?, :respond_to_has?
+    alias_method :respond_to_and_has?, :respond_to_has?
+    alias_method :responds_to_and_has?, :respond_to_has?
+    alias_method :respond_to_has_present?, :respond_to_has_and_present?
+    alias_method :respond_to_and_has_present?, :respond_to_has_and_present?
+    alias_method :respond_to_and_has_and_present?, :respond_to_has_and_present?
+    alias_method :responds_to_has_present?, :respond_to_has_and_present?
+    alias_method :responds_to_and_has_present?, :respond_to_has_and_present?
+    alias_method :responds_to_and_has_and_present?, :respond_to_has_and_present?
 
-    def to_json
-      to_hash.to_json
+    ##
+    # Private Instance Methods
+    #
+    private
+
+    def copy_to(object, method)
+      duplicate = proc { |obj|
+        case obj
+        when Message, String then obj.__send__(method)
+        else                      obj
+        end
+      }
+
+      object.__send__(:initialize)
+      @values.each do |name, value|
+        if value.is_a?(Field::FieldArray)
+          object.__send__(name).replace(value.map {|v| duplicate.call(v)})
+        else
+          object.__send__("#{name}=", duplicate.call(value))
+        end
+      end
+      object
     end
 
   end
