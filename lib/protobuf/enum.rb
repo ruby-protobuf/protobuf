@@ -16,12 +16,13 @@ module Protobuf
     # mechanisms. This is useful for the enum field setters
     # as well as repeated enum field construction.
     def self.fetch(value)
-      if value.is_a?(::Protobuf::EnumValue)
+      case value
+      when ::Protobuf::EnumValue then
         value
-      elsif value.respond_to?(:to_sym)
-        value_by_name(value.to_sym) rescue nil
-      elsif value.respond_to?(:to_i)
-        enum_by_value(value.to_i) rescue nil
+      when Numeric then
+        enum_by_value(value.to_i)
+      when String, Symbol then
+        value_by_name(value.to_sym)
       else
         nil
       end

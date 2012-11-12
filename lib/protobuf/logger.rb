@@ -54,7 +54,7 @@ module Protobuf
       [:debug, :info, :warn, :error, :fatal, :any, :add, :log].each do |m|
         define_method("log_#{m}") do |*params, &block|
           params.map! { |message| sign_message(message) }
-          Protobuf::Logger.__send__(m, *params, &block)
+          ::Protobuf::Logger.__send__(m, *params, &block)
         end
       end
 

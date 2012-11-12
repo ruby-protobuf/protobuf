@@ -25,12 +25,14 @@ describe Protobuf::Enum do
     context 'when value can be coerced to a symbol' do
       it 'fetches based on the symbol name value' do
         Test::EnumTestType.fetch("ONE").should eq Test::EnumTestType::ONE
+        Test::EnumTestType.fetch(:ONE).should eq Test::EnumTestType::ONE
       end
     end
 
     context 'when value can be coerced to an integer' do
       it 'fetches based on the integer tag value' do
         Test::EnumTestType.fetch(3.0).should eq Test::EnumTestType::THREE
+        Test::EnumTestType.fetch(3).should eq Test::EnumTestType::THREE
       end
     end
 
