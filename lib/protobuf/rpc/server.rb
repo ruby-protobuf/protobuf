@@ -22,7 +22,7 @@ module Protobuf
       end
 
       def enable_gc!
-        ::GC.enable if ::Protobuf.gc_pause_server_request?
+        ::GC.enable && ::GC.start if ::Protobuf.gc_pause_server_request?
       end
 
       # no-op, implemented by including class if desired.
