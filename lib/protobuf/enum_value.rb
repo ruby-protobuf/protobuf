@@ -1,10 +1,22 @@
 require 'protobuf/enum'
 
+##
+# Adding extension to Numeric until
+# we can get people to stop calling #value
+# on EnumValue
+class Numeric
+  unless method_defined?(:value)
+    def value
+      self
+    end
+  end
+end
+
 module Protobuf
   class EnumValue
     include Comparable
 
-    attr_reader :parent_class, :name, :value
+    attr_reader :parent_class, :name
 
     ##
     # Constructor
@@ -21,7 +33,7 @@ module Protobuf
     def <=>(compared_value)
       case compared_value
       when ::Protobuf::EnumValue then
-        value <=> compared_value.value
+        value <=> compared_value.to_i
       when Numeric then
         value <=> compared_value.to_i
       end
@@ -34,10 +46,6 @@ module Protobuf
 
     def inspect
       "\#<Protobuf::EnumValue #{@parent_class}::#{@name}=#{@value}>"
-    end
-
-    def to_hash_value
-      self.to_i
     end
 
     def to_i
@@ -58,6 +66,19 @@ module Protobuf
         self.to_i.to_s
       end
     end
+
+    def value
+      if ::Protobuf.print_deprecation_warnings?
+        $stderr.puts("[WARNING] Calling #value on an EnumValue is deprecated and no longer needed.")
+      end
+
+      @value
+    end
+
+    ##
+    # Instance Aliases
+    #
+    alias_method :to_hash_value, :to_i
   end
 end
 
