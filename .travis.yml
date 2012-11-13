@@ -1,0 +1,9 @@
+language: ruby
+rvm:
+  - "1.9.2"
+  - "1.9.3"
+  - jruby-19mode
+  - rbx-19mode
+  - ruby-head
+  - jruby-head
+script: NO_COMPILE_TEST_PROTOS=1 bundle exec rake spec

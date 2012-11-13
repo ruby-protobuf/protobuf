@@ -1,7 +1,13 @@
 require 'benchmark'
 require 'support/all'
 require 'support/test/resource_service'
-require 'perftools'
+
+begin
+  require 'perftools'
+rescue LoadError
+  $stderr.puts 'perftools must be uncommented in the gemspec before you can run this benchmark task'
+  exit(1)
+end
 
 # Including a way to turn on debug logger for spec runs
 if ENV["DEBUG"]
