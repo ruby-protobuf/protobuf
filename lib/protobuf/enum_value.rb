@@ -41,7 +41,11 @@ module Protobuf
     end
 
     def to_i
-      @value.to_i
+      @value
+    end
+
+    def to_int
+      @value.to_int
     end
 
     def to_s(format = :value_string)

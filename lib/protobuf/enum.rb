@@ -18,7 +18,7 @@ module Protobuf
     def self.fetch(value)
       case value
       when ::Protobuf::EnumValue then
-        value
+        value.value
       when Numeric then
         enum_by_value(value.to_i)
       when String, Symbol then

@@ -12,4 +12,8 @@ describe Protobuf::EnumValue do
 	its(:inspect) { should eq('#<Protobuf::EnumValue Test::EnumTestType::ONE=1>') }
   specify { subject.to_s(:name).should eq("ONE") }
 
+  it "can be used as the index to an array" do 
+    array = [0, 1, 2, 3]
+    array[::Test::EnumTestType::ONE].should eq(1)
+  end
 end
