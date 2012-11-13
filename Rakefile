@@ -12,9 +12,9 @@ task :default => :spec
 desc "Run specs"
 RSpec::Core::RakeTask.new(:spec)
 
-## 
+##
 # Rake-compiler
 #
-require 'rake/extensiontask'
-
-Rake::ExtensionTask.new("ruby_generator")
+# require 'rake/extensiontask'
+#
+# Rake::ExtensionTask.new("ruby_generator")
