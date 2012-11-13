@@ -33,7 +33,7 @@ module Protobuf
       end
 
       def log_signature
-        @_log_signature ||= "client-#{self.class}"
+        @_log_signature ||= "[client-#{self.class}]"
       end
 
       # Set a complete callback on the client to return the object (self).
