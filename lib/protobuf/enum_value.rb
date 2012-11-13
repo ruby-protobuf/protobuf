@@ -13,7 +13,6 @@ module Protobuf
       @parent_class = parent_class
       @name = name
       @value = value
-      super(@value)
     end
 
     ## 

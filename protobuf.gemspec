@@ -19,7 +19,11 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   unless ENV['WITHOUT_PROTO_COMPILER']
-    s.extensions << File.join('ext', 'ruby_generator', 'extconf.rb')
+    unless defined?(JRUBY_VERSION)
+      s.extensions << File.join('ext', 'ruby_generator', 'extconf.rb')
+    else
+      s.platform = 'java'
+    end
   end
 
   s.add_dependency 'activesupport'
