@@ -26,5 +26,4 @@ if RUBY_PLATFORM =~ /java/
   require "rake/javaextensiontask"
 else
   require "rake/extensiontask"
-  Rake::ExtensionTask.new("ruby_generator", spec)
 end
