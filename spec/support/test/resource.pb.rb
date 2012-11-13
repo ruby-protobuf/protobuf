@@ -15,7 +15,6 @@ module Test
   #
   class ResourceFindRequest < ::Protobuf::Message; end
   class Resource < ::Protobuf::Message; end
-  class Extended < ::Protobuf::Message; end
   class Nested < ::Protobuf::Message; end
   
   ##

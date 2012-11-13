@@ -19,10 +19,10 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   unless ENV['WITHOUT_PROTO_COMPILER']
-    unless defined?(JRUBY_VERSION)
-      s.extensions << File.join('ext', 'ruby_generator', 'extconf.rb')
-    else
+    if defined?(JRUBY_VERSION)
       s.platform = 'java'
+    else
+      s.extensions << File.join('ext', 'ruby_generator', 'extconf.rb')
     end
   end
 
@@ -37,7 +37,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
   s.add_development_dependency 'rake'
-  # s.add_development_dependency 'rake-compiler'
+  s.add_development_dependency 'rake-compiler'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'yard'
