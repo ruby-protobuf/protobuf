@@ -10,5 +10,6 @@ describe Protobuf::EnumValue do
 	its(:to_hash_value) { should eq 1 }
 	its(:to_s) { should eq "1" }
 	its(:inspect) { should eq '#<Protobuf::EnumValue Test::EnumTestType::ONE=1>' }
+  specify { subject.to_s(:name).should eq("ONE") }
 
 end

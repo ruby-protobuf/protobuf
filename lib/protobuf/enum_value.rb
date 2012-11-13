@@ -26,8 +26,15 @@ module Protobuf
       self.to_i
     end
 
-    def to_s
-      to_hash_value.to_s
+    def to_s(format = :value_string)
+      case format
+      when :value_string then
+        self.to_i.to_s
+      when :name then
+        name.to_s
+      else
+        self.to_i.to_s
+      end
     end
   end
 end
