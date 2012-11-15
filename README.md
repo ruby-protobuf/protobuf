@@ -22,7 +22,7 @@ Let's say you have a `defs.proto` file that defines a User message.
 package foo;
 message User {
   required string first_name = 1;
-  required string last_name = 1;
+  required string last_name = 2;
 }
 
 Now let's compile that definition to ruby:
@@ -147,7 +147,7 @@ module Foo
 end
 ```
 
-Simply implement the instance method for the defined rpc. You can provide any other methods in this class as helpers, but only those defined in the proto file will be callable by remote clients. Every request made by a client will provide a non-empty request of the defined type. The server creates a new service instance based on the request, so you should not be constrained to just the endpoint method. This is similar to rails controllers where only methods defined by the routes file are hooked up to HTTP requests, but it's very common to implement private methods the aid in code quality and simpilicity.
+Simply implement the instance method for the defined rpc. You can provide any other methods in this class as helpers, but only those defined in the proto file will be callable by remote clients. Every request made by a client will provide a non-empty request of the defined type. The server creates a new service instance based on the request, so you should not be constrained to just the endpoint method. This is similar to rails controllers where only methods defined by the routes file are hooked up to HTTP requests, but it's very common to implement private methods to aid in code quality and simpilicity.
 
 Every instance has a `request` and `response` object used for fulfilling the call, again, similar to a rails controller action. You should never attempt to modify the `request` object. The `response` object however should be modified or replaced entirely.  If you need to create your own response object (a valid case), simply use `respond_with(new_response)`. The returned object should conform to one of three properties:
 
@@ -176,7 +176,9 @@ This means that the client's `on_failure` callback will be invoked instead of th
 Service Filters provides ActionController-style filter support to service instances, specifically adding `before_filter`, `after_filter`, and `around_filter`.
 
 ```ruby
-class Foo::UserService < ::Protobuf::Rpc::Service
+require lib/foo/user.pb
+
+class Foo::UserService
   before_filter :start_request_timer
   after_filter :end_request_timer
   around_filter :benchmark_request
@@ -236,13 +238,13 @@ __:except__ – The opposite of the `:only` option. A string/symbol or Array of 
 
 ### Servers
 
-A service is nothing without being hooked up to a socket. It's the nerdy kid waiting by the telephone for someone to call without knowing that the phone company disconnected their house. Sad and pathetic. So hook the phone lines!
+A service is nothing without being hooked up to a socket. It's the nerdy kid waiting by the telephone for someone to call without knowing that the phone company disconnected their house. Sad and pathetic. So hook up the phone lines!
 
 ```
 $ rpc_server -o myserver.com -p 9939 -l ./log/protobuf.log ./config/environment.rb
 ```
 
-The previous call will start an Socket server running on the given host and port which will load your application into memory. You certainly don't have to run rails or any other framework, just make sure you have some kind of file that will load your services all into memory. The server doesn't know where you put your code, so tell it.
+The previous call will start a Socket server running on the given host and port which will load your application into memory. You certainly don't have to run rails or any other framework, just make sure you have some kind of file that will load your services all into memory. The server doesn't know where you put your code, so tell it.
 
 Be aware that the server needs to be able to translate the socket stream of bytes into an actual protobuf request object. If the definition for that request object aren't known to the server, you're going to have a long day getting this going. It's necessary to store all your definitions and their generated classes in a shared repository (read: gem) so that both client and server have access to the ruby classes in their respective load paths.
 
@@ -287,7 +289,7 @@ Foo::UserService.client.find(req) do |c|
 
   # Register a block for execution when the response
   # is deemed a failure. This can be either a client-side
-  # or server-side failure. The object passed the to the
+  # or server-side failure. The object passed to the
   # block has a `message` and a `code` attribute
   # to aid in logging/diagnosing the failure.
   c.on_failure do |err|
