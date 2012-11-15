@@ -1,3 +1,4 @@
+require 'delegate'
 require 'protobuf/enum'
 
 ##
@@ -13,8 +14,7 @@ class Numeric
 end
 
 module Protobuf
-  class EnumValue
-    include Comparable
+  class EnumValue < SimpleDelegator
 
     attr_reader :parent_class, :name
 
@@ -25,18 +25,7 @@ module Protobuf
       @parent_class = parent_class
       @name = name
       @value = value
-    end
-
-    ## 
-    # Public Instance Methods
-    #
-    def <=>(compared_value)
-      case compared_value
-      when ::Protobuf::EnumValue then
-        value <=> compared_value.to_i
-      when Numeric then
-        value <=> compared_value.to_i
-      end
+      super(@value)
     end
 
     # Overriding the class so ActiveRecord/Arel visitor will visit the enum as a Fixnum
@@ -68,10 +57,6 @@ module Protobuf
     end
 
     def value
-      if ::Protobuf.print_deprecation_warnings?
-        $stderr.puts("[WARNING] Calling #value on an EnumValue is deprecated and no longer needed.")
-      end
-
       @value
     end
 

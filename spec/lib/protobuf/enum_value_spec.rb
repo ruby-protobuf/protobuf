@@ -2,15 +2,6 @@ require 'spec_helper'
 
 describe Protobuf::EnumValue do
 
-  def capture_stderr(&required_block)
-    real_stderr = $stderr
-    $stderr = StringIO.new
-    yield
-    $stderr.string
-  ensure
-    $stderr = real_stderr
-  end
-
 	subject { Test::EnumTestType::ONE }
   its(:class) { should eq(Fixnum) }
 	its(:parent_class) { should eq(Test::EnumTestType) }
@@ -26,11 +17,4 @@ describe Protobuf::EnumValue do
     array[::Test::EnumTestType::ONE].should eq(1)
   end
 
-  it "prints a Warning to $stderr when #value is called" do 
-    local_warning = capture_stderr do 
-      ::Test::EnumTestType::ONE.value
-    end
-
-    local_warning.should match(/deprecated/i)
-  end
 end
