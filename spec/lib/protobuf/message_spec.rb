@@ -28,7 +28,7 @@ describe Protobuf::Message do
       it "raises a 'message not initialized' error" do
         expect {
           message.serialize_to(stream)
-        }.to raise_error(Protobuf::NotInitializedError, /message.*not initialized/i)
+        }.to raise_error(Protobuf::SerializationError, /required/i)
       end
     end
   end
@@ -165,19 +165,19 @@ describe Protobuf::Message do
       specify do
         expect {
           subject.get_field_by_name(1)
-        }.to raise_error(::Protobuf::Message::FieldNotDefinedError, /.*1.*#{subject.class.name}/)
+        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*1.*#{subject.class.name}/)
       end
 
       specify do
         expect {
           subject.get_field_by_name(:nothere)
-        }.to raise_error(::Protobuf::Message::FieldNotDefinedError, /.*nothere.*#{subject.class.name}/)
+        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*nothere.*#{subject.class.name}/)
       end
 
       specify do
         expect {
           subject.get_field_by_name(nil)
-        }.to raise_error(::Protobuf::Message::FieldNotDefinedError, /.*nil.*#{subject.class.name}/)
+        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*nil.*#{subject.class.name}/)
       end
     end
   end
@@ -219,13 +219,13 @@ describe Protobuf::Message do
       specify do
         expect {
           subject.get_field_by_tag("not a number")
-        }.to raise_error(::Protobuf::Message::FieldNotDefinedError, /.*not a number.*#{subject.class.name}/)
+        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*not a number.*#{subject.class.name}/)
       end
 
       specify do
         expect {
           subject.get_field_by_tag(nil)
-        }.to raise_error(::Protobuf::Message::FieldNotDefinedError, /.*nil.*#{subject.class.name}/)
+        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*nil.*#{subject.class.name}/)
       end
     end
   end

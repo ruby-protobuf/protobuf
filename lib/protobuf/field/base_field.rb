@@ -67,18 +67,6 @@ module Protobuf
         @_message = (self.class < ::Protobuf::Field::MessageField)
       end
 
-      def initialized?(message_instance)
-        value = message_instance.__send__(getter_method_name)
-        case @rule
-        when :required then
-          ! value.nil? && (! kind_of?(MessageField) || value.initialized?)
-        when :repeated then
-          value.all? {|msg| ! kind_of?(MessageField) || msg.initialized? }
-        when :optional then
-          value.nil? || ! kind_of?(MessageField) || value.initialized?
-        end
-      end
-
       # Decode +bytes+ and pass to +message_instance+.
       def set(message_instance, bytes)
         if packed?

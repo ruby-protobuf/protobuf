@@ -42,7 +42,7 @@ describe 'Functional EventMachine Client' do
       end
       EM.stop
     end
-    error.message.should =~ /ResourceFindRequest.*fields.*improperly set/
+    error.message.should =~ /name.*required/
   end
 
   it 'calls the on_failure callback when the request type is wrong' do

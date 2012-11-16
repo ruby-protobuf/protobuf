@@ -1,15 +1,11 @@
 require 'set'
 require 'protobuf/field'
 require 'protobuf/enum'
+require 'protobuf/exceptions'
 require 'protobuf/message/decoder'
 
 module Protobuf
   class Message
-    ##
-    # Error Classes
-    #
-    class FieldNotDefinedError < StandardError; end
-
     ##
     # Constants
     #
@@ -164,7 +160,7 @@ module Protobuf
 
     def each_field_for_serialization
       all_fields.each do |field|
-        next unless has_field?(field.name)
+        next unless has_field_or_required_field?(field)
 
         value = __send__(field.name)
         value.compact! if field.repeated?
@@ -172,7 +168,8 @@ module Protobuf
         if value.present? || [true, false].include?(value)
           yield(field, value) 
         else
-          raise "#{field.name} is required on #{field.message_class}" if field.required?
+          # Only way you can get here is if you are required and not present
+          raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
         end
       end
     end
@@ -208,10 +205,6 @@ module Protobuf
       @values.has_key?(name)
     end
 
-    def initialized?
-      all_fields.all? { |field| field.initialized?(self) }
-    end
-
     def inspect
       to_hash.inspect
     end
@@ -234,11 +227,6 @@ module Protobuf
     end
 
     def serialize_to(stream)
-      # FIXME make this not as ghetto
-      unless initialized?
-        raise NotInitializedError, "Message #{self.class.name} is not initialized (one or more fields is improperly set): #{JSON.parse(self.to_json)}"
-      end
-
       each_field_for_serialization do |field, value|
         if field.repeated?
           if field.packed?
@@ -348,6 +336,11 @@ module Protobuf
       end
       object
     end
+
+    def has_field_or_required_field?(field)
+      has_field?(field.name) || field.required?  
+    end
+
     # Encode key and value, and write to +stream+.
     def write_pair(stream, field, value)
       key = (field.tag << 3) | field.wire_type

@@ -41,7 +41,7 @@ describe 'Functional ZMQ Client' do
       c.on_success { raise "shouldn't pass"}
       c.on_failure {|e| error = e}
     end
-    error.message.should =~ /ResourceFindRequest.*fields.*improperly set/
+    error.message.should =~ /name.*required/
   end
 
   it 'calls the on_failure callback when the request type is wrong' do
