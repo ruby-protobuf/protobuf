@@ -140,6 +140,17 @@ namespace :benchmark do
     puts args[:profile_output]
   end
 
+  desc "benchmark Protobuf Message #serialize"
+  task :profile_protobuf_serialize, [:number, :profile_output] do |t, args|
+    args.with_defaults(:number => 1000, :profile_output => "/tmp/profiler_new_#{Time.now.to_i}")
+    create_params = { :name => "The name that we set", :date_created => Time.now.to_i, :status => 2 }
+    ::PerfTools::CpuProfiler.start(args[:profile_output]) do
+      args[:number].to_i.times { Test::Resource.new(create_params).serialize }
+    end
+
+    puts args[:profile_output]
+  end
+
   desc "benchmark EventMachine client with EventMachine server"
   task :em_client_em_server, [:number, :length] do |t, args|
     args.with_defaults(:number => 1000, :length => 100)

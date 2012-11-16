@@ -43,10 +43,9 @@ module Protobuf
 
     # Read varint integer value from +stream+.
     def read_varint(stream)
-      read_method = stream.respond_to?(:readbyte) ? :readbyte : :readchar
       value = index = 0
       begin
-        byte = stream.__send__(read_method)
+        byte = stream.readbyte
         value |= (byte & 0x7f) << (7 * index)
         index += 1
       end while (byte & 0x80).nonzero?

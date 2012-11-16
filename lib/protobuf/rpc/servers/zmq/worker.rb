@@ -49,7 +49,7 @@ module Protobuf
         end
 
         def send_data
-          response_data = @response.is_a?(::Protobuf::Message) ? @response.serialize_to_string : @response.to_s
+          response_data = @response.to_s # to_s is aliases as serialize_to_string in Message
           @stats.response_size = response_data.size
           zmq_error_check(@socket.send_string(response_data))
         end

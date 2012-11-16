@@ -129,7 +129,7 @@ module Protobuf
 
     def clear!
       @values.delete_if do |_, value|
-        if value.is_a?(Field::FieldArray)
+        if value.is_a?(::Protobuf::Field::FieldArray)
           value.clear
           false
         else
@@ -225,15 +225,17 @@ module Protobuf
         (self.__send__(key).present? || [true, false].include?(self.__send__(key)))
     end
 
-    def serialize_to(stream)
+    def serialize_to_string
+      stream = ""
+
       each_field_for_serialization do |field, value|
         if field.repeated?
           if field.packed?
             key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
             packed_value = value.map { |val| field.encode(val) }.join
-            stream.write(::Protobuf::Field::VarintField.encode(key))
-            stream.write(::Protobuf::Field::VarintField.encode(packed_value.size))
-            stream.write(packed_value)
+            stream << ::Protobuf::Field::VarintField.encode(key)
+            stream << ::Protobuf::Field::VarintField.encode(packed_value.size)
+            stream << packed_value
           else
             value.each { |val| write_pair(stream, field, val) }
           end
@@ -241,14 +243,8 @@ module Protobuf
           write_pair(stream, field, value)
         end
       end
-    end
 
-    def serialize_to_string(string = '')
-      io = StringIO.new(string)
-      serialize_to(io)
-      result = io.string
-      result.force_encoding(::Protobuf::Message::STRING_ENCODING) if result.respond_to?(:force_encoding)
-      result
+      return stream
     end
 
     def set_field(tag, bytes)
@@ -329,7 +325,7 @@ module Protobuf
 
       object.__send__(:initialize)
       @values.each do |name, value|
-        if value.is_a?(Field::FieldArray)
+        if value.is_a?(::Protobuf::Field::FieldArray)
           object.__send__(name).replace(value.map {|v| duplicate.call(v)})
         else
           object.__send__("#{name}=", duplicate.call(value))
@@ -352,10 +348,8 @@ module Protobuf
     # Encode key and value, and write to +stream+.
     def write_pair(stream, field, value)
       key = (field.tag << 3) | field.wire_type
-      key_bytes = ::Protobuf::Field::VarintField.encode(key)
-      stream.write(key_bytes)
-      bytes = field.encode(value)
-      stream.write(bytes)
+      stream << ::Protobuf::Field::VarintField.encode(key)
+      stream << field.encode(value)
     end
 
   end

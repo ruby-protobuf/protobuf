@@ -104,10 +104,10 @@ module Protobuf
         def rpc_request_data
           validate_request_type
 
-          return Protobuf::Socketrpc::Request.new(
+          return ::Protobuf::Socketrpc::Request.new(
             :service_name => @options[:service].name,
             :method_name => @options[:method].to_s,
-            :request_proto => @options[:request].serialize_to_string
+            :request_proto => @options[:request]
           ).serialize_to_string
         rescue => e
           fail(:INVALID_REQUEST_PROTO, "Could not set request proto: #{e.message}")

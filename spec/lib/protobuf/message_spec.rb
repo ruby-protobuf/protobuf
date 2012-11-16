@@ -23,23 +23,21 @@ describe Protobuf::Message do
   describe '#encode' do
     context "when there's no value for a required field" do
       let(:message) { ::Test::Resource.new }
-      let(:stream) { StringIO.new }
 
       it "raises a 'message not initialized' error" do
         expect {
-          message.serialize_to(stream)
+          message.serialize_to_string
         }.to raise_error(Protobuf::SerializationError, /required/i)
       end
     end
 
     context "repeated fields" do 
       let(:message) { ::Test::Resource.new(:name => "something") }
-      let(:stream) { StringIO.new }
 
       it "does not raise an error when repeated fields are []" do
         expect {
           message.repeated_enum = []
-          message.serialize_to(stream)
+          message.serialize_to_string
         }.to_not raise_error
       end
     end
