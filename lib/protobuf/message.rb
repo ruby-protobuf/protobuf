@@ -209,12 +209,12 @@ module Protobuf
       to_hash.inspect
     end
 
-    def parse_from_string(string)
-      parse_from(StringIO.new(string))
-    end
-
     def parse_from(stream)
       Decoder.decode(stream, self)
+    end
+
+    def parse_from_string(string)
+      parse_from(StringIO.new(string))
     end
 
     def respond_to_has?(key)
@@ -244,7 +244,7 @@ module Protobuf
       end
     end
 
-    def serialize_to_string(string='')
+    def serialize_to_string(string = '')
       io = StringIO.new(string)
       serialize_to(io)
       result = io.string
@@ -303,6 +303,8 @@ module Protobuf
     #
     alias_method :to_hash_value, :to_hash
     alias_method :to_s, :serialize_to_string
+    alias_method :bytes, :serialize_to_string
+    alias_method :serialize, :serialize_to_string
     alias_method :responds_to_has?, :respond_to_has?
     alias_method :respond_to_and_has?, :respond_to_has?
     alias_method :responds_to_and_has?, :respond_to_has?

@@ -26,7 +26,6 @@ module Protobuf
         if value.is_a?(::Protobuf::Message)
           value = value.serialize_to_string
         else
-          value = value.dup
           value.force_encoding(::Protobuf::Message::STRING_ENCODING) if value.respond_to?(:force_encoding)
         end
 
