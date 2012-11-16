@@ -31,6 +31,18 @@ describe Protobuf::Message do
         }.to raise_error(Protobuf::SerializationError, /required/i)
       end
     end
+
+    context "repeated fields" do 
+      let(:message) { ::Test::Resource.new(:name => "something") }
+      let(:stream) { StringIO.new }
+
+      it "does not raise an error when repeated fields are []" do
+        expect {
+          message.repeated_enum = []
+          message.serialize_to(stream)
+        }.to_not raise_error
+      end
+    end
   end
 
   describe "boolean predicate methods" do 

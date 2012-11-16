@@ -35,7 +35,7 @@ module Protobuf
         raise TagCollisionError, %!{Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
       end
 
-      field_definition = Field.build(self, rule, type, fname, tag, options)
+      field_definition = ::Protobuf::Field.build(self, rule, type, fname, tag, options)
       field_name_hash[fname] = tag
       field_array[tag] = field_definition
     end
@@ -160,24 +160,15 @@ module Protobuf
 
     def each_field_for_serialization
       all_fields.each do |field|
-        next unless has_field?(field.name) || field.required?
+        next unless _field_must_be_serialized?(field)
 
         value = @values[field.name]
 
-        if field.repeated?
-          if !value.nil?
-            value.compact!
-            @values[field.name] = nil if value.empty?
-          end
-        end
-
-        if has_field?(field.name) || field.required?
-          if value.present? || [true, false].include?(value)
-            yield(field, value) 
-          else
-            # Only way you can get here is if you are required and not present
-            raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
-          end
+        if value.present? || [true, false].include?(value)
+          yield(field, value) 
+        else
+          # Only way you can get here is if you are required and not present
+          raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
         end
       end
     end
@@ -345,6 +336,17 @@ module Protobuf
         end
       end
       object
+    end
+
+    def _field_must_be_serialized?(field)
+      return true if field.required?
+
+      if field.repeated? && has_field?(field.name)
+        @values[field.name].compact!
+        @values.delete(field.name) if @values[field.name].empty?
+      end
+
+      return has_field?(field.name)
     end
 
     # Encode key and value, and write to +stream+.
