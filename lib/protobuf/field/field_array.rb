@@ -12,24 +12,24 @@ module Protobuf
       # Public Instance Methods
       #
       def []=(nth, val)
-        super(nth, normalize(val))
+        super(nth, normalize(val)) unless val.nil?
       end
 
       def <<(val)
-        super(normalize(val))
+        super(normalize(val)) unless val.nil?
       end
 
       def push(val)
-        super(normalize(val))
+        super(normalize(val)) unless val.nil?
       end
 
       def unshift(val)
-        super(normalize(val))
+        super(normalize(val)) unless val.nil?
       end
 
       def replace(val)
         raise TypeError unless val.is_a?(Array)
-        val = val.map { |v| normalize(v)}
+        val = val.map { |v| normalize(v) }
         super(val)
       end
 

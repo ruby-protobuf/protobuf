@@ -20,6 +20,19 @@ describe Protobuf::Message do
     end
   end
 
+  describe '#encode' do
+    context "when there's no value for a required field" do
+      let(:message) { ::Test::Resource.new }
+      let(:stream) { StringIO.new }
+
+      it "raises a 'message not initialized' error" do
+        expect {
+          message.serialize_to(stream)
+        }.to raise_error(Protobuf::NotInitializedError, /message.*not initialized/i)
+      end
+    end
+  end
+
   describe "boolean predicate methods" do 
     subject { Test::ResourceFindRequest.new(:name => "resource") }
 

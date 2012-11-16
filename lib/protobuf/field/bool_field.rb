@@ -8,8 +8,7 @@ module Protobuf
       end
 
       def acceptable?(val)
-        raise TypeError unless [true, false].include?(val)
-        true
+        [true, false].include?(val)
       end
 
       def decode(value)

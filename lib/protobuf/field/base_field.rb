@@ -40,7 +40,7 @@ module Protobuf
         @default_value = \
           case @rule
           when :repeated then
-            FieldArray.new(self).freeze
+            ::Protobuf::Field::FieldArray.new(self).freeze
           when :required then
             nil
           when :optional then
@@ -85,13 +85,14 @@ module Protobuf
           array = message_instance.__send__(getter_method_name)
           method = \
             case wire_type
-            when WireType::FIXED32 then :read_fixed32
-            when WireType::FIXED64 then :read_fixed64
-            when WireType::VARINT  then :read_varint
+            when ::Protobuf::WireType::FIXED32 then :read_fixed32
+            when ::Protobuf::WireType::FIXED64 then :read_fixed64
+            when ::Protobuf::WireType::VARINT  then :read_varint
             end
           stream = StringIO.new(bytes)
+
           until stream.eof?
-            array << decode(Decoder.__send__(method, stream))
+            array << decode(::Protobuf::Decoder.__send__(method, stream))
           end
         else
           value = decode(bytes)
@@ -195,8 +196,13 @@ module Protobuf
         @message_class.class_eval do
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
-            @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
-            @values[field.name].replace(val)
+
+            if val.nil?
+              @values.delete(field.name)
+            else
+              @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
+              @values[field.name].replace(val)
+            end
           end
         end
       end
@@ -216,6 +222,7 @@ module Protobuf
         @message_class.class_eval do
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
+
             if val.nil?
               @values.delete(field.name)
             elsif field.acceptable?(val)

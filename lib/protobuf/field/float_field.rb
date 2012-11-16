@@ -22,9 +22,7 @@ module Protobuf
       end
 
       def acceptable?(val)
-        raise TypeError, val.class.name unless val.is_a?(Numeric)
-        raise RangeError if val < min || max < val
-        true
+        (val > min || val < max) rescue false
       end
     end
   end

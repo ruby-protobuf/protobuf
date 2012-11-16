@@ -13,18 +13,18 @@ module Protobuf
         tag, wire_type = read_key(stream)
         bytes =
           case wire_type
-          when WireType::VARINT then
+          when ::Protobuf::WireType::VARINT then
             read_varint(stream)
-          when WireType::FIXED64 then
+          when ::Protobuf::WireType::FIXED64 then
             read_fixed64(stream)
-          when WireType::LENGTH_DELIMITED then
+          when ::Protobuf::WireType::LENGTH_DELIMITED then
             read_length_delimited(stream)
-          when WireType::START_GROUP then
-            read_start_group(stream)
-          when WireType::END_GROUP then
-            read_end_group(stream)
-          when WireType::FIXED32 then
+          when ::Protobuf::WireType::FIXED32 then
             read_fixed32(stream)
+          when ::Protobuf::WireType::START_GROUP then
+            raise NotImplementedError, 'Group is deprecated.'
+          when ::Protobuf::WireType::END_GROUP then
+            raise NotImplementedError, 'Group is deprecated.'
           else
             raise InvalidWireType, wire_type
           end
@@ -67,16 +67,6 @@ module Protobuf
     def read_length_delimited(stream)
       value_length = read_varint(stream)
       stream.read(value_length)
-    end
-
-    # Not implemented.
-    def read_start_group(stream)
-      raise NotImplementedError, 'Group is deprecated.'
-    end
-
-    # Not implemented.
-    def read_end_group(stream)
-      raise NotImplementedError, 'Group is deprecated.'
     end
 
   end

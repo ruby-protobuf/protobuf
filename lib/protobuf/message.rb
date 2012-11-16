@@ -2,7 +2,6 @@ require 'set'
 require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/message/decoder'
-require 'protobuf/message/encoder'
 
 module Protobuf
   class Message
@@ -168,6 +167,7 @@ module Protobuf
         next unless has_field?(field.name)
 
         value = __send__(field.name)
+        value.compact! if field.repeated?
 
         if value.present? || [true, false].include?(value)
           yield(field, value) 
@@ -234,7 +234,26 @@ module Protobuf
     end
 
     def serialize_to(stream)
-      Encoder.encode(stream, self)
+      # FIXME make this not as ghetto
+      unless initialized?
+        raise NotInitializedError, "Message #{self.class.name} is not initialized (one or more fields is improperly set): #{JSON.parse(self.to_json)}"
+      end
+
+      each_field_for_serialization do |field, value|
+        if field.repeated?
+          if field.packed?
+            key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
+            packed_value = value.map { |val| field.encode(val) }.join
+            stream.write(::Protobuf::Field::VarintField.encode(key))
+            stream.write(::Protobuf::Field::VarintField.encode(packed_value.size))
+            stream.write(packed_value)
+          else
+            value.each { |val| write_pair(stream, field, val) }
+          end
+        else
+          write_pair(stream, field, value)
+        end
+      end
     end
 
     def serialize_to_string(string='')
@@ -328,6 +347,14 @@ module Protobuf
         end
       end
       object
+    end
+    # Encode key and value, and write to +stream+.
+    def write_pair(stream, field, value)
+      key = (field.tag << 3) | field.wire_type
+      key_bytes = ::Protobuf::Field::VarintField.encode(key)
+      stream.write(key_bytes)
+      bytes = field.encode(value)
+      stream.write(bytes)
     end
 
   end
