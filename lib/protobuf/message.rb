@@ -159,7 +159,21 @@ module Protobuf
     def each_field
       all_fields.each do |field|
         value = __send__(field.name)
-        yield(field, value)
+        yield(field, value) 
+      end
+    end
+
+    def each_field_for_serialization
+      all_fields.each do |field|
+        next unless has_field?(field.name)
+
+        value = __send__(field.name)
+
+        if value.present? || [true, false].include?(value)
+          yield(field, value) 
+        else
+          raise "#{field.name} is required on #{field.message_class}" if field.required?
+        end
       end
     end
 

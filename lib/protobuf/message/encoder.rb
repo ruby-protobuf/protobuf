@@ -14,9 +14,7 @@ module Protobuf
         raise NotInitializedError, "Message #{message.class.name} is not initialized (one or more fields is improperly set): #{JSON.parse(message.to_json)}"
       end
 
-      message.each_field do |field, value|
-        next unless message.has_field?(field.name)
-
+      message.each_field_for_serialization do |field, value|
         if field.repeated?
           if field.packed?
             key = (field.tag << 3) | WireType::LENGTH_DELIMITED
