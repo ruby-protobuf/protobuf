@@ -169,6 +169,17 @@ describe Protobuf::Message do
     end
   end
 
+  describe "#define_setter" do 
+    subject { ::Test::Resource.new }
+    it "allows string fields to be set to nil" do 
+      expect { subject.name = nil }.to_not raise_error
+    end
+
+    it "does not allow string fields to be set to Numeric" do 
+      expect { subject.name = 1}.to raise_error(/name/)
+    end
+  end
+
   describe '#get_ext_field_by_name' do
     pending 'Need to get a proto compiled with extensions first'
   end

@@ -10,11 +10,11 @@ module Protobuf
       end
 
       def acceptable?(val)
-        if val.is_a?(::Protobuf::Message) || val.instance_of?(String)
+        if val.nil? || val.is_a?(::Protobuf::Message) || val.instance_of?(String)
           return true
         end
 
-        raise TypeError
+        raise TypeError, "Cannot set field : #{name} to value : #{val}"
       end
 
       def decode(bytes)
