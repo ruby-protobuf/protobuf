@@ -160,16 +160,24 @@ module Protobuf
 
     def each_field_for_serialization
       all_fields.each do |field|
-        next unless has_field_or_required_field?(field)
+        next unless has_field?(field.name) || field.required?
 
-        value = __send__(field.name)
-        value.compact! if field.repeated?
+        value = @values[field.name]
 
-        if value.present? || [true, false].include?(value)
-          yield(field, value) 
-        else
-          # Only way you can get here is if you are required and not present
-          raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
+        if field.repeated?
+          if !value.nil?
+            value.compact!
+            @values[field.name] = nil if value.empty?
+          end
+        end
+
+        if has_field?(field.name) || field.required?
+          if value.present? || [true, false].include?(value)
+            yield(field, value) 
+          else
+            # Only way you can get here is if you are required and not present
+            raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
+          end
         end
       end
     end
@@ -337,10 +345,6 @@ module Protobuf
         end
       end
       object
-    end
-
-    def has_field_or_required_field?(field)
-      has_field?(field.name) || field.required?  
     end
 
     # Encode key and value, and write to +stream+.
