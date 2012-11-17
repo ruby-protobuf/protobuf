@@ -25,6 +25,10 @@ module Protobuf
         result << bytes
       end
 
+      def message?
+        true
+      end
+
       def wire_type
         ::Protobuf::WireType::LENGTH_DELIMITED
       end

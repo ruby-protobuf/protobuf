@@ -19,6 +19,10 @@ module Protobuf
         super(value.to_i)
       end
 
+      def enum?
+        true
+      end
+
       private
 
       def typed_default_value

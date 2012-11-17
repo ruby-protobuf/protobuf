@@ -58,13 +58,11 @@ module Protobuf
       end
 
       def enum?
-        return @_enum unless @_enum.nil?
-        @_enum = (self.class < ::Protobuf::Field::EnumField)
+        false
       end
 
       def message?
-        return @_message unless @_message.nil?
-        @_message = (self.class < ::Protobuf::Field::MessageField)
+        false
       end
 
       # Decode +bytes+ and pass to +message_instance+.
