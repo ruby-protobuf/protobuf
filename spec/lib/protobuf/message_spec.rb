@@ -40,6 +40,17 @@ describe Protobuf::Message do
           message.serialize_to_string
         }.to_not raise_error
       end
+
+      it "sets the value to nil when empty array is passed" do 
+        message.repeated_enum = []
+        message.instance_variable_get("@values")[:repeated_enum].should be_nil
+      end
+
+      it "raises TypeError when a non-array replaces it" do 
+        expect {
+          message.repeated_enum = 2
+        }.to raise_error(/value of type/)
+      end
     end
   end
 

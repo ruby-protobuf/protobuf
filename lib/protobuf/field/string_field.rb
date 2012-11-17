@@ -6,8 +6,14 @@ module Protobuf
       ENCODING = 'UTF-8'.freeze
 
       def decode(bytes)
-        bytes.force_encoding(::Protobuf::Field::StringField::ENCODING) if bytes.respond_to?(:force_encoding)
+        bytes.force_encoding(::Protobuf::Field::StringField::ENCODING) 
         bytes
+      end
+
+      def encode(value)
+        value.force_encoding(::Protobuf::Field::StringField::ENCODING) 
+        string_size = ::Protobuf::Field::VarintField.encode(value.size)
+        string_size << value
       end
     end
   end

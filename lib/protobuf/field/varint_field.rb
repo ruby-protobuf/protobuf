@@ -49,7 +49,15 @@ module Protobuf
       end
 
       def encode(value)
-        self.class.encode(value)
+        return [value].pack('C') if value < 128
+
+        bytes = []
+        until value == 0
+          bytes << (0x80 | (value & 0x7f))
+          value >>= 7
+        end
+        bytes[-1] &= 0x7f
+        bytes.pack('C*')
       end
 
       def wire_type

@@ -28,7 +28,7 @@ module Protobuf
       end
 
       def replace(val)
-        raise TypeError unless val.is_a?(Array)
+        raise_type_error(val) unless val.is_a?(Array)
         val = val.map { |v| normalize(v) }
         super(val)
       end
@@ -59,6 +59,15 @@ module Protobuf
         else
           value
         end
+      end
+
+      def raise_type_error(val)
+        error_text = <<-TYPE_ERROR
+          Expected value of type '#{@field.type}'
+          Got '#{val.class}' for protobuf field #{@field.name}
+        TYPE_ERROR
+
+        raise TypeError, error_text
       end
     end
   end

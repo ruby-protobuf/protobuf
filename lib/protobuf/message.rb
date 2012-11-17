@@ -6,10 +6,6 @@ require 'protobuf/message/decoder'
 
 module Protobuf
   class Message
-    ##
-    # Constants
-    #
-    STRING_ENCODING = "ASCII-8BIT".freeze
 
     ##
     # Class Methods

@@ -21,7 +21,7 @@ module Protobuf
       
       def encode(value)
         bytes = value.serialize_to_string
-        result = VarintField.encode(bytes.size)
+        result = ::Protobuf::Field::VarintField.encode(bytes.size)
         result << bytes
       end
 

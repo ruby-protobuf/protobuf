@@ -5,6 +5,15 @@ module Protobuf
   module Field
     class BaseField
       ##
+      # Constants
+      #
+      PACKED_TYPES = [
+        ::Protobuf::WireType::VARINT,
+        ::Protobuf::WireType::FIXED32,
+        ::Protobuf::WireType::FIXED64
+      ].freeze
+
+      ##
       # Attributes
       #
       attr_reader :message_class, :rule, :type, :name, :tag, :default, :default_value, :setter_method_name, :getter_method_name
@@ -29,24 +38,15 @@ module Protobuf
         @extension = options.delete(:extension)
         @packed    = repeated? && options.delete(:packed)
         @deprecated = options.delete(:deprecated)
-        unless options.empty?
-          warn "WARNING: Invalid options: #{options.inspect} (in #{@message_class.name.split('::').last}.#{@name})"
-        end
-
-        if packed? && ! [WireType::VARINT, WireType::FIXED32, WireType::FIXED64].include?(wire_type)
-          raise "Can't use packed encoding for `#{@type}' type"
-        end
-
         @default_value = \
           case @rule
-          when :repeated then
-            ::Protobuf::Field::FieldArray.new(self).freeze
-          when :required then
-            nil
-          when :optional then
-            typed_default_value
+          when :repeated then ::Protobuf::Field::FieldArray.new(self).freeze
+          when :required then nil
+          when :optional then typed_default_value
           end
 
+        warn_excess_options(options) unless options.empty?
+        validate_packed_field if packed?
         define_accessor
       end
 
@@ -185,7 +185,7 @@ module Protobuf
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
 
-            if val.nil?
+            if val.nil? || (val.respond_to?(:empty?) && val.empty?)
               @values.delete(field.name)
             else
               @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
@@ -211,7 +211,7 @@ module Protobuf
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
 
-            if val.nil?
+            if val.nil? || (val.respond_to?(:empty?) && val.empty?)
               @values.delete(field.name)
             elsif field.acceptable?(val)
               @values[field.name] = val
@@ -228,6 +228,16 @@ module Protobuf
         else
           @default
         end
+      end
+
+      def validate_packed_field
+        if packed? && ! ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
+          raise "Can't use packed encoding for `#{@type}' type"
+        end
+      end
+
+      def warn_excess_options(options)
+        warn "WARNING: Invalid options: #{options.inspect} (in #{@message_class.name.split('::').last}.#{@name})"
       end
 
     end

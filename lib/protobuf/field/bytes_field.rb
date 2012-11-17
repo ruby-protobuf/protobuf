@@ -1,12 +1,12 @@
+require 'protobuf/wire_type'
+
 module Protobuf
   module Field
     class BytesField < BaseField
+      BYTES_ENCODING = "ASCII-8BIT".freeze
+
       def self.default
         ''
-      end
-
-      def wire_type
-        WireType::LENGTH_DELIMITED
       end
 
       def acceptable?(val)
@@ -18,19 +18,20 @@ module Protobuf
       end
 
       def decode(bytes)
-        bytes.force_encoding(::Protobuf::Message::STRING_ENCODING) if bytes.respond_to?(:force_encoding)
+        bytes.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING) 
         bytes
       end
 
       def encode(value)
-        if value.is_a?(::Protobuf::Message)
-          value = value.serialize_to_string
-        else
-          value.force_encoding(::Protobuf::Message::STRING_ENCODING) if value.respond_to?(:force_encoding)
-        end
+        value = value.serialize_to_string if value.is_a?(::Protobuf::Message)
+        value.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING) 
 
-        string_size = VarintField.encode(value.size)
+        string_size = ::Protobuf::Field::VarintField.encode(value.size)
         string_size << value
+      end
+
+      def wire_type
+        ::Protobuf::WireType::LENGTH_DELIMITED
       end
     end
   end
