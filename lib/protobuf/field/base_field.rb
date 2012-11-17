@@ -38,13 +38,9 @@ module Protobuf
         @extension = options.delete(:extension)
         @packed    = repeated? && options.delete(:packed)
         @deprecated = options.delete(:deprecated)
-        @default_value = \
-          case @rule
-          when :repeated then ::Protobuf::Field::FieldArray.new(self).freeze
-          when :required then nil
-          when :optional then typed_default_value
-          end
 
+        set_rule_predicates
+        set_default_value
         warn_excess_options(options) unless options.empty?
         validate_packed_field if packed?
         define_accessor
@@ -101,25 +97,22 @@ module Protobuf
       end
 
       def extension?
-        !!@extension
+        !! @extension
       end
 
       # Is this a repeated field?
       def repeated?
-        return @_repeated unless @_repeated.nil?
-        @_repeated = (@rule == :repeated)
+        !! @repeated
       end
 
       # Is this a required field?
       def required?
-        return @_required unless @_required.nil?
-        @_required = (@rule == :required)
+        !! @required
       end
 
       # Is this a optional field?
       def optional?
-        return @_optional unless @_optional.nil?
-        @_optional = (@rule == :optional)
+        !! @optional
       end
 
       # Is this a deprecated field?
@@ -217,6 +210,28 @@ module Protobuf
               raise TypeError, "unacceptable value #{val} for type #{field.type}"
             end
           end
+        end
+      end
+
+      def set_default_value
+        @default_value = case 
+                         when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
+                         when required? then nil
+                         when optional? then typed_default_value
+                         end
+      end
+
+      def set_rule_predicates
+        case @rule
+        when :repeated then
+          @required = @optional = false
+          @repeated = true
+        when :required then
+          @repeated = @optional = false
+          @required = true
+        when :optional then
+          @repeated = @required = false
+          @optional = true
         end
       end
 
