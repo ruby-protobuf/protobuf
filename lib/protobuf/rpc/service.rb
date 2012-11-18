@@ -11,8 +11,8 @@ module Protobuf
     RpcMethod = Struct.new("RpcMethod", :method, :request_type, :response_type)
 
     class Service
-      include Protobuf::Rpc::ServiceFilters
-      include Protobuf::Logger::LogMethods
+      include ::Protobuf::Rpc::ServiceFilters
+      include ::Protobuf::Logger::LogMethods
 
 
       attr_reader :response, :rpc
@@ -97,7 +97,6 @@ module Protobuf
       def self.rpc_method?(name)
         rpcs.key?(name)
       end
-
 
       ##
       # Instance Methods

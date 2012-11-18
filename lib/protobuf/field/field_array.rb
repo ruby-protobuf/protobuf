@@ -51,6 +51,7 @@ module Protobuf
       # Private Instance Methods
       #
       def normalize(value)
+        value = value.to_proto if value.respond_to?(:to_proto)
         raise TypeError unless @field.acceptable?(value)
 
         if @field.is_a?(::Protobuf::Field::EnumField)

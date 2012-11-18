@@ -44,6 +44,8 @@ module Protobuf
               @values.delete(field.name)
             when val.is_a?(field.type) then
               @values[field.name] = val
+            when val.respond_to?(:to_proto) then
+              @values[field.name] = val.to_proto
             when val.respond_to?(:to_hash) then
               @values[field.name] = field.type.new(val.to_hash)
             else
