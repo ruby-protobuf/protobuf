@@ -9,7 +9,7 @@ module Protobuf
         include ::Protobuf::Rpc::Server
         include ::Protobuf::Logger::LogMethods
 
-        AUTO_COLLECT_TIMEOUT = 20 # seconds
+        AUTO_COLLECT_TIMEOUT = 5 # seconds
 
         def self.cleanup?
           # every 10 connections run a cleanup routine after closing the response

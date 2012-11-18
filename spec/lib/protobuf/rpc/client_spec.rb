@@ -9,7 +9,7 @@ describe Protobuf::Rpc::Client do
   context "when using fiber based calls" do
     it "waits for response" do
       EventMachine.fiber_run do
-        StubServer.new(:delay => 3) do |server|
+        StubServer.new(:delay => 1) do |server|
           client = Test::ResourceService.client
           start = now
 
