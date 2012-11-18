@@ -29,7 +29,7 @@ module Protobuf
 
       def replace(val)
         raise_type_error(val) unless val.is_a?(Array)
-        val = val.map { |v| normalize(v) }
+        val = val.map! { |v| normalize(v) }
         super(val)
       end
 
@@ -52,6 +52,7 @@ module Protobuf
       #
       def normalize(value)
         raise TypeError unless @field.acceptable?(value)
+
         if @field.is_a?(::Protobuf::Field::EnumField)
           @field.type.fetch(value)
         elsif @field.is_a?(::Protobuf::Field::MessageField) && value.respond_to?(:to_hash)

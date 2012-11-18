@@ -46,6 +46,18 @@ describe Protobuf::Message do
         message.instance_variable_get("@values")[:repeated_enum].should be_nil
       end
 
+      it "does not compact the edit original array" do 
+        a = [nil].freeze
+        message.repeated_enum = a
+        message.repeated_enum.should eq([])
+        a.should eq([nil].freeze)
+      end
+
+      it "compacts the set array" do 
+        message.repeated_enum = [nil]
+        message.repeated_enum.should eq([])
+      end
+
       it "raises TypeError when a non-array replaces it" do 
         expect {
           message.repeated_enum = 2

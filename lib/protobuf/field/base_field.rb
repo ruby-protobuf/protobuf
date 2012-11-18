@@ -175,7 +175,18 @@ module Protobuf
         @message_class.class_eval do
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
-            val.compact! if val.respond_to?(:compact!)
+            
+            if val.is_a?(Array)
+              val = val.dup
+              val.compact!
+            else
+              error_text = <<-TYPE_ERROR
+                Expected value of type '#{field.type}'
+                Got '#{val.class}' for protobuf field #{field.name}
+              TYPE_ERROR
+
+              raise TypeError, error_text
+            end
 
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
               @values.delete(field.name)
