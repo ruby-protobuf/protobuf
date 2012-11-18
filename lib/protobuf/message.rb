@@ -269,10 +269,6 @@ module Protobuf
       self
     end
 
-    def to_proto_hash
-      self.to_hash
-    end
-
     def ==(obj)
       return false unless obj.is_a?(self.class)
       each_field do |field, value|
@@ -301,6 +297,7 @@ module Protobuf
     # Instance Aliases
     #
     alias_method :to_hash_value, :to_hash
+    alias_method :to_proto_hash, :to_hash
     alias_method :to_s, :serialize_to_string
     alias_method :bytes, :serialize_to_string
     alias_method :serialize, :serialize_to_string
