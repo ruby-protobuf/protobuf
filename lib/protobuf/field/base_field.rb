@@ -175,6 +175,7 @@ module Protobuf
         @message_class.class_eval do
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
+            val.compact! if val.respond_to?(:compact!)
 
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
               @values.delete(field.name)

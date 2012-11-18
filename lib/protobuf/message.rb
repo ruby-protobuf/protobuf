@@ -156,7 +156,7 @@ module Protobuf
 
     def each_field_for_serialization
       all_fields.each do |field|
-        next unless _field_must_be_serialized?(field)
+        next unless __field_must_be_serialized__?(field)
 
         value = @values[field.name]
 
@@ -265,6 +265,14 @@ module Protobuf
       to_hash.to_json
     end
 
+    def to_proto
+      self
+    end
+
+    def to_proto_hash
+      self.to_hash
+    end
+
     def ==(obj)
       return false unless obj.is_a?(self.class)
       each_field do |field, value|
@@ -330,15 +338,13 @@ module Protobuf
       object
     end
 
-    def _field_must_be_serialized?(field)
-      return true if field.required?
+    def __field_must_be_serialized__?(field)
+      field.required? || __field_value_is_present__?(field)
+    end
 
-      if field.repeated? && has_field?(field.name)
-        @values[field.name].compact!
-        @values.delete(field.name) if @values[field.name].empty?
-      end
-
-      return has_field?(field.name)
+    def __field_value_is_present__?(field)
+      value = @values[field.name]
+      !value.nil? && (value.present? || [true, false].include?(value))
     end
 
     # Encode key and value, and write to +stream+.
