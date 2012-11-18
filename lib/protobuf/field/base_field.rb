@@ -125,16 +125,6 @@ module Protobuf
         !! @packed
       end
 
-      # Upper limit for this field.
-      def max
-        self.class.max
-      end
-
-      # Lower limit for this field.
-      def min
-        self.class.min
-      end
-
       def to_s
         "#{@rule} #{@type} #{@name} = #{@tag} #{@default ? "[default=#{@default.inspect}]" : ''}"
       end
