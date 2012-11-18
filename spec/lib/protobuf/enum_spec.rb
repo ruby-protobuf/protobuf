@@ -18,7 +18,7 @@ describe Protobuf::Enum do
   describe '.fetch' do
     context 'when value is an EnumValue' do
       it 'responds with that object' do
-        Test::EnumTestType.fetch(Test::EnumTestType::THREE).should eq Test::EnumTestType::THREE
+        Test::EnumTestType.fetch(Test::EnumTestType::THREE).name.should eq Test::EnumTestType::THREE.name
       end
     end
 
