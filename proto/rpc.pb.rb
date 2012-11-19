@@ -36,7 +36,7 @@ module Protobuf
     #
     ::Protobuf::Socketrpc::Request.required(::Protobuf::Field::StringField, :service_name, 1)
     ::Protobuf::Socketrpc::Request.required(::Protobuf::Field::StringField, :method_name, 2)
-    ::Protobuf::Socketrpc::Request.required(::Protobuf::Field::BytesField, :request_proto, 3)
+    ::Protobuf::Socketrpc::Request.optional(::Protobuf::Field::BytesField, :request_proto, 3)
     
     ::Protobuf::Socketrpc::Response.optional(::Protobuf::Field::BytesField, :response_proto, 1)
     ::Protobuf::Socketrpc::Response.optional(::Protobuf::Field::StringField, :error, 2)

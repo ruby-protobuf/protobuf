@@ -147,7 +147,11 @@ module Protobuf
       # Request object for this rpc cycle. Not assignable.
       #
       def request
-        @_request ||= rpcs[@rpc].request_type.new.parse_from_string(@request_bytes)
+        @_request ||= if @request_bytes.present?
+            rpcs[@rpc].request_type.new.parse_from_string(@request_bytes)
+          else
+            rpcs[@rpc].request_type.new
+          end
       rescue => e
         raise BadRequestProto, "Unable to parse request: #{e.message}"
       end

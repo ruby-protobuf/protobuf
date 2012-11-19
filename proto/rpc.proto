@@ -33,7 +33,7 @@ message Request {
   required string method_name = 2;
   
   // RPC request proto
-  required bytes request_proto = 3;
+  optional bytes request_proto = 3;
 }
 
 message Response {

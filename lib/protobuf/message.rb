@@ -160,11 +160,11 @@ module Protobuf
 
         value = @values[field.name]
 
-        if value.present? || [true, false].include?(value)
-          yield(field, value) 
-        else
-          # Only way you can get here is if you are required and not present
+        if value.nil?
+          # Only way you can get here is if you are required and nil
           raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
+        else
+          yield(field, value) 
         end
       end
     end
@@ -336,12 +336,7 @@ module Protobuf
     end
 
     def __field_must_be_serialized__?(field)
-      field.required? || __field_value_is_present__?(field)
-    end
-
-    def __field_value_is_present__?(field)
-      value = @values[field.name]
-      !value.nil? && (value.present? || [true, false].include?(value))
+      field.required? || !@values[field.name].nil?
     end
 
     # Encode key and value, and write to +stream+.
