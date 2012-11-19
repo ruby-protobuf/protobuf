@@ -176,7 +176,7 @@ This means that the client's `on_failure` callback will be invoked instead of th
 Service Filters provides ActionController-style filter support to service instances, specifically adding `before_filter`, `after_filter`, and `around_filter`.
 
 ```ruby
-require lib/foo/user.pb
+require 'lib/foo/user.pb'
 
 class Foo::UserService
   before_filter :start_request_timer
