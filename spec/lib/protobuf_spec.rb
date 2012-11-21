@@ -3,6 +3,22 @@ require 'protobuf'
 
 describe ::Protobuf do
 
+  describe '.client_host' do
+    after { ::Protobuf.instance_variable_set(:@_client_host, nil) }
+
+    subject { ::Protobuf.client_host }
+
+    context 'when client_host is not pre-configured' do
+      it { should eq `hostname`.chomp }
+    end
+
+    context 'when client_host is pre-configured' do
+      let(:hostname) { 'override.myhost.com' }
+      before { ::Protobuf.client_host = hostname }
+      it { should eq hostname }
+    end
+  end
+
   describe '.connector_type' do
     before { described_class.instance_variable_set(:@_connector_type, nil) }
 
