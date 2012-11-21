@@ -14,12 +14,12 @@ module Protobuf
         start
       end
 
-      def client=(peer)
-        @client = {:port => peer[0], :ip => peer[1]}
+      def client=(client_host)
+        @client = client_host
       end
 
       def client
-        @client ? "#{@client[:ip]}:#{@client[:port]}" : nil
+        @client || nil
       end
 
       def method_name

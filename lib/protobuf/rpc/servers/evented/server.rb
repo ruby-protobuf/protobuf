@@ -31,10 +31,6 @@ module Protobuf
           log_debug { sign_message("sending data: #{response_buffer.inspect}") }
           super(response_buffer.write)
         end
-
-        def set_peer
-          @stats.client = ::Socket.unpack_sockaddr_in(get_peername)
-        end
       end
     end
   end
