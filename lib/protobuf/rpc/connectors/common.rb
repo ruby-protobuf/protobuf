@@ -11,6 +11,10 @@ module Protobuf
           end
         end
 
+        def request_caller
+          @options[:client_host] || ::Protobuf.client_host
+        end
+
         def complete
           @stats.stop
           log_info { @stats.to_s }
@@ -101,21 +105,21 @@ module Protobuf
           fail(:RPC_ERROR, "Connection error: #{e.message}")
         end
 
-        def rpc_request_data
-          validate_request_type
+        def request_bytes
+          validate_request_type!
+          fields = { :service_name => @options[:service].name,
+                     :method_name => @options[:method].to_s,
+                     :request_proto => @options[:request],
+                     :caller => request_caller }
 
-          return ::Protobuf::Socketrpc::Request.new(
-            :service_name => @options[:service].name,
-            :method_name => @options[:method].to_s,
-            :request_proto => @options[:request]
-          ).serialize_to_string
+          return ::Protobuf::Socketrpc::Request.new(fields).serialize_to_string
         rescue => e
           fail(:INVALID_REQUEST_PROTO, "Could not set request proto: #{e.message}")
         end
 
         def setup_connection
           initialize_stats
-          @request_data = rpc_request_data
+          @request_data = request_bytes
         end
 
         def succeed(response)
@@ -129,7 +133,7 @@ module Protobuf
           complete
         end
 
-        def validate_request_type
+        def validate_request_type!
           unless @options[:request].class == @options[:request_type]
             expected = @options[:request_type].name
             actual = @options[:request].class.name
@@ -138,13 +142,13 @@ module Protobuf
         end
 
         def verify_callbacks
-          if !any_callbacks?
+          unless any_callbacks?
             log_debug { sign_message("No callbacks set, using data_callback") }
             @success_cb = @failure_cb = self.method(:data_callback)
           end
         end
 
-        def verify_options
+        def verify_options!
           # Verify the options that are necessary and merge them in
           [:service, :method, :host, :port].each do |opt|
             fail(:RPC_ERROR, "Invalid client connection configuration. #{opt} must be a defined option.") if @options[opt].nil?
