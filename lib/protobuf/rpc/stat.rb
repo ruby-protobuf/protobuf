@@ -47,7 +47,7 @@ module Protobuf
       end
 
       def stop
-        start if !@start_time
+        start unless @start_time
         @end_time ||= Time.now
       end
 
