@@ -21,6 +21,21 @@ describe Protobuf::Message do
   end
 
   describe '#encode' do
+    context "encoding" do 
+      it "accepts UTF-8 strings into string fields" do
+        message = ::Test::Resource.new(:name => "Kyle Redfearn\u0060s iPad")
+
+        expect { message.serialize_to_string }.to_not raise_error
+      end
+
+      it "trims unicode characters from string fields" do
+        message = ::Test::Resource.new(:name => "my name\xc3")
+        new_message = ::Test::Resource.new
+        new_message.parse_from_string(message.serialize_to_string)
+        new_message.name.should eq("my name")
+      end
+    end
+
     context "when there's no value for a required field" do
       let(:message) { ::Test::Resource.new }
 
