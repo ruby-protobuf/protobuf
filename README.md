@@ -14,6 +14,8 @@ So let's dive in and see how to work with all three.
 
 ## 1. Generating ruby classes from `.proto` files
 
+_The `protobuf` package is required for compilation. Mac: `brew install protobuf`, Ubuntu: `sudo apt-get install -y protobuf`_
+
 Protocol Buffers are great because they allow you to clearly define data storage or data transfer packets. Google officially supports Java, C++, and Python for compilation and usage. Let's make it ruby aware!
 
 Let's say you have a `defs.proto` file that defines a User message.
@@ -24,9 +26,11 @@ message User {
   required string first_name = 1;
   required string last_name = 2;
 }
+```
 
 Now let's compile that definition to ruby:
 
+```
 $ rprotoc defs.proto --ruby_out ./lib
 ```
 
