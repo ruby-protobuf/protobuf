@@ -14,7 +14,6 @@ module Protobuf
         @request = ::Protobuf::Socketrpc::Request.new
         @response = ::Protobuf::Socketrpc::Response.new
         @stats = Protobuf::Rpc::Stat.new(:SERVER)
-        set_peer
       end
 
       def disable_gc!
@@ -25,12 +24,11 @@ module Protobuf
         ::GC.enable && ::GC.start if ::Protobuf.gc_pause_server_request?
       end
 
-      # no-op, implemented by including class if desired.
-      def set_peer; end
-
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
         parse_request_from_buffer
+        @stats.client = @request.caller
+
         @dispatcher = ::Protobuf::Rpc::ServiceDispatcher.new(@request)
         @stats.dispatcher = @dispatcher
 

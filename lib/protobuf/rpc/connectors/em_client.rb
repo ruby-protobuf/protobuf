@@ -17,7 +17,7 @@ module Protobuf
           @failure_cb = failure_cb
           @options = DEFAULT_OPTIONS.merge(options)
           @response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
-          verify_options
+          verify_options!
 
           log_debug { sign_message("Client Initialized: #{options.inspect}") }
         rescue => e

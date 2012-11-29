@@ -10,20 +10,23 @@ describe Protobuf::Rpc::Connectors::Common do
     end
   end
 
-  subject{ @subject ||= common_class.new({}) }
+  let(:subject_options) { {} }
+
+  subject { @subject ||= common_class.new(subject_options) }
 
   context "API" do
-    specify{ subject.respond_to?(:any_callbacks?).should be_true }
-    specify{ subject.respond_to?(:data_callback).should be_true }
-    specify{ subject.respond_to?(:error).should be_true }
-    specify{ subject.respond_to?(:fail).should be_true }
-    specify{ subject.respond_to?(:complete).should be_true }
-    specify{ subject.respond_to?(:parse_response).should be_true }
-    specify{ subject.respond_to?(:verify_options).should be_true }
-    specify{ subject.respond_to?(:verify_callbacks).should be_true }
+    specify { subject.respond_to?(:any_callbacks?).should be_true }
+    specify { subject.respond_to?(:request_caller).should be_true }
+    specify { subject.respond_to?(:data_callback).should be_true }
+    specify { subject.respond_to?(:error).should be_true }
+    specify { subject.respond_to?(:fail).should be_true }
+    specify { subject.respond_to?(:complete).should be_true }
+    specify { subject.respond_to?(:parse_response).should be_true }
+    specify { subject.respond_to?(:verify_options!).should be_true }
+    specify { subject.respond_to?(:verify_callbacks).should be_true }
   end
 
-  context "#any_callbacks?" do
+  describe "#any_callbacks?" do
 
     [:@complete_cb, :@success_cb, :@failure_cb].each do |cb|
       it "returns true if #{cb} is provided" do
@@ -42,7 +45,19 @@ describe Protobuf::Rpc::Connectors::Common do
 
   end
 
-  context "#data_callback" do
+  describe '#request_caller' do
+    its(:request_caller) { should eq ::Protobuf.client_host }
+
+    context 'when "client_host" option is given to initializer' do
+      let(:hostname) { 'myhost.myserver.com' }
+      let(:subject_options) { { :client_host => hostname } }
+
+      its(:request_caller) { should_not eq ::Protobuf.client_host }
+      its(:request_caller) { should eq hostname }
+    end
+  end
+
+  describe "#data_callback" do
     it "changes state to use the data callback" do
       subject.data_callback("data")
       subject.instance_variable_get(:@used_data_callback).should be_true
@@ -54,7 +69,28 @@ describe Protobuf::Rpc::Connectors::Common do
     end
   end
 
-  context "#verify_callbacks" do
+  describe '#request_bytes' do
+    let(:service) { Test::ResourceService }
+    let(:method) { :find }
+    let(:request) { '' }
+    let(:client_host) { 'myhost.myservice.com' }
+    let(:subject_options) { { :service => service,
+                              :method => method,
+                              :request => request,
+                              :client_host => client_host } }
+
+    let(:expected) { ::Protobuf::Socketrpc::Request.new({ :service_name => service.name,
+                                                          :method_name => 'find',
+                                                          :request_proto => '',
+                                                          :caller => client_host }) }
+
+    before { subject.stub(:validate_request_type!).and_return(true) }
+    before { subject.should_not_receive(:fail) }
+
+    its(:request_bytes) { should eq expected.serialize_to_string }
+  end
+
+  describe "#verify_callbacks" do
 
     it "sets @failure_cb to #data_callback when no callbacks are defined" do
       subject.verify_callbacks

@@ -74,7 +74,7 @@ module Protobuf
                   client, sockaddr = @server.accept
                   @listen_fds << client
                 else
-                  if !@working.include?(client)
+                  unless @working.include?(client)
                     @working << @listen_fds.delete(client)
                     log_debug { sign_message("Working")  }
                     @threads << { :thread => new_worker(client), :socket => client }

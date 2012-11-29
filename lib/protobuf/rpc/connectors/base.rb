@@ -9,14 +9,15 @@ module Protobuf
   module Rpc
     module Connectors
       DEFAULT_OPTIONS = {
-        :service        => nil,           # Service to invoke
-        :method         => nil,           # Service method to call
-        :host           => '127.0.0.1',   # A default host (usually overridden)
-        :port           => '9399',        # A default port (usually overridden)
+        :service        => nil,           # Fully-qualified Service class
+        :method         => nil,           # Service method to invoke
+        :host           => '127.0.0.1',   # The hostname or address of the service (usually overridden or pre-configured)
+        :port           => '9399',        # The port of the service (usually overridden or pre-configured)
         :request        => nil,           # The request object sent by the client
         :request_type   => nil,           # The request type expected by the client
         :response_type  => nil,           # The response type expected by the client
-        :timeout        => 30             # The default timeout for the request, also handled by client.rb
+        :timeout        => 30,            # The default timeout for the request, also handled by client.rb
+        :client_host    => nil            # The hostname or address of this client
       }
 
       class Base
