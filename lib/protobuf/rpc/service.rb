@@ -15,8 +15,6 @@ module Protobuf
       include ::Protobuf::Logger::LogMethods
 
 
-      attr_reader :response, :rpc
-
       DEFAULT_HOST = '127.0.0.1'.freeze
       DEFAULT_PORT = 9399
 
@@ -102,23 +100,26 @@ module Protobuf
       # Instance Methods
       #
 
+      attr_reader :response, :method_name, :client_host
+
       # Initialize a service with the rpc endpoint name and the bytes
       # for the request.
-      def initialize(rpc, request_bytes)
-        @rpc = rpc
-        @request_bytes = request_bytes
+      def initialize(method_name, request_bytes, client_host = nil)
+        @method_name = method_name
+        @client_host = client_host
+        @_request_bytes = request_bytes
       end
 
       # Register a failure callback for use when rpc_failed is invoked.
       #
       def on_rpc_failed(callable)
-        @rpc_failed_callback ||= callable
+        @_rpc_failed_callback ||= callable
       end
 
       # Response object for this rpc cycle. Not assignable.
       #
       def response
-        @_response ||= rpcs[@rpc].response_type.new
+        @_response ||= response_type.new
       end
 
       # Convenience method to get back to class method.
@@ -144,16 +145,24 @@ module Protobuf
 
       private
 
+      def response_type
+        @_response_type ||= rpcs[@method_name].response_type
+      end
+
       # Request object for this rpc cycle. Not assignable.
       #
       def request
-        @_request ||= if @request_bytes.present?
-            rpcs[@rpc].request_type.new.parse_from_string(@request_bytes)
+        @_request ||= if @_request_bytes.present?
+            request_type.new.parse_from_string(@_request_bytes)
           else
-            rpcs[@rpc].request_type.new
+            request_type.new
           end
       rescue => e
         raise BadRequestProto, "Unable to parse request: #{e.message}"
+      end
+
+      def request_type
+        @_request_type ||= rpcs[@method_name].request_type
       end
 
       # Sugar to make an rpc method feel like a controller method.
@@ -165,10 +174,22 @@ module Protobuf
       end
       alias_method :return_from_whence_you_came, :respond_with
 
+      # Renamed attribute from prior implementaiton due to lack of clarity
+      # in what the variable contained. DEPRECATED.
+      def rpc
+        if ::Protobuf.print_deprecation_warnings?
+          $stderr.puts <<-ERROR
+            [WARNING] Service#rpc method has been deprecated
+                      and will be removed in a future version of protobuf.
+          ERROR
+        end
+        @method_name
+      end
+
       # Automatically fail a service method.
       #
       def rpc_failed(message)
-        @rpc_failed_callback.call(message)
+        @_rpc_failed_callback.call(message)
       end
 
     end

@@ -29,7 +29,7 @@ module Protobuf
         def handle_request(socket)
           @request_data = ''
           zmq_error_check(socket.recv_string(@request_data))
-          log_debug { sign_message("handling request") } if !@request_data.nil?
+          log_debug { sign_message("handling request") } unless @request_data.nil?
         end
 
         def run

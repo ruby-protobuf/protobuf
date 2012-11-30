@@ -14,6 +14,19 @@ module Protobuf
 
 	module_function
 
+  # Client Host
+  #
+  # Default: `hostname` of the system
+  #
+  # The name or address of the host to use during client RPC calls.
+  def self.client_host
+    @_client_host ||= `hostname`.chomp
+  end
+
+  def self.client_host=(host)
+    @_client_host = host
+  end
+
   # Connector Type
   #
   # Default: socket

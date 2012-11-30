@@ -52,10 +52,6 @@ module Protobuf
           @_log_signature ||= "server-#{self.class}-#{object_id}"
         end
 
-        def set_peer
-          @stats.client = ::Socket.unpack_sockaddr_in(@socket.getpeername)
-        end
-
         def socket_writable?
           ! @socket.nil? && ! @socket.closed?
         end

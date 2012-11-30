@@ -74,7 +74,7 @@ module Protobuf
         request_proto = outer_request.has_field?(:request_proto) ? outer_request.request_proto : nil
 
         if service_klass.rpc_method?(method_name)
-          self.service = service_klass.new(method_name, request_proto)
+          self.service = service_klass.new(method_name, request_proto, outer_request.caller)
           self.callable_method = service.callable_rpc_method(method_name)
           self.definition = service.rpcs[method_name]
         else
