@@ -3,127 +3,134 @@ require 'protobuf/cli'
 
 describe ::Protobuf::CLI do
 
-	let(:app_file) do
-		File.expand_path('../../../support/test_app_file.rb', __FILE__)
-	end
+  let(:app_file) do
+    File.expand_path('../../../support/test_app_file.rb', __FILE__)
+  end
 
-	before do
-		::Protobuf::Rpc::SocketRunner.stub(:run)
-		::Protobuf::Rpc::ZmqRunner.stub(:run)
-		::Protobuf::Rpc::EventedRunner.stub(:run)
-	end
+  before do
+    ::Protobuf::Rpc::SocketRunner.stub(:run)
+    ::Protobuf::Rpc::ZmqRunner.stub(:run)
+    ::Protobuf::Rpc::EventedRunner.stub(:run)
+  end
 
-	describe '#start' do
-		let(:base_args) { [ 'start', app_file ] }
-		let(:test_args) { [] }
-		let(:args) { base_args + test_args }
+  describe '#start' do
+    let(:base_args) { [ 'start', app_file ] }
+    let(:test_args) { [] }
+    let(:args) { base_args + test_args }
 
-		context 'host option' do
-			let(:test_args) { [ '--host=123.123.123.123' ] }
+    context 'host option' do
+      let(:test_args) { [ '--host=123.123.123.123' ] }
 
-			it 'sends the host option to the runner' do
-				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options[:host].should eq '123.123.123.123'
-				end
-				described_class.start(args)
-			end
-		end
+      it 'sends the host option to the runner' do
+        ::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
+          options[:host].should eq '123.123.123.123'
+        end
+        described_class.start(args)
+      end
+    end
 
-		context 'port option' do
-			let(:test_args) { [ '--port=12345' ] }
+    context 'port option' do
+      let(:test_args) { [ '--port=12345' ] }
 
-			it 'sends the port option to the runner' do
-				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options[:port].should eq 12345
-				end
-				described_class.start(args)
-			end
-		end
+      it 'sends the port option to the runner' do
+        ::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
+          options[:port].should eq 12345
+        end
+        described_class.start(args)
+      end
+    end
 
-		context 'threads option' do
-			let(:test_args) { [ '--threads=500' ] }
+    context 'threads option' do
+      let(:test_args) { [ '--threads=500' ] }
 
-			it 'sends the threads option to the runner' do
-				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options[:threads].should eq 500
-				end
-				described_class.start(args)
-			end
-		end
+      it 'sends the threads option to the runner' do
+        ::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
+          options[:threads].should eq 500
+        end
+        described_class.start(args)
+      end
+    end
 
-		context 'backlog option' do
-			let(:test_args) { [ '--backlog=500' ] }
+    context 'backlog option' do
+      let(:test_args) { [ '--backlog=500' ] }
 
-			it 'sends the backlog option to the runner' do
-				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options[:backlog].should eq 500
-				end
-				described_class.start(args)
-			end
-		end
+      it 'sends the backlog option to the runner' do
+        ::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
+          options[:backlog].should eq 500
+        end
+        described_class.start(args)
+      end
+    end
 
-		context 'threshold option' do
-			let(:test_args) { [ '--threshold=500' ] }
+    context 'threshold option' do
+      let(:test_args) { [ '--threshold=500' ] }
 
-			it 'sends the backlog option to the runner' do
-				::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
-					options[:threshold].should eq 500
-				end
-				described_class.start(args)
-			end
-		end
+      it 'sends the backlog option to the runner' do
+        ::Protobuf::Rpc::SocketRunner.should_receive(:run) do |options|
+          options[:threshold].should eq 500
+        end
+        described_class.start(args)
+      end
+    end
 
-		context 'log options' do
-			let(:test_args) { [ '--log=mylog.log', '--level=0' ] }
+    context 'log options' do
+      let(:test_args) { [ '--log=mylog.log', '--level=0' ] }
 
-			it 'sends the log file and level options to the runner' do
-				::Protobuf::Logger.should_receive(:configure) do |options|
-					options[:file].should eq 'mylog.log'
-					options[:level].should eq 0
-				end
-				described_class.start(args)
-			end
+      it 'sends the log file and level options to the runner' do
+        ::Protobuf::Logger.should_receive(:configure) do |options|
+          options[:file].should eq 'mylog.log'
+          options[:level].should eq 0
+        end
+        described_class.start(args)
+      end
 
-			context 'when debugging' do
-				let(:test_args) { [ '--level=3', '--debug' ] }
+      context 'when debugging' do
+        let(:test_args) { [ '--level=3', '--debug' ] }
 
-				it 'overrides the log-level to DEBUG' do
-					::Protobuf::Logger.should_receive(:configure) do |options|
-						options[:level].should eq ::Logger::DEBUG
-					end
-					described_class.start(args)
-				end
-			end
-		end
+        it 'overrides the log-level to DEBUG' do
+          ::Protobuf::Logger.should_receive(:configure) do |options|
+            options[:level].should eq ::Logger::DEBUG
+          end
+          described_class.start(args)
+        end
+      end
+    end
 
-		context 'gc options' do
+    context 'gc options' do
 
-			context 'when gc options are not present' do
-				let(:test_args) { [] }
+      context 'when gc options are not present' do
+        let(:test_args) { [] }
 
-				it 'sets both request and serialization pausing to false' do
-					described_class.start(args)
-					::Protobuf.gc_pause_server_request?.should be_false
-				end
-			end
+        it 'sets both request and serialization pausing to false' do
+          described_class.start(args)
+          ::Protobuf.gc_pause_server_request?.should be_false
+        end
+      end
 
-			context 'request pausing' do
-				let(:test_args) { [ '--gc_pause_request' ] }
+      context 'request pausing' do
+        let(:test_args) { [ '--gc_pause_request' ] }
 
-				it 'sets the configuration option to GC pause server request' do
-					described_class.start(args)
-					::Protobuf.gc_pause_server_request?.should be_true
-				end
-			end
-		end
+        it 'sets the configuration option to GC pause server request' do
+          described_class.start(args)
+          ::Protobuf.gc_pause_server_request?.should be_true
+        end
+      end
+    end
 
-		context 'deprecation options' do
+    context 'deprecation options' do
       context 'when not given' do
         let(:test_args) { [] }
 
         it 'sets the deprecation warning flag to its default value' do
           described_class.start(args)
-					::Protobuf.print_deprecation_warnings?.should be_true
+          ::Protobuf.print_deprecation_warnings?.should be_true
+        end
+
+        it 'sets the deprecation warning flag to false if ENV["PB_IGNORE_DEPRECATIONS"] is present' do
+          ENV["PB_IGNORE_DEPRECATIONS"] = "1"
+          described_class.start(args)
+          ::Protobuf.print_deprecation_warnings?.should be_false
+          ENV.delete("PB_IGNORE_DEPRECATIONS")
         end
       end
 
@@ -132,7 +139,7 @@ describe ::Protobuf::CLI do
 
         it 'sets the deprecation warning flag to true' do
           described_class.start(args)
-					::Protobuf.print_deprecation_warnings?.should be_true
+          ::Protobuf.print_deprecation_warnings?.should be_true
         end
       end
 
@@ -141,72 +148,72 @@ describe ::Protobuf::CLI do
 
         it 'sets the deprecation warning flag to false' do
           described_class.start(args)
-					::Protobuf.print_deprecation_warnings?.should be_false
+          ::Protobuf.print_deprecation_warnings?.should be_false
         end
       end
-		end
+    end
 
-		context 'run modes' do
+    context 'run modes' do
 
-			context 'socket' do
-				let(:test_args) { [ '--socket' ] }
+      context 'socket' do
+        let(:test_args) { [ '--socket' ] }
 
-				before do
-					::Protobuf::Rpc::EventedRunner.should_not_receive(:run)
-					::Protobuf::Rpc::ZmqRunner.should_not_receive(:run)
-				end
+        before do
+          ::Protobuf::Rpc::EventedRunner.should_not_receive(:run)
+          ::Protobuf::Rpc::ZmqRunner.should_not_receive(:run)
+        end
 
-				it 'is activated by the --socket switch' do
-					::Protobuf::Rpc::SocketRunner.should_receive(:run)
-					described_class.start(args)
-				end
+        it 'is activated by the --socket switch' do
+          ::Protobuf::Rpc::SocketRunner.should_receive(:run)
+          described_class.start(args)
+        end
 
-				it 'configures the connector type to be socket' do
+        it 'configures the connector type to be socket' do
           load "protobuf/socket.rb"
-					::Protobuf.connector_type.should == :socket
-				end
-			end
+          ::Protobuf.connector_type.should == :socket
+        end
+      end
 
-			context 'evented' do
-				let(:test_args) { [ '--evented' ] }
+      context 'evented' do
+        let(:test_args) { [ '--evented' ] }
 
-				before do
-					::Protobuf::Rpc::SocketRunner.should_not_receive(:run)
-					::Protobuf::Rpc::ZmqRunner.should_not_receive(:run)
-				end
+        before do
+          ::Protobuf::Rpc::SocketRunner.should_not_receive(:run)
+          ::Protobuf::Rpc::ZmqRunner.should_not_receive(:run)
+        end
 
-				it 'is activated by the --evented switch' do
-					::Protobuf::Rpc::EventedRunner.should_receive(:run)
-					described_class.start(args)
-				end
+        it 'is activated by the --evented switch' do
+          ::Protobuf::Rpc::EventedRunner.should_receive(:run)
+          described_class.start(args)
+        end
 
-				it 'configures the connector type to be evented' do
+        it 'configures the connector type to be evented' do
           load "protobuf/evented.rb"
-					::Protobuf.connector_type.should == :evented
-				end
-			end
+          ::Protobuf.connector_type.should == :evented
+        end
+      end
 
-			context 'zmq' do
-				let(:test_args) { [ '--zmq' ] }
+      context 'zmq' do
+        let(:test_args) { [ '--zmq' ] }
 
-				before do
-					::Protobuf::Rpc::SocketRunner.should_not_receive(:run)
-					::Protobuf::Rpc::EventedRunner.should_not_receive(:run)
-				end
+        before do
+          ::Protobuf::Rpc::SocketRunner.should_not_receive(:run)
+          ::Protobuf::Rpc::EventedRunner.should_not_receive(:run)
+        end
 
-				it 'is activated by the --zmq switch' do
-					::Protobuf::Rpc::ZmqRunner.should_receive(:run)
-					described_class.start(args)
-				end
+        it 'is activated by the --zmq switch' do
+          ::Protobuf::Rpc::ZmqRunner.should_receive(:run)
+          described_class.start(args)
+        end
 
-				it 'configures the connector type to be zmq' do
+        it 'configures the connector type to be zmq' do
           load "protobuf/zmq.rb"
-					::Protobuf.connector_type.should == :zmq
-				end
-			end
+          ::Protobuf.connector_type.should == :zmq
+        end
+      end
 
-		end
+    end
 
-	end
+  end
 
 end
