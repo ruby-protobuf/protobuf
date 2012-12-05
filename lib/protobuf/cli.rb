@@ -31,7 +31,7 @@ module Protobuf
 
     option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
     option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
-    option :print_deprecation_warnings, :type => :boolean, :default => true, :desc => 'Cause use of deprecated fields to be printed or ignored.'
+    option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
 
     def start(app_file)
       debug_say 'Configuring the rpc_server process'
@@ -61,13 +61,23 @@ module Protobuf
 
       # Tell protobuf how to handle the printing of deprecated field usage.
       def configure_deprecation_warnings
-        ::Protobuf.print_deprecation_warnings = options.print_deprecation_warnings?
+        if options.print_deprecation_warnings.nil?
+          ::Protobuf.print_deprecation_warnings = !ENV.key?("PB_IGNORE_DEPRECATIONS")
+        else
+          ::Protobuf.print_deprecation_warnings = options.print_deprecation_warnings?
+        end
       end
 
       # If we pause during request we don't need to pause in serialization
       def configure_gc
         debug_say 'Configuring gc'
-        ::Protobuf.gc_pause_server_request = options.gc_pause_request?
+
+        if defined?(JRUBY_VERSION)
+          # GC.enable/disable are noop's on Jruby
+          ::Protobuf.gc_pause_server_request = false
+        else
+          ::Protobuf.gc_pause_server_request = options.gc_pause_request?
+        end
       end
 
       # Setup the protobuf logger.

@@ -121,9 +121,16 @@ describe ::Protobuf::CLI do
       context 'when not given' do
         let(:test_args) { [] }
 
-        it 'sets the deprecation warning flag to its default value' do
+        it 'sets the deprecation warning flag to true when no ENV is present and no command line option' do
           described_class.start(args)
           ::Protobuf.print_deprecation_warnings?.should be_true
+        end
+
+        it 'sets the deprecation warning flag to false if ENV["PB_IGNORE_DEPRECATIONS"] is present' do
+          ENV["PB_IGNORE_DEPRECATIONS"] = "1"
+          described_class.start(args)
+          ::Protobuf.print_deprecation_warnings?.should be_false
+          ENV.delete("PB_IGNORE_DEPRECATIONS")
         end
       end
 
@@ -166,6 +173,7 @@ describe ::Protobuf::CLI do
           ENV['PB_SERVER_TYPE'] = "Socket"
           runner.should_receive(:run)
           described_class.start(args)
+          ENV.delete('PB_SERVER_TYPE')
         end
 
         it 'configures the connector type to be socket' do
@@ -192,6 +200,7 @@ describe ::Protobuf::CLI do
           ENV['PB_SERVER_TYPE'] = "Evented"
           runner.should_receive(:run)
           described_class.start(args)
+          ENV.delete('PB_SERVER_TYPE')
         end
 
         it 'configures the connector type to be evented' do
@@ -218,6 +227,7 @@ describe ::Protobuf::CLI do
           ENV['PB_SERVER_TYPE'] = "Zmq"
           runner.should_receive(:run)
           described_class.start(args)
+          ENV.delete('PB_SERVER_TYPE')
         end
 
         it 'configures the connector type to be zmq' do
