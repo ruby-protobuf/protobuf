@@ -121,7 +121,7 @@ describe ::Protobuf::CLI do
       context 'when not given' do
         let(:test_args) { [] }
 
-        it 'sets the deprecation warning flag to its default value' do
+        it 'sets the deprecation warning flag to true when no ENV is present and no command line option' do
           described_class.start(args)
           ::Protobuf.print_deprecation_warnings?.should be_true
         end
