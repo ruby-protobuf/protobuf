@@ -157,6 +157,7 @@ describe ::Protobuf::CLI do
 
       context 'socket' do
         let(:test_args) { [ '--socket' ] }
+        let(:runner) { ::Protobuf::Rpc::SocketRunner }
 
         before do
           ::Protobuf::Rpc::EventedRunner.should_not_receive(:run)
@@ -164,8 +165,15 @@ describe ::Protobuf::CLI do
         end
 
         it 'is activated by the --socket switch' do
-          ::Protobuf::Rpc::SocketRunner.should_receive(:run)
+          runner.should_receive(:run)
           described_class.start(args)
+        end
+
+        it 'is activated by PB_SERVER_TYPE=Socket ENV variable' do 
+          ENV['PB_SERVER_TYPE'] = "Socket"
+          runner.should_receive(:run)
+          described_class.start(args)
+          ENV.delete('PB_SERVER_TYPE')
         end
 
         it 'configures the connector type to be socket' do
@@ -176,6 +184,7 @@ describe ::Protobuf::CLI do
 
       context 'evented' do
         let(:test_args) { [ '--evented' ] }
+        let(:runner) { ::Protobuf::Rpc::EventedRunner }
 
         before do
           ::Protobuf::Rpc::SocketRunner.should_not_receive(:run)
@@ -183,8 +192,15 @@ describe ::Protobuf::CLI do
         end
 
         it 'is activated by the --evented switch' do
-          ::Protobuf::Rpc::EventedRunner.should_receive(:run)
+          runner.should_receive(:run)
           described_class.start(args)
+        end
+
+        it 'is activated by PB_SERVER_TYPE=Evented ENV variable' do 
+          ENV['PB_SERVER_TYPE'] = "Evented"
+          runner.should_receive(:run)
+          described_class.start(args)
+          ENV.delete('PB_SERVER_TYPE')
         end
 
         it 'configures the connector type to be evented' do
@@ -195,6 +211,7 @@ describe ::Protobuf::CLI do
 
       context 'zmq' do
         let(:test_args) { [ '--zmq' ] }
+        let(:runner) { ::Protobuf::Rpc::ZmqRunner }
 
         before do
           ::Protobuf::Rpc::SocketRunner.should_not_receive(:run)
@@ -202,8 +219,15 @@ describe ::Protobuf::CLI do
         end
 
         it 'is activated by the --zmq switch' do
-          ::Protobuf::Rpc::ZmqRunner.should_receive(:run)
+          runner.should_receive(:run)
           described_class.start(args)
+        end
+
+        it 'is activated by PB_SERVER_TYPE=Zmq ENV variable' do 
+          ENV['PB_SERVER_TYPE'] = "Zmq"
+          runner.should_receive(:run)
+          described_class.start(args)
+          ENV.delete('PB_SERVER_TYPE')
         end
 
         it 'configures the connector type to be zmq' do

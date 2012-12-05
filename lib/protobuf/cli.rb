@@ -101,15 +101,24 @@ module Protobuf
       def configure_server_mode
         debug_say 'Configuring runner mode'
         if options.zmq? && ! options.evented? && ! options.socket?
-          @mode = :zmq
-          @runner = ::Protobuf::Rpc::ZmqRunner
+          server_zmq!
         elsif options.evented? && ! options.zmq? && ! options.socket?
-          @mode = :evented
-          @runner = ::Protobuf::Rpc::EventedRunner
+          server_evented!
+        elsif (env_server_type = ENV["PB_SERVER_TYPE"])
+          case
+          when env_server_type =~ /zmq/i then
+            server_zmq!
+          when env_server_type =~ /socket/i then
+            server_socket!
+          when env_server_type =~ /evented/i then
+            server_evented!
+          else
+            say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{env_server_type}'. Defaulting to socket mode.", :yellow
+            server_socket!
+          end
         else
           say 'WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow if multi_mode?
-          @mode = :socket
-          @runner = ::Protobuf::Rpc::SocketRunner
+          server_socket!
         end
       end
 
@@ -181,6 +190,21 @@ module Protobuf
         end
 
         exit(1)
+      end
+
+      def server_evented!
+        @mode = :evented
+        @runner = ::Protobuf::Rpc::EventedRunner
+      end
+
+      def server_socket!
+        @mode = :socket
+        @runner = ::Protobuf::Rpc::SocketRunner
+      end
+
+      def server_zmq!
+        @mode = :zmq
+        @runner = ::Protobuf::Rpc::ZmqRunner
       end
 
       # Start the runner and log the relevant options.
