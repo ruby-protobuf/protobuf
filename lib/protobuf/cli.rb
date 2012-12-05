@@ -67,7 +67,13 @@ module Protobuf
       # If we pause during request we don't need to pause in serialization
       def configure_gc
         debug_say 'Configuring gc'
-        ::Protobuf.gc_pause_server_request = options.gc_pause_request?
+
+        if defined?(JRUBY_VERSION)
+          # GC.enable/disable are noop's on Jruby
+          ::Protobuf.gc_pause_server_request = false
+        else
+          ::Protobuf.gc_pause_server_request = options.gc_pause_request?
+        end
       end
 
       # Setup the protobuf logger.
