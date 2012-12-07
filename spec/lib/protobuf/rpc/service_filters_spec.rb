@@ -55,6 +55,9 @@ describe Protobuf::Rpc::ServiceFilters do
       FilterTest.before_filter(:foo)
     end
 
+    specify { subject.class.should respond_to(:before_filter) }
+    specify { subject.class.should respond_to(:before_action) }
+
     it 'calls filters in the order they were defined' do
       subject.__send__(:run_filters, :endpoint)
       subject.called.should eq [ :verify_before, :foo, :endpoint ]
@@ -286,6 +289,9 @@ describe Protobuf::Rpc::ServiceFilters do
       FilterTest.after_filter(:foo)
     end
 
+    specify { subject.class.should respond_to(:after_filter) }
+    specify { subject.class.should respond_to(:after_action) }
+
     it 'calls filters in the order they were defined' do
       subject.__send__(:run_filters, :endpoint)
       subject.called.should eq [ :endpoint, :verify_after, :foo ]
@@ -319,6 +325,9 @@ describe Protobuf::Rpc::ServiceFilters do
       FilterTest.around_filter(:outer_around)
       FilterTest.around_filter(:inner_around)
     end
+
+    specify { subject.class.should respond_to(:around_filter) }
+    specify { subject.class.should respond_to(:around_action) }
 
     it 'calls filters in the order they were defined' do
       subject.__send__(:run_filters, :endpoint)

@@ -17,6 +17,7 @@ module Protobuf
           define_method "#{type}_filter" do |*args|
             set_filters(type, *args)
           end
+          alias_method "#{type}_action", "#{type}_filter"
         end
 
         # Filters hash keyed based on filter type (e.g. :before, :after, :around),
