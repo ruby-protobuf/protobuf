@@ -40,7 +40,7 @@ module Protobuf
     def self.extensions(range)
       extension_fields.add_range(range)
     end
-    
+
     def self.extension_field_name_to_tag
       @extension_fields_by_name ||= {}
     end
@@ -150,7 +150,7 @@ module Protobuf
     def each_field
       all_fields.each do |field|
         value = __send__(field.name)
-        yield(field, value) 
+        yield(field, value)
       end
     end
 
@@ -164,7 +164,7 @@ module Protobuf
           # Only way you can get here is if you are required and nil
           raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
         else
-          yield(field, value) 
+          yield(field, value)
         end
       end
     end
@@ -217,7 +217,7 @@ module Protobuf
     end
 
     def respond_to_has_and_present?(key)
-      self.respond_to_has?(key) && 
+      self.respond_to_has?(key) &&
         (self.__send__(key).present? || [true, false].include?(self.__send__(key)))
     end
 
@@ -261,8 +261,8 @@ module Protobuf
       return result
     end
 
-    def to_json
-      to_hash.to_json
+    def to_json(options = {})
+      to_hash.to_json(options)
     end
 
     def to_proto
