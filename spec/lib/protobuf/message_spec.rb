@@ -2,26 +2,26 @@ require 'spec_helper'
 
 describe Protobuf::Message do
 
-  describe '#initialize' do 
-    it "does not try to set attributes which have nil values" do 
+  describe '#initialize' do
+    it "does not try to set attributes which have nil values" do
       Test::EnumTestMessage.any_instance.should_not_receive("non_default_enum=")
       test_enum = Test::EnumTestMessage.new(:non_default_enum => nil)
     end
 
-    it "takes a hash as an initialization argument" do 
+    it "takes a hash as an initialization argument" do
       test_enum = Test::EnumTestMessage.new(:non_default_enum => 2)
       test_enum.non_default_enum.should eq(2)
     end
 
-    it "initializes with an object that responds to #to_hash" do 
-      hashie_object = OpenStruct.new(:to_hash => { :non_default_enum => 2 })      
+    it "initializes with an object that responds to #to_hash" do
+      hashie_object = OpenStruct.new(:to_hash => { :non_default_enum => 2 })
       test_enum = Test::EnumTestMessage.new(hashie_object)
       test_enum.non_default_enum.should eq(2)
     end
   end
 
   describe '#encode' do
-    context "encoding" do 
+    context "encoding" do
       it "accepts UTF-8 strings into string fields" do
         message = ::Test::Resource.new(:name => "Kyle Redfearn\u0060s iPad")
 
@@ -46,7 +46,7 @@ describe Protobuf::Message do
       end
     end
 
-    context "repeated fields" do 
+    context "repeated fields" do
       let(:message) { ::Test::Resource.new(:name => "something") }
 
       it "does not raise an error when repeated fields are []" do
@@ -56,24 +56,24 @@ describe Protobuf::Message do
         }.to_not raise_error
       end
 
-      it "sets the value to nil when empty array is passed" do 
+      it "sets the value to nil when empty array is passed" do
         message.repeated_enum = []
         message.instance_variable_get("@values")[:repeated_enum].should be_nil
       end
 
-      it "does not compact the edit original array" do 
+      it "does not compact the edit original array" do
         a = [nil].freeze
         message.repeated_enum = a
         message.repeated_enum.should eq([])
         a.should eq([nil].freeze)
       end
 
-      it "compacts the set array" do 
+      it "compacts the set array" do
         message.repeated_enum = [nil]
         message.repeated_enum.should eq([])
       end
 
-      it "raises TypeError when a non-array replaces it" do 
+      it "raises TypeError when a non-array replaces it" do
         expect {
           message.repeated_enum = 2
         }.to raise_error(/value of type/)
@@ -81,66 +81,66 @@ describe Protobuf::Message do
     end
   end
 
-  describe "boolean predicate methods" do 
+  describe "boolean predicate methods" do
     subject { Test::ResourceFindRequest.new(:name => "resource") }
 
     it { should respond_to(:active?) }
 
-    it "sets the predicate to true when the boolean value is true" do 
+    it "sets the predicate to true when the boolean value is true" do
       subject.active = true
       subject.active?.should be_true
     end
 
-    it "sets the predicate to false when the boolean value is false" do 
+    it "sets the predicate to false when the boolean value is false" do
       subject.active = false
       subject.active?.should be_false
     end
 
-    it "does not put predicate methods on non-boolean fields" do 
+    it "does not put predicate methods on non-boolean fields" do
       Test::ResourceFindRequest.new(:name => "resource").should_not respond_to(:name?)
     end
   end
 
-  describe "#respond_to_and_has?" do 
+  describe "#respond_to_and_has?" do
     subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
 
-    it "is false when the message does not have the field" do 
+    it "is false when the message does not have the field" do
       subject.respond_to_and_has?(:other_field).should be_false
     end
 
-    it "is true when the message has the field" do 
+    it "is true when the message has the field" do
       subject.respond_to_and_has?(:non_default_enum).should be_true
     end
   end
 
-  describe "#respond_to_has_and_present?" do 
+  describe "#respond_to_has_and_present?" do
     subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
 
-    it "is false when the message does not have the field" do 
+    it "is false when the message does not have the field" do
       subject.respond_to_and_has_and_present?(:other_field).should be_false
     end
 
-    it "is false when the field is repeated and a value is not present" do 
+    it "is false when the field is repeated and a value is not present" do
       subject.respond_to_and_has_and_present?(:repeated_enums).should be_false
     end
 
-    it "is false when the field is repeated and the value is empty array" do 
+    it "is false when the field is repeated and the value is empty array" do
       subject.repeated_enums = []
       subject.respond_to_and_has_and_present?(:repeated_enums).should be_false
     end
 
-    it "is true when the field is repeated and a value is present" do 
+    it "is true when the field is repeated and a value is present" do
       subject.repeated_enums = [2]
       subject.respond_to_and_has_and_present?(:repeated_enums).should be_true
     end
 
-    it "is true when the message has the field" do 
+    it "is true when the message has the field" do
       subject.respond_to_and_has_and_present?(:non_default_enum).should be_true
     end
 
-    context "#API" do 
+    context "#API" do
       subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
-        
+
       it { should respond_to(:respond_to_and_has_and_present?) }
       it { should respond_to(:responds_to_and_has_and_present?) }
       it { should respond_to(:responds_to_has?) }
@@ -150,7 +150,7 @@ describe Protobuf::Message do
       it { should respond_to(:respond_to_and_has_present?) }
       it { should respond_to(:responds_to_and_has_present?) }
     end
-   
+
   end
 
   describe '#to_hash' do
@@ -230,13 +230,13 @@ describe Protobuf::Message do
     end
   end
 
-  describe "#define_setter" do 
+  describe "#define_setter" do
     subject { ::Test::Resource.new }
-    it "allows string fields to be set to nil" do 
+    it "allows string fields to be set to nil" do
       expect { subject.name = nil }.to_not raise_error
     end
 
-    it "does not allow string fields to be set to Numeric" do 
+    it "does not allow string fields to be set to Numeric" do
       expect { subject.name = 1}.to raise_error(/name/)
     end
   end

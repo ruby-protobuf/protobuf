@@ -32,6 +32,8 @@ module Protobuf
         @message_class, @rule, @type, @name, @tag = \
           message_class, rule, type, name, tag
 
+        set_rule_predicates
+
         @getter_method_name = name
         @setter_method_name = "#{name}=".to_sym
         @default   = options.delete(:default)
@@ -39,7 +41,6 @@ module Protobuf
         @packed    = repeated? && options.delete(:packed)
         @deprecated = options.delete(:deprecated)
 
-        set_rule_predicates
         set_default_value
         warn_excess_options(options) unless options.empty?
         validate_packed_field if packed?
@@ -165,7 +166,7 @@ module Protobuf
         @message_class.class_eval do
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
-            
+
             if val.is_a?(Array)
               val = val.dup
               val.compact!
@@ -216,7 +217,7 @@ module Protobuf
       end
 
       def set_default_value
-        @default_value = case 
+        @default_value = case
                          when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
                          when required? then nil
                          when optional? then typed_default_value
