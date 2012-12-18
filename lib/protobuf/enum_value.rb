@@ -66,7 +66,7 @@ module Protobuf
       when args.empty? && block_given?
         yield self
       when respond_to?(args.first)
-        __send__(*args)
+        __send__(*args, &block)
       else
         @value.try(*args, &block)
       end
