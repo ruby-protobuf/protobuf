@@ -56,6 +56,22 @@ module Protobuf
       end
     end
 
+    # Re-implement `try` in order to fix the problem where
+    # the underlying fixnum doesn't respond to all methods (e.g. name or value).
+    # If we respond to the first argument, `__send__` the args. Otherwise,
+    # delegate the `try` call to the underlying vlaue fixnum.
+    #
+    def try(*args, &block)
+      case
+      when args.empty? && block_given?
+        yield self
+      when respond_to?(args.first)
+        __send__(*args, &block)
+      else
+        @value.try(*args, &block)
+      end
+    end
+
     def value
       @value
     end
