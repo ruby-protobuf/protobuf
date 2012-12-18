@@ -39,6 +39,8 @@ describe Protobuf::Enum do
     context 'when value is not an applicable type' do
       it 'returns a nil' do
         Test::EnumTestType.fetch(Test::Resource.new).should be_nil
+        Test::EnumTestType.fetch(nil).should be_nil
+        Test::EnumTestType.fetch(false).should be_nil
       end
     end
   end
