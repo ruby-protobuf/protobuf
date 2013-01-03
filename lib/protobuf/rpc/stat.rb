@@ -70,10 +70,10 @@ module Protobuf
       def to_s
         [
           server? ? "[SRV]" : "[CLT]",
+          server? ? client : server,
           rpc,
           elapsed_time,
-          sizes,
-          server? ? server : client
+          sizes
         ].compact.join(' - ')
       end
 
