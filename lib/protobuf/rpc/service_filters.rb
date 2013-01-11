@@ -240,7 +240,12 @@ module Protobuf
             begin
               yield
             rescue *rescue_filters.keys => ex
-              call_or_send(rescue_filters[ex.class], ex)
+              callable = rescue_filters.fetch(ex.class) {
+                mapped_klass = rescue_filters.keys.detect { |child_klass| ex.class < child_klass }
+                rescue_filters[mapped_klass]
+              }
+
+              call_or_send(callable, ex)
             end
           end
         end

@@ -390,6 +390,11 @@ describe Protobuf::Rpc::ServiceFilters do
           raise CustomError3, 'Filter 3 failed'
         end
 
+        def filter_with_runtime_error
+          @called << :filter_with_runtime_error
+          raise RuntimeError, 'Filter with runtime error failed'
+        end
+
         def custom_error_occurred(ex)
           @ex_class = ex.class
           @called << :custom_error_occurred
@@ -453,6 +458,25 @@ describe Protobuf::Rpc::ServiceFilters do
           subject.called.should eq([ :filter_with_error1, :block_rescue_handler ])
           subject.ex_class.should eq CustomError1
         }.to_not raise_error(CustomError1)
+      end
+    end
+
+    context 'when thrown exception inherits from a mapped exception' do
+      before do
+        FilterTest.rescue_from(StandardError) do |service, ex|
+          service.ex_class = ex.class
+          service.called << :standard_error_rescue_handler
+        end
+      end
+      before { FilterTest.before_filter(:filter_with_runtime_error) }
+
+      it 'rescues with the given callable' do
+        expect {
+          subject.should_not_receive(:endpoint)
+          subject.__send__(:run_filters, :endpoint)
+          subject.called.should eq([ :filter_with_runtime_error, :standard_error_rescue_handler ])
+          subject.ex_class.should eq RuntimeError
+        }.to_not raise_error
       end
     end
   end
