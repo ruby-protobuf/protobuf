@@ -52,7 +52,7 @@ module Protobuf
       #
       def normalize(value)
         value = value.to_proto if value.respond_to?(:to_proto)
-        raise TypeError unless @field.acceptable?(value)
+        raise TypeError, "Unacceptable value #{value} for field #{@field.name} of type #{@field.type}" unless @field.acceptable?(value)
 
         if @field.is_a?(::Protobuf::Field::EnumField)
           @field.type.fetch(value)
@@ -65,8 +65,8 @@ module Protobuf
 
       def raise_type_error(val)
         error_text = <<-TYPE_ERROR
-          Expected value of type '#{@field.type}'
-          Got '#{val.class}' for protobuf field #{@field.name}
+          Expected repeated value of type '#{@field.type}'
+          Got '#{val.class}' for repeated protobuf field #{@field.name}
         TYPE_ERROR
 
         raise TypeError, error_text
