@@ -173,8 +173,8 @@ module Protobuf
               val.compact!
             else
               error_text = <<-TYPE_ERROR
-                Expected value of type '#{field.type}'
-                Got '#{val.class}' for protobuf field #{field.name}
+                Expected repeated value of type '#{field.type}'
+                Got '#{val.class}' for repeated protobuf field #{field.name}
               TYPE_ERROR
 
               raise TypeError, error_text
@@ -211,7 +211,7 @@ module Protobuf
             elsif field.acceptable?(val)
               @values[field.name] = val
             else
-              raise TypeError, "unacceptable value #{val} for type #{field.type}"
+              raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type}"
             end
           end
         end
