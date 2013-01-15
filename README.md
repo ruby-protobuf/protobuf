@@ -55,9 +55,9 @@ module Foo
 end
 ```
 
-_Note: The generator will pre-define all the classes empty and then re-open to apply the defined fields. This is an optomization to prevent recursive field errors._
+_Note: The generator will pre-define all the classes empty and then re-open to apply the defined fields. This is an optimization to prevent recursive field errors._
 
-The generated class is now just a plain old ruby object and you can use it however you wish.
+The generated class is now just a plain old ruby object. You can use it however you wish.
 
 ```ruby
 require 'lib/foo/user.pb'
