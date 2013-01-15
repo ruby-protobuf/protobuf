@@ -6,11 +6,11 @@ module Protobuf
       def acceptable?(val)
         case val
         when Symbol then
-          raise TypeError unless @type.const_defined?(val)
+          raise TypeError, "Enum #{val} is not known for type #{@type}" unless @type.const_defined?(val)
         when EnumValue then
-          raise TypeError if val.parent_class != @type
+          raise TypeError, "Enum #{val} is not owned by #{@type}" if val.parent_class != @type
         else
-          raise TypeError unless @type.valid_tag?(val)
+          raise TypeError, "Tag #{val} is not valid for Enum #{@type}" unless @type.valid_tag?(val)
         end
         true
       end
@@ -42,7 +42,7 @@ module Protobuf
               @values.delete(field.name)
             else
               value = field.type.fetch(value)
-              raise TypeError, "Invalid ENUM value: #{orig_value.inspect} for #{field.name}" unless value
+              raise TypeError, "Invalid Enum value: #{orig_value.inspect} for #{field.name}" unless value
 
               @values[field.name] = value
             end

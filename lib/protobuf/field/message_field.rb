@@ -3,7 +3,7 @@ require 'protobuf/field/base_field'
 module Protobuf
   module Field
     class MessageField < BaseField
-      RAISE_TYPE = lambda { |field, val| raise TypeError, "Expected value of type '#{field.type}', but got '#{val.class}'" }
+      RAISE_TYPE = lambda { |field, val| raise TypeError, "Expected value of type '#{field.type}' for field #{field.name}, but got '#{val.class}'" }
 
       ##
       # Public Instance Methods
@@ -18,7 +18,7 @@ module Protobuf
         message.parse_from_string(bytes)
         message
       end
-      
+
       def encode(value)
         bytes = value.serialize_to_string
         result = ::Protobuf::Field::VarintField.encode(bytes.size)
@@ -39,7 +39,7 @@ module Protobuf
         field = self
         @message_class.class_eval do
           define_method("#{field.name}=") do |val|
-            case 
+            case
             when val.nil? then
               @values.delete(field.name)
             when val.is_a?(field.type) then

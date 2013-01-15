@@ -18,7 +18,7 @@ module Protobuf
       end
 
       def decode(bytes)
-        bytes.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING) 
+        bytes.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
         bytes
       end
 
@@ -34,10 +34,12 @@ module Protobuf
               elsif field.acceptable?(val)
                 @values[field.name] = val.dup
               else
-                raise TypeError, "unacceptable value #{val} for type #{field.type}"
+                raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type}"
               end
             rescue NoMethodError => ex
-              raise TypeError, "unacceptable value #{val} for type #{field.type} field #{field.name}"
+              ::Protobuf::Logger.error { ex.message }
+              ::Protobuf::Logger.error { ex.backtrace.join("\n") }
+              raise TypeError, "Got NoMethodError attempting to set #{val} for field #{field.name} of type #{field.type}: #{ex.message}"
             end
           end
         end
@@ -45,7 +47,7 @@ module Protobuf
 
       def encode(value)
         value = value.serialize_to_string if value.is_a?(::Protobuf::Message)
-        value.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING) 
+        value.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 
         string_size = ::Protobuf::Field::VarintField.encode(value.size)
         string_size << value
