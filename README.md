@@ -5,7 +5,7 @@
 
 ***IMPORTANT: Those upgrading from version 1.4.2 to 2.X should read the [UPGRADING.md](https://github.com/localshred/protobuf/blob/master/UPGRADING.md) notes***
 
-Protobuf is an implementation of [Google's protocol buffers][google-pb] in ruby. We currently support version 2.4.0. It's a gem for managing 3 things:
+Protobuf is an implementation of [Google's protocol buffers][google-pb] in ruby. We currently support version 2.4.1 with support for the new 2.5 coming shortly after it becomes final. It's a gem for managing 3 things:
 
 1. Generating ruby classes from `.proto` files.
 2. Provide an RPC mechanism for calling remote services.
