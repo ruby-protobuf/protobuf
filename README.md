@@ -1,5 +1,6 @@
 # protobuf
 
+[![Gem Version](https://badge.fury.io/rb/protobuf.png)](http://badge.fury.io/rb/protobuf)
 [![Build Status](https://secure.travis-ci.org/localshred/protobuf.png?branch=master)](https://travis-ci.org/localshred/protobuf)
 
 ***IMPORTANT: Those upgrading from version 1.4.2 to 2.X should read the [UPGRADING.md](https://github.com/localshred/protobuf/blob/master/UPGRADING.md) notes***
