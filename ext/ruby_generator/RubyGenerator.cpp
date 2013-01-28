@@ -114,7 +114,7 @@ void RubyGenerator::PrintMessage(const Descriptor* descriptor, bool print_fields
   map<string,string> data;
   data["class_name"] = descriptor->name();
 
-  if (print_fields) {
+  if (print_fields && (descriptor->field_count() > 0 || descriptor->extension_count() > 0)) {
     printer_->Print(data, "class $class_name$");
     PrintNewLine();
     printer_->Indent();
