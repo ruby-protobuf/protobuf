@@ -121,16 +121,23 @@ describe ::Protobuf::CLI do
       context 'when not given' do
         let(:test_args) { [] }
 
-        it 'sets the deprecation warning flag to true when no ENV is present and no command line option' do
-          described_class.start(args)
-          ::Protobuf.print_deprecation_warnings?.should be_true
+        context 'when no ENV is present and no command line option' do
+          before { ENV.delete("PB_IGNORE_DEPRECATIONS") }
+
+          it 'sets the deprecation warning flag to true' do
+            described_class.start(args)
+            ::Protobuf.print_deprecation_warnings?.should be_true
+          end
         end
 
-        it 'sets the deprecation warning flag to false if ENV["PB_IGNORE_DEPRECATIONS"] is present' do
-          ENV["PB_IGNORE_DEPRECATIONS"] = "1"
-          described_class.start(args)
-          ::Protobuf.print_deprecation_warnings?.should be_false
-          ENV.delete("PB_IGNORE_DEPRECATIONS")
+        context 'if ENV["PB_IGNORE_DEPRECATIONS"] is present' do
+          before { ENV["PB_IGNORE_DEPRECATIONS"] = "1" }
+          after { ENV.delete("PB_IGNORE_DEPRECATIONS") }
+
+          it 'sets the deprecation warning flag to false ' do
+            described_class.start(args)
+            ::Protobuf.print_deprecation_warnings?.should be_false
+          end
         end
       end
 

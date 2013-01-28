@@ -18,6 +18,9 @@ if ENV["DEBUG"]
   ::Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
 end
 
+# Get rid of the deprecation env var if present (messes with specs).
+ENV.delete("PB_IGNORE_DEPRECATIONS")
+
 ::RSpec.configure do |c|
   c.include(::Sander6::CustomMatchers)
   c.mock_with :rspec
