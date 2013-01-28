@@ -118,7 +118,6 @@ class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
 				}
 				else if (c == 95) { // underscore char
 					segment_end = true;
-					continue;
 				}
 				else if (segment_end) {
 					if (c >= 97 && c <= 122) { // a-z chars
