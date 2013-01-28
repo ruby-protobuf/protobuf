@@ -2,9 +2,10 @@ require 'spec_helper'
 
 describe Protobuf::Enum do
   let(:name) { :THREE }
-  let(:tag) { 3 }
+  let(:tag)  { 3 }
 
   before(:all) do
+    Test::EnumTestType.define(:MINUS_ONE, -1)
     Test::EnumTestType.define(name, tag)
   end
 
@@ -47,7 +48,7 @@ describe Protobuf::Enum do
 
   describe '.enum_by_value' do
     it 'gets the EnumValue corresponding to the given value (tag)' do
-      Test::EnumTestType.enum_by_value(tag).should eq Test::EnumTestType::THREE
+      Test::EnumTestType.enum_by_value(tag).should eq Test::EnumTestType.const_get(name)
     end
   end
 
@@ -82,6 +83,7 @@ describe Protobuf::Enum do
   describe '.values' do
     it 'provides a hash of defined EnumValues' do
       Test::EnumTestType.values.should eq({
+        :MINUS_ONE => Test::EnumTestType::MINUS_ONE,
         :ONE   => Test::EnumTestType::ONE,
         :TWO   => Test::EnumTestType::TWO,
         :THREE => Test::EnumTestType::THREE

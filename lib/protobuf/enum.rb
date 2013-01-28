@@ -7,7 +7,7 @@ module Protobuf
       enum_value = ::Protobuf::EnumValue.new(self, name, value)
       const_set(name, enum_value)
       @values ||= {}
-      @names ||= []
+      @names ||= {}
       @values[name] = enum_value
       @names[value] = name
     end
