@@ -6,3 +6,5 @@ rvm:
   - ruby-head
   - jruby-head
 script: NO_COMPILE_TEST_PROTOS=1 bundle exec rake spec
+before_install:
+ - sudo apt-get install -qq libzmq-dev
