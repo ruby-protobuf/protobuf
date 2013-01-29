@@ -1,8 +1,7 @@
 unless defined?(JRUBY_VERSION)
   begin
     require 'mkmf'
-
-    include_directory = File.expand_path(File.join(File.dirname(__FILE__), "..", "protobuf-2.4.1", "src"))
+    include_directory = File.expand_path(ENV['PROTOC_SRC'] || File.join(File.dirname(__FILE__), "..", "protobuf-2.4.1", "src"))
 
     $CPPFLAGS << " -I#{include_directory}"
     $CPPFLAGS << " -Wall "
