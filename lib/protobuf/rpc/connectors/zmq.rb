@@ -8,7 +8,7 @@ module Protobuf
         include Protobuf::Logger::LogMethods
 
         def send_request
-          ::Timeout.timeout(options[:timeout]) do
+          timeout_wrap do
             setup_connection
             connect_to_rpc_server
             post_init
