@@ -3,27 +3,18 @@ require 'spec_helper'
 describe ::Protobuf::Rpc::Zmq::Worker do
   before(:each) do 
     load 'protobuf/zmq.rb'
-  end
 
-  after(:each) do
-    subject.instance_variable_get(:@socket).close
-    subject.instance_variable_get(:@zmq_context).terminate
+    fake_socket = double
+    fake_socket.should_receive(:connect).and_return(0)
+    fake_socket.should_receive(:send_string).and_return(0)
+
+    fake_context = double
+    fake_context.should_receive(:socket).and_return( fake_socket )
+    ::ZMQ::Context.should_receive(:new).and_return( fake_context )
   end
 
   subject do
     described_class.new({ :host => '127.0.0.1', :port => 9400 })
-  end
-
-  it 'sets the context' do
-    subject.instance_variable_get(:@zmq_context).should be_a(::ZMQ::Context)
-  end
-
-  it 'sets the poller' do
-    subject.instance_variable_get(:@socket).should be_a(::ZMQ::Socket)
-  end
-
-  it 'sets the socket' do
-    subject.instance_variable_get(:@poller).should be_a(::ZMQ::Poller)
   end
 
   describe '#run' do

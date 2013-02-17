@@ -2,6 +2,8 @@ module Protobuf
   module Rpc
     module Zmq
 
+      WORKER_READY_MESSAGE = "WORKER_READY"
+
       module Util
         include ::Protobuf::Logger::LogMethods
         def self.included(base)
