@@ -14,8 +14,6 @@ module Protobuf
             post_init
             read_response
           end
-        ensure
-          @socket.close unless @socket.closed?
         end
 
         def log_signature
