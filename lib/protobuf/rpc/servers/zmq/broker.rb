@@ -28,7 +28,7 @@ module Protobuf
           if available_workers.size > 0
             poller.register(frontend, ::ZMQ::POLLIN) if poller.size < 2
           else
-            poller.delete(frontend)            
+            poller.delete(frontend)
           end
 
           poller.poll(1000)
