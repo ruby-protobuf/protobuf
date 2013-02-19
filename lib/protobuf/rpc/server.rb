@@ -32,6 +32,7 @@ module Protobuf
 
         @dispatcher = ::Protobuf::Rpc::ServiceDispatcher.new(@request)
         @stats.dispatcher = @dispatcher
+        log_info { @stats.to_s }
 
         disable_gc!
         @dispatcher.invoke!
