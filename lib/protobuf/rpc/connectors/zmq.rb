@@ -75,6 +75,7 @@ module Protobuf
         # Trying a number of times, attempt to get a response from the server.
         # If we haven't received a legitimate response in the LAZY_RETRIES number
         # of retries, fail the request.
+        #
         def poll_send_data
           poll_timeout = (options[:timeout] / LAZY_RETRIES) * 1000
 
@@ -136,10 +137,6 @@ module Protobuf
             log_debug { sign_message("Socket closed")  }
             @socket = nil
           end
-        end
-
-        def zmq_context
-          self.class.zmq_context
         end
 
         # Return the ZMQ Context to use for this process.
