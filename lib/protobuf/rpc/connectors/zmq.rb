@@ -16,7 +16,7 @@ module Protobuf
         # Class Constants
         #
 
-        LAZY_RETRIES = 3
+        CLIENT_RETRIES = ENV['PB_CLIENT_RETRIES'] || 3
 
         ##
         # Instance methods
@@ -62,7 +62,7 @@ module Protobuf
           log_debug { sign_message("Establishing connection: #{location}") }
           socket.setsockopt(::ZMQ::LINGER, 0)
           zmq_error_check(socket.connect("tcp://#{location}"), :socket_connect)
-          zmq_error_check(poller.register_readable(socket), :poller_register_socket)
+          zmq_error_check(poller.register_readable(socket), :poller_register_readable)
           log_debug { sign_message("Connection established to #{location}") }
         end
 
@@ -73,13 +73,13 @@ module Protobuf
         end
 
         # Trying a number of times, attempt to get a response from the server.
-        # If we haven't received a legitimate response in the LAZY_RETRIES number
+        # If we haven't received a legitimate response in the CLIENT_RETRIES number
         # of retries, fail the request.
         #
         def poll_send_data
-          poll_timeout = (options[:timeout] / LAZY_RETRIES) * 1000
+          poll_timeout = (options[:timeout] / CLIENT_RETRIES) * 1000
 
-          LAZY_RETRIES.times do |n|
+          CLIENT_RETRIES.times do |n|
             send_data
 
             if poller.poll(poll_timeout) == 1
@@ -132,7 +132,7 @@ module Protobuf
         def socket_close
           if socket
             log_debug { sign_message("Closing Socket")  }
-            zmq_error_check(poller.deregister_readable(socket), :poller_deregister_socket)
+            zmq_error_check(poller.deregister_readable(socket), :poller_deregister_readable)
             zmq_error_check(socket.close, :socket_close)
             log_debug { sign_message("Socket closed")  }
             @socket = nil
