@@ -36,17 +36,16 @@ module Protobuf
           !!@running
         end
 
-        def self.start_worker(failed_worker = false)
-          @threads.select! { |t| t.alive? } if failed_worker
-
-          @threads << Thread.new(self, @worker_options) { |parent_server, worker_options|
+        def self.start_worker
+          @threads << Thread.new(@worker_options) { |worker_options|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run 
+              ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run
             rescue => e
-              if parent_server.running?
-                log_error { parent_server.sign_message("Restart Worker on Exception: #{e.inspect}\n #{e.backtrace}") }
-                parent_server.start_worker(true)
-              end
+              message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join("\n")}"
+              $stderr.puts message
+              log_error { message }
+
+              retry if ::Protobuf::Rpc::Zmq::Server.running?
             end
           }
         end
