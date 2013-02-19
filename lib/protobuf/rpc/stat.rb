@@ -22,6 +22,10 @@ module Protobuf
         @client || nil
       end
 
+      def elapsed_time
+        (start_time && end_time ? "#{(end_time - start_time).round(4)}s" : nil)
+      end
+
       def method_name
         @method_name ||= @dispatcher.try(:service).try(:rpc)
       end
@@ -39,7 +43,7 @@ module Protobuf
       end
 
       def sizes
-        "#{@request_size || 0}B/#{@response_size || 0}B"
+        "#{@request_size || 0}B/#{@response_size || 0}B" if stopped?
       end
 
       def start
@@ -51,12 +55,12 @@ module Protobuf
         @end_time ||= Time.now
       end
 
-      def rpc
-        service && method_name ? "#{service}##{method_name}" : nil
+      def stopped?
+        ! end_time.nil?
       end
 
-      def elapsed_time
-        (start_time && end_time ? "#{(end_time - start_time).round(4)}s" : nil)
+      def rpc
+        service && method_name ? "#{service}##{method_name}" : nil
       end
 
       def server?
@@ -71,10 +75,15 @@ module Protobuf
         [
           server? ? "[SRV]" : "[CLT]",
           server? ? client : server,
+          trace_id,
           rpc,
           elapsed_time,
           sizes
         ].compact.join(' - ')
+      end
+
+      def trace_id
+        Thread.current.object_id.to_s(16)
       end
 
     end
