@@ -52,7 +52,7 @@ module Protobuf
 
           def move_to_backend(socket)
             message_array = []
-            zmq_error_check(socket.recv_strings(message_array))
+            zmq_error_check(socket.recv_strings(message_array), :socket_recv_strings)
 
             backend_message_set = [
               available_workers.shift, # Worker UUID for router
@@ -62,12 +62,12 @@ module Protobuf
               message_array[2] # Client Message payload (request)
             ]
 
-            zmq_error_check(backend.send_strings(backend_message_set))
+            zmq_error_check(backend.send_strings(backend_message_set), :backend_send_strings)
           end
 
           def move_to_frontend(socket)
             message_array = []
-            zmq_error_check(socket.recv_strings(message_array))
+            zmq_error_check(socket.recv_strings(message_array), :socked_recv_strings)
 
             # Push UUID of socket on the available workers queue
             available_workers << message_array[0]
@@ -80,7 +80,7 @@ module Protobuf
                 message_array[4] # Reply payload
               ]
 
-              zmq_error_check(frontend.send_strings(frontend_message_set))
+              zmq_error_check(frontend.send_strings(frontend_message_set), :frontend_send_strings)
             end
           end
 
@@ -90,7 +90,7 @@ module Protobuf
             port = dealer_options[:port]
 
             zmq_backend = context.socket(::ZMQ::ROUTER)
-            zmq_error_check(zmq_backend.bind(bind_address(host, port)))
+            zmq_error_check(zmq_backend.bind(bind_address(host, port)), :zmq_backend_bind)
             zmq_backend
           end
 
@@ -99,7 +99,7 @@ module Protobuf
             port = options[:port]
 
             zmq_frontend = context.socket(::ZMQ::ROUTER)
-            zmq_error_check(zmq_frontend.bind(bind_address(host, port)))
+            zmq_error_check(zmq_frontend.bind(bind_address(host, port)), :zmq_frontend_bind)
             zmq_frontend
           end
 

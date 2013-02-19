@@ -156,8 +156,14 @@ module Protobuf
           log_debug { sign_message("ZMQ Context terminated")  }
         end
 
-        def zmq_error_check(return_code, message)
-          raise "Last ZMQ API call (#{message}) failed at #{caller(1)}" unless return_code >= 0
+        def zmq_error_check(return_code, source)
+          unless ::ZMQ::Util.resultcode_ok?(return_code)
+            raise <<-ERROR
+            Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+
+            #{caller(1).join($/)}
+            ERROR
+          end
         end
 
       end
