@@ -27,7 +27,7 @@ module Protobuf
       end
 
       def method_name
-        @method_name ||= @dispatcher.try(:service).try(:rpc)
+        @method_name ||= @dispatcher.try(:service).try(:method_name)
       end
 
       def server=(peer)
