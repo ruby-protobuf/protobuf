@@ -122,6 +122,18 @@ module Protobuf
         @_response ||= response_type.new
       end
 
+      # Request object for this rpc cycle. Not assignable.
+      #
+      def request
+        @_request ||= if @_request_bytes.present?
+            request_type.new.parse_from_string(@_request_bytes)
+          else
+            request_type.new
+          end
+      rescue => e
+        raise BadRequestProto, "Unable to parse request: #{e.message}"
+      end
+
       # Convenience method to get back to class method.
       #
       def rpc_method?(name)
@@ -147,18 +159,6 @@ module Protobuf
 
       def response_type
         @_response_type ||= rpcs[@method_name].response_type
-      end
-
-      # Request object for this rpc cycle. Not assignable.
-      #
-      def request
-        @_request ||= if @_request_bytes.present?
-            request_type.new.parse_from_string(@_request_bytes)
-          else
-            request_type.new
-          end
-      rescue => e
-        raise BadRequestProto, "Unable to parse request: #{e.message}"
       end
 
       def request_type
