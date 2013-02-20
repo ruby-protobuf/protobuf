@@ -4,7 +4,7 @@ $:.push File.expand_path("./spec", File.dirname(__FILE__))
 require "rubygems"
 require "rubygems/package_task"
 require "bundler/gem_tasks"
-# require "benchmark/tasks"
+require "benchmark/tasks"
 
 require "rspec/core/rake_task"
 

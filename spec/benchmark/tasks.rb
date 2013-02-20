@@ -1,5 +1,6 @@
 require 'benchmark'
-require 'support/all'
+require 'protobuf'
+require 'support/server'
 require 'support/test/resource_service'
 
 begin
@@ -33,11 +34,12 @@ namespace :benchmark do
 
     EventMachine.fiber_run do
       StubServer.new do |server|
-        client = ::Test::ResourceService.client
-
         benchmark_wrapper(global_bench) do |bench|
           bench.report("ES / EC") do
-            (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
+            (1..number_tests.to_i).each do
+              client = ::Test::ResourceService.client
+              client.find(:name => "Test Name" * test_length.to_i, :active => true)
+            end
           end
         end
       end
@@ -51,11 +53,12 @@ namespace :benchmark do
 
     EventMachine.fiber_run do
       StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server|
-        client = ::Test::ResourceService.client(:port => 9399)
-
         benchmark_wrapper(global_bench) do |bench|
           bench.report("SS / EC") do
-            (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
+            (1..number_tests.to_i).each do
+              client = ::Test::ResourceService.client(:port => 9399)
+              client.find(:name => "Test Name" * test_length.to_i, :active => true)
+            end
           end
         end
       end
@@ -69,11 +72,12 @@ namespace :benchmark do
     EM.stop if EM.reactor_running?
 
     StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server|
-      client = ::Test::ResourceService.client(:port => 9399)
-
       benchmark_wrapper(global_bench) do |bench|
         bench.report("SS / SC") do
-          (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
+          (1..number_tests.to_i).each do
+            client = ::Test::ResourceService.client(:port => 9399)
+            client.find(:name => "Test Name" * test_length.to_i, :active => true)
+          end
         end
       end
     end
@@ -86,11 +90,12 @@ namespace :benchmark do
     Thread.pass until EM.reactor_running?
 
     StubServer.new(:port => 9399) do |server|
-      client = ::Test::ResourceService.client(:port => 9399)
-
       benchmark_wrapper(global_bench) do |bench|
         bench.report("ES / SC") do
-          (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
+          (1..number_tests.to_i).each do
+            client = ::Test::ResourceService.client(:port => 9399)
+            client.find(:name => "Test Name" * test_length.to_i, :active => true)
+          end
         end
       end
     end
@@ -102,11 +107,12 @@ namespace :benchmark do
   def zmq_client_zmq_server(number_tests, test_length, global_bench = nil)
     load "protobuf/zmq.rb"
     StubServer.new(:port => 9399, :server => Protobuf::Rpc::Zmq::Server) do |server|
-      client = ::Test::ResourceService.client(:port => 9399)
-
       benchmark_wrapper(global_bench) do |bench|
         bench.report("ZS / ZC") do
-          (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
+          (1..number_tests.to_i).each do |i|
+            client = ::Test::ResourceService.client(:port => 9399)
+            client.find(:name => "Test Name" * test_length.to_i, :active => true)
+          end
         end
       end
       server.stop
