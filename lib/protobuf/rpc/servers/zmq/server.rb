@@ -25,6 +25,9 @@ module Protobuf
 
           @running = true
           log_debug { sign_message("server started") }
+
+          self.register_signals
+
           while self.running? do
             @broker.poll
           end
@@ -32,16 +35,24 @@ module Protobuf
           @broker.teardown if @broker
         end
 
+        def self.register_signals
+          trap(:TTIN) do
+            log_info { sign_message('TTIN received: Starting new worker') }
+            self.start_worker
+            log_info { sign_message("Worker Thread count = #{self.thread_count}") }
+          end
+        end
+
         def self.running?
           !!@running
         end
 
         def self.start_worker
-          @threads << Thread.new(@worker_options) { |worker_options|
+          self.threads << Thread.new(@worker_options) { |worker_options|
             begin
               ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run
             rescue => e
-              message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join("\n")}"
+              message = "Worker Failed, spawning new worker: #{e.inspect}#{$/} #{e.backtrace.join($/)}"
               $stderr.puts message
               log_error { message }
 
@@ -53,12 +64,19 @@ module Protobuf
         def self.stop
           @running = false
 
-          @threads.each do |t|
+          self.threads.each do |t|
             t.join
           end
         end
 
-        @threads ||= []
+        def self.threads
+          @threads ||= []
+        end
+
+        def self.thread_count
+          self.threads.count
+        end
+
       end
     end
   end
