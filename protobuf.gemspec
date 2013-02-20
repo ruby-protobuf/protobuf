@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'eventmachine'
   s.add_development_dependency 'ffi-rzmq'
-  # s.add_development_dependency 'perftools.rb'
+  s.add_development_dependency 'perftools.rb'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-nav'
   s.add_development_dependency 'rake'
