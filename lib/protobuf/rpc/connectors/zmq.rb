@@ -76,6 +76,8 @@ module Protobuf
         # of retries, fail the request.
         #
         def poll_send_data
+          return if error?
+
           poll_timeout = (options[:timeout].to_f / CLIENT_RETRIES.to_f) * 1000
 
           CLIENT_RETRIES.times do |n|
@@ -118,6 +120,8 @@ module Protobuf
         # Send the request data to the remote rpc_server.
         #
         def send_data
+          return if error?
+
           @stats.request_size = @request_data.size
           zmq_error_check(socket.send_string(@request_data), :socket_send_string)
         end
