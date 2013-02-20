@@ -21,7 +21,12 @@ module Protobuf
         end
 
         def log_signature
-          @_log_signature ||= "server-#{self.class}-#{object_id}"
+          unless @_log_signature
+            name = (self.class == Class ? self.name : self.class.name)
+            @_log_signature = "[server-#{name}-#{object_id}]"
+          end
+
+          @_log_signature
         end
 
         def resolve_ip(hostname)

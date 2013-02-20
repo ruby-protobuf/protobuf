@@ -67,7 +67,7 @@ module Protobuf
 
           def move_to_frontend(socket)
             message_array = []
-            zmq_error_check(socket.recv_strings(message_array), :socked_recv_strings)
+            zmq_error_check(socket.recv_strings(message_array), :socket_recv_strings)
 
             # Push UUID of socket on the available workers queue
             available_workers << message_array[0]

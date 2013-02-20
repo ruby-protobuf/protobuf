@@ -16,7 +16,7 @@ module Protobuf
         # Class Constants
         #
 
-        CLIENT_RETRIES = ENV['PB_CLIENT_RETRIES'] || 3
+        CLIENT_RETRIES = (ENV['PB_CLIENT_RETRIES'] || 3)
 
         ##
         # Instance methods
@@ -29,7 +29,6 @@ module Protobuf
         #
         def send_request
           setup_connection
-          connect_to_rpc_server
           poll_send_data
         ensure
           close_connection
@@ -77,17 +76,19 @@ module Protobuf
         # of retries, fail the request.
         #
         def poll_send_data
-          poll_timeout = (options[:timeout] / CLIENT_RETRIES) * 1000
+          poll_timeout = (options[:timeout].to_f / CLIENT_RETRIES.to_f) * 1000
 
           CLIENT_RETRIES.times do |n|
+            connect_to_rpc_server
+            log_debug { sign_message("Sending Request (attempt #{n + 1}, #{socket})") }
             send_data
+            log_debug { sign_message("Request sending complete (attempt #{n + 1}, #{socket})") }
 
             if poller.poll(poll_timeout) == 1
               read_response
               return
             else
               socket_close
-              connect_to_rpc_server
             end
           end
 
@@ -117,10 +118,8 @@ module Protobuf
         # Send the request data to the remote rpc_server.
         #
         def send_data
-          log_debug { sign_message("Sending Request: #{@request_data}") }
           @stats.request_size = @request_data.size
           zmq_error_check(socket.send_string(@request_data), :socket_send_string)
-          log_debug { sign_message("write closed") }
         end
 
         # Setup a ZMQ request socket in the current zmq context.
@@ -132,7 +131,6 @@ module Protobuf
         def socket_close
           if socket
             log_debug { sign_message("Closing Socket")  }
-            zmq_error_check(poller.deregister_readable(socket), :poller_deregister_readable)
             zmq_error_check(socket.close, :socket_close)
             log_debug { sign_message("Socket closed")  }
             @socket = nil
@@ -157,7 +155,7 @@ module Protobuf
         end
 
         def zmq_error_check(return_code, source)
-          unless ::ZMQ::Util.resultcode_ok?(return_code)
+          unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
             raise <<-ERROR
             Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
