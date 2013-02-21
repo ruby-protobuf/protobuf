@@ -83,17 +83,6 @@ describe ::Protobuf::CLI do
         end
         described_class.start(args)
       end
-
-      context 'when debugging' do
-        let(:test_args) { [ '--level=3', '--debug' ] }
-
-        it 'overrides the log-level to DEBUG' do
-          ::Protobuf::Logger.should_receive(:configure) do |options|
-            options[:level].should eq ::Logger::DEBUG
-          end
-          described_class.start(args)
-        end
-      end
     end
 
     context 'gc options' do
