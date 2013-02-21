@@ -13,10 +13,11 @@ module Protobuf
         #
         def self.run(options = {})
           log_debug { sign_message("initializing broker") }
+
           @broker = ::Protobuf::Rpc::Zmq::Broker.new(options)
+
           local_worker_threads = options[:threads]
 
-          @worker_options = options.merge(:port => options[:port] + 1)
           log_debug { sign_message("starting server workers") }
 
           local_worker_threads.times do
@@ -24,12 +25,12 @@ module Protobuf
           end
 
           @running = true
+
           log_debug { sign_message("server started") }
+
           while self.running? do
             @broker.poll
           end
-        ensure
-          @broker.teardown if @broker
         end
 
         def self.running?
@@ -37,15 +38,15 @@ module Protobuf
         end
 
         def self.start_worker
-          @threads << Thread.new(@worker_options) { |worker_options|
+          @threads << Thread.new(@broker) { |broker|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run
+              ::Protobuf::Rpc::Zmq::Worker.new(broker).run
             rescue => e
-              message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join("\n")}"
-              $stderr.puts message
-              log_error { message }
-
-              retry if ::Protobuf::Rpc::Zmq::Server.running?
+              if ::Protobuf::Rpc::Zmq::Server.running?
+                message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join("\n")}"
+                $stderr.puts message
+                log_error { message }
+              end
             end
           }
         end
@@ -56,6 +57,8 @@ module Protobuf
           @threads.each do |t|
             t.join
           end
+
+          @broker.teardown
         end
 
         @threads ||= []
