@@ -9,7 +9,7 @@ describe Protobuf::Rpc::Client do
   context "when using fiber based calls" do
     it "waits for response" do
       EventMachine.fiber_run do
-        StubServer.new(:delay => 1) do |server|
+        StubServer.new(:server => Protobuf::Rpc::Evented::Server, :delay => 1) do |server|
           client = Test::ResourceService.client
           start = now
 
@@ -31,24 +31,31 @@ describe Protobuf::Rpc::Client do
       end
     end
 
-    it "throws and error when call is attempted without 'EventMachine.fiber_run'" do
+    it "throws an error when call is attempted without 'EventMachine.fiber_run'" do
+      error = nil
       subject = Proc.new do
         EventMachine.run do
-          StubServer.new(:delay => 1) do |server|
+          StubServer.new(:server => Protobuf::Rpc::Evented::Server, :delay => 1) do |server|
             client = Test::ResourceService.client
-            client.find(:name => "Test Name", :active => true)
+            client.find(:name => "Test Name", :active => true) do |c|
+              c.on_failure do |err|
+                error = err
+                EM.add_timer(1) { EM.stop_event_loop }
+              end
+            end
           end
         end
       end
 
-      subject.should raise_error(RuntimeError, /EM.fiber_run/)
+      subject.call
+      error.message.should match(/EM.fiber_run/)
     end
 
     it "throws a timeout when client timeout is exceeded" do
       error = nil
       test_proc = Proc.new do
         EventMachine.fiber_run do
-          StubServer.new(:delay => 2) do |server|
+          StubServer.new(:server => Protobuf::Rpc::Evented::Server, :delay => 2) do |server|
             client = Test::ResourceService.client(:timeout => 1)
             client.find(:name => "Test Name", :active => true) do |cl|
               cl.on_success {}
@@ -67,7 +74,7 @@ describe Protobuf::Rpc::Client do
 
       it "throws a timeout when client timeout is exceeded" do
         subject = Proc.new do
-          StubServer.new(:delay => 2) do |server|
+          StubServer.new(:server => Protobuf::Rpc::Evented::Server, :delay => 2) do |server|
             client = Test::ResourceService.client(:timeout => 1)
             client.find(:name => "Test Name", :active => true)
           end
@@ -80,7 +87,7 @@ describe Protobuf::Rpc::Client do
         failure_message = nil
 
         subject = Proc.new do
-          StubServer.new(:delay => 2) do |server|
+          StubServer.new(:server => Protobuf::Rpc::Evented::Server, :delay => 2) do |server|
             client = Test::ResourceService.client(:timeout => 1)
             client.find(:name => "Test Name", :active => true) do |c|
               c.on_failure do |f|
