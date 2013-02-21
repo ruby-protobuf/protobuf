@@ -33,7 +33,7 @@ namespace :benchmark do
     EM.stop if EM.reactor_running?
 
     EventMachine.fiber_run do
-      StubServer.new do |server|
+      StubServer.new(:server => Protobuf::Rpc::Evented::Server) do |server|
         benchmark_wrapper(global_bench) do |bench|
           bench.report("ES / EC") do
             (1..number_tests.to_i).each do
