@@ -14,6 +14,7 @@ module Test
   # Message Classes
   #
   class ResourceFindRequest < ::Protobuf::Message; end
+  class ResourceSleepRequest < ::Protobuf::Message; end
   class Resource < ::Protobuf::Message; end
   class Nested < ::Protobuf::Message; end
   
@@ -35,6 +36,10 @@ module Test
     optional ::Protobuf::Field::BoolField, :active, 2
   end
   
+  class ResourceSleepRequest
+    optional ::Protobuf::Field::Int32Field, :sleep, 1
+  end
+  
   class Resource
     required ::Protobuf::Field::StringField, :name, 1
     optional ::Protobuf::Field::Int64Field, :date_created, 2
@@ -54,5 +59,6 @@ module Test
   #
   class ResourceService < ::Protobuf::Rpc::Service
     rpc :find, ::Test::ResourceFindRequest, ::Test::Resource
+    rpc :find_with_sleep, ::Test::ResourceSleepRequest, ::Test::Resource
   end
 end
