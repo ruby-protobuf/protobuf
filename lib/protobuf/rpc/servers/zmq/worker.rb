@@ -17,13 +17,13 @@ module Protobuf
 
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REQ)
-          zmq_error_check(@socket.connect("tcp://#{resolve_ip(host)}:#{port}"))
+          zmq_error_check(@socket.connect("tcp://#{resolve_ip(host)}:#{port}"), :socket_connect)
 
           @poller = ::ZMQ::Poller.new
           @poller.register(@socket, ::ZMQ::POLLIN)
 
           # Send request to broker telling it we are ready
-          zmq_error_check(@socket.send_string(::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE))
+          zmq_error_check(@socket.send_string(::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE), :socket_send_string)
         end
 
         ##
@@ -31,7 +31,7 @@ module Protobuf
         #
         def handle_request(socket)
           message_array = []
-          zmq_error_check(socket.recv_strings(message_array))
+          zmq_error_check(socket.recv_strings(message_array), :socket_recv_strings)
 
           @request_data = message_array[2]
           @client_address = message_array[0]
@@ -55,7 +55,7 @@ module Protobuf
         end
 
         def send_data
-          response_data = @response.to_s # to_s is aliases as serialize_to_string in Message
+          response_data = @response.serialize_to_string
 
           response_message_set = [
             @client_address, # client uuid address
@@ -64,7 +64,7 @@ module Protobuf
           ]
 
           @stats.response_size = response_data.size
-          zmq_error_check(@socket.send_strings(response_message_set))
+          zmq_error_check(@socket.send_strings(response_message_set), :socket_send_strings)
         end
       end
 

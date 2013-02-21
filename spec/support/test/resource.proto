@@ -12,6 +12,10 @@ message ResourceFindRequest {
   optional bool active = 2;
 }
 
+message ResourceSleepRequest {
+  optional int32 sleep = 1;
+}
+
 message Resource {
   required string name = 1;
   optional int64 date_created = 2;
@@ -28,4 +32,5 @@ message Nested {
 
 service ResourceService {
   rpc Find (ResourceFindRequest) returns (Resource);
+  rpc FindWithSleep (ResourceSleepRequest) returns (Resource);
 }
