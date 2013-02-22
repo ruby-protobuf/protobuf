@@ -245,7 +245,7 @@ __:except__ – The opposite of the `:only` option. A string/symbol or Array of 
 A service is nothing without being hooked up to a socket. It's the nerdy kid waiting by the telephone for someone to call without knowing that the phone company disconnected their house. Sad and pathetic. So hook up the phone lines!
 
 ```
-$ rpc_server -o myserver.com -p 9939 -l ./log/protobuf.log ./config/environment.rb
+$ rpc_server -o myserver.com -p 9399 -l ./log/protobuf.log ./config/environment.rb
 ```
 
 The previous call will start a Socket server running on the given host and port which will load your application into memory. You certainly don't have to run rails or any other framework, just make sure you have some kind of file that will load your services all into memory. The server doesn't know where you put your code, so tell it.
@@ -256,7 +256,7 @@ Once the server starts, you should see it as a running process with `ps`. Sendin
 
 ```
 $ ps aux | grep rpc_server
-1234 ... rpc_server myservice.com:9939
+1234 ... rpc_server myservice.com:9399
 
 $ kill -QUIT 1234
 rpc_server shutdown
