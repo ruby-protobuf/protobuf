@@ -12,10 +12,12 @@ module Protobuf
         # Class Methods
         #
         def self.run(options = {})
-          log_debug { sign_message("initializing broker") }
-          @broker = ::Protobuf::Rpc::Zmq::Broker.new(options)
-          local_worker_threads = options[:threads]
+          unless options[:workers_only]
+            log_debug { sign_message("initializing broker") }
+            @broker = ::Protobuf::Rpc::Zmq::Broker.new(options)
+          end
 
+          local_worker_threads = options[:threads]
           @worker_options = options.merge(:port => options[:port] + 1)
           log_debug { sign_message("starting server workers") }
 
@@ -26,7 +28,12 @@ module Protobuf
           @running = true
           log_debug { sign_message("server started") }
           while self.running? do
-            @broker.poll
+            if options[:workers_only]
+              sleep 5
+              Thread.pass
+            else
+              @broker.poll
+            end
           end
         ensure
           @broker.teardown if @broker
