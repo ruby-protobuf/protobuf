@@ -41,6 +41,7 @@ class StubServer
     @running = true
     @options = OpenStruct.new({ :host => "127.0.0.1",
                                 :port => 9399,
+                                :worker_port => 9400,
                                 :delay => 0,
                                 :server => Protobuf::Rpc::Evented::Server }.merge(options))
 

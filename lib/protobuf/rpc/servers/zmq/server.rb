@@ -12,13 +12,14 @@ module Protobuf
         # Class Methods
         #
         def self.run(options = {})
+          @options = options
+
           unless options[:workers_only]
             log_debug { sign_message("initializing broker") }
             @broker = ::Protobuf::Rpc::Zmq::Broker.new(options)
           end
 
           local_worker_threads = options[:threads]
-          @worker_options = options.merge(:port => options[:port] + 1)
           log_debug { sign_message("starting server workers") }
 
           local_worker_threads.times do
@@ -44,9 +45,9 @@ module Protobuf
         end
 
         def self.start_worker
-          @threads << Thread.new(@worker_options) { |worker_options|
+          @threads << Thread.new(@options) { |options|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run
+              ::Protobuf::Rpc::Zmq::Worker.new(options).run
             rescue => e
               message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join("\n")}"
               $stderr.puts message

@@ -13,7 +13,7 @@ module Protobuf
         #
         def initialize(options = {})
           host = options[:host]
-          port = options[:port]
+          port = options[:worker_port]
 
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REQ)

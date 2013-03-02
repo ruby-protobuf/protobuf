@@ -33,6 +33,7 @@ module Protobuf
     option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
     option :workers_only,               :type => :boolean, :default => false, :desc => "Starts process with only workers (no broker/frontend is started) only relevant for Zmq Server"
+    option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
 
     def start(app_file)
       debug_say 'Configuring the rpc_server process'
@@ -176,6 +177,7 @@ module Protobuf
           :backlog => options.backlog,
           :threshold => options.threshold,
           :threads => options.threads,
+          :worker_port => options.worker_port || (options.port + 1),
           :workers_only => options.workers_only
         }
       end

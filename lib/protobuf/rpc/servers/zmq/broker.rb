@@ -85,9 +85,8 @@ module Protobuf
           end
 
           def setup_backend(options = {})
-            dealer_options = options.merge(:port => options[:port] + 1)
-            host = dealer_options[:host]
-            port = dealer_options[:port]
+            host = options[:host]
+            port = options[:worker_port]
 
             zmq_backend = context.socket(::ZMQ::ROUTER)
             zmq_error_check(zmq_backend.bind(bind_address(host, port)))
