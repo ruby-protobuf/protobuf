@@ -49,7 +49,7 @@ module Protobuf
             begin
               ::Protobuf::Rpc::Zmq::Worker.new(options).run
             rescue => e
-              message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join("\n")}"
+              message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join($/)}"
               $stderr.puts message
               log_error { message }
 
@@ -64,6 +64,10 @@ module Protobuf
           @threads.each do |t|
             t.join
           end
+        end
+
+        def self.threads
+          @threads
         end
 
         @threads ||= []

@@ -214,9 +214,13 @@ module Protobuf
 
       # Start the runner and log the relevant options.
       def start_server!
+        @runner.register_signals
+
         debug_say 'Invoking server start'
         @runner.run(runner_options) do
-          Protobuf::Logger.info { "pid #{::Process.pid} -- #{@mode} RPC Server listening at #{options.host}:#{options.port}" }
+          ::Protobuf::Logger.info { 
+            "pid #{::Process.pid} -- #{@mode} RPC Server listening at #{options.host}:#{options.port}"
+          }
         end
       end
 

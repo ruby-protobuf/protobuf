@@ -2,8 +2,8 @@ module Protobuf
   module Rpc
     class SocketRunner
 
-      def self.stop
-        ::Protobuf::Rpc::Socket::Server.stop
+      def self.register_signals
+        # noop
       end
 
       def self.run(server)
@@ -20,6 +20,10 @@ module Protobuf
 
 				yield if block_given?
         ::Protobuf::Rpc::Socket::Server.run(server_config)
+      end
+
+      def self.stop
+        ::Protobuf::Rpc::Socket::Server.stop
       end
 
     end

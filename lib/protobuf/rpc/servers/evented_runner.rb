@@ -2,8 +2,8 @@ module Protobuf
   module Rpc
     class EventedRunner
 
-      def self.stop
-        ::EventMachine.stop_event_loop if ::EventMachine.reactor_running?
+      def self.register_signals
+        # Noop
       end
 
       def self.run(options)
@@ -16,6 +16,11 @@ module Protobuf
 				yield if block_given?
         ::EM.reactor_running? ? ::EM.reactor_thread.join : ::EM.run
       end
+
+      def self.stop
+        ::EventMachine.stop_event_loop if ::EventMachine.reactor_running?
+      end
+
     end
   end
 end

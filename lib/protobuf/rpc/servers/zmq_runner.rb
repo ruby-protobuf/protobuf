@@ -2,8 +2,12 @@ module Protobuf
   module Rpc
     class ZmqRunner
 
-      def self.stop
-        Protobuf::Rpc::Zmq::Server.stop
+      def self.register_signals
+        trap(:TTIN) do 
+          log_info { "TTIN received: Starting new worker" }
+          ::Protobuf::Rpc::Zmq::Server.start_worker
+          log_info { "Worker count : #{::Protobuf::Rpc::Zmq::Server.threads.size}" }
+        end
       end
 
       def self.run(server)
@@ -17,9 +21,14 @@ module Protobuf
                         end
 
 				yield if block_given?
+
         Protobuf::Rpc::Zmq::Server.run(server_config)
       end
-    end
 
+      def self.stop
+        Protobuf::Rpc::Zmq::Server.stop
+      end
+
+    end
   end
 end
