@@ -92,11 +92,11 @@ end
 ```
 
 ___Note:__ The generator will pre-define all the classes empty and then
-re-open to apply the defined fields. This is an optomization to prevent
+re-open to apply the defined fields. This is an optimization to prevent
 recursive field errors._
 
-The generated class is now just a plain old ruby object and you
-can use it however you wish.
+The generated class is now just a plain old ruby object.
+You can use it however you wish.
 
 ```ruby
 require 'lib/foo/user.pb'
@@ -340,7 +340,7 @@ that the phone company disconnected their house. Sad and pathetic.
 So hook up the phone lines!
 
 ```
-$ rpc_server -o myserver.com -p 9939 -l ./log/protobuf.log ./config/environment.rb
+$ rpc_server -o myserver.com -p 9399 -l ./log/protobuf.log ./config/environment.rb
 ```
 
 The previous call will start a Socket server running on the given
@@ -364,7 +364,7 @@ result in shutting the server down gracefully.
 
 ```
 $ ps aux | grep rpc_server
-1234 ... rpc_server myservice.com:9939
+1234 ... rpc_server myservice.com:9399
 
 $ kill -QUIT 1234
 rpc_server shutdown
