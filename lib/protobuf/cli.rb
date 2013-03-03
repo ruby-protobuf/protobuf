@@ -178,7 +178,7 @@ module Protobuf
           :threshold => options.threshold,
           :threads => options.threads,
           :worker_port => options.worker_port || (options.port + 1),
-          :workers_only => options.workers_only
+          :workers_only => !!ENV['PB_WORKERS_ONLY'] || options.workers_only
         }
       end
 
