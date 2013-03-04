@@ -1,6 +1,7 @@
 module Protobuf
   module Rpc
     class ZmqRunner
+      include ::Protobuf::Logger::LogMethods
 
       def self.register_signals
         trap(:TTIN) do 
@@ -22,11 +23,11 @@ module Protobuf
 
 				yield if block_given?
 
-        Protobuf::Rpc::Zmq::Server.run(server_config)
+        ::Protobuf::Rpc::Zmq::Server.run(server_config)
       end
 
       def self.stop
-        Protobuf::Rpc::Zmq::Server.stop
+        ::Protobuf::Rpc::Zmq::Server.stop
       end
 
     end
