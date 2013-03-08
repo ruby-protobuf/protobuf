@@ -18,6 +18,7 @@ bool RubyGenerator::Generate(const FileDescriptor* file,
 
   filename = CreateRubyFileName(file_->name());
   ns_vector.clear();
+  extended_messages.clear();
   SplitStringUsing(file_->package(), ".", &ns_vector);
 
   // Get a ZeroCopyOutputStream object of the data.
@@ -41,8 +42,9 @@ bool RubyGenerator::Generate(const FileDescriptor* file,
   PrintMessagesForFileDescriptor(file_, false);
   PrintNewLine();
 
-  PrintEnumsForFileDescriptor(file_, true);
   PrintMessagesForFileDescriptor(file_, true);
+
+  PrintDanglingExtendedMessages();
 
   PrintServices();
 
@@ -88,6 +90,9 @@ void RubyGenerator::PrintEnclosingNamespaceModuleEnds() const {
 ///////////////////////////////////////////////// [ messages ] ////////////////
 //
 
+// Print a comment and then iteratively PrintMessage for each message
+// type defined by in this FileDescriptor scope.
+//
 void RubyGenerator::PrintMessagesForFileDescriptor(const FileDescriptor* descriptor, bool print_fields) const {
   if (descriptor->message_type_count() > 0) {
     if (print_fields) {
@@ -95,6 +100,7 @@ void RubyGenerator::PrintMessagesForFileDescriptor(const FileDescriptor* descrip
     }
     else {
       PrintComment("Message Classes", true);
+      StoreExtensionFields(descriptor);
     }
 
     for (int i = 0; i < descriptor->message_type_count(); i++) {
@@ -103,76 +109,102 @@ void RubyGenerator::PrintMessagesForFileDescriptor(const FileDescriptor* descrip
   }
 }
 
+// Iterates the nested types of a message descriptor and calls PrintMessage for each.
+//
 void RubyGenerator::PrintMessagesForDescriptor(const Descriptor* descriptor, bool print_fields) const {
   for (int i = 0; i < descriptor->nested_type_count(); i++) {
     PrintMessage(descriptor->nested_type(i), print_fields);
   }
 }
-//
+
 // Print out the given descriptor message as a Ruby class.
+//
 void RubyGenerator::PrintMessage(const Descriptor* descriptor, bool print_fields) const {
   map<string,string> data;
   data["class_name"] = descriptor->name();
 
-  if (print_fields && (descriptor->field_count() > 0 || descriptor->extension_count() > 0)) {
-    printer_->Print(data, "class $class_name$");
-    PrintNewLine();
-    printer_->Indent();
+  switch (print_fields) {
+    case false:
 
-    if (descriptor->enum_type_count() > 0) {
-      PrintEnumsForDescriptor(descriptor, true);
-    }
+      if (DescriptorHasNestedTypes(descriptor)) {
+        printer_->Print(data, "class $class_name$ < ::Protobuf::Message");
+        PrintNewLine();
+        printer_->Indent();
 
-    if (descriptor->nested_type_count() > 0) {
-      PrintMessagesForDescriptor(descriptor, true);
-    }
+        if (descriptor->enum_type_count() > 0) {
+          PrintEnumsForDescriptor(descriptor, true);
+        }
 
-    PrintExtensionRangesForDescriptor(descriptor);
+        if (descriptor->nested_type_count() > 0) {
+          PrintMessagesForDescriptor(descriptor, false);
+        }
 
-    // Print Fields
-    if (descriptor->field_count() > 0) {
-      for (int i = 0; i < descriptor->field_count(); i++) {
-        PrintMessageField(descriptor->field(i));
+        printer_->Outdent();
+        printer_->Print(data, "end");
       }
-    }
-
-    // Print Extension Fields
-    if (descriptor->extension_count() > 0) {
-      for (int i = 0; i < descriptor->extension_count(); i++) {
-        PrintMessageField(descriptor->extension(i));
+      else {
+        printer_->Print(data, "class $class_name$ < ::Protobuf::Message; end");
       }
-    }
 
-    printer_->Outdent();
-    printer_->Print(data, "end");
-    PrintNewLine();
+      PrintNewLine();
+      StoreExtensionFields(descriptor);
+
+      break;
+
+    case true:
+
+      if (descriptor->field_count() > 0 || DescriptorHasExtensions(descriptor)) {
+        printer_->Print(data, "class $class_name$");
+        PrintNewLine();
+        printer_->Indent();
+
+        if (descriptor->nested_type_count() > 0) {
+          PrintMessagesForDescriptor(descriptor, true);
+        }
+
+        // Print Fields
+        if (descriptor->field_count() > 0) {
+          for (int i = 0; i < descriptor->field_count(); i++) {
+            PrintMessageField(descriptor->field(i));
+          }
+        }
+
+        PrintExtensionRangesForDescriptor(descriptor);
+
+        // Print Extension Fields
+        if (DescriptorHasExtensions(descriptor)) {
+          PrintMessageExtensionFields(descriptor->full_name());
+        }
+
+        printer_->Outdent();
+        printer_->Print(data, "end");
+        PrintNewLine();
+        PrintNewLine();
+      }
+      else if (descriptor->nested_type_count() > 0) {
+        printer_->Print(data, "class $class_name$");
+        PrintNewLine();
+        printer_->Indent();
+
+        if (descriptor->nested_type_count() > 0) {
+          PrintMessagesForDescriptor(descriptor, true);
+        }
+
+        printer_->Outdent();
+        printer_->Print(data, "end");
+        PrintNewLine();
+        PrintNewLine();
+      }
+
+      break;
   }
-  else if (DescriptorHasNestedTypes(descriptor)) {
-    printer_->Print(data, "class $class_name$ < ::Protobuf::Message");
-    PrintNewLine();
-    printer_->Indent();
-
-    if (descriptor->enum_type_count() > 0) {
-      PrintEnumsForDescriptor(descriptor, false);
-    }
-
-    if (descriptor->nested_type_count() > 0) {
-      PrintMessagesForDescriptor(descriptor, false);
-    }
-
-    printer_->Outdent();
-    printer_->Print(data, "end");
-    PrintNewLine();
-  }
-  else {
-    printer_->Print(data, "class $class_name$ < ::Protobuf::Message; end");
-  }
-
-  PrintNewLine();
 }
 
 void RubyGenerator::PrintExtensionRangesForDescriptor(const Descriptor* descriptor) const {
   if (descriptor->extension_range_count() > 0) {
+    PrintNewLine();
+    PrintComment("Extension Fields", false);
+
     for (int i = 0; i < descriptor->extension_range_count(); i++) {
       const Descriptor::ExtensionRange* range = descriptor->extension_range(i);
       map<string,string> data;
@@ -281,6 +313,20 @@ void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
   PrintNewLine();
 }
 
+// Print out each extension field previously mapped to the full name of
+// the descriptor message.
+//
+// After printign the fields, erase the fields from the map so that we know
+// which fields are dangling and to print wrapped in a re-opened class block.
+//
+void RubyGenerator::PrintMessageExtensionFields(const string full_name) const {
+  vector<const FieldDescriptor*> message_extensions = extended_messages[full_name];
+  vector<const FieldDescriptor*>::iterator it;
+  for (it = message_extensions.begin(); it != message_extensions.end(); ++it) {
+    PrintMessageField(*it);
+  }
+  extended_messages.erase(full_name);
+}
 
 //
 ///////////////////////////////////////////////// [ enums ] ///////////////////
@@ -288,7 +334,7 @@ void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
 
 void RubyGenerator::PrintEnumsForDescriptor(const Descriptor* descriptor, bool print_values) const {
   for (int i = 0; i < descriptor->enum_type_count(); i++) {
-    PrintEnum(descriptor->enum_type(i), print_values);
+    PrintEnum(descriptor->enum_type(i));
   }
 }
 
@@ -302,32 +348,27 @@ void RubyGenerator::PrintEnumsForFileDescriptor(const FileDescriptor* descriptor
     }
 
     for (int i = 0; i < descriptor->enum_type_count(); i++) {
-      PrintEnum(descriptor->enum_type(i), print_values);
+      PrintEnum(descriptor->enum_type(i));
     }
   }
 }
 
 // Print the given enum descriptor as a Ruby class.
-void RubyGenerator::PrintEnum(const EnumDescriptor* descriptor, bool print_values) const {
+void RubyGenerator::PrintEnum(const EnumDescriptor* descriptor) const {
   map<string,string> data;
   data["class_name"] = descriptor->name();
 
-  if (print_values) {
-    printer_->Print(data, "class $class_name$");
-    printer_->Indent();
-    PrintNewLine();
+  printer_->Print(data, "class $class_name$ < ::Protobuf::Enum");
+  printer_->Indent();
+  PrintNewLine();
 
-    for (int i = 0; i < descriptor->value_count(); i++) {
-      PrintEnumValue(descriptor->value(i));
-    }
+  for (int i = 0; i < descriptor->value_count(); i++) {
+    PrintEnumValue(descriptor->value(i));
+  }
 
-    printer_->Outdent();
-    printer_->Print(data, "end");
-    PrintNewLine();
-  }
-  else {
-    printer_->Print(data, "class $class_name$ < ::Protobuf::Enum; end");
-  }
+  printer_->Outdent();
+  printer_->Print(data, "end");
+  PrintNewLine();
 
   PrintNewLine();
 }
@@ -387,6 +428,42 @@ void RubyGenerator::PrintServiceMethod(const MethodDescriptor* descriptor) const
 ///////////////////////////////////////////////// [ general ] ////////////////
 //
 
+void RubyGenerator::PrintDanglingExtendedMessages() const {
+  if (extended_messages.size() > 0) {
+    PrintComment("Extended Messages", true);
+
+    tr1::unordered_map<string, vector<const FieldDescriptor*> >::iterator it;
+    for (it = extended_messages.begin(); it != extended_messages.end(); ++it ) {
+      map<string,string> data;
+      data["class_name"] = Constantize(it->first);
+
+      printer_->Print(data, "class $class_name$");
+      printer_->Indent();
+      PrintNewLine();
+
+      PrintMessageExtensionFields(it->first);
+
+      printer_->Outdent();
+      printer_->Print(data, "end");
+      PrintNewLine();
+      PrintNewLine();
+    }
+  }
+}
+
+// Explicitly check for the key with `count` so that we don't create
+// empty vectors for classes simply using bracket access.
+//
+bool RubyGenerator::DescriptorHasExtensions(const Descriptor* descriptor) const {
+  const string full_name = descriptor->full_name();
+  if (extended_messages.count(full_name) > 0) {
+    return (extended_messages[full_name].size());
+  }
+  else {
+    return 0;
+  }
+}
+
 // Print a header or one-line comment (as indicated by the as_header bool).
 void RubyGenerator::PrintComment(string comment, bool as_header) const {
   char format[] = "# $comment$\n";
@@ -442,6 +519,25 @@ void RubyGenerator::PrintComment(string comment) const {
 
 void RubyGenerator::PrintNewLine() const {
   printer_->Print("\n");
+}
+
+// We need to store any extension fields defined in the scope of this
+// descriptor message by the field's containing type.
+void RubyGenerator::StoreExtensionFields(const FileDescriptor* descriptor) const {
+  for (int i = 0; i < descriptor->extension_count(); i++) {
+    const FieldDescriptor* extension_field = descriptor->extension(i);
+    const Descriptor* containing = extension_field->containing_type();
+    extended_messages[containing->full_name()].push_back(extension_field);
+  }
+}
+
+// Same as above, only accept the Descriptor type instead of FileDescriptor.
+void RubyGenerator::StoreExtensionFields(const Descriptor* descriptor) const {
+  for (int i = 0; i < descriptor->extension_count(); i++) {
+    const FieldDescriptor* extension_field = descriptor->extension(i);
+    const Descriptor* containing = extension_field->containing_type();
+    extended_messages[containing->full_name()].push_back(extension_field);
+  }
 }
 
 } // namespace ruby
