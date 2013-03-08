@@ -64,11 +64,8 @@ module Protobuf
     end
 
     def self.get_ext_field_by_name(name)
-      # Check if the name has been used before, if not then set it to the sym value
-      extension_fields[extension_field_name_to_tag[name.to_sym]]
-    rescue TypeError, NoMethodError => e
-      name = 'nil' if name.nil?
-      raise FieldNotDefinedError.new("Field '#{name}' is not defined on message '#{self.name}'")
+      tag = extension_field_name_to_tag[name.to_sym]
+      extension_fields[tag] unless tag.nil?
     end
 
     def self.get_ext_field_by_tag(tag)
@@ -77,11 +74,8 @@ module Protobuf
 
     # Find a field object by +name+.
     def self.get_field_by_name(name)
-      # Check if the name has been used before, if not then set it to the sym value
-      fields[field_name_to_tag[name.to_sym]]
-    rescue TypeError, NoMethodError => e
-      name = 'nil' if name.nil?
-      raise FieldNotDefinedError.new("Field '#{name}' is not defined on message '#{self.name}'")
+      tag = field_name_to_tag[name.to_sym]
+      fields[tag] unless tag.nil?
     end
 
     # Find a field object by +tag+ number.
@@ -89,6 +83,7 @@ module Protobuf
       fields[tag]
     rescue TypeError => e
       tag = tag.nil? ? 'nil' : tag.to_s
+      raise
       raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
     end
 
@@ -280,16 +275,12 @@ module Protobuf
     def [](name)
       if field = get_field_by_name(name) || get_ext_field_by_name(name)
         __send__(field.name)
-      else
-        raise NoMethodError, "No such field: #{name.inspect}"
       end
     end
 
     def []=(name, value)
       if field = get_field_by_name(name) || get_ext_field_by_name(name)
         __send__(field.setter_method_name, value)
-      else
-        raise NoMethodError, "No such field: #{name.inspect}"
       end
     end
 
