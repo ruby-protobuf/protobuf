@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <tr1/unordered_map>
 
 #include <google/protobuf/compiler/command_line_interface.h>
 #include <google/protobuf/compiler/code_generator.h>
@@ -31,15 +32,19 @@ class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
 			GeneratorContext* context,
 			string* error) const;
 
-
 	private:
 		mutable GeneratorContext* context_;
 		mutable io::Printer* printer_;
 		mutable const FileDescriptor* file_;
 		mutable string filename;
 		mutable vector<string> ns_vector;
+    mutable tr1::unordered_map<string, vector<const FieldDescriptor*> > extended_messages;
 
 		GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RubyGenerator);
+
+    bool DescriptorHasExtensions(const Descriptor* descriptor) const;
+		void PrintDanglingExtendedMessages() const;
+		void PrintExtensionRangesForDescriptor(const Descriptor* descriptor) const;
 
 		void PrintEnclosingNamespaceModules() const;
 		void PrintEnclosingNamespaceModuleEnds() const;
@@ -47,12 +52,12 @@ class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
 		void PrintMessagesForDescriptor(const Descriptor* descriptor, bool print_fields) const;
 		void PrintMessagesForFileDescriptor(const FileDescriptor* descriptor, bool print_fields) const;
 		void PrintMessage(const Descriptor* descriptor, bool print_fields) const;
-		void PrintExtensionRangesForDescriptor(const Descriptor* descriptor) const;
 		void PrintMessageField(const FieldDescriptor* descriptor) const;
+		void PrintMessageExtensionFields(const string full_name) const;
 
 		void PrintEnumsForDescriptor(const Descriptor* descriptor, bool print_values) const;
 		void PrintEnumsForFileDescriptor(const FileDescriptor* descriptor, bool print_values) const;
-		void PrintEnum(const EnumDescriptor* descriptor, bool print_values) const;
+		void PrintEnum(const EnumDescriptor* descriptor) const;
 		void PrintEnumValue(const EnumValueDescriptor* descriptor) const;
 
 		void PrintServices() const;
@@ -66,6 +71,9 @@ class LIBPROTOC_EXPORT RubyGenerator : public CodeGenerator {
 		void PrintComment(string comment, bool as_header) const;
 		void PrintRequire(string lib_name) const;
 		void PrintNewLine() const;
+
+    void StoreExtensionFields(const FileDescriptor* descriptor) const;
+    void StoreExtensionFields(const Descriptor* descriptor) const;
 
 		// Take the proto file name, strip ".proto"
 		// from the end and add ".pb.rb"
