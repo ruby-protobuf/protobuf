@@ -13,17 +13,62 @@ message ResourceFindRequest {
 }
 
 message Resource {
+  extensions 100 to max;
+
   required string name = 1;
   optional int64 date_created = 2;
   optional StatusType status = 3;
   repeated StatusType repeated_enum = 4;
 }
 
+message Searchable {
+  enum SearchType {
+    FLAT = 1;
+    NESTED = 2;
+  }
+
+  extend test.Resource {
+    optional bool ext_is_searchable = 100;
+    optional bool ext_is_hidden = 101;
+    optional Searchable.SearchType ext_search_type = 102 [default=FLAT];
+  }
+}
+
+message MessageParent {
+  message MessageChild {
+    optional string child1 = 1;
+  }
+}
+
 message Nested {
+  extensions 100 to 110;
+
   optional string name = 1;
   optional Resource resource = 2;
   repeated Resource multiple_resources = 3;
   optional StatusType status = 4;
+
+  message NestedLevelOne {
+    extensions 100 to 101;
+    optional bool level_one = 1 [default=true];
+
+    extend Resource {
+      optional bool ext_nested_in_level_one = 105;
+    }
+  }
+
+  extend NestedLevelOne {
+    optional bool ext_nested_level_one = 100;
+  }
+}
+
+extend Nested {
+  optional string foo = 100;
+  optional int64 bar = 101;
+}
+
+extend Nested.NestedLevelOne {
+  optional bool ext_nested_level_one_outer = 101;
 }
 
 service ResourceService {
