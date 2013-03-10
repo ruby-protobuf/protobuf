@@ -1,4 +1,5 @@
 package test;
+import 'test/resource.proto';
 
 enum EnumTestType {
   ONE = 1;
@@ -9,4 +10,8 @@ message EnumTestMessage {
   optional EnumTestType non_default_enum = 1;
   optional EnumTestType default_enum = 2 [default=ONE];
   repeated EnumTestType repeated_enums = 3;
+}
+
+extend test.Resource {
+  optional int32 ext_other_file_defined_field = 200;
 }
