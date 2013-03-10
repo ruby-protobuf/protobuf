@@ -93,7 +93,7 @@ module Protobuf
           raise
         rescue
           # Closing the server causes the loop to raise an exception here
-          raise if running?
+          raise #if running?
         end
 
         def self.running?

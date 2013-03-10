@@ -69,7 +69,7 @@ namespace :benchmark do
 
   def sock_client_sock_server(number_tests, test_length, global_bench = nil)
     load "protobuf/socket.rb"
-    EM.stop if defined?(EM) && EM.reactor_running?
+    EM.stop if EM.reactor_running?
 
     StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server|
       benchmark_wrapper(global_bench) do |bench|
