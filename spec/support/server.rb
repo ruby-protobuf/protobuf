@@ -41,28 +41,19 @@ class StubServer
     @running = true
     @options = OpenStruct.new({ :host => "127.0.0.1",
                                 :port => 9399,
-                                :backlog => 100,
-                                :threshold => 100,
-                                :threads => 5,
-                                :server => Protobuf::Rpc::Zmq::Server }.merge(options))
+                                :delay => 0,
+                                :server => Protobuf::Rpc::Evented::Server }.merge(options))
 
     start
     yield self
-  rescue => e
-    puts <<-EXC
-    Exception occurred #{e.message}
-    #{e.backtrace.join($/)}
-    EXC
   ensure
     stop if @running
   end
 
   def start
-    case @options.server.name
-    when "Protobuf::Rpc::Evented::Server" then
-      start_em_server
-    when "Protobuf::Rpc::Zmq::Server" then
-      start_zmq_server
+    case
+    when @options.server == Protobuf::Rpc::Evented::Server then start_em_server
+    when @options.server == Protobuf::Rpc::Zmq::Server then start_zmq_server
     else
       start_socket_server
     end
@@ -74,32 +65,26 @@ class StubServer
     end
   end
 
-  if defined?(EventMachine)
-    def start_em_server
-      @server_handle = EventMachine.start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
-    end
+  def start_em_server
+    @server_handle = EventMachine.start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
   end
 
-  if defined?(Protobuf::Rpc::Socket::Server)
-    def start_socket_server
-      @sock_server = Thread.new(@options) { |opt| Protobuf::Rpc::SocketRunner.run(opt) }
-      @sock_server.abort_on_exception = true # Set for testing purposes
-      Thread.pass until Protobuf::Rpc::Socket::Server.running?
-    end
+  def start_socket_server
+    @sock_server = Thread.new(@options) { |opt| Protobuf::Rpc::SocketRunner.run(opt) }
+    @sock_server.abort_on_exception = true # Set for testing purposes
+    Thread.pass until Protobuf::Rpc::Socket::Server.running?
   end
 
-  if defined?(Protobuf::Rpc::Zmq::Server)
-    def start_zmq_server
-      @zmq_server = Thread.new(@options) { |opt| Protobuf::Rpc::ZmqRunner.run(opt) }
-      Thread.pass until Protobuf::Rpc::Zmq::Server.running?
-    end
+  def start_zmq_server
+    @zmq_server = Thread.new(@options) { |opt| Protobuf::Rpc::ZmqRunner.run(opt) }
+    Thread.pass until Protobuf::Rpc::Zmq::Server.running?
   end
 
   def stop
-    case @options.server.name
-    when "Protobuf::Rpc::Evented::Server" then
+    case
+    when @options.server == Protobuf::Rpc::Evented::Server then
       EventMachine.stop_server(@server_handle) if @server_handle
-    when "Protobuf::Rpc::Zmq::Server" then
+    when @options.server == Protobuf::Rpc::Zmq::Server then
       Protobuf::Rpc::ZmqRunner.stop
       @zmq_server.join if @zmq_server
     else
