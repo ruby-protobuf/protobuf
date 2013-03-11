@@ -6,49 +6,83 @@ module Protobuf
     module Zmq
       class Broker
         include ::Protobuf::Rpc::Zmq::Util
-        attr_reader :frontend, :backend, :poller, :context, :available_workers
+        attr_reader :frontend, :backend, :poller, :context, :available_workers, :options, :expected_worker_count
 
         ##
         # Constructor
         #
         def initialize(options = {})
           @available_workers = []
+          @options = options.deep_dup
+          @expected_worker_count = @options[:threads]
           @context = ::ZMQ::Context.new
-          @frontend = setup_frontend(options)
-          @backend = setup_backend(options)
           @poller = ::ZMQ::Poller.new
-          @poller.register(frontend, ::ZMQ::POLLIN)
-          @poller.register(backend, ::ZMQ::POLLIN)
+          setup_backend
         end
 
         ##
         # Instance Methods
         #
         def poll
-          if available_workers.size > 0
-            poller.register(frontend, ::ZMQ::POLLIN) if poller.size < 2
+          if frontend.nil?
+            if local_workers_have_started?            
+              # only open the front end when the workers are done booting
+              log_info { "Starting frontend socket in broker, all workers ready!" }
+              setup_frontend 
+            end
           else
-            poller.delete(frontend)            
+            # Start checking the poller after startup
+            if available_workers.size > 0
+              poller.register(frontend, ::ZMQ::POLLIN) if poller.size < 2
+            else
+              poller.delete(frontend)
+            end
           end
 
           poller.poll(1000)
           poller.readables.each do |socket|
             case socket
-            when frontend then
-              move_to_backend(socket)
             when backend then
               move_to_frontend(socket)
+            when frontend then
+              move_to_backend(socket)
             end
           end
         end
 
+        def setup_backend
+          host = options[:host]
+          port = options[:worker_port]
+
+          zmq_backend = context.socket(::ZMQ::ROUTER)
+          zmq_error_check(zmq_backend.bind(bind_address(host, port)))
+
+          @backend = zmq_backend
+          @poller.register(@backend, ::ZMQ::POLLIN)
+        end
+
+        def setup_frontend
+          host = options[:host]
+          port = options[:port]
+
+          zmq_frontend = context.socket(::ZMQ::ROUTER)
+          zmq_error_check(zmq_frontend.bind(bind_address(host, port)))
+
+          @frontend = zmq_frontend
+          @poller.register(@frontend, ::ZMQ::POLLIN)
+        end
+
         def teardown
-          frontend.close
-          backend.close
-          context.terminate
+          frontend.try(:close)
+          backend.try(:close)
+          context.try(:terminate)
         end
 
         private
+
+          def local_workers_have_started?
+            @local_workers_have_started ||= available_workers.size >= expected_worker_count
+          end
 
           def move_to_backend(socket)
             message_array = []
@@ -73,7 +107,9 @@ module Protobuf
             available_workers << message_array[0]
 
             # messages should be [ "uuid of socket", "", "READY_MESSAGE || uuid of client socket"]
-            unless message_array[2] == ::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE
+            if message_array[2] == ::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE
+              log_info { "Worker #{available_workers.size} of #{expected_worker_count} ready!" }
+            else
               frontend_message_set = [
                 message_array[2], # client UUID
                 "",
@@ -82,24 +118,6 @@ module Protobuf
 
               zmq_error_check(frontend.send_strings(frontend_message_set))
             end
-          end
-
-          def setup_backend(options = {})
-            host = options[:host]
-            port = options[:worker_port]
-
-            zmq_backend = context.socket(::ZMQ::ROUTER)
-            zmq_error_check(zmq_backend.bind(bind_address(host, port)))
-            zmq_backend
-          end
-
-          def setup_frontend(options = {})
-            host = options[:host]
-            port = options[:port]
-
-            zmq_frontend = context.socket(::ZMQ::ROUTER)
-            zmq_error_check(zmq_frontend.bind(bind_address(host, port)))
-            zmq_frontend
           end
 
           def bind_address(host, port)
