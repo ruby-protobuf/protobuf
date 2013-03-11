@@ -62,7 +62,7 @@ module Protobuf
           @running = false
 
           @threads.each do |t|
-            t.join
+            t.join(5) || t.kill
           end
         end
 
