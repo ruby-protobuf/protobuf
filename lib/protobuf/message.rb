@@ -34,6 +34,10 @@ module Protobuf
       field_definition = ::Protobuf::Field.build(self, rule, type, fname, tag, options)
       field_name_hash[fname] = tag
       field_array[tag] = field_definition
+
+      define_method("#{fname}!") do
+        @values[fname]
+      end
     end
 
     # Reserve field numbers for extensions. Don't use this method directly.
