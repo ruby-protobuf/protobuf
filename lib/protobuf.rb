@@ -2,7 +2,10 @@ require 'logger'
 require 'socket'
 require 'pp'
 require 'stringio'
-require 'active_support/all'
+require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/object/try'
+require 'active_support/inflector'
+require 'active_support/json'
 
 module Protobuf
 
