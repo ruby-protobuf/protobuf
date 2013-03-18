@@ -78,7 +78,8 @@ module Protobuf
 
     # Find a field object by +name+.
     def self.get_field_by_name(name)
-      tag = field_name_to_tag[name.to_sym]
+      name = name.to_sym if name.respond_to?(:to_sym)
+      tag = field_name_to_tag[name]
       fields[tag] unless tag.nil?
     end
 
@@ -87,7 +88,6 @@ module Protobuf
       fields[tag]
     rescue TypeError => e
       tag = tag.nil? ? 'nil' : tag.to_s
-      raise
       raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
     end
 
