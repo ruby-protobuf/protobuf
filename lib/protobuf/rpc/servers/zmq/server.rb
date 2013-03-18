@@ -12,11 +12,14 @@ module Protobuf
         # Class Methods
         #
         def self.run(options = {})
-          log_debug { sign_message("initializing broker") }
-          @broker = ::Protobuf::Rpc::Zmq::Broker.new(options)
-          local_worker_threads = options[:threads]
+          @options = options
 
-          @worker_options = options.merge(:port => options[:port] + 1)
+          unless options[:workers_only]
+            log_debug { sign_message("initializing broker") }
+            @broker = ::Protobuf::Rpc::Zmq::Broker.new(options)
+          end
+
+          local_worker_threads = options[:threads]
           log_debug { sign_message("starting server workers") }
 
           local_worker_threads.times do
@@ -26,7 +29,12 @@ module Protobuf
           @running = true
           log_debug { sign_message("server started") }
           while self.running? do
-            @broker.poll
+            if options[:workers_only]
+              sleep 5
+              Thread.pass
+            else
+              @broker.poll
+            end
           end
         ensure
           @broker.teardown if @broker
@@ -37,11 +45,11 @@ module Protobuf
         end
 
         def self.start_worker
-          @threads << Thread.new(@worker_options) { |worker_options|
+          @threads << Thread.new(@options) { |options|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run
+              ::Protobuf::Rpc::Zmq::Worker.new(options).run
             rescue => e
-              message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join("\n")}"
+              message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join($/)}"
               $stderr.puts message
               log_error { message }
 
@@ -54,8 +62,12 @@ module Protobuf
           @running = false
 
           @threads.each do |t|
-            t.join
+            t.join(5) || t.kill
           end
+        end
+
+        def self.threads
+          @threads
         end
 
         @threads ||= []

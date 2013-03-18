@@ -10,15 +10,11 @@ describe ::Protobuf::Rpc::Zmq::Broker do
   end
 
   subject do
-    described_class.new({ :host => '127.0.0.1', :port => 9399 })
+    described_class.new({ :host => '127.0.0.1', :port => 9399, :worker_port => 9400 })
   end
 
   it 'sets up a context' do
     subject.context.should be_a(::ZMQ::Context)
-  end
-
-  it 'sets up a frontend socket' do
-    subject.frontend.should be_a(::ZMQ::Socket)
   end
 
   it 'sets up a backend socket' do

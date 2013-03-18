@@ -204,6 +204,52 @@ describe ::Protobuf::CLI do
           ::Protobuf.connector_type.should == :evented
         end
       end
+      
+      context 'zmq workers only' do
+        let(:test_args) { [ '--workers_only', '--zmq' ] }
+        let(:runner) { ::Protobuf::Rpc::ZmqRunner }
+
+        before do
+          ::Protobuf::Rpc::SocketRunner.should_not_receive(:run)
+          ::Protobuf::Rpc::EventedRunner.should_not_receive(:run)
+        end
+
+        it 'is activated by the --workers_only switch' do
+          runner.should_receive(:run) do |options|
+            options[:workers_only].should be_true
+          end
+
+          described_class.start(args)
+        end
+
+        it 'is activated by PB_WORKERS_ONLY=1 ENV variable' do 
+          ENV['PB_WORKERS_ONLY'] = "1"
+          runner.should_receive(:run) do |options|
+            options[:workers_only].should be_true
+          end
+
+          described_class.start(args)
+          ENV.delete('PB_WORKERS_ONLY')
+        end
+      end
+
+      context 'zmq worker port' do
+        let(:test_args) { [ '--worker_port=1234', '--zmq' ] }
+        let(:runner) { ::Protobuf::Rpc::ZmqRunner }
+
+        before do
+          ::Protobuf::Rpc::SocketRunner.should_not_receive(:run)
+          ::Protobuf::Rpc::EventedRunner.should_not_receive(:run)
+        end
+
+        it 'is activated by the --worker_port switch' do
+          runner.should_receive(:run) do |options|
+            options[:worker_port].should eq(1234)
+          end
+
+          described_class.start(args)
+        end
+      end
 
       context 'zmq' do
         let(:test_args) { [ '--zmq' ] }

@@ -7,6 +7,7 @@ Bundler.setup :default, :development, :test
 require 'pry'
 
 $: << ::File.expand_path('..', File.dirname(__FILE__))
+$: << ::File.expand_path('../spec/support', File.dirname(__FILE__))
 #$: << ::File.expand_path('../lib', File.dirname(__FILE__))
 
 require 'protobuf'

@@ -32,6 +32,8 @@ module Protobuf
     option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
     option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
+    option :workers_only,               :type => :boolean, :default => false, :desc => "Starts process with only workers (no broker/frontend is started) only relevant for Zmq Server"
+    option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
 
     def start(app_file)
       debug_say 'Configuring the rpc_server process'
@@ -47,7 +49,6 @@ module Protobuf
       run_if_no_abort { require_application!(app_file) }
       run_if_no_abort { configure_process_name(app_file) }
       run_if_no_abort { start_server! }
-
     rescue => e
       say_and_exit!('ERROR: RPC Server failed to start.', e)
     end
@@ -170,11 +171,15 @@ module Protobuf
       end
 
       def runner_options
-        { :host => options.host,
+        { 
+          :host => options.host,
           :port => options.port,
           :backlog => options.backlog,
           :threshold => options.threshold,
-          :threads => options.threads }
+          :threads => options.threads,
+          :worker_port => options.worker_port || (options.port + 1),
+          :workers_only => !!ENV['PB_WORKERS_ONLY'] || options.workers_only
+        }
       end
 
       def say_and_exit!(message, exception = nil)
@@ -209,9 +214,13 @@ module Protobuf
 
       # Start the runner and log the relevant options.
       def start_server!
+        @runner.register_signals
+
         debug_say 'Invoking server start'
         @runner.run(runner_options) do
-          Protobuf::Logger.info { "pid #{::Process.pid} -- #{@mode} RPC Server listening at #{options.host}:#{options.port}" }
+          ::Protobuf::Logger.info { 
+            "pid #{::Process.pid} -- #{@mode} RPC Server listening at #{options.host}:#{options.port}"
+          }
         end
       end
 

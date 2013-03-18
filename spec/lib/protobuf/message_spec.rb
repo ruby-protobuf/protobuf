@@ -3,6 +3,22 @@ require 'spec_helper'
 describe Protobuf::Message do
 
   describe '#initialize' do
+    it "initializes the enum getter to 0" do
+      test_enum = Test::EnumTestMessage.new
+      test_enum.non_default_enum.should eq(0)
+    end
+
+    it "exposes the enum getter raw value through ! method" do 
+      test_enum = Test::EnumTestMessage.new
+      test_enum.non_default_enum!.should be_nil
+    end
+
+    it "exposes the enum getter raw value through ! method (when set)" do 
+      test_enum = Test::EnumTestMessage.new
+      test_enum.non_default_enum = 1
+      test_enum.non_default_enum!.should eq(1)
+    end
+
     it "does not try to set attributes which have nil values" do
       Test::EnumTestMessage.any_instance.should_not_receive("non_default_enum=")
       test_enum = Test::EnumTestMessage.new(:non_default_enum => nil)
