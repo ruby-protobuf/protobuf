@@ -8,12 +8,12 @@ describe Protobuf::Message do
       test_enum.non_default_enum.should eq(0)
     end
 
-    it "exposes the enum getter raw value through ! method" do 
+    it "exposes the enum getter raw value through ! method" do
       test_enum = Test::EnumTestMessage.new
       test_enum.non_default_enum!.should be_nil
     end
 
-    it "exposes the enum getter raw value through ! method (when set)" do 
+    it "exposes the enum getter raw value through ! method (when set)" do
       test_enum = Test::EnumTestMessage.new
       test_enum.non_default_enum = 1
       test_enum.non_default_enum!.should eq(1)
@@ -227,21 +227,15 @@ describe Protobuf::Message do
 
     context 'when name is not a valid field' do
       specify do
-        expect {
-          subject.get_field_by_name(1)
-        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*1.*#{subject.class.name}/)
+        subject.get_field_by_name(1).should be_nil
       end
 
       specify do
-        expect {
-          subject.get_field_by_name(:nothere)
-        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*nothere.*#{subject.class.name}/)
+        subject.get_field_by_name(:nothere).should be_nil
       end
 
       specify do
-        expect {
-          subject.get_field_by_name(nil)
-        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*nil.*#{subject.class.name}/)
+        subject.get_field_by_name(nil).should be_nil
       end
     end
   end
