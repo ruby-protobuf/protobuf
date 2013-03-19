@@ -54,11 +54,16 @@ message Nested {
 
     extend Resource {
       optional bool ext_nested_in_level_one = 105;
+      optional bool ext_dup_field = 106;
     }
   }
 
   extend NestedLevelOne {
     optional bool ext_nested_level_one = 100;
+  }
+
+  extend Resource {
+    optional bool ext_dup_field = 107;
   }
 }
 

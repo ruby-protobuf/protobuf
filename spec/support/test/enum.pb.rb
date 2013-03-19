@@ -9,6 +9,7 @@ require 'protobuf/message'
 require 'test/resource.pb'
 
 module Test
+
   ##
   # Enum Classes
   #
@@ -32,6 +33,7 @@ module Test
     repeated ::Test::EnumTestType, :repeated_enums, 3
   end
   
+  
   ##
   # Extended Messages
   #
@@ -40,3 +42,4 @@ module Test
   end
   
 end
+
