@@ -64,7 +64,7 @@ module Protobuf
         def self.stop
           @running = false
 
-          self.threads.each do |t|
+          @threads.each do |t|
             t.join
           end
         end
