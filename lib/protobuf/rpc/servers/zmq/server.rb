@@ -39,7 +39,7 @@ module Protobuf
           trap(:TTIN) do
             log_info { sign_message('TTIN received: Starting new worker') }
             self.start_worker
-            log_info { sign_message("Worker Thread count = #{self.thread_count}") }
+            log_info { sign_message("Worker Thread count = #{@threads.count}") }
           end
         end
 
@@ -48,7 +48,7 @@ module Protobuf
         end
 
         def self.start_worker
-          self.threads << Thread.new(@worker_options) { |worker_options|
+          @threads << Thread.new(@worker_options) { |worker_options|
             begin
               ::Protobuf::Rpc::Zmq::Worker.new(worker_options).run
             rescue => e
@@ -69,14 +69,7 @@ module Protobuf
           end
         end
 
-        def self.threads
-          @threads ||= []
-        end
-
-        def self.thread_count
-          self.threads.count
-        end
-
+        @threads ||= []
       end
     end
   end
