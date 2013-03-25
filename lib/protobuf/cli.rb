@@ -171,7 +171,7 @@ module Protobuf
       end
 
       def runner_options
-        { 
+        {
           :host => options.host,
           :port => options.port,
           :backlog => options.backlog,
@@ -187,7 +187,7 @@ module Protobuf
 
         ::Protobuf::Logger.error { message }
         if exception
-          $stderr.puts "[#{exception.class.name}] #{exception.message}" 
+          $stderr.puts "[#{exception.class.name}] #{exception.message}"
           $stderr.puts exception.backtrace.join("\n")
 
           ::Protobuf::Logger.error { "[#{exception.class.name}] #{exception.message}" }
@@ -199,17 +199,17 @@ module Protobuf
 
       def server_evented!
         @mode = :evented
-        @runner = ::Protobuf::Rpc::EventedRunner
+        @runner = ::Protobuf::Rpc::EventedRunner.new(runner_options)
       end
 
       def server_socket!
         @mode = :socket
-        @runner = ::Protobuf::Rpc::SocketRunner
+        @runner = ::Protobuf::Rpc::SocketRunner.new(runner_options)
       end
 
       def server_zmq!
         @mode = :zmq
-        @runner = ::Protobuf::Rpc::ZmqRunner
+        @runner = ::Protobuf::Rpc::ZmqRunner.new(runner_options)
       end
 
       # Start the runner and log the relevant options.
@@ -217,15 +217,14 @@ module Protobuf
         @runner.register_signals
 
         debug_say 'Invoking server start'
-        @runner.run(runner_options) do
-          ::Protobuf::Logger.info { 
+
+        @runner.run do
+          ::Protobuf::Logger.info {
             "pid #{::Process.pid} -- #{@mode} RPC Server listening at #{options.host}:#{options.port}"
           }
         end
       end
-
     end
-
   end
 end
 

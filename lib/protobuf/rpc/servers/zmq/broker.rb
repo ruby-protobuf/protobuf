@@ -25,7 +25,7 @@ module Protobuf
         #
         def poll
           if frontend.nil?
-            if local_workers_have_started?            
+            if local_workers_have_started?
               # only open the front end when the workers are done booting
               log_info { "Starting frontend socket in broker, all workers ready!" }
               setup_frontend 

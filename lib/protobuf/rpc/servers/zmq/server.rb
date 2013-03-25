@@ -8,18 +8,24 @@ module Protobuf
       class Server
         include ::Protobuf::Rpc::Zmq::Util
 
-        ##
-        # Class Methods
-        #
-        def self.run(options = {})
-          @options = options
+        attr_accessor :threads, :options
 
-          unless options[:workers_only]
+        def initialize(options)
+          @options = options
+          @threads = []
+        end
+
+        def host
+          @options[:host]
+        end
+
+        def run
+          unless @options[:workers_only]
             log_debug { sign_message("initializing broker") }
-            @broker = ::Protobuf::Rpc::Zmq::Broker.new(options)
+            @broker = ::Protobuf::Rpc::Zmq::Broker.new(@options)
           end
 
-          local_worker_threads = options[:threads]
+          local_worker_threads = @options[:threads]
           log_debug { sign_message("starting server workers") }
 
           local_worker_threads.times do
@@ -29,7 +35,7 @@ module Protobuf
           @running = true
           log_debug { sign_message("server started") }
           while self.running? do
-            if options[:workers_only]
+            if @options[:workers_only]
               sleep 5
               Thread.pass
             else
@@ -40,25 +46,25 @@ module Protobuf
           @broker.teardown if @broker
         end
 
-        def self.running?
+        def running?
           !!@running
         end
 
-        def self.start_worker
-          @threads << Thread.new(@options) { |options|
+        def start_worker
+          @threads << Thread.new(self) { |server|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(options).run
+              ::Protobuf::Rpc::Zmq::Worker.new(server).run
             rescue => e
               message =  "Worker Failed, spawning new worker: #{e.inspect}\n #{e.backtrace.join($/)}"
               $stderr.puts message
               log_error { message }
 
-              retry if ::Protobuf::Rpc::Zmq::Server.running?
+              retry if self.running?
             end
           }
         end
 
-        def self.stop
+        def stop
           @running = false
 
           @threads.each do |t|
@@ -66,11 +72,9 @@ module Protobuf
           end
         end
 
-        def self.threads
-          @threads
+        def worker_port
+          @options[:worker_port]
         end
-
-        @threads ||= []
       end
     end
   end

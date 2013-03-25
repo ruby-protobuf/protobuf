@@ -11,9 +11,10 @@ module Protobuf
         ##
         # Constructor
         #
-        def initialize(options = {})
-          host = options[:host]
-          port = options[:worker_port]
+        def initialize(server)
+          @server = server
+          host = server.host
+          port = server.worker_port
 
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REQ)
@@ -39,7 +40,7 @@ module Protobuf
         end
 
         def run
-          while ::Protobuf::Rpc::Zmq::Server.running? do
+          while @server.running? do
             # poll for 1_000 milliseconds then continue looping
             # This lets us see whether we need to die
             @poller.poll(1_000)
