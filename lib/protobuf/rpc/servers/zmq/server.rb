@@ -22,11 +22,11 @@ module Protobuf
           local_worker_threads = options[:threads]
           log_debug { sign_message("starting server workers") }
 
+          @running = true
           local_worker_threads.times do
             self.start_worker
           end
 
-          @running = true
           log_debug { sign_message("server started") }
           while self.running? do
             if options[:workers_only]
