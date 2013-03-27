@@ -20,6 +20,8 @@ module Protobuf
         end
 
         def run
+          @running = true
+
           unless @options[:workers_only]
             log_debug { sign_message("initializing broker") }
             @broker = ::Protobuf::Rpc::Zmq::Broker.new(@options)
@@ -28,12 +30,13 @@ module Protobuf
           local_worker_threads = @options[:threads]
           log_debug { sign_message("starting server workers") }
 
+
           local_worker_threads.times do
             self.start_worker
           end
 
-          @running = true
           log_debug { sign_message("server started") }
+
           while self.running? do
             if @options[:workers_only]
               sleep 5
