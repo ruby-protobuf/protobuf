@@ -8,6 +8,7 @@ coverage
 doc
 .yardoc
 .DS_Store
+.rspec
 *.so
 *.bin
 Gemfile.lock
