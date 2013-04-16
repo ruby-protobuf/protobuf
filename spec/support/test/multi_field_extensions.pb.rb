@@ -27,8 +27,6 @@ module Test
     # Extension Fields
     extensions 100...536870912
     optional ::Test::PayloadA, :payload, 100, :extension => true
-    # UNCOMMENT TO TEST FAILING WITH MULTIPLE FIELDS
-    # optional ::Test::PayloadB, :payload, 101, :extension => true
   end
   
   

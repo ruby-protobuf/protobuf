@@ -16,8 +16,8 @@ message PayloadA {
 }
 
 message PayloadB {
-  extend Header {
+  //extend Header {
   // UNCOMMENT TO TEST FAILING WITH MULTIPLE FIELDS
   //  optional PayloadB payload = 101;
-  }
+  //}
 }

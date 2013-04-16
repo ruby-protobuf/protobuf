@@ -57,7 +57,6 @@ module Test
     optional ::Test::Searchable::SearchType, :ext_search_type, 102, :default => ::Test::Searchable::SearchType::FLAT, :extension => true
     optional ::Protobuf::Field::BoolField, :ext_nested_in_level_one, 105, :extension => true
     optional ::Protobuf::Field::BoolField, :ext_dup_field, 106, :extension => true
-    optional ::Protobuf::Field::BoolField, :ext_dup_field, 107, :extension => true
   end
   
   class MessageParent
