@@ -62,9 +62,9 @@ message Nested {
     optional bool ext_nested_level_one = 100;
   }
 
-  extend Resource {
-    optional bool ext_dup_field = 107;
-  }
+//  extend Resource {
+//    optional bool ext_dup_field = 107;
+//  }
 }
 
 extend Nested {

@@ -15,3 +15,7 @@ tmp/*
 ext/defs
 ext/out
 ext/ruby_generator/protoc-ruby
+.ruby-gemset
+.ruby-version
+ext/ruby_generator/gdb.run
+ext/ruby_generator/protoc-ruby.dSYM
