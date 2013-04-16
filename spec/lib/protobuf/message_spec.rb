@@ -44,11 +44,24 @@ describe Protobuf::Message do
         expect { message.serialize_to_string }.to_not raise_error
       end
 
-      it "trims unicode characters from string fields" do
-        message = ::Test::Resource.new(:name => "my name\xc3")
+      it "keeps utf-8 when utf-8 is input for string fields" do
+        name = "my name\xC3"
+        name.force_encoding("UTF-8")
+
+        message = ::Test::Resource.new(:name => name)
         new_message = ::Test::Resource.new
         new_message.parse_from_string(message.serialize_to_string)
-        new_message.name.should eq("my name")
+        (new_message.name == name).should be_true
+      end
+
+      it "trims binary when binary is input for string fields" do
+        name = "my name\xC3"
+        name.force_encoding("ASCII-8BIT")
+
+        message = ::Test::Resource.new(:name => name)
+        new_message = ::Test::Resource.new
+        new_message.parse_from_string(message.serialize_to_string)
+        (new_message.name == "my name").should be_true
       end
     end
 
