@@ -1,6 +1,8 @@
 package test;
 import 'test/resource.proto';
 
+// Test extending another message from an imported file.
+
 enum EnumTestType {
   ONE = 1;
   TWO = 2;
