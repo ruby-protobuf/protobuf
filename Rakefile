@@ -17,13 +17,15 @@ RSpec::Core::RakeTask.new(:spec)
 ##
 # rake-compiler
 #
-spec = Gem::Specification.load("protobuf.gemspec")
+gemspec = Gem::Specification.load("protobuf.gemspec")
 
-Gem::PackageTask.new(spec) do |pkg|
+Gem::PackageTask.new(gemspec) do |pkg|
 end
 
 if RUBY_PLATFORM =~ /java/
   require "rake/javaextensiontask"
+  Rake::JavaExtensionTask.new('ruby_generator', gemspec)
 else
   require "rake/extensiontask"
+  Rake::ExtensionTask.new('ruby_generator', gemspec)
 end
