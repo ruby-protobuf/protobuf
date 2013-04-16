@@ -5,4 +5,5 @@ module Protobuf
   class TagCollisionError < Error; end
   class SerializationError < StandardError; end
   class FieldNotDefinedError < StandardError; end
+  class DuplicateFieldNameError < StandardError; end
 end
