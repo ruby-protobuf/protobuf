@@ -1,0 +1,23 @@
+package test;
+
+message Header {
+  extensions 100 to max;
+  enum Type   {
+    PayloadTypeA = 1;
+    PayloadTypeB = 2;
+  }
+  required Type type = 1;
+}
+
+message PayloadA {
+  extend Header {
+    optional PayloadA payload = 100;
+  }
+}
+
+message PayloadB {
+  extend Header {
+  // UNCOMMENT TO TEST FAILING WITH MULTIPLE FIELDS
+  //  optional PayloadB payload = 101;
+  }
+}
