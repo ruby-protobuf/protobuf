@@ -1,4 +1,5 @@
 #include "RubyGenerator.h"
+#include <ctype.h>
 
 namespace google {
 namespace protobuf  {
@@ -219,9 +220,22 @@ void RubyGenerator::PrintExtensionRangesForDescriptor(const Descriptor* descript
 
 // Print the given FieldDescriptor to the Message DSL methods.
 void RubyGenerator::PrintMessageField(const FieldDescriptor* descriptor) const {
+  string underscore_name = "";
+  string camel_case_name = descriptor->name();
+
+  for (string::iterator it = camel_case_name.begin(); it != camel_case_name.end(); ++it) {
+    if (!islower(*it)) {
+      underscore_name += '_';
+      underscore_name += tolower(*it);
+    }
+    else {
+      underscore_name += *it;
+    }
+  }
+
   map<string,string> data;
   data["field_presence"] = "";
-  data["field_name"] = descriptor->lowercase_name();
+  data["field_name"] = underscore_name;
   data["tag_number"] = SimpleItoa(descriptor->number());
   data["data_type"] = "";
   data["default_opt"] = "";
