@@ -6,10 +6,6 @@ module Protobuf
         @options = options
       end
 
-      def register_signals
-        # Noop
-      end
-
       def run
         # Startup and run the rpc server
         ::EventMachine.schedule do

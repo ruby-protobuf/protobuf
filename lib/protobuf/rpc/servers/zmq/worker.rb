@@ -31,12 +31,14 @@ module Protobuf
         # Instance Methods
         #
         def handle_request(socket)
-          message_array = []
-          zmq_error_check(socket.recv_strings(message_array))
+          zmq_error_check(socket.recv_strings(frames = []))
 
-          @request_data = message_array[2]
-          @client_address = message_array[0]
-          log_debug { sign_message("handling request") } unless @request_data.nil?
+          @client_address, empty, @request_data = *frames
+
+          unless @request_data.nil?
+            log_debug { sign_message("handling request") }
+            handle_client
+          end
         end
 
         def run
@@ -47,7 +49,6 @@ module Protobuf
             @poller.readables.each do |socket|
               initialize_request!
               handle_request(socket)
-              handle_client unless @request_data.nil?
             end
           end
         ensure

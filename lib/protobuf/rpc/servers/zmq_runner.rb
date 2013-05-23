@@ -16,15 +16,8 @@ module Protobuf
         @server = ::Protobuf::Rpc::Zmq::Server.new(@options)
       end
 
-      def register_signals
-        trap(:TTIN) do
-          log_info { "TTIN received: Starting new worker" }
-          @server.start_worker
-          log_info { "Worker count : #{::Protobuf::Rpc::Zmq::Server.threads.size}" }
-        end
-      end
-
       def run
+        register_signals
         yield if block_given?
         @server.run
       end
@@ -35,6 +28,16 @@ module Protobuf
 
       def stop
         @server.stop
+      end
+
+      private
+
+      def register_signals
+        trap(:TTIN) do
+          log_info { "TTIN received: Starting new worker" }
+          @server.start_worker
+          log_info { "Worker count : #{::Protobuf::Rpc::Zmq::Server.threads.size}" }
+        end
       end
     end
   end

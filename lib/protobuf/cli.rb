@@ -214,8 +214,6 @@ module Protobuf
 
       # Start the runner and log the relevant options.
       def start_server!
-        @runner.register_signals
-
         debug_say 'Invoking server start'
 
         @runner.run do

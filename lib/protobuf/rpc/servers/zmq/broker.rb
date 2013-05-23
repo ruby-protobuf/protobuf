@@ -85,38 +85,23 @@ module Protobuf
           end
 
           def move_to_backend(socket)
-            message_array = []
-            zmq_error_check(socket.recv_strings(message_array))
+            # frames = [CLIENT_ID, "", REQUEST_DATA]
 
-            backend_message_set = [
-              available_workers.shift, # Worker UUID for router
-              "",
-              message_array[0], # Client UUID for return value
-              "",
-              message_array[2] # Client Message payload (request)
-            ]
-
-            zmq_error_check(backend.send_strings(backend_message_set))
+            zmq_error_check(socket.recv_strings(frames = []))
+            frames = [available_workers.shift, ""] + frames
+            zmq_error_check(backend.send_strings(frames))
           end
 
           def move_to_frontend(socket)
-            message_array = []
-            zmq_error_check(socket.recv_strings(message_array))
+            # frames = [WORKER_ID, "", READY_MESSAGE | (CLIENT_ID, "", RESPONSE_DATA)]
 
-            # Push UUID of socket on the available workers queue
-            available_workers << message_array[0]
+            zmq_error_check(socket.recv_strings(frames = []))
+            available_workers << frames.shift(2)[0]
 
-            # messages should be [ "uuid of socket", "", "READY_MESSAGE || uuid of client socket"]
-            if message_array[2] == ::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE
+            if frames == [::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE]
               log_info { "Worker #{available_workers.size} of #{expected_worker_count} ready!" }
             else
-              frontend_message_set = [
-                message_array[2], # client UUID
-                "",
-                message_array[4] # Reply payload
-              ]
-
-              zmq_error_check(frontend.send_strings(frontend_message_set))
+              zmq_error_check(frontend.send_strings(frames))
             end
           end
 

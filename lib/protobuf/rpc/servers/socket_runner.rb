@@ -17,10 +17,6 @@ module Protobuf
         @server = ::Protobuf::Rpc::Socket::Server.new(@options)
       end
 
-      def register_signals
-        # noop
-      end
-
       def run
         yield if block_given?
         @server.run
