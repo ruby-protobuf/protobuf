@@ -5,6 +5,7 @@ require 'protobuf/message'
 require 'protobuf/rpc/service'
 
 module Test
+
   ##
   # Enum Classes
   #
@@ -55,6 +56,7 @@ module Test
     optional ::Protobuf::Field::BoolField, :ext_is_hidden, 101, :extension => true
     optional ::Test::Searchable::SearchType, :ext_search_type, 102, :default => ::Test::Searchable::SearchType::FLAT, :extension => true
     optional ::Protobuf::Field::BoolField, :ext_nested_in_level_one, 105, :extension => true
+    optional ::Protobuf::Field::BoolField, :ext_dup_field, 106, :extension => true
   end
   
   class MessageParent
@@ -85,6 +87,7 @@ module Test
     optional ::Protobuf::Field::Int64Field, :bar, 101, :extension => true
   end
   
+  
   ##
   # Services
   #
@@ -92,3 +95,4 @@ module Test
     rpc :find, ::Test::ResourceFindRequest, ::Test::Resource
   end
 end
+

@@ -12,7 +12,7 @@ module Protobuf
 
       def encode(value)
         # TODO: make replace character configurable?
-        value.encode!(::Protobuf::Field::StringField::ENCODING, ::Protobuf::Field::BytesField::BYTES_ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+        value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
         value.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 
         string_size = ::Protobuf::Field::VarintField.encode(value.size)

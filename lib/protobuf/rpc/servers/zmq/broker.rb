@@ -13,7 +13,7 @@ module Protobuf
         #
         def initialize(options = {})
           @available_workers = []
-          @options = options.deep_dup
+          @options = options.dup
           @expected_worker_count = @options[:threads]
           @context = ::ZMQ::Context.new
           @poller = ::ZMQ::Poller.new
@@ -28,7 +28,7 @@ module Protobuf
             if local_workers_have_started?
               # only open the front end when the workers are done booting
               log_info { "Starting frontend socket in broker, all workers ready!" }
-              setup_frontend 
+              setup_frontend
             end
           else
             # Start checking the poller after startup

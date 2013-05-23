@@ -36,16 +36,12 @@ bool RubyGenerator::Generate(const FileDescriptor* file,
   PrintImportRequires();
 
   PrintEnclosingNamespaceModules();
+  StoreExtensionFields(file_);
 
   PrintEnumsForFileDescriptor(file_, false);
-  PrintNewLine();
   PrintMessagesForFileDescriptor(file_, false);
-  PrintNewLine();
-
   PrintMessagesForFileDescriptor(file_, true);
-
   PrintDanglingExtendedMessages();
-
   PrintServices();
 
   PrintEnclosingNamespaceModuleEnds();
@@ -72,6 +68,7 @@ void RubyGenerator::PrintEnclosingNamespaceModules() const {
 
     printer_->Print(data, "module $ns$");
     PrintNewLine();
+    PrintNewLine();
     printer_->Indent();
   }
 }
@@ -81,6 +78,7 @@ void RubyGenerator::PrintEnclosingNamespaceModuleEnds() const {
   for (iter = ns_vector.begin(); iter < ns_vector.end(); iter++) {
     printer_->Outdent();
     printer_->Print("end");
+    PrintNewLine();
     PrintNewLine();
   }
 }
@@ -100,12 +98,12 @@ void RubyGenerator::PrintMessagesForFileDescriptor(const FileDescriptor* descrip
     }
     else {
       PrintComment("Message Classes", true);
-      StoreExtensionFields(descriptor);
     }
 
     for (int i = 0; i < descriptor->message_type_count(); i++) {
       PrintMessage(descriptor->message_type(i), print_fields);
     }
+    PrintNewLine();
   }
 }
 
@@ -350,6 +348,7 @@ void RubyGenerator::PrintEnumsForFileDescriptor(const FileDescriptor* descriptor
     for (int i = 0; i < descriptor->enum_type_count(); i++) {
       PrintEnum(descriptor->enum_type(i));
     }
+    PrintNewLine();
   }
 }
 
@@ -369,7 +368,6 @@ void RubyGenerator::PrintEnum(const EnumDescriptor* descriptor) const {
   printer_->Outdent();
   printer_->Print(data, "end");
   PrintNewLine();
-
   PrintNewLine();
 }
 

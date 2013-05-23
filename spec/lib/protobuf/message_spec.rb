@@ -2,6 +2,54 @@ require 'spec_helper'
 
 describe Protobuf::Message do
 
+  describe '.define_field' do
+    context 'when defining a field with a tag that has already been used' do
+      it 'raises a TagCollisionError' do
+        expect {
+          Class.new(Protobuf::Message) do
+            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 1, {}
+            define_field :optional, ::Protobuf::Field::Int32Field, :bar, 1, {}
+          end
+        }.to raise_error(Protobuf::TagCollisionError, /Field number 1 has already been used/)
+      end
+    end
+
+    context 'when defining an extension field with a tag that has already been used' do
+      it 'raises a TagCollisionError' do
+        expect {
+          Class.new(Protobuf::Message) do
+            extensions 100...110
+            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 100, {}
+            define_field :optional, ::Protobuf::Field::Int32Field, :bar, 100, :extension => true
+          end
+        }.to raise_error(Protobuf::TagCollisionError, /Field number 100 has already been used/)
+      end
+    end
+
+    context 'when defining a field with a name that has already been used' do
+      it 'raises a DuplicateFieldNameError' do
+        expect {
+          Class.new(Protobuf::Message) do
+            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 1, {}
+            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 2, {}
+          end
+        }.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
+      end
+    end
+
+    context 'when defining an extension field with a name that has already been used' do
+      it 'raises a DuplicateFieldNameError' do
+        expect {
+          Class.new(Protobuf::Message) do
+            extensions 100...110
+            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 1, {}
+            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 100, :extension => true
+          end
+        }.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
+      end
+    end
+  end
+
   describe '#initialize' do
     it "initializes the enum getter to 0" do
       test_enum = Test::EnumTestMessage.new
@@ -44,11 +92,24 @@ describe Protobuf::Message do
         expect { message.serialize_to_string }.to_not raise_error
       end
 
-      it "trims unicode characters from string fields" do
-        message = ::Test::Resource.new(:name => "my name\xc3")
+      it "keeps utf-8 when utf-8 is input for string fields" do
+        name = "my name\xC3"
+        name.force_encoding("UTF-8")
+
+        message = ::Test::Resource.new(:name => name)
         new_message = ::Test::Resource.new
         new_message.parse_from_string(message.serialize_to_string)
-        new_message.name.should eq("my name")
+        (new_message.name == name).should be_true
+      end
+
+      it "trims binary when binary is input for string fields" do
+        name = "my name\xC3"
+        name.force_encoding("ASCII-8BIT")
+
+        message = ::Test::Resource.new(:name => name)
+        new_message = ::Test::Resource.new
+        new_message.parse_from_string(message.serialize_to_string)
+        (new_message.name == "my name").should be_true
       end
     end
 

@@ -27,8 +27,14 @@ module Protobuf
       field_array = options[:extension] ? extension_fields : fields
       field_name_hash = options[:extension] ? extension_field_name_to_tag : field_name_to_tag
 
-      if field_array[tag]
-        raise TagCollisionError, %!{Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
+      previous_tag_field = get_field_by_tag(tag) || get_ext_field_by_tag(tag)
+      if previous_tag_field
+        raise TagCollisionError, %!Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
+      end
+
+      previous_name_field = get_field_by_name(fname) || get_ext_field_by_name(fname)
+      if previous_name_field
+        raise DuplicateFieldNameError, %!Field name #{fname} has already been used in "#{self.name}".!
       end
 
       field_definition = ::Protobuf::Field.build(self, rule, type, fname, tag, options)
