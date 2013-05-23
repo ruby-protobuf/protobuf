@@ -12,23 +12,24 @@ describe Protobuf::Rpc::Socket::Server do
   before(:all) do
     load 'protobuf/socket.rb'
     Thread.abort_on_exception = true
-    server = OpenStruct.new(:server => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
-    @server_thread = Thread.new(server) { |s| Protobuf::Rpc::SocketRunner.run(s) }
-    Thread.pass until Protobuf::Rpc::Socket::Server.running?
+    @options = OpenStruct.new(:host => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
+    @runner = ::Protobuf::Rpc::SocketRunner.new(@options)
+    @server = @runner.instance_variable_get(:@server)
+    @server_thread = Thread.new(@runner) { |runner| runner.run }
+    Thread.pass until @server.running?
   end
 
   after(:all) do
-    Protobuf::Rpc::SocketRunner.stop
+    @server.stop
     @server_thread.join
   end
 
   it "Runner provides a stop method" do
-    runner_class = described_class.to_s.gsub(/Evented::Server/, "EventedRunner").constantize
-    runner_class.respond_to?(:stop).should be_true
+    @runner.respond_to?(:stop).should be_true
   end
 
   it "provides a stop method" do
-    described_class.respond_to?(:stop).should be_true
+    @runner.respond_to?(:stop).should be_true
   end
 
   it "provides a Runner class" do
@@ -37,7 +38,7 @@ describe Protobuf::Rpc::Socket::Server do
   end
 
   it "signals the Server is running" do
-    described_class.running?.should be_true
+    @server.running?.should be_true
   end
 
 end
