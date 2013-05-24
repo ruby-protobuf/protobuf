@@ -6,6 +6,7 @@ module Protobuf
 
       module Util
         include ::Protobuf::Logger::LogMethods
+
         def self.included(base)
           base.extend(::Protobuf::Rpc::Zmq::Util)
         end
@@ -21,9 +22,7 @@ module Protobuf
         def resolve_ip(hostname)
           ::Resolv.getaddress(hostname)
         end
-
       end
-
     end
   end
 end

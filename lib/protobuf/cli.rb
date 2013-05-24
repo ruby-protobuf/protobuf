@@ -29,6 +29,7 @@ module Protobuf
     option :evented,                    :type => :boolean, :aliases => %w(-m), :desc => 'Evented Mode for server and client connections (uses EventMachine).'
     option :zmq,                        :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
 
+    option :dynamic_discovery,          :type => :boolean, :default => false, :aliases => %w(-y), :desc => 'Enable dynamic discovery (Currently only available with ZeroMQ).'
     option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
     option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
@@ -101,25 +102,26 @@ module Protobuf
       # Configure the mode of the server and the runner class.
       def configure_server_mode
         debug_say 'Configuring runner mode'
-        if options.zmq? && ! options.evented? && ! options.socket?
+
+        if multi_mode?
+          say 'WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow
+          server_socket!
+        elsif options.zmq?
           server_zmq!
-        elsif options.evented? && ! options.zmq? && ! options.socket?
+        elsif options.evented?
           server_evented!
-        elsif (env_server_type = ENV["PB_SERVER_TYPE"])
-          case
-          when env_server_type =~ /zmq/i then
-            server_zmq!
-          when env_server_type =~ /socket/i then
+        else
+          case server_type = ENV["PB_SERVER_TYPE"]
+          when nil, /socket/i
             server_socket!
-          when env_server_type =~ /evented/i then
+          when /zmq/i
+            server_zmq!
+          when /evented/i
             server_evented!
           else
-            say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{env_server_type}'. Defaulting to socket mode.", :yellow
+            say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
             server_socket!
           end
-        else
-          say 'WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow if multi_mode?
-          server_socket!
         end
       end
 
@@ -145,9 +147,11 @@ module Protobuf
 
       # Internal helper to determine if the modes are multi-set which is not valid.
       def multi_mode?
-        (options.zmq? && (options.evented? || options.socket?)) \
-          && (options.evented? && (options.evented? || options.socket?)) \
-          && (options.zmq? && (options.evented? || options.socket?)) \
+        [
+          options.zmq?,
+          options.evented?,
+          options.socket?,
+        ].count(true) > 1
       end
 
       # Require the application file given, exiting if the file doesn't exist.

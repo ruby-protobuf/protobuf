@@ -2,14 +2,32 @@ require 'spec_helper'
 require 'protobuf/rpc/servers/zmq/server'
 
 describe Protobuf::Rpc::Zmq::Server do
-  subject { described_class.new({}) }
+  subject { described_class.new(options) }
 
-  before(:each) do
+  let(:options) {{
+    :host => '127.0.0.1',
+    :port => 9399,
+    :worker_port => 9400,
+    :workers_only => true
+  }}
+
+  before do
     load 'protobuf/zmq.rb'
   end
 
-  describe '.running?' do
+  after do
+    subject.teardown
+  end
 
+  it 'sets up a ZMQ context' do
+    subject.instance_variable_get(:@zmq_context).should be_a(::ZMQ::Context)
+  end
+
+  it 'sets up a backend socket' do
+    subject.instance_variable_get(:@backend_socket).should be_a(::ZMQ::Socket)
+  end
+
+  describe '.running?' do
     it 'returns true if running' do
       subject.instance_variable_set(:@running, true)
       subject.running?.should be_true
@@ -22,21 +40,13 @@ describe Protobuf::Rpc::Zmq::Server do
   end
 
   describe '.stop' do
-    # keep threads instance variable from retaining any thread mocks we've
-    # created (breaks tests down the line, otherwise)
-    after(:each) do
-      subject.instance_variable_set(:@threads, [])
-    end
-
-    it 'lets all threads stop' do
-      thread_mock = double(Thread)
-      thread_mock.should_receive(:join).and_return(thread_mock)
-      subject.instance_variable_set(:@threads, [thread_mock])
+    it 'signals shutdown' do
+      subject.should_receive(:signal_shutdown)
       subject.stop
     end
 
     it 'sets running to false' do
-      subject.instance_variable_set(:@threads, [])
+      subject.instance_variable_set(:@workers, [])
       subject.stop
       subject.instance_variable_get(:@running).should be_false
     end
