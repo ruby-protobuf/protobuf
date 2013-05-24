@@ -96,16 +96,18 @@ describe ::Protobuf::CLI do
 
         it 'sets both request and serialization pausing to false' do
           described_class.start(args)
-          ::Protobuf.gc_pause_server_request?.should be_false
+          ::Protobuf.should_not be_gc_pause_server_request
         end
       end
 
-      context 'request pausing' do
-        let(:test_args) { [ '--gc_pause_request' ] }
+      unless defined?(JRUBY_VERSION)
+        context 'request pausing' do
+          let(:test_args) { [ '--gc_pause_request' ] }
 
-        it 'sets the configuration option to GC pause server request' do
-          described_class.start(args)
-          ::Protobuf.gc_pause_server_request?.should be_true
+          it 'sets the configuration option to GC pause server request' do
+            described_class.start(args)
+            ::Protobuf.should be_gc_pause_server_request
+          end
         end
       end
     end

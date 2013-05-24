@@ -7,9 +7,7 @@ require 'protobuf/rpc/servers/zmq_runner'
 
 module Protobuf
   class CLI < ::Thor
-    include ::Thor::Actions
-
-    attr_accessor :runner, :mode, :start_aborted
+    attr_accessor :runner, :mode
 
     default_task :start
 
@@ -38,7 +36,6 @@ module Protobuf
 
     def start(app_file)
       debug_say 'Configuring the rpc_server process'
-      @start_aborted = false
 
       configure_logger
       configure_traps
@@ -47,9 +44,9 @@ module Protobuf
       configure_gc
       configure_deprecation_warnings
 
-      run_if_no_abort { require_application!(app_file) }
-      run_if_no_abort { configure_process_name(app_file) }
-      run_if_no_abort { start_server! }
+      require_application!(app_file) unless exit_requested?
+      configure_process_name(app_file) unless exit_requested?
+      start_server! unless exit_requested?
     rescue => e
       say_and_exit!('ERROR: RPC Server failed to start.', e)
     end
@@ -129,13 +126,16 @@ module Protobuf
       # TODO add signal handling for hot-reloading the application.
       def configure_traps
         debug_say 'Configuring traps'
-        [:INT, :QUIT, :TERM].each do |signal|
-          debug_say "Registering signal trap for #{signal}", :blue
+
+        exit_signals = [:INT, :TERM]
+        exit_signals << :QUIT unless defined?(JRUBY_VERSION)
+
+        exit_signals.each do |signal|
+          debug_say "Registering trap for exit signal #{signal}", :blue
+
           trap(signal) do
-            ::Protobuf::Logger.info { 'RPC Server shutting down...' }
-            @start_aborted = true
-            @runner.stop
-            ::Protobuf::Logger.info { 'Shutdown complete' }
+            @exit_requested = true
+            shutdown_server
           end
         end
       end
@@ -143,6 +143,10 @@ module Protobuf
       # Say something if we're in debug mode.
       def debug_say(message, color = :yellow)
         say(message, color) if options.debug?
+      end
+
+      def exit_requested?
+        !!@exit_requested
       end
 
       # Internal helper to determine if the modes are multi-set which is not valid.
@@ -168,10 +172,6 @@ module Protobuf
       rescue LoadError => e
         puts e.message, *(e.backtrace)
         say_and_exit!("Failed to load protobuf runner #{@mode}", e)
-      end
-
-      def run_if_no_abort
-        yield unless @start_aborted
       end
 
       def runner_options
@@ -214,6 +214,12 @@ module Protobuf
       def server_zmq!
         @mode = :zmq
         @runner = ::Protobuf::Rpc::ZmqRunner.new(runner_options)
+      end
+
+      def shutdown_server!
+        ::Protobuf::Logger.info { 'RPC Server shutting down...' }
+        @runner.try :stop
+        ::Protobuf::Logger.info { 'Shutdown complete' }
       end
 
       # Start the runner and log the relevant options.

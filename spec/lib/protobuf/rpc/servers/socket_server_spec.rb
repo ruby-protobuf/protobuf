@@ -25,11 +25,11 @@ describe Protobuf::Rpc::Socket::Server do
   end
 
   it "Runner provides a stop method" do
-    @runner.respond_to?(:stop).should be_true
+    @runner.should respond_to(:stop)
   end
 
   it "provides a stop method" do
-    @runner.respond_to?(:stop).should be_true
+    @server.should respond_to(:stop)
   end
 
   it "provides a Runner class" do
@@ -38,7 +38,7 @@ describe Protobuf::Rpc::Socket::Server do
   end
 
   it "signals the Server is running" do
-    @server.running?.should be_true
+    @server.should be_running
   end
 
 end

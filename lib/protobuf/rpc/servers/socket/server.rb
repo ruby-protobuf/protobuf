@@ -101,12 +101,12 @@ module Protobuf
         end
 
         def running?
-          @running
+          !!@running
         end
 
         def stop
           @running = false
-          @server.close if @server
+          @server.try :close
         end
       end
     end
