@@ -2,25 +2,29 @@ require 'spec_helper'
 require 'spec/support/test/resource_service'
 
 describe 'Functional ZMQ Client' do
-  before(:all) do
+  let(:options) {{
+    :host => "127.0.0.1",
+    :port => 9399,
+    :worker_port => 9400,
+    :backlog => 100,
+    :threshold => 100,
+    :threads => 5,
+    :dynamic_discovery => true,
+    :beacon_port => 9398
+  }}
+
+  let(:server) { ::Protobuf::Rpc::Zmq::Server.new(options) }
+  let(:server_thread) { Thread.new(server) { |server| server.run } }
+
+  before do
     load "protobuf/zmq.rb"
-    Thread.abort_on_exception = true
-    options = OpenStruct.new(:host => "127.0.0.1",
-                             :port => 9399,
-                             :worker_port => 9400,
-                             :backlog => 100,
-                             :threshold => 100,
-                             :threads => 5)
-
-    @runner = ::Protobuf::Rpc::ZmqRunner.new(options)
-    @server_thread = Thread.new(@runner) { |runner| runner.run }
-
-    Thread.pass until @runner.running?
+    server_thread.abort_on_exception = true
+    Thread.pass until server.running?
   end
 
-  after(:all) do
-    @runner.stop
-    @server_thread.try(:join)
+  after do
+    server.stop
+    server_thread.join
   end
 
   it 'runs fine when required fields are set' do

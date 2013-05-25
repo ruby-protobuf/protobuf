@@ -1,5 +1,7 @@
 require 'protobuf/rpc/servers/zmq/worker'
 require 'protobuf/rpc/servers/zmq/util'
+require 'protobuf/rpc/dynamic_discovery.pb'
+require 'securerandom'
 
 module Protobuf
   module Rpc
@@ -18,10 +20,6 @@ module Protobuf
           init_frontend_socket unless brokerless?
           init_shutdown_socket
           init_beacon_socket if broadcast_beacons?
-        end
-
-        def alive_workers
-          @workers.count { |worker| worker.alive? }
         end
 
         def backend_ip
@@ -53,17 +51,27 @@ module Protobuf
         end
 
         def broadcast_flatline
-          # TODO: create a flatline beacon from the proto
-          flatline = "flatline"
+          flatline = ::Protobuf::DynamicDiscovery::Beacon.new(
+            :beacon_type => ::Protobuf::DynamicDiscovery::BeaconType::FLATLINE,
+            :uuid => uuid,
+            :address => frontend_ip,
+            :port => frontend_port.to_s
+          )
 
-          @beacon_socket.send flatline, 0
+          @beacon_socket.send flatline.to_s, 0
         end
 
         def broadcast_heartbeat
-          # TODO: create a heartbeat beacon from the proto
-          heartbeat = "heartbeat"
+          heartbeat = ::Protobuf::DynamicDiscovery::Beacon.new(
+            :beacon_type => ::Protobuf::DynamicDiscovery::BeaconType::HEARTBEAT,
+            :uuid => uuid,
+            :address => frontend_ip,
+            :port => frontend_port.to_s,
+            :ttl => beacon_interval * 3,
+            :service_classes => ["not sure"] # TODO: Figure out what goes here
+          )
 
-          @beacon_socket.send heartbeat, 0
+          @beacon_socket.send heartbeat.to_s, 0
         end
 
         def brokerless?
@@ -110,7 +118,7 @@ module Protobuf
           @workers.each do |t|
             t.join(5) || t.kill
           end
-
+        ensure
           teardown
         end
 
@@ -135,9 +143,11 @@ module Protobuf
           while running? || @workers.any?
             poller.poll(timeout)
             poller.readables.each do |readable|
-              if readable === @frontend_socket && available_workers.any?
-                @frontend_socket.recv_strings frames = []
-                @backend_socket.send_strings [available_workers.shift, ""] + frames
+              if readable === @frontend_socket
+                if available_workers.any?
+                  @frontend_socket.recv_strings frames = []
+                  @backend_socket.send_strings [available_workers.shift, ""] + frames
+                end
               elsif readable === @backend_socket
                 @backend_socket.recv_strings frames = []
                 available_workers << frames.shift(2)[0]
@@ -147,6 +157,7 @@ module Protobuf
               elsif readable === @shutdown_socket
                 broadcast_flatline if broadcast_beacons?
                 poller.deregister_readable @frontend_socket
+                poller.deregister_readable @shutdown_socket
               end
             end
 
@@ -216,6 +227,10 @@ module Protobuf
           @total_workers ||= @options[:threads]
         end
 
+        def uuid
+          @uuid ||= SecureRandom.uuid
+        end
+
         def wait_for_shutdown_signal
           @shutdown_socket.recv_string shutdown = ""
         end
@@ -223,7 +238,7 @@ module Protobuf
         private
 
         def default_options
-          { :beacon_interval => 5 }
+          { :beacon_interval => 5  }
         end
 
         def init_backend_socket
@@ -233,7 +248,7 @@ module Protobuf
 
         def init_beacon_socket
           @beacon_socket = UDPSocket.new
-          @beacon_socket.setsockopt Socket::SOL_SOCKET, Socket::SO_BROADCAST, true
+          @beacon_socket.setsockopt :SOCKET, :BROADCAST, true
           @beacon_socket.connect beacon_ip, beacon_port
         end
 

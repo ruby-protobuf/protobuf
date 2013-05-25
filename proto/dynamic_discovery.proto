@@ -22,19 +22,19 @@
 //
 // Protobufs needed for dynamic discovery zmq server and client.
 
-package protobuf.dynamic_discovery;
+package protobuf.dynamicDiscovery;
 
 enum BeaconType {
-  HEARTBEAT = 1;
-  FLATLINE = 2;
+  HEARTBEAT = 0;
+  FLATLINE = 1;
 }
 
 message Beacon {
   optional BeaconType beacon_type = 1;
   optional string uuid = 2;
-  optional string hostname = 3;
+  optional string address = 3;
   optional string port = 4;
   optional int32 ttl = 5;
-  repeated string service_classes = 5;
+  repeated string service_classes = 6;
 }
 

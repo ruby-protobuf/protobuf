@@ -1,3 +1,5 @@
+require 'resolv'
+
 module Protobuf
   module Rpc
     module Zmq
