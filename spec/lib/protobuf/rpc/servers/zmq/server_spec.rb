@@ -19,14 +19,6 @@ describe Protobuf::Rpc::Zmq::Server do
     subject.teardown
   end
 
-  it 'sets up a ZMQ context' do
-    subject.instance_variable_get(:@zmq_context).should be_a(::ZMQ::Context)
-  end
-
-  it 'sets up a backend socket' do
-    subject.instance_variable_get(:@backend_socket).should be_a(::ZMQ::Socket)
-  end
-
   describe '.running?' do
     it 'returns true if running' do
       subject.instance_variable_set(:@running, true)

@@ -1,7 +1,10 @@
-require 'protobuf/rpc/servers/zmq/worker'
 require 'protobuf/rpc/servers/zmq/util'
+require 'protobuf/rpc/servers/zmq/worker'
+require 'protobuf/rpc/servers/zmq/broker'
 require 'protobuf/rpc/dynamic_discovery.pb'
 require 'securerandom'
+
+STDOUT.sync = true
 
 module Protobuf
   module Rpc
@@ -16,10 +19,11 @@ module Protobuf
           @workers = []
 
           init_zmq_context
-          init_backend_socket
-          init_frontend_socket unless brokerless?
-          init_shutdown_socket
           init_beacon_socket if broadcast_beacons?
+          init_shutdown_socket
+        rescue
+          teardown
+          raise
         end
 
         def backend_ip
@@ -100,7 +104,7 @@ module Protobuf
 
         def reap_dead_workers
           @workers.keep_if do |worker|
-            worker.alive?
+            worker.thread.alive? or worker.thread.join && false
           end
         end
 
@@ -111,14 +115,13 @@ module Protobuf
         def run
           @running = true
 
+          start_broker unless brokerless?
           start_missing_workers
-
-          brokerless? ? wait_for_shutdown_signal : run_broker
-
-          @workers.each do |t|
-            t.join(5) || t.kill
-          end
+          wait_for_shutdown_signal
+          stop_workers
+          stop_broker unless brokerless?
         ensure
+          @running = false
           teardown
         end
 
@@ -126,64 +129,19 @@ module Protobuf
           !!@running
         end
 
-        def run_broker
-          log_debug { sign_message("initializing broker") }
-
-          timeout = 0
-          next_beacon = 0
-          next_reaping = 0
-          next_cycle = Time.now.to_i + maintenance_interval
-          poller = ZMQ::Poller.new
-          available_workers = []
-
-          poller.register_readable @frontend_socket
-          poller.register_readable @backend_socket
-          poller.register_readable @shutdown_socket
-
-          while running? || @workers.any?
-            poller.poll(timeout)
-            poller.readables.each do |readable|
-              if readable === @frontend_socket
-                if available_workers.any?
-                  @frontend_socket.recv_strings frames = []
-                  @backend_socket.send_strings [available_workers.shift, ""] + frames
-                end
-              elsif readable === @backend_socket
-                @backend_socket.recv_strings frames = []
-                available_workers << frames.shift(2)[0]
-                unless frames == [::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE]
-                  @frontend_socket.send_strings frames
-                end
-              elsif readable === @shutdown_socket
-                broadcast_flatline if broadcast_beacons?
-                poller.deregister_readable @frontend_socket
-                poller.deregister_readable @shutdown_socket
-              end
-            end
-
-            if (time = Time.now.to_i) >= next_reaping
-              reap_dead_workers
-              start_missing_workers if running?
-              next_reaping = time + reaping_interval
-              next_cycle = [next_cycle, next_reaping].min
-            end
-
-            if broadcast_beacons? && time >= next_beacon
-              running? ? broadcast_heartbeat : broadcast_flatline
-              next_beacon = time + beacon_interval
-              next_cycle = [next_cycle, next_beacon].min
-            end
-
-            timeout = [minimum_timeout, 1_000 * (next_cycle - time)].max
-          end
+        def shutdown_uri
+          "inproc://#{object_id}"
         end
 
         def signal_shutdown
-          @running = false
-          socket = zmq_context.socket ZMQ::PAIR
+          socket = @zmq_context.socket ZMQ::PAIR
           zmq_error_check(socket.connect shutdown_uri)
-          zmq_error_check(socket.send_string "shutdown")
+          zmq_error_check(socket.send_string "blargh!")
           zmq_error_check(socket.close)
+        end
+
+        def start_broker
+          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self).start
         end
 
         def start_missing_workers
@@ -196,31 +154,27 @@ module Protobuf
         end
 
         def start_worker
-          @workers << Thread.new(self) do |server|
-            begin
-              ::Protobuf::Rpc::Zmq::Worker.new(server).run
-            rescue => e
-              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
-              $stderr.puts message
-              log_error { message }
-            end
-          end
-        end
-
-        def shutdown_uri
-          "inproc://#{object_id}"
+          @workers << ::Protobuf::Rpc::Zmq::Worker.new(self).start
         end
 
         def stop
           signal_shutdown
         end
 
+        def stop_broker
+          @broker.signal_shutdown
+          @broker.join
+        end
+
+        def stop_workers
+          @workers.each &:signal_shutdown
+          Thread.pass until reap_dead_workers.empty?
+        end
+
         def teardown
-          @frontend_socket.try :close
-          @backend_socket.try :close
           @shutdown_socket.try :close
           @beacon_socket.try :close
-          @zmq_context.terminate
+          @zmq_context.try :terminate
         end
 
         def total_workers
@@ -232,7 +186,34 @@ module Protobuf
         end
 
         def wait_for_shutdown_signal
-          @shutdown_socket.recv_string shutdown = ""
+          timeout = 0
+          next_beacon = 0
+          next_reaping = 0
+          next_cycle = Time.now.to_i + maintenance_interval
+          poller = ZMQ::Poller.new
+
+          poller.register_readable @shutdown_socket
+
+          while poller.poll(timeout) >= 0
+            break if poller.readables.any?
+
+            time = Time.now.to_i
+
+            if time >= next_reaping
+              reap_dead_workers
+              start_missing_workers
+              next_reaping = time + reaping_interval
+              next_cycle = [next_cycle, next_reaping].min
+            end
+
+            if broadcast_beacons? && time >= next_beacon
+              broadcast_heartbeat
+              next_beacon = time + beacon_interval
+              next_cycle = [next_cycle, next_beacon].min
+            end
+
+            timeout = [minimum_timeout, 1000 * (next_cycle - time)].max
+          end
         end
 
         private
@@ -241,20 +222,10 @@ module Protobuf
           { :beacon_interval => 5  }
         end
 
-        def init_backend_socket
-          @backend_socket = @zmq_context.socket ZMQ::ROUTER
-          zmq_error_check(@backend_socket.bind backend_uri)
-        end
-
         def init_beacon_socket
           @beacon_socket = UDPSocket.new
           @beacon_socket.setsockopt :SOCKET, :BROADCAST, true
           @beacon_socket.connect beacon_ip, beacon_port
-        end
-
-        def init_frontend_socket
-          @frontend_socket = @zmq_context.socket ZMQ::ROUTER
-          zmq_error_check(@frontend_socket.bind frontend_uri)
         end
 
         def init_shutdown_socket
