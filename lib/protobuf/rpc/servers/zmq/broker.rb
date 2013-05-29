@@ -21,10 +21,6 @@ module Protobuf
           @thread.try :join
         end
 
-        def minimum_timeout
-          100
-        end
-
         def run
           idle_workers = []
 
