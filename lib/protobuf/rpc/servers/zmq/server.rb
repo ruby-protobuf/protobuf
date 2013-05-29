@@ -194,15 +194,12 @@ module Protobuf
           next_reaping = time + reaping_interval
           next_cycle = time + maintenance_interval
           poller = ZMQ::Poller.new
-
           poller.register_readable @shutdown_socket
 
-          while poller.poll(timeout) >= 0
-            break if poller.readables.any?
-
-            time = Time.now.to_i
-
-            if time >= next_reaping
+          # If the poller returns 1, a shutdown signal has been received.
+          # If the poller returns -1, something went wrong.
+          while poller.poll(timeout) === 0
+            if (time = Time.now.to_i) >= next_reaping
               reap_dead_workers
               start_missing_workers
               next_reaping = time + reaping_interval
