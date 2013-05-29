@@ -9,7 +9,7 @@ describe 'Functional ZMQ Client' do
     :backlog => 100,
     :threshold => 100,
     :threads => 5,
-    :dynamic_discovery => true,
+    :broadcast_beacons => true,
     :beacon_port => 9398
   }}
 

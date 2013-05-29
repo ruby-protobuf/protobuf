@@ -49,7 +49,7 @@ module Protobuf
         end
 
         def broadcast_beacons?
-          !brokerless? && options[:dynamic_discovery]
+          !brokerless? && options[:broadcast_beacons]
         end
 
         def broadcast_flatline
