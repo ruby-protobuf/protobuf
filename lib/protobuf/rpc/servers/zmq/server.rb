@@ -105,7 +105,7 @@ module Protobuf
 
         def reap_dead_workers
           @workers.keep_if do |worker|
-            worker.thread.alive? or worker.thread.join && false
+            worker.alive? or worker.join && false
           end
         end
 

@@ -23,6 +23,10 @@ module Protobuf
         ##
         # Instance Methods
         #
+        def alive?
+          @thread.try(:alive?) || false
+        end
+
         def handle_request(socket)
           zmq_error_check(socket.recv_strings(frames = []))
 
@@ -32,6 +36,10 @@ module Protobuf
             log_debug { sign_message("handling request") }
             handle_client
           end
+        end
+
+        def join
+          @thread.try :join
         end
 
         def run
