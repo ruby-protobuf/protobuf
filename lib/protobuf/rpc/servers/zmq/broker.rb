@@ -5,8 +5,6 @@ module Protobuf
       class Broker
         include ::Protobuf::Rpc::Zmq::Util
 
-        attr_reader :server
-
         def initialize(server)
           @server = server
 
@@ -15,6 +13,9 @@ module Protobuf
           init_frontend_socket
           init_shutdown_socket
           init_poller
+        rescue
+          teardown
+          raise
         end
 
         def join
@@ -30,14 +31,15 @@ module Protobuf
                 case readable
                 when @frontend_socket
                   if idle_workers.any?
-                    @frontend_socket.recv_strings frames = []
-                    @backend_socket.send_strings [idle_workers.shift, ""] + frames
+                    zmq_error_check(@frontend_socket.recv_strings frames = [])
+                    frames.unshift(idle_workers.shift, "")
+                    zmq_error_check(@backend_socket.send_strings frames)
                   end
                 when @backend_socket
-                  @backend_socket.recv_strings frames = []
+                  zmq_error_check(@backend_socket.recv_strings frames = [])
                   idle_workers << frames.shift(2)[0]
                   unless frames == [::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE]
-                    @frontend_socket.send_strings frames
+                    zmq_error_check(@frontend_socket.send_strings frames)
                   end
                 when @shutdown_socket
                   throw :shutdown
@@ -45,7 +47,7 @@ module Protobuf
               end
             end
           end
-
+        ensure
           teardown
         end
 
@@ -66,27 +68,27 @@ module Protobuf
         def signal_shutdown
           socket = @zmq_context.socket ZMQ::PAIR
           zmq_error_check(socket.connect shutdown_uri)
-          zmq_error_check(socket.send_string "")
+          zmq_error_check(socket.send_string ".")
           zmq_error_check(socket.close)
         end
 
         def teardown
-          @frontend_socket.close
-          @backend_socket.close
-          @shutdown_socket.close
-          @zmq_context.terminate
+          @frontend_socket.try :close
+          @backend_socket.try :close
+          @shutdown_socket.try :close
+          @zmq_context.try :terminate
         end
 
         private
 
         def init_backend_socket
           @backend_socket = @zmq_context.socket ZMQ::ROUTER
-          zmq_error_check(@backend_socket.bind server.backend_uri)
+          zmq_error_check(@backend_socket.bind @server.backend_uri)
         end
 
         def init_frontend_socket
           @frontend_socket = @zmq_context.socket ZMQ::ROUTER
-          zmq_error_check(@frontend_socket.bind server.frontend_uri)
+          zmq_error_check(@frontend_socket.bind @server.frontend_uri)
         end
 
         def init_poller

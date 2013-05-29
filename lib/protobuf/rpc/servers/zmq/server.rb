@@ -4,15 +4,13 @@ require 'protobuf/rpc/servers/zmq/broker'
 require 'protobuf/rpc/dynamic_discovery.pb'
 require 'securerandom'
 
-STDOUT.sync = true
-
 module Protobuf
   module Rpc
     module Zmq
       class Server
         include ::Protobuf::Rpc::Zmq::Util
 
-        attr_accessor :options, :workers, :zmq_context
+        attr_accessor :options
 
         def initialize(options)
           @options = default_options.merge(options)
@@ -138,7 +136,7 @@ module Protobuf
         def signal_shutdown
           socket = @zmq_context.socket ZMQ::PAIR
           zmq_error_check(socket.connect shutdown_uri)
-          zmq_error_check(socket.send_string "blargh!")
+          zmq_error_check(socket.send_string ".")
           zmq_error_check(socket.close)
         end
 
@@ -180,7 +178,7 @@ module Protobuf
         end
 
         def total_workers
-          @total_workers ||= @options[:threads]
+          @total_workers ||= [@options[:threads].to_i, 1].max
         end
 
         def uuid
@@ -230,7 +228,7 @@ module Protobuf
 
         def init_shutdown_socket
           @shutdown_socket = @zmq_context.socket ZMQ::PAIR
-          @shutdown_socket.bind shutdown_uri
+          zmq_error_check(@shutdown_socket.bind shutdown_uri)
         end
 
         def init_zmq_context

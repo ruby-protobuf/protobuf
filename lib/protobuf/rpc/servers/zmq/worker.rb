@@ -8,8 +8,6 @@ module Protobuf
         include ::Protobuf::Rpc::Server
         include ::Protobuf::Rpc::Zmq::Util
 
-        attr_reader :thread
-
         ##
         # Constructor
         #
@@ -18,6 +16,9 @@ module Protobuf
           init_zmq_context
           init_backend_socket
           init_shutdown_socket
+        rescue
+          teardown
+          raise
         end
 
         ##
@@ -27,8 +28,12 @@ module Protobuf
           @thread.try(:alive?) || false
         end
 
-        def handle_request(socket)
-          zmq_error_check(socket.recv_strings(frames = []))
+        def join
+          @thread.try :join
+        end
+
+        def process_request
+          zmq_error_check(@backend_socket.recv_strings(frames = []))
 
           @client_address, empty, @request_data = *frames
 
@@ -38,31 +43,26 @@ module Protobuf
           end
         end
 
-        def join
-          @thread.try :join
-        end
-
         def run
-          running = true
           poller = ::ZMQ::Poller.new
-
           poller.register_readable(@backend_socket)
           poller.register_readable(@shutdown_socket)
 
           # Send request to broker telling it we are ready
           zmq_error_check(@backend_socket.send_string(::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE))
 
-          while poller.poll > 0
-            poller.readables.each do |readable|
-              if readable === @backend_socket
-                initialize_request!
-                handle_request(@backend_socket)
-              elsif readable === @shutdown_socket
-                running = false
+          catch(:shutdown) do
+            while poller.poll > 0
+              poller.readables.each do |readable|
+                case readable
+                when @backend_socket
+                  initialize_request!
+                  process_request
+                when @shutdown_socket
+                  throw :shutdown
+                end
               end
             end
-
-            break unless running
           end
         ensure
           teardown
@@ -85,7 +85,7 @@ module Protobuf
         def signal_shutdown
           socket = @zmq_context.socket ZMQ::PAIR
           zmq_error_check(socket.connect shutdown_uri)
-          zmq_error_check(socket.send_string "shutdown")
+          zmq_error_check(socket.send_string ".")
           zmq_error_check(socket.close)
         end
 

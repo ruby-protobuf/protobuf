@@ -5,7 +5,6 @@ module Protobuf
     module Zmq
 
       WORKER_READY_MESSAGE = "\1"
-      WORKER_SHUTDOWN_MESSAGE = "\2"
 
       module Util
         include ::Protobuf::Logger::LogMethods
