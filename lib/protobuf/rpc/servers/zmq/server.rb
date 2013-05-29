@@ -10,10 +10,12 @@ module Protobuf
       class Server
         include ::Protobuf::Rpc::Zmq::Util
 
+        DEFAULT_OPTIONS = { :beacon_interval => 5 }
+
         attr_accessor :options
 
         def initialize(options)
-          @options = default_options.merge(options)
+          @options = DEFAULT_OPTIONS.merge(options)
           @workers = []
 
           init_zmq_context
@@ -215,10 +217,6 @@ module Protobuf
         end
 
         private
-
-        def default_options
-          { :beacon_interval => 5  }
-        end
 
         def init_beacon_socket
           @beacon_socket = UDPSocket.new
