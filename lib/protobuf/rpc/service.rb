@@ -54,6 +54,11 @@ module Protobuf
         @_host = new_host
       end
 
+      def self.inherited(subclass)
+        @_subclasses ||= []
+        @_subclasses << subclass
+      end
+
       # Shorthand call to configure, passing a string formatted as hostname:port
       # e.g. 127.0.0.1:9933
       # e.g. localhost:0
@@ -94,6 +99,15 @@ module Protobuf
       #
       def self.rpc_method?(name)
         rpcs.key?(name)
+      end
+
+      # An array of defined service classes
+      def self.services
+        @_subclasses.select do |subclass|
+          subclass.rpcs.any? do |(name, method)|
+            subclass.method_defined? name
+          end
+        end
       end
 
       ##
