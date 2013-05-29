@@ -188,10 +188,11 @@ module Protobuf
         end
 
         def wait_for_shutdown_signal
+          time = Time.now.to_i
           timeout = 0
           next_beacon = 0
-          next_reaping = 0
-          next_cycle = Time.now.to_i + maintenance_interval
+          next_reaping = time + reaping_interval
+          next_cycle = time + maintenance_interval
           poller = ZMQ::Poller.new
 
           poller.register_readable @shutdown_socket
