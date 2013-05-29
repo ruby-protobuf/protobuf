@@ -119,6 +119,7 @@ module Protobuf
           start_broker unless brokerless?
           start_missing_workers
           wait_for_shutdown_signal
+          broadcast_flatline if broadcast_beacons?
           stop_workers
           stop_broker unless brokerless?
         ensure
