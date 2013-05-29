@@ -66,13 +66,14 @@ module Protobuf
         end
 
         def broadcast_heartbeat
+          services = ::Protobuf::Rpc::Service.services
           heartbeat = ::Protobuf::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::DynamicDiscovery::BeaconType::HEARTBEAT,
             :uuid => uuid,
             :address => frontend_ip,
             :port => frontend_port.to_s,
             :ttl => beacon_interval * 3,
-            :service_classes => ["not sure"] # TODO: Figure out what goes here
+            :service_classes => services.map(&:name)
           )
 
           @beacon_socket.send heartbeat.to_s, 0
