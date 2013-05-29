@@ -103,7 +103,7 @@ module Protobuf
 
       # An array of defined service classes
       def self.services
-        (@_subclasses ||[]).select do |subclass|
+        (@_subclasses || []).select do |subclass|
           subclass.rpcs.any? do |(name, method)|
             subclass.method_defined? name
           end
