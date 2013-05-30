@@ -25,7 +25,7 @@ module Protobuf
 
           @running = true
           log_debug { sign_message("server started") }
-          while self.running? do
+          while @threads.any? do
             @broker.poll
           end
         ensure
@@ -53,8 +53,8 @@ module Protobuf
         def self.stop
           @running = false
 
-          @threads.each do |t|
-            t.join
+          @threads.delete_if do |t|
+            t.join || true
           end
         end
 
