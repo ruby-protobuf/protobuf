@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'spec/support/test/resource_service'
+require 'protobuf/rpc/service_directory'
 
 describe 'Functional ZMQ Client' do
   let(:options) {{
@@ -8,9 +9,7 @@ describe 'Functional ZMQ Client' do
     :worker_port => 9400,
     :backlog => 100,
     :threshold => 100,
-    :threads => 5,
-    :broadcast_beacons => true,
-    :beacon_port => 9398
+    :threads => 5
   }}
 
   let(:server) { ::Protobuf::Rpc::Zmq::Server.new(options) }

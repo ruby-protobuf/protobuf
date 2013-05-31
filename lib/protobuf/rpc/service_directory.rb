@@ -2,6 +2,8 @@ require 'delegate'
 require 'singleton'
 require 'socket'
 require 'thread'
+require 'timeout'
+
 require 'protobuf/rpc/dynamic_discovery.pb'
 
 module Protobuf
@@ -12,8 +14,11 @@ module Protobuf
 
       DEFAULT_ADDRESS = "0.0.0.0"
       DEFAULT_PORT = 9398
+      DEFAULT_TIMEOUT = 5
 
-      class Server < Delegator
+      ServiceNotFound = Class.new(RuntimeError)
+
+      class Listing < Delegator
         attr_reader :expires_at
 
         def initialize(server)
@@ -36,70 +41,86 @@ module Protobuf
 
       # Class Methods
       #
-      def self.address
-        @address ||= DEFAULT_ADDRESS
+      class << self
+        attr_writer :address, :port, :timeout
       end
 
-      def self.address=(value)
-        @address ||= value
+      def self.address
+        @address ||= DEFAULT_ADDRESS
       end
 
       def self.port
         @port ||= DEFAULT_PORT
       end
 
-      def self.port=(value)
-        @port ||= value.to_i
+      def self.start
+        yield(self) if block_given?
+        self.instance.start
       end
 
-      def self.start
-        self.instance.start
+      def self.stop
+        self.instance.stop
+      end
+
+      def self.timeout
+        @timeout ||= DEFAULT_TIMEOUT
       end
 
       # Instance Methods
       #
       def initialize
-        @servers = {}
+        @listings = {}
         @mutex = Mutex.new
       end
 
-      def add_server(server)
+      def add_listing_for(server)
         @mutex.synchronize do
-          @servers[server.uuid] = Server.new(server)
+          @listings[server.uuid] = Listing.new(server)
         end
       end
 
       def find(service)
+        listing = nil
         log_debug { sign_message("searching for #{service}") }
-        Thread.pass until server = random_server_for(service)
-        log_debug { sign_message("found #{service} at #{server}") }
 
-        [server.address, server.port]
+        Timeout.timeout(self.class.timeout, ServiceNotFound) do
+          Thread.pass until listing = random_listing_for(service)
+        end
+
+        log_debug { sign_message("found #{service} at #{listing.inspect}") }
+
+        [listing.address, listing.port]
       end
 
-      def random_server_for(service)
+      def listing_count
         @mutex.synchronize do
-          servers = @servers.values.select do |server|
-            server.services.any? do |service_class|
-              server.current? && service_class.to_s == service.to_s
+          @listings.count
+        end
+      end
+
+      def random_listing_for(service)
+        @mutex.synchronize do
+          listings = @listings.values.select do |listing|
+            listing.services.any? do |listed_service|
+              listing.current? && listed_service.to_s == service.to_s
             end
           end
 
-          servers.sample
+          listings.sample
         end
       end
 
-      def reap_expired_servers
+      def remove_expired_listings
         @mutex.synchronize do
-          @servers.delete_if do |uuid, server|
-            server.expired?
+          @listings.delete_if do |uuid, listing|
+            listing.expired?
           end
         end
       end
 
-      def remove_server(server)
+      def remove_listing_for(server)
         @mutex.synchronize do
-          @servers.delete server.uuid
+          @listings.delete(server.uuid)
         end
       end
 
@@ -113,17 +134,17 @@ module Protobuf
 
           case beacon.beacon_type
           when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
-            add_server(beacon.server)
+            add_listing_for(beacon.server)
           when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
-            remove_server(beacon.server)
+            remove_listing_for(beacon.server)
           end
 
-          reap_expired_servers
+          remove_expired_listings
         end
       end
 
       def running?
-        @thread.try(:alive?)
+        !!@thread.try(:alive?)
       end
 
       def start
@@ -136,13 +157,22 @@ module Protobuf
             begin
               self.run
             rescue => e
-              log_debug { sign_message("service directory failed: (#{e.class}) #{e.message}") }
+              log_debug { sign_message("error: (#{e.class}) #{e.message}") }
               raise
             end
           end
         end
 
         self
+      end
+
+      def stop
+        @mutex.synchronize do
+          @thread.try(:kill)
+          @listings = {}
+        end
+
+        @socket.try(:close)
       end
 
       private
