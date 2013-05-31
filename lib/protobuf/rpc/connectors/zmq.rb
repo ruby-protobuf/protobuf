@@ -1,4 +1,5 @@
 require 'protobuf/rpc/connectors/base'
+require 'protobuf/rpc/service_directory'
 
 module Protobuf
   module Rpc
@@ -15,13 +16,27 @@ module Protobuf
             read_response
           end
         ensure
-          @socket.close if @socket
-          @zmq_context.terminate if @zmq_context
+          @socket.try :close
+          @zmq_context.try :terminate
           @zmq_context = nil
         end
 
         def log_signature
           @_log_signature ||= "[client-#{self.class}]"
+        end
+
+        def service_directory
+          ::Protobuf::Rpc::ServiceDirectory.instance
+        end
+
+        def service_uri
+          if service_directory.running?
+            host, port = service_directory.find options[:service]
+          else
+            host, port = options[:host], options[:port]
+          end
+
+          "tcp://#{host}:#{port}"
         end
 
         private
@@ -35,11 +50,11 @@ module Protobuf
 
         def connect_to_rpc_server
           return if @error
-          log_debug { sign_message("Establishing connection: #{options[:host]}:#{options[:port]}") }
+          log_debug { sign_message("Establishing connection: #{service_uri}") }
           @zmq_context = ::ZMQ::Context.new
           @socket = @zmq_context.socket(::ZMQ::REQ)
-          zmq_error_check(@socket.connect("tcp://#{options[:host]}:#{options[:port]}"))
-          log_debug { sign_message("Connection established #{options[:host]}:#{options[:port]}") }
+          zmq_error_check(@socket.connect(service_uri))
+          log_debug { sign_message("Connection established #{service_uri}") }
         end
 
         # Method to determine error state, must be used with Connector api

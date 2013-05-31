@@ -55,28 +55,21 @@ module Protobuf
         end
 
         def broadcast_flatline
-          flatline = ::Protobuf::DynamicDiscovery::Beacon.new(
-            :beacon_type => ::Protobuf::DynamicDiscovery::BeaconType::FLATLINE,
-            :uuid => uuid,
-            :address => frontend_ip,
-            :port => frontend_port.to_s
+          flatline = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
+            :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE,
+            :server => self.to_proto
           )
 
           @beacon_socket.send flatline.to_s, 0
         end
 
         def broadcast_heartbeat
-          services = ::Protobuf::Rpc::Service.services
-          heartbeat = ::Protobuf::DynamicDiscovery::Beacon.new(
-            :beacon_type => ::Protobuf::DynamicDiscovery::BeaconType::HEARTBEAT,
-            :uuid => uuid,
-            :address => frontend_ip,
-            :port => frontend_port.to_s,
-            :ttl => beacon_interval * 3,
-            :service_classes => services.map(&:name)
+          heartbeat = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
+            :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT,
+            :server => self.to_proto
           )
 
-          @beacon_socket.send heartbeat.to_s, 0
+          @beacon_socket.send heartbeat.serialize_to_string, 0
         end
 
         def brokerless?
@@ -181,6 +174,16 @@ module Protobuf
 
         def total_workers
           @total_workers ||= [@options[:threads].to_i, 1].max
+        end
+
+        def to_proto
+          @proto ||= ::Protobuf::Rpc::DynamicDiscovery::Server.new(
+            :uuid => uuid,
+            :address => frontend_ip,
+            :port => frontend_port.to_s,
+            :ttl => beacon_interval * 3,
+            :services => ::Protobuf::Rpc::Service.implemented_services
+          )
         end
 
         def uuid
