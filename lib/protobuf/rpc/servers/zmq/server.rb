@@ -60,7 +60,7 @@ module Protobuf
             :server => self.to_proto
           )
 
-          @beacon_socket.send flatline.to_s, 0
+          @beacon_socket.send flatline.serialize_to_string, 0
         end
 
         def broadcast_heartbeat

@@ -31,12 +31,12 @@ module Protobuf
 
         def service_uri
           if service_directory.running?
-            host, port = service_directory.find options[:service]
+            address, port = service_directory.find options[:service]
           else
-            host, port = options[:host], options[:port]
+            address, port = options[:host], options[:port]
           end
 
-          "tcp://#{host}:#{port}"
+          "tcp://#{address}:#{port}"
         end
 
         private

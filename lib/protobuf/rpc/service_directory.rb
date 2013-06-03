@@ -26,6 +26,10 @@ module Protobuf
           @expires_at = Time.now.to_i + ttl
         end
 
+        def <=>(other)
+          other.expires_at <=> self.expires_at
+        end
+
         def current?
           !expired?
         end
@@ -74,8 +78,15 @@ module Protobuf
       end
 
       def add_listing_for(server)
-        @mutex.synchronize do
-          @listings[server.uuid] = Listing.new(server)
+        if server && server.uuid
+          log_debug { sign_message("Adding listing for server: #{server.inspect}") }
+
+          @mutex.synchronize do
+            @listings[server.uuid] = Listing.new(server)
+          end
+
+        else
+          log_debug { sign_message("Cannot add server without uuid: #{server.inspect}") }
         end
       end
 
@@ -84,30 +95,12 @@ module Protobuf
         log_debug { sign_message("searching for #{service}") }
 
         Timeout.timeout(self.class.timeout, ServiceNotFound) do
-          Thread.pass until listing = random_listing_for(service)
+          Thread.pass until listing = youngest_listing_for(service)
         end
 
         log_debug { sign_message("found #{service} at #{listing.inspect}") }
 
         [listing.address, listing.port]
-      end
-
-      def listing_count
-        @mutex.synchronize do
-          @listings.count
-        end
-      end
-
-      def random_listing_for(service)
-        @mutex.synchronize do
-          listings = @listings.values.select do |listing|
-            listing.services.any? do |listed_service|
-              listing.current? && listed_service.to_s == service.to_s
-            end
-          end
-
-          listings.sample
-        end
       end
 
       def remove_expired_listings
@@ -119,18 +112,25 @@ module Protobuf
       end
 
       def remove_listing_for(server)
-        @mutex.synchronize do
-          @listings.delete(server.uuid)
+        if server && server.uuid
+          log_debug { sign_message("Removing server: #{server.inspect}") }
+
+          @mutex.synchronize do
+            @listings.delete(server.uuid)
+          end
+
+        else
+          log_debug { sign_message("Cannot remove server without uuid: #{server.inspect}") }
         end
       end
 
       def run
-        loop do
+        begin
           data, addr = @socket.recvfrom(1024)
           beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new
           beacon.parse_from_string(data) rescue nil
 
-          log_debug { sign_message("received beacon: #{beacon.inspect}") }
+          log_debug { sign_message("received beacon: #{beacon.inspect} from #{addr}") }
 
           case beacon.beacon_type
           when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
@@ -140,7 +140,9 @@ module Protobuf
           end
 
           remove_expired_listings
-        end
+        rescue => e
+          log_debug { sign_message("error: (#{e.class}) #{e.message}") }
+        end while true
       end
 
       def running?
@@ -149,30 +151,37 @@ module Protobuf
 
       def start
         unless running?
-          log_debug { sign_message("starting service directory") }
-
+          log_debug { sign_message("starting") }
           init_socket
-
-          @thread = Thread.new do
-            begin
-              self.run
-            rescue => e
-              log_debug { sign_message("error: (#{e.class}) #{e.message}") }
-              raise
-            end
-          end
+          @thread = Thread.new { self.run }
         end
 
         self
       end
 
       def stop
+        log_debug { sign_message("stopping") }
+
         @mutex.synchronize do
           @thread.try(:kill)
+          @thread = nil
           @listings = {}
         end
 
         @socket.try(:close)
+        @socket = nil
+      end
+
+      def youngest_listing_for(service)
+        @mutex.synchronize do
+          listings = @listings.values.select do |listing|
+            listing.services.any? do |listed_service|
+              listing.current? && listed_service.to_s == service.to_s
+            end
+          end
+
+          listings.sort.first
+        end
       end
 
       private
