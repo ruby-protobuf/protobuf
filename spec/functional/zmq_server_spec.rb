@@ -43,27 +43,51 @@ describe 'Functional ZMQ Client' do
     }.to_not raise_error
   end
 
-  it 'calls the on_failure callback when a message is malformed' do
-    error = nil
-    request = ::Test::ResourceFindRequest.new(:active => true)
-    client = ::Test::ResourceService.client
+  context 'when a message is malformed' do
+    it 'calls the on_failure callback' do
+      error = nil
+      StubServer.new(:server => Protobuf::Rpc::Zmq::Server) do
+        request = ::Test::ResourceFindRequest.new(:active => true)
+        client = ::Test::ResourceService.client
 
-    client.find(request) do |c|
-      c.on_success { raise "shouldn't pass"}
-      c.on_failure {|e| error = e}
+        client.find(request) do |c|
+          c.on_success { raise "shouldn't pass" }
+          c.on_failure {|e| error = e }
+        end
+      end
+      error.message.should match(/name.*required/)
     end
-    error.message.should =~ /name.*required/
   end
 
-  it 'calls the on_failure callback when the request type is wrong' do
-    error = nil
-    request = ::Test::Resource.new(:name => 'Test Name')
-    client = ::Test::ResourceService.client
+  context 'when the request type is wrong' do
+    it 'calls the on_failure callback' do
+      error = nil
+      StubServer.new(:server => Protobuf::Rpc::Zmq::Server) do
+        request = ::Test::Resource.new(:name => 'Test Name')
+        client = ::Test::ResourceService.client
 
-    client.find(request) do |c|
-      c.on_success { raise "shouldn't pass"}
-      c.on_failure {|e| error = e}
+        client.find(request) do |c|
+          c.on_success { raise "shouldn't pass" }
+          c.on_failure {|e| error = e}
+        end
+      end
+      error.message.should match(/expected request.*ResourceFindRequest.*Resource instead/i)
     end
-    error.message.should =~ /expected request.*ResourceFindRequest.*Resource instead/i
   end
+
+  context 'when the server takes too long to respond' do
+    it 'responds with a timeout error' do
+      error = nil
+      StubServer.new(:server => Protobuf::Rpc::Zmq::Server) do
+        client = ::Test::ResourceService.client(:timeout => 1)
+
+        client.find_with_sleep(:sleep => 2) do |c|
+          c.on_success { raise "shouldn't pass" }
+          c.on_failure { |e| error = e }
+        end
+      end
+      error.message.should match(/The server took longer than 1 seconds to respond/i)
+    end
+  end
+
 end

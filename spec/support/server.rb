@@ -53,8 +53,10 @@ class StubServer
 
   def start
     case
-    when @options.server == Protobuf::Rpc::Evented::Server then start_em_server
-    when @options.server == Protobuf::Rpc::Zmq::Server then start_zmq_server
+    when @options.server == Protobuf::Rpc::Evented::Server
+      start_em_server
+    when @options.server == Protobuf::Rpc::Zmq::Server
+      start_zmq_server
     else
       start_socket_server
     end
@@ -67,7 +69,11 @@ class StubServer
   end
 
   def start_em_server
-    @server_handle = EventMachine.start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
+    @server_handle = EventMachine.start_server(
+      @options.host,
+      @options.port,
+      StubProtobufServerFactory.build(@options.delay)
+    )
   end
 
   def start_socket_server
@@ -89,7 +95,7 @@ class StubServer
     when @options.server == Protobuf::Rpc::Evented::Server then
       EventMachine.stop_server(@server_handle) if @server_handle
     when @options.server == Protobuf::Rpc::Zmq::Server then
-      @zmq_runner.stop
+      @zmq_runner.try :stop
       @zmq_thread.join if @zmq_thread
     else
       @sock_runner.stop
