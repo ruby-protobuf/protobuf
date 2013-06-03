@@ -5,81 +5,195 @@ module Protobuf
   module Rpc
     module Connectors
       class Zmq < Base
+
+        ##
+        # Included Modules
+        #
+
         include Protobuf::Rpc::Connectors::Common
         include Protobuf::Logger::LogMethods
 
+        ##
+        # Class Constants
+        #
+
+        CLIENT_RETRIES = (ENV['PB_CLIENT_RETRIES'] || 3)
+
+        ##
+        # Instance methods
+        #
+
+        # Start the request/response cycle. We implement the Lazy Pirate
+        # req/reply reliability pattern as laid out in the ZMQ Guide, Chapter 4.
+        #
+        # @see http://zguide.zeromq.org/php:chapter4#Client-side-Reliability-Lazy-Pirate-Pattern
+        #
         def send_request
-          timeout_wrap do
-            setup_connection
-            connect_to_rpc_server
-            post_init
-            read_response
-          end
+          setup_connection
+          poll_send_data
         ensure
-          @socket.try :close
-          @zmq_context.try :terminate
-          @zmq_context = nil
+          close_connection
         end
 
         def log_signature
           @_log_signature ||= "[client-#{self.class}]"
         end
 
+        private
+
+        ##
+        # Private Instance methods
+        #
+
+        def close_connection
+          socket_close
+          zmq_context_terminate
+        end
+
+        # Establish a request socket connection to the remote rpc_server.
+        # Set the socket option LINGER to 0 so that we don't wait
+        # for queued messages to be accepted when the socket/context are
+        # asked to close/terminate.
+        #
+        def connect_to_rpc_server
+          return if error?
+
+          log_debug { sign_message("Establishing connection: #{server_uri}") }
+          socket.setsockopt(::ZMQ::LINGER, 0)
+          zmq_error_check(socket.connect(server_uri), :socket_connect)
+          zmq_error_check(poller.register_readable(socket), :poller_register_readable)
+          log_debug { sign_message("Connection established to #{server_uri}") }
+        end
+
+        # Method to determine error state, must be used with Connector API.
+        #
+        def error?
+          !! @error
+        end
+
+        # Trying a number of times, attempt to get a response from the server.
+        # If we haven't received a legitimate response in the CLIENT_RETRIES number
+        # of retries, fail the request.
+        #
+        def poll_send_data
+          return if error?
+
+          poll_timeout = (options[:timeout].to_f / CLIENT_RETRIES.to_f) * 1000
+
+          CLIENT_RETRIES.times do |n|
+            connect_to_rpc_server
+            log_debug { sign_message("Sending Request (attempt #{n + 1}, #{socket})") }
+            send_data
+            log_debug { sign_message("Request sending complete (attempt #{n + 1}, #{socket})") }
+
+            if poller.poll(poll_timeout) == 1
+              read_response
+              return
+            else
+              close_connection
+            end
+          end
+
+          fail(:RPC_FAILED, "The server took longer than #{options[:timeout]} seconds to respond")
+        end
+
+        def poller
+          @poller ||= ::ZMQ::Poller.new
+        end
+
+        # Read the string response from the available readable. This will be
+        # the current @socket. Calls `parse_response` to invoke the success or
+        # failed callbacks, depending on the state of the communication
+        # and response data.
+        #
+        def read_response
+          return if error?
+
+          poller.readables.each do |readable|
+            @response_data = ''
+            zmq_error_check(readable.recv_string(@response_data), :socket_recv_string)
+          end
+
+          parse_response
+        end
+
+        # Send the request data to the remote rpc_server.
+        #
+        def send_data
+          return if error?
+
+          @stats.request_size = @request_data.size
+          zmq_error_check(socket.send_string(@request_data), :socket_send_string)
+        end
+
+        # The location of the server. If the ServiceDirectory is running then
+        # we ask it for a server that hosts the requested service. If it is
+        # not running, or it cannot be found, we fallback to the options.
+        #
+        def server_uri
+          if service_directory.running?
+            listing = service_directory.find(service) rescue nil
+            host, port = listing.address, listing.port if listing
+          end
+
+          host, port = options[:host], options[:port] unless host && port
+
+          "tcp://#{host}:#{port}"
+        end
+
+        # The service we're attempting to connect to
+        #
+        def service
+          options[:service]
+        end
+
+        # Alias for ::Protobuf::Rpc::ServiceDirectory.instance
         def service_directory
           ::Protobuf::Rpc::ServiceDirectory.instance
         end
 
-        def service_uri
-          if service_directory.running?
-            address, port = service_directory.find options[:service]
-          else
-            address, port = options[:host], options[:port]
+        # Setup a ZMQ request socket in the current zmq context.
+        #
+        def socket
+          @socket ||= zmq_context.socket(::ZMQ::REQ)
+        end
+
+        def socket_close
+          if socket
+            log_debug { sign_message("Closing Socket")  }
+            zmq_error_check(socket.close, :socket_close)
+            log_debug { sign_message("Socket closed")  }
+            @socket = nil
           end
-
-          "tcp://#{address}:#{port}"
         end
 
-        private
-
-        def close_connection
-          return if @error
-          zmq_error_check(@socket.close)
-          zmq_error_check(@zmq_context.terminate)
-          log_debug { sign_message("Connector closed")  }
+        # Return the ZMQ Context to use for this process.
+        # If the context does not exist, create it, then register
+        # an exit block to ensure the context is terminated correctly.
+        #
+        def zmq_context
+          @zmq_context ||= ::ZMQ::Context.new
         end
 
-        def connect_to_rpc_server
-          return if @error
-          log_debug { sign_message("Establishing connection: #{service_uri}") }
-          @zmq_context = ::ZMQ::Context.new
-          @socket = @zmq_context.socket(::ZMQ::REQ)
-          zmq_error_check(@socket.connect(service_uri))
-          log_debug { sign_message("Connection established #{service_uri}") }
+        # Terminate the zmq_context (if any).
+        #
+        def zmq_context_terminate
+          log_debug { sign_message("Terminating ZMQ Context")  }
+          @zmq_context.try(:terminate)
+          @zmq_context = nil
+          log_debug { sign_message("ZMQ Context terminated")  }
         end
 
-        # Method to determine error state, must be used with Connector api
-        def error?
-          !!@error
+        def zmq_error_check(return_code, source)
+          unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
+            raise <<-ERROR
+            Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+
+            #{caller(1).join($/)}
+            ERROR
+          end
         end
 
-        def read_response
-          return if @error
-          @response_data = ''
-          zmq_error_check(@socket.recv_string(@response_data))
-          parse_response
-        end
-
-        def send_data
-          return if @error
-          log_debug { sign_message("Sending Request: #{@request_data}") }
-          @stats.request_size = @request_data.size
-          zmq_error_check(@socket.send_string(@request_data))
-          log_debug { sign_message("write closed") }
-        end
-
-        def zmq_error_check(return_code)
-          raise "Last API call failed at #{caller(1)}" unless return_code >= 0
-        end
       end
     end
   end
