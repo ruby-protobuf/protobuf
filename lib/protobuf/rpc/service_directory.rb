@@ -14,9 +14,7 @@ module Protobuf
 
       DEFAULT_ADDRESS = "0.0.0.0"
       DEFAULT_PORT = 9398
-      DEFAULT_TIMEOUT = 5
-
-      ServiceNotFound = Class.new(RuntimeError)
+      DEFAULT_TIMEOUT = 1
 
       class Listing < Delegator
         attr_reader :expires_at
@@ -24,10 +22,6 @@ module Protobuf
         def initialize(server)
           @server = server
           @expires_at = Time.now.to_i + ttl
-        end
-
-        def <=>(other)
-          other.expires_at <=> self.expires_at
         end
 
         def current?
@@ -50,7 +44,7 @@ module Protobuf
       # Class Methods
       #
       class << self
-        attr_writer :address, :port, :timeout
+        attr_writer :address, :port
       end
 
       def self.address
@@ -68,10 +62,6 @@ module Protobuf
 
       def self.stop
         self.instance.stop
-      end
-
-      def self.timeout
-        @timeout ||= DEFAULT_TIMEOUT
       end
 
       # Instance Methods
@@ -94,17 +84,18 @@ module Protobuf
         end
       end
 
-      def find(service)
-        listing = nil
-        log_debug { sign_message("searching for #{service}") }
+      def lookup(service)
+        log_debug { sign_message("lookup #{service}") }
 
-        Timeout.timeout(self.class.timeout, ServiceNotFound) do
-          Thread.pass until listing = youngest_listing_for(service)
+        @mutex.synchronize do
+          listings = @listings.values.select do |listing|
+            listing.services.any? do |listed_service|
+              listing.current? && listed_service == service.to_s
+            end
+          end
+
+          listings.sample
         end
-
-        log_debug { sign_message("found #{service} at #{listing.inspect}") }
-
-        listing
       end
 
       def remove_expired_listings
@@ -128,27 +119,6 @@ module Protobuf
         end
       end
 
-      def run
-        begin
-          data, addr = @socket.recvfrom(1024)
-          beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new
-          beacon.parse_from_string(data) rescue nil
-
-          log_debug { sign_message("received beacon: #{beacon.inspect} from #{addr}") }
-
-          case beacon.beacon_type
-          when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
-            add_listing_for(beacon.server)
-          when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
-            remove_listing_for(beacon.server)
-          end
-
-          remove_expired_listings
-        rescue => e
-          log_debug { sign_message("error: (#{e.class}) #{e.message}") }
-        end while true
-      end
-
       def running?
         !!@thread.try(:alive?)
       end
@@ -157,7 +127,7 @@ module Protobuf
         unless running?
           log_debug { sign_message("starting") }
           init_socket
-          @thread = Thread.new { self.run }
+          @thread = Thread.new { self.send(:run) }
         end
 
         self
@@ -176,16 +146,14 @@ module Protobuf
         @socket = nil
       end
 
-      def youngest_listing_for(service)
-        @mutex.synchronize do
-          listings = @listings.values.select do |listing|
-            listing.services.any? do |listed_service|
-              listing.current? && listed_service.to_s == service.to_s
-            end
-          end
-
-          listings.sort.first
+      def wait_for(service, timeout = DEFAULT_TIMEOUT)
+        log_debug { sign_message("waiting for #{service}") }
+        Timeout.timeout(timeout) do
+          sleep(timeout / 10.0) until listing = lookup(service)
+          listing
         end
+      rescue
+        nil
       end
 
       private
@@ -193,6 +161,27 @@ module Protobuf
       def init_socket
         @socket = UDPSocket.new
         @socket.bind(self.class.address, self.class.port)
+      end
+
+      def run
+        begin
+          data, addr = @socket.recvfrom(2048)
+          beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new
+          beacon.parse_from_string(data) rescue nil
+
+          log_debug { sign_message("received beacon: #{beacon.inspect} from #{addr}") }
+
+          case beacon.beacon_type
+          when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
+            add_listing_for(beacon.server)
+          when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
+            remove_listing_for(beacon.server)
+          end
+
+          remove_expired_listings
+        rescue => e
+          log_debug { sign_message("error: (#{e.class}) #{e.message}") }
+        end while true
       end
     end
   end

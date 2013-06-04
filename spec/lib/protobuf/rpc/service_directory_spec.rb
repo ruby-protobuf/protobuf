@@ -9,8 +9,10 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     instance.instance_variable_get(:@listings)
   end
 
-  before(:all) do
-    ::Protobuf::Rpc::ServiceDirectory.timeout = 0.1
+  def duration
+    start = Time.now.to_f
+    yield
+    Time.now.to_f - start
   end
 
   after do
@@ -21,7 +23,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     instance.should be_a_kind_of(Singleton)
   end
 
-  describe "#find" do
+  describe "#lookup" do
     let(:server) { double('server', :uuid => '123',
                           :services => ['Known::Service'],
                           :address => "0.0.0.0",
@@ -29,21 +31,26 @@ describe ::Protobuf::Rpc::ServiceDirectory do
                           :ttl => 15) }
     let(:listing) { ::Protobuf::Rpc::ServiceDirectory::Listing.new(server) }
 
-    it "times out when nothing is found" do
-      expect {
-        instance.find("Unknown::Service")
-      }.to raise_error(::Protobuf::Rpc::ServiceDirectory::ServiceNotFound)
-    end
-
     it "returns a listing for the given service" do
       instance.add_listing_for(server)
-      instance.find("Known::Service").should eq listing
+      instance.lookup("Known::Service").should eq listing
     end
 
-    it "delegates to #youngest_listing_for" do
-      instance.should_receive(:youngest_listing_for)
-              .with("Known::Service") { double('listing') }
-      instance.find("Known::Service")
+    it "returns random listings" do
+      instance.add_listing_for double(:uuid => 1, :ttl => 5, :services => ["Test"])
+      instance.add_listing_for double(:uuid => 2, :ttl => 5, :services => ["Test"])
+
+      uuids = 100.times.map { instance.lookup("Test").uuid }
+      uuids.count(1).should be_within(25).of(50)
+      uuids.count(2).should be_within(25).of(50)
+    end
+
+    it "does not return expired listings" do
+      instance.instance_variable_set(:@listings, {
+        '1' => double(:current? => false, :services => ["Test"]),
+      })
+
+      instance.lookup("Test").should be_nil
     end
   end
 
@@ -88,20 +95,40 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     end
   end
 
-  describe "#youngest_listing_for" do
-    it "returns the youngest listing" do
-      instance.add_listing_for double(:uuid => 1, :ttl => 5, :services => ["Test"])
-      instance.add_listing_for double(:uuid => 2, :ttl => 15, :services => ["Test"])
-      instance.add_listing_for double(:uuid => 3, :ttl => 10, :services => ["Test"])
-      instance.youngest_listing_for("Test").uuid.should eq 2
+  describe "#wait_for" do
+    it "returns a listing for the given service" do
+      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
+      instance.add_listing_for server
+      instance.lookup("Test").should eq server
     end
 
-    it "does not return expired listings" do
-      instance.instance_variable_set(:@listings, {
-        '1' => double(:current? => false, :services => ["Test"]),
-      })
+    it "depends on #lookup" do
+      instance.stub(:lookup).with("Hayoob!") { "yup" }
+      instance.wait_for("Hayoob!").should eq "yup"
+    end
 
-      instance.youngest_listing_for("Test").should be_nil
+    it "waits for the service to appear" do
+      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
+
+      t = Thread.new do
+        sleep 0.5
+        instance.add_listing_for server
+      end
+
+      duration { instance.wait_for("Test") }.should be_within(0.01).of(0.5)
+      t.join
+    end
+
+    it "returns nil if the service doesn't appear withint the timeout period" do
+      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
+
+      t = Thread.new do
+        sleep 0.5
+        instance.add_listing_for server
+      end
+
+      instance.wait_for("Test", 0.1).should be_nil
+      t.join
     end
   end
 

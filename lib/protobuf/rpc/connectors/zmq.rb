@@ -132,7 +132,7 @@ module Protobuf
         #
         def server_uri
           if service_directory.running?
-            listing = service_directory.find(service) rescue nil
+            listing = service_directory.lookup(service)
             host, port = listing.address, listing.port if listing
           end
 

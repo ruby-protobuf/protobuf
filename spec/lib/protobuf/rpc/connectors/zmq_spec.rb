@@ -39,12 +39,12 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
 
     context "when the service directory is running" do
       it "searches the service directory" do
-        service_directory.should_receive(:find).and_return(listing)
+        service_directory.should_receive(:lookup).and_return(listing)
         subject.send(:server_uri).should eq "tcp://127.0.0.2:9399"
       end
 
       it "defaults to the options" do
-        service_directory.should_receive(:find).and_raise(RuntimeError)
+        service_directory.should_receive(:lookup) { nil }
         subject.send(:server_uri).should eq "tcp://127.0.0.1:9400"
       end
     end
@@ -53,7 +53,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       let(:running?) { false }
 
       it "does not search the directory" do
-        service_directory.should_not_receive(:find)
+        service_directory.should_not_receive(:lookup)
         subject.send(:server_uri).should eq "tcp://127.0.0.1:9400"
       end
     end
