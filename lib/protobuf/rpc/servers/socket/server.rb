@@ -66,8 +66,9 @@ module Protobuf
 
           while running?
             log_debug { sign_message("Waiting for connections") }
+            ready_cnxns = IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT) rescue nil
 
-            if ready_cnxns = IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT)
+            if ready_cnxns
               cnxns = ready_cnxns.first
               cnxns.each do |client|
                 case

@@ -27,6 +27,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
                           :address => "0.0.0.0",
                           :port => 9999,
                           :ttl => 15) }
+    let(:listing) { ::Protobuf::Rpc::ServiceDirectory::Listing.new(server) }
 
     it "times out when nothing is found" do
       expect {
@@ -36,20 +37,12 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
     it "returns a listing for the given service" do
       instance.add_listing_for(server)
-      instance.find("Known::Service").should eq [server.address, server.port]
-    end
-
-    it "does not return expired listings" do
-      server.stub(:ttl => 0)
-      instance.add_listing_for(server)
-      expect {
-        instance.find("Known::Service")
-      }.to raise_error(::Protobuf::Rpc::ServiceDirectory::ServiceNotFound)
+      instance.find("Known::Service").should eq listing
     end
 
     it "delegates to #youngest_listing_for" do
-      instance.should_receive(:youngest_listing_for).with("Known::Service") { double(:address => '0.0.0.0', :port => 9398) }
-      instance.add_listing_for(server)
+      instance.should_receive(:youngest_listing_for)
+              .with("Known::Service") { double('listing') }
       instance.find("Known::Service")
     end
   end
@@ -101,6 +94,14 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       instance.add_listing_for double(:uuid => 2, :ttl => 15, :services => ["Test"])
       instance.add_listing_for double(:uuid => 3, :ttl => 10, :services => ["Test"])
       instance.youngest_listing_for("Test").uuid.should eq 2
+    end
+
+    it "does not return expired listings" do
+      instance.instance_variable_set(:@listings, {
+        '1' => double(:current? => false, :services => ["Test"]),
+      })
+
+      instance.youngest_listing_for("Test").should be_nil
     end
   end
 

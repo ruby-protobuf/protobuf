@@ -38,6 +38,10 @@ module Protobuf
           Time.now.to_i >= @expires_at
         end
 
+        def ttl
+          [super.to_i, 3].max
+        end
+
         def __getobj__
           @server
         end
@@ -100,7 +104,7 @@ module Protobuf
 
         log_debug { sign_message("found #{service} at #{listing.inspect}") }
 
-        [listing.address, listing.port]
+        listing
       end
 
       def remove_expired_listings
