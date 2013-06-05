@@ -42,7 +42,6 @@ module Protobuf
       configure_logger
       configure_traps
       configure_server_mode
-      require_protobuf!
       configure_gc
       configure_deprecation_warnings
 
@@ -168,14 +167,6 @@ module Protobuf
         say_and_exit!("Failed to load application file #{app_file}", e)
       end
 
-      # Loads protobuf in the given mode, exiting if somehow the mode is wrong.
-      def require_protobuf!
-        require "protobuf/#{@mode}"
-      rescue LoadError => e
-        puts e.message, *(e.backtrace)
-        say_and_exit!("Failed to load protobuf runner #{@mode}", e)
-      end
-
       def runner_options
         {
           :host => options.host,
@@ -204,16 +195,22 @@ module Protobuf
       end
 
       def server_evented!
+        require 'protobuf/evented'
+
         @mode = :evented
         @runner = ::Protobuf::Rpc::EventedRunner.new(runner_options)
       end
 
       def server_socket!
+        require 'protobuf/socket'
+
         @mode = :socket
         @runner = ::Protobuf::Rpc::SocketRunner.new(runner_options)
       end
 
       def server_zmq!
+        require 'protobuf/zmq'
+
         @mode = :zmq
         @runner = ::Protobuf::Rpc::ZmqRunner.new(runner_options)
       end
