@@ -20,6 +20,9 @@ module Protobuf
         attr_accessor :options
 
         def initialize(options)
+          # Symbolize keys
+          options.inject({}) {|h,(k,v)| h[k.to_sym] = v; h}
+
           @options = DEFAULT_OPTIONS.merge(options)
           @workers = []
 
