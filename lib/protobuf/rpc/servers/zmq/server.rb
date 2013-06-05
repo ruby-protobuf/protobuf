@@ -55,6 +55,10 @@ module Protobuf
           options[:beacon_port].to_i
         end
 
+        def beacon_uri
+          "udp://#{beacon_ip}:#{beacon_port}"
+        end
+
         def broadcast_beacons?
           !brokerless? && options[:broadcast_beacons]
         end
@@ -75,6 +79,8 @@ module Protobuf
           )
 
           @beacon_socket.send heartbeat.serialize_to_string, 0
+
+          log_debug { sign_message("sent heartbeat to #{beacon_uri}") }
         end
 
         def brokerless?
