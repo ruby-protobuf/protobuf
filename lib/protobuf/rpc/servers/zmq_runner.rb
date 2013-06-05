@@ -1,3 +1,5 @@
+require 'ostruct'
+
 module Protobuf
   module Rpc
     class ZmqRunner
