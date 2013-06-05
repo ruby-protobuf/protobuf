@@ -30,6 +30,8 @@ module Protobuf
     option :zmq,                        :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
 
     option :broadcast_beacons,          :type => :boolean, :default => false, :desc => 'Broadcast beacons for dynamic discovery (Currently only available with ZeroMQ).'
+    option :beacon_address,             :type => :string,  :desc => 'Broadcast beacons to this address'
+    option :beacon_port,                :type => :string,  :desc => 'Broadcast beacons to this port'
     option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
     option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
@@ -37,6 +39,8 @@ module Protobuf
     option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
 
     def start(app_file)
+      $rpc_server = true
+
       debug_say 'Configuring the rpc_server process'
 
       configure_logger
