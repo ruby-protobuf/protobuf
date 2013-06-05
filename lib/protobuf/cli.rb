@@ -7,6 +7,8 @@ require 'protobuf/rpc/servers/zmq_runner'
 
 module Protobuf
   class CLI < ::Thor
+    include ::Thor::Actions
+
     attr_accessor :runner, :mode
 
     default_task :start
@@ -168,7 +170,7 @@ module Protobuf
 
       # Loads protobuf in the given mode, exiting if somehow the mode is wrong.
       def require_protobuf!
-        require "protobuf/#{@mode}.rb"
+        require "protobuf/#{@mode}"
       rescue LoadError => e
         puts e.message, *(e.backtrace)
         say_and_exit!("Failed to load protobuf runner #{@mode}", e)
