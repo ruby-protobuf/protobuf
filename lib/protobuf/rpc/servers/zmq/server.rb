@@ -234,7 +234,7 @@ module Protobuf
 
         def init_beacon_socket
           @beacon_socket = UDPSocket.new
-          @beacon_socket.setsockopt :SOCKET, :BROADCAST, true
+          @beacon_socket.setsockopt Socket::SOL_SOCKET, Socket::SO_BROADCAST, true
           @beacon_socket.connect beacon_ip, beacon_port
         end
 
