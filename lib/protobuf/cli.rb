@@ -39,8 +39,6 @@ module Protobuf
     option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
 
     def start(app_file)
-      $rpc_server = true
-
       debug_say 'Configuring the rpc_server process'
 
       configure_logger
