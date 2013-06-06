@@ -29,9 +29,9 @@ module Protobuf
     option :evented,                    :type => :boolean, :aliases => %w(-m), :desc => 'Evented Mode for server and client connections (uses EventMachine).'
     option :zmq,                        :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
 
-    option :broadcast_beacons,          :type => :boolean, :default => false, :desc => 'Broadcast beacons for dynamic discovery (Currently only available with ZeroMQ).'
+    option :broadcast_beacons,          :type => :boolean, :desc => 'Broadcast beacons for dynamic discovery (Currently only available with ZeroMQ).'
     option :beacon_address,             :type => :string,  :desc => 'Broadcast beacons to this address'
-    option :beacon_port,                :type => :string,  :desc => 'Broadcast beacons to this port'
+    option :beacon_port,                :type => :numeric, :desc => 'Broadcast beacons to this port'
     option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
     option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
@@ -140,7 +140,7 @@ module Protobuf
 
           trap(signal) do
             @exit_requested = true
-            shutdown_server
+            shutdown_server!
           end
         end
       end
@@ -172,15 +172,10 @@ module Protobuf
       end
 
       def runner_options
-        {
-          :host => options.host,
-          :port => options.port,
-          :backlog => options.backlog,
-          :threshold => options.threshold,
-          :threads => options.threads,
-          :worker_port => options.worker_port || (options.port + 1),
-          :workers_only => !!ENV['PB_WORKERS_ONLY'] || options.workers_only
-        }
+        opt = options.inject({}){|h,(k,v)|h[k.to_sym]=v;h} # Symbolize keys
+        opt[:workers_only] = !!ENV['PB_WORKERS_ONLY'] || options.workers_only
+
+        opt
       end
 
       def say_and_exit!(message, exception = nil)

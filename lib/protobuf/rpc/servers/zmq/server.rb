@@ -20,9 +20,6 @@ module Protobuf
         attr_accessor :options
 
         def initialize(options)
-          # Symbolize keys
-          options.inject({}) {|h,(k,v)| h[k.to_sym] = v; h}
-
           @options = DEFAULT_OPTIONS.merge(options)
           @workers = []
 
@@ -39,7 +36,7 @@ module Protobuf
         end
 
         def backend_port
-          options[:worker_port]
+          options[:worker_port] || frontend_port + 1
         end
 
         def backend_uri

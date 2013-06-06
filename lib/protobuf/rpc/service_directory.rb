@@ -73,8 +73,6 @@ module Protobuf
 
       def add_listing_for(server)
         if server && server.uuid
-          log_debug { sign_message("Adding listing for server: #{server.inspect}") }
-
           @mutex.synchronize do
             @listings[server.uuid] = Listing.new(server)
           end

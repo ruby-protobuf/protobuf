@@ -109,10 +109,8 @@ module Protobuf
         def read_response
           return if error?
 
-          poller.readables.each do |readable|
-            @response_data = ''
-            zmq_error_check(readable.recv_string(@response_data), :socket_recv_string)
-          end
+          @response_data = ''
+          zmq_error_check(socket.recv_string(@response_data), :socket_recv_string)
 
           parse_response
         end
