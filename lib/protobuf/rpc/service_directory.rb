@@ -158,6 +158,7 @@ module Protobuf
 
       def init_socket
         @socket = UDPSocket.new
+        @socket.setsockopt(:SOCKET, :REUSEADDR, true)
         @socket.bind(self.class.address, self.class.port)
       end
 
