@@ -130,7 +130,7 @@ module Protobuf
       def start
         unless running?
           init_socket
-          log_debug { sign_message("listining at udp://#{self.class.address}:#{self.class.port}") }
+          log_debug { sign_message("listening to udp://#{self.class.address}:#{self.class.port}") }
           @thread = Thread.new { self.send(:run) }
         end
 
