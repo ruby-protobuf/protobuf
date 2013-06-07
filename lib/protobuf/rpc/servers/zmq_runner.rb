@@ -15,21 +15,21 @@ module Protobuf
                      raise "Cannot parser Zmq Server - server options"
                    end
 
-        @server = ::Protobuf::Rpc::Zmq::Server.new(@options)
       end
 
       def run
+        @server = ::Protobuf::Rpc::Zmq::Server.new(@options)
         register_signals
         yield if block_given?
         @server.run
       end
 
       def running?
-        @server.running?
+        @server.try :running?
       end
 
       def stop
-        @server.stop
+        @server.try :stop
       end
 
       private
