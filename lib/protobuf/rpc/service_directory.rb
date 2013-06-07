@@ -12,8 +12,8 @@ module Protobuf
       include ::Singleton
       include ::Protobuf::Logger::LogMethods
 
-      DEFAULT_ADDRESS = "0.0.0.0"
-      DEFAULT_PORT = 9398
+      DEFAULT_ADDRESS = "255.255.255.255"
+      DEFAULT_PORT = 53000
       DEFAULT_TIMEOUT = 1
 
       class Listing < Delegator
@@ -52,7 +52,7 @@ module Protobuf
       end
 
       def self.port
-        @port ||= DEFAULT_PORT
+        (@port ||= DEFAULT_PORT).to_i
       end
 
       def self.start

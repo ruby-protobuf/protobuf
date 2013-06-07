@@ -11,9 +11,7 @@ module Protobuf
         include ::Protobuf::Rpc::Zmq::Util
 
         DEFAULT_OPTIONS = {
-          :beacon_address => "255.255.255.255",
           :beacon_interval => 5,
-          :beacon_port => 9398,
           :broadcast_beacons => false
         }
 
@@ -48,11 +46,25 @@ module Protobuf
         end
 
         def beacon_ip
-          @beacon_ip ||= resolve_ip(options[:beacon_address])
+          unless @beacon_ip
+            unless address = options[:beacon_address]
+              address = ::Protobuf::Rpc::ServiceDirectory.address
+            end
+
+            @beacon_ip = resolve_ip(address)
+          end
+
+          @beacon_ip
         end
 
         def beacon_port
-          options[:beacon_port].to_i
+          unless @beacon_port
+            unless port = options[:beacon_port]
+              port = ::Protobuf::Rpc::ServiceDirectory.port
+            end
+
+            @beacon_port = port.to_i
+          end
         end
 
         def beacon_uri
@@ -192,7 +204,7 @@ module Protobuf
             :uuid => uuid,
             :address => frontend_ip,
             :port => frontend_port.to_s,
-            :ttl => beacon_interval * 3,
+            :ttl => (beacon_interval * 1.5).ceil,
             :services => ::Protobuf::Rpc::Service.implemented_services
           )
         end
