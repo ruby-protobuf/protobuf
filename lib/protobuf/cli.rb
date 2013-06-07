@@ -216,6 +216,7 @@ module Protobuf
       def shutdown_server!
         ::Protobuf::Logger.info { 'RPC Server shutting down...' }
         @runner.try :stop
+        ::Protobuf::Rpc::ServiceDirectory.instance.stop
         ::Protobuf::Logger.info { 'Shutdown complete' }
       end
 
