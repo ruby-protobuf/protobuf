@@ -73,6 +73,12 @@ module Protobuf
 
       def add_listing_for(server)
         if server && server.uuid
+
+          log_debug do
+            action = @listings[server.uuid] ? "Updating" : "Adding";
+            sign_message("#{action} server: #{server.inspect}")
+          end
+
           @mutex.synchronize do
             @listings[server.uuid] = Listing.new(server)
           end
@@ -123,8 +129,8 @@ module Protobuf
 
       def start
         unless running?
-          log_debug { sign_message("starting") }
           init_socket
+          log_debug { sign_message("listining at udp://#{self.class.address}:#{self.class.port}") }
           @thread = Thread.new { self.send(:run) }
         end
 
@@ -167,8 +173,6 @@ module Protobuf
           data, addr = @socket.recvfrom(2048)
           beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new
           beacon.parse_from_string(data) rescue nil
-
-          log_debug { sign_message("received beacon: #{beacon.inspect} from #{addr}") }
 
           case beacon.beacon_type
           when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
