@@ -65,6 +65,8 @@ module Protobuf
 
             @beacon_port = port.to_i
           end
+
+          @beacon_port
         end
 
         def beacon_uri
