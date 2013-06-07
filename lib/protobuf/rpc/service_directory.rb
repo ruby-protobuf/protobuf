@@ -52,7 +52,7 @@ module Protobuf
       end
 
       def self.port
-        (@port ||= DEFAULT_PORT).to_i
+        @port ||= DEFAULT_PORT
       end
 
       def self.start
@@ -159,7 +159,7 @@ module Protobuf
       def init_socket
         @socket = UDPSocket.new
         @socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_REUSEADDR, true)
-        @socket.bind(self.class.address, self.class.port)
+        @socket.bind(self.class.address, self.class.port.to_i)
       end
 
       def run
