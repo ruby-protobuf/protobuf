@@ -179,6 +179,9 @@ module Protobuf
           beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new
           beacon.parse_from_string(data) rescue nil
 
+          # Favor the address captured by the socket
+          beacon.try(:server).try(:address=, addr[3])
+
           case beacon.beacon_type
           when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
             add_listing_for(beacon.server)
