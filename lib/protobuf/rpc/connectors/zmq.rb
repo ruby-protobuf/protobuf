@@ -58,11 +58,12 @@ module Protobuf
         def connect_to_rpc_server
           return if error?
 
-          log_debug { sign_message("Establishing connection: #{server_uri}") }
+          uri = server_uri
+          log_debug { sign_message("Establishing connection: #{uri}") }
           socket.setsockopt(::ZMQ::LINGER, 0)
-          zmq_error_check(socket.connect(server_uri), :socket_connect)
+          zmq_error_check(socket.connect(uri), :socket_connect)
           zmq_error_check(poller.register_readable(socket), :poller_register_readable)
-          log_debug { sign_message("Connection established to #{server_uri}") }
+          log_debug { sign_message("Connection established to #{uri}") }
         end
 
         # Method to determine error state, must be used with Connector API.
