@@ -123,6 +123,11 @@ module Protobuf
         end
       end
 
+      def restart
+        stop
+        start
+      end
+
       def running?
         !!@thread.try(:alive?)
       end
