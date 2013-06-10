@@ -58,18 +58,33 @@ module Protobuf
         def connect_to_rpc_server
           return if error?
 
-          uri = server_uri
-          log_debug { sign_message("Establishing connection: #{uri}") }
+          server_uri = lookup_server_uri
+          log_debug { sign_message("Establishing connection: #{server_uri}") }
           socket.setsockopt(::ZMQ::LINGER, 0)
-          zmq_error_check(socket.connect(uri), :socket_connect)
+          zmq_error_check(socket.connect(server_uri), :socket_connect)
           zmq_error_check(poller.register_readable(socket), :poller_register_readable)
-          log_debug { sign_message("Connection established to #{uri}") }
+          log_debug { sign_message("Connection established to #{server_uri}") }
         end
 
         # Method to determine error state, must be used with Connector API.
         #
         def error?
           !! @error
+        end
+
+        # Lookup a server uri for the requested service in the service
+        # directory. If the service directory is not running, default
+        # to the host and port in the options
+        #
+        def lookup_server_uri
+          if service_directory.running?
+            listing = service_directory.lookup(service)
+            host, port = listing.address, listing.port if listing
+          end
+
+          host, port = options[:host], options[:port] unless host && port
+
+          "tcp://#{host}:#{port}"
         end
 
         # Trying a number of times, attempt to get a response from the server.
@@ -123,21 +138,6 @@ module Protobuf
 
           @stats.request_size = @request_data.size
           zmq_error_check(socket.send_string(@request_data), :socket_send_string)
-        end
-
-        # The location of the server. If the ServiceDirectory is running then
-        # we ask it for a server that hosts the requested service. If it is
-        # not running, or it cannot be found, we fallback to the options.
-        #
-        def server_uri
-          if service_directory.running?
-            listing = service_directory.lookup(service)
-            host, port = listing.address, listing.port if listing
-          end
-
-          host, port = options[:host], options[:port] unless host && port
-
-          "tcp://#{host}:#{port}"
         end
 
         # The service we're attempting to connect to
