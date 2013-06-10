@@ -84,13 +84,11 @@ module Protobuf
           end
 
         else
-          log_debug { sign_message("Cannot add server without uuid: #{server.inspect}") }
+          log_info { sign_message("Cannot add server without uuid: #{server.inspect}") }
         end
       end
 
       def lookup(service)
-        log_debug { sign_message("lookup #{service}") }
-
         @mutex.synchronize do
           listings = @listings.values.select do |listing|
             listing.services.any? do |listed_service|
@@ -119,7 +117,7 @@ module Protobuf
           end
 
         else
-          log_debug { sign_message("Cannot remove server without uuid: #{server.inspect}") }
+          log_info { sign_message("Cannot remove server without uuid: #{server.inspect}") }
         end
       end
 
@@ -135,7 +133,7 @@ module Protobuf
       def start
         unless running?
           init_socket
-          log_debug { sign_message("listening to udp://#{self.class.address}:#{self.class.port}") }
+          log_info { sign_message("listening to udp://#{self.class.address}:#{self.class.port}") }
           @thread = Thread.new { self.send(:run) }
         end
 
@@ -143,7 +141,7 @@ module Protobuf
       end
 
       def stop
-        log_debug { sign_message("stopping") }
+        log_info { sign_message("Stopping directory") }
 
         @mutex.synchronize do
           @thread.try(:kill)
@@ -162,6 +160,7 @@ module Protobuf
           listing
         end
       rescue
+        log_info { sign_message("no listing found for #{service}") }
         nil
       end
 
