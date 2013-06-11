@@ -107,7 +107,7 @@ module Protobuf
 
         def stop
           @running = false
-          @server.try :close
+          @server.try(:close)
         end
       end
     end
