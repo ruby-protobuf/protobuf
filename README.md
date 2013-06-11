@@ -423,11 +423,21 @@ allows servers to be dynamically discovered by the client.
 ServiceDirectory.start do |config|
   config.port = 53000
 end
+
+# If your server also runs this code, it will default to the
+# given port when sending beacons and have its own service
+# directory. You can prevent this code from running on the
+# server if needed:
+unless defined? ::Protobuf::CLI
+  ServiceDirectory.start do |config|
+    config.port = 53000
+  end
+end
 ```
 
 #### Starting the server
 ```
-$ rpc_server -o myserver.com --broadcast-beacons ./config/environment.rb
+$ rpc_server --broadcast-beacons --beacon-port 53000 ...
 ```
 
 The client will listen on the specified port for beacons broadcast
@@ -435,10 +445,10 @@ by servers. Each beacon includes a list of services provided by the
 broadcasting server. The client randomly selects a server for the
 desired service each time a request is made.
 
-*CAUTION:* When running multiple environments on a single network,
+__CAUTION:__ When running multiple environments on a single network,
 e.g., qa and staging, be sure that each environment is setup with
-a unique broadcast port; otherwise, clients in one environment will
-make requests to servers in another environment.
+a unique beacon port; otherwise, clients in one environment _will_
+make requests to servers in the other environment.
 
 Check out {Protobuf::ServiceDirectory} for more details.
 
