@@ -29,17 +29,21 @@ module Protobuf
         end
 
         def join
-          @thread.try :join
+          @thread.try(:join)
         end
 
         def process_request
-          zmq_error_check(@backend_socket.recv_strings(frames = []))
-
-          @client_address, empty, @request_data = *frames
+          @client_address, empty, @request_data = read_from_backend
 
           unless @request_data.nil?
             log_debug { sign_message("handling request") }
             handle_client
+          end
+        end
+
+        def read_from_backend
+          [].tap do |frames|
+            zmq_error_check(@backend_socket.recv_strings(frames))
           end
         end
 
@@ -49,7 +53,7 @@ module Protobuf
           poller.register_readable(@shutdown_socket)
 
           # Send request to broker telling it we are ready
-          zmq_error_check(@backend_socket.send_string(::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE))
+          write_to_backend([::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE])
 
           catch(:shutdown) do
             while poller.poll > 0
@@ -69,13 +73,11 @@ module Protobuf
         end
 
         def send_data
-          response_data = @response.to_s # to_s is aliases as serialize_to_string in Message
+          data = @response.serialize_to_string
 
-          frames = [@client_address, "", response_data]
+          @stats.response_size = data.size
 
-          @stats.response_size = response_data.size
-
-          zmq_error_check(@backend_socket.send_strings(frames))
+          write_to_backend([@client_address, "", data])
         end
 
         def shutdown_uri
@@ -84,8 +86,8 @@ module Protobuf
 
         def signal_shutdown
           socket = @zmq_context.socket ZMQ::PAIR
-          zmq_error_check(socket.connect shutdown_uri)
-          zmq_error_check(socket.send_string ".")
+          zmq_error_check(socket.connect(shutdown_uri))
+          zmq_error_check(socket.send_string("."))
           zmq_error_check(socket.close)
         end
 
@@ -95,7 +97,7 @@ module Protobuf
               self.run
             rescue => e
               message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
-              $stderr.puts message
+              $stderr.puts(message)
               log_error { message }
             end
           end
@@ -104,9 +106,13 @@ module Protobuf
         end
 
         def teardown
-          @backend_socket.try :close
-          @shutdown_socket.try :close
-          @zmq_context.try :terminate
+          @backend_socket.try(:close)
+          @shutdown_socket.try(:close)
+          @zmq_context.try(:terminate)
+        end
+
+        def write_to_backend(frames)
+          zmq_error_check(@backend_socket.send_strings(frames))
         end
 
         private
@@ -116,13 +122,13 @@ module Protobuf
         end
 
         def init_backend_socket
-          @backend_socket = @zmq_context.socket ZMQ::REQ
-          zmq_error_check(@backend_socket.connect @server.backend_uri)
+          @backend_socket = @zmq_context.socket(ZMQ::REQ)
+          zmq_error_check(@backend_socket.connect(@server.backend_uri))
         end
 
         def init_shutdown_socket
-          @shutdown_socket = @zmq_context.socket ZMQ::PAIR
-          zmq_error_check(@shutdown_socket.bind shutdown_uri)
+          @shutdown_socket = @zmq_context.socket(ZMQ::PAIR)
+          zmq_error_check(@shutdown_socket.bind(shutdown_uri))
         end
       end
     end

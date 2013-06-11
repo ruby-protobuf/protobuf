@@ -19,7 +19,19 @@ module Protobuf
         end
 
         def join
-          @thread.try :join
+          @thread.try(:join)
+        end
+
+        def read_from_backend
+          [].tap do |frames|
+            zmq_error_check(@backend_socket.recv_strings(frames))
+          end
+        end
+
+        def read_from_frontend
+          [].tap do |frames|
+            zmq_error_check(@frontend_socket.recv_strings(frames))
+          end
         end
 
         def run
@@ -31,15 +43,14 @@ module Protobuf
                 case readable
                 when @frontend_socket
                   if idle_workers.any?
-                    zmq_error_check(@frontend_socket.recv_strings frames = [])
-                    frames.unshift(idle_workers.shift, "")
-                    zmq_error_check(@backend_socket.send_strings frames)
+                    frames = read_from_frontend
+                    write_to_backend([idle_workers.shift, ""] + frames)
                   end
                 when @backend_socket
-                  zmq_error_check(@backend_socket.recv_strings frames = [])
-                  idle_workers << frames.shift(2)[0]
+                  worker, ignore, *frames = read_from_backend
+                  idle_workers << worker
                   unless frames == [::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE]
-                    zmq_error_check(@frontend_socket.send_strings frames)
+                    write_to_frontend(frames)
                   end
                 when @shutdown_socket
                   throw :shutdown
@@ -49,6 +60,14 @@ module Protobuf
           end
         ensure
           teardown
+        end
+
+        def write_to_backend(frames)
+          zmq_error_check(@backend_socket.send_strings(frames))
+        end
+
+        def write_to_frontend(frames)
+          zmq_error_check(@frontend_socket.send_strings(frames))
         end
 
         def start
@@ -66,41 +85,41 @@ module Protobuf
         end
 
         def signal_shutdown
-          socket = @zmq_context.socket ZMQ::PAIR
-          zmq_error_check(socket.connect shutdown_uri)
+          socket = @zmq_context.socket(ZMQ::PAIR)
+          zmq_error_check(socket.connect(shutdown_uri))
           zmq_error_check(socket.send_string ".")
           zmq_error_check(socket.close)
         end
 
         def teardown
-          @frontend_socket.try :close
-          @backend_socket.try :close
-          @shutdown_socket.try :close
-          @zmq_context.try :terminate
+          @frontend_socket.try(:close)
+          @backend_socket.try(:close)
+          @shutdown_socket.try(:close)
+          @zmq_context.try(:terminate)
         end
 
         private
 
         def init_backend_socket
-          @backend_socket = @zmq_context.socket ZMQ::ROUTER
-          zmq_error_check(@backend_socket.bind @server.backend_uri)
+          @backend_socket = @zmq_context.socket(ZMQ::ROUTER)
+          zmq_error_check(@backend_socket.bind(@server.backend_uri))
         end
 
         def init_frontend_socket
-          @frontend_socket = @zmq_context.socket ZMQ::ROUTER
-          zmq_error_check(@frontend_socket.bind @server.frontend_uri)
+          @frontend_socket = @zmq_context.socket(ZMQ::ROUTER)
+          zmq_error_check(@frontend_socket.bind(@server.frontend_uri))
         end
 
         def init_poller
           @poller = ZMQ::Poller.new
-          @poller.register_readable @frontend_socket
-          @poller.register_readable @backend_socket
-          @poller.register_readable @shutdown_socket
+          @poller.register_readable(@frontend_socket)
+          @poller.register_readable(@backend_socket)
+          @poller.register_readable(@shutdown_socket)
         end
 
         def init_shutdown_socket
-          @shutdown_socket = @zmq_context.socket ZMQ::PAIR
-          zmq_error_check(@shutdown_socket.bind shutdown_uri)
+          @shutdown_socket = @zmq_context.socket(ZMQ::PAIR)
+          zmq_error_check(@shutdown_socket.bind(shutdown_uri))
         end
 
         def init_zmq_context

@@ -92,7 +92,7 @@ module Protobuf
             :server => self.to_proto
           )
 
-          @beacon_socket.send heartbeat.serialize_to_string, 0
+          @beacon_socket.send(heartbeat.serialize_to_string, 0)
 
           log_debug { sign_message("sent heartbeat to #{beacon_uri}") }
         end
@@ -187,14 +187,14 @@ module Protobuf
         end
 
         def stop_workers
-          @workers.each &:signal_shutdown
+          @workers.each(&:signal_shutdown)
           Thread.pass until reap_dead_workers.empty?
         end
 
         def teardown
-          @shutdown_socket.try :close
-          @beacon_socket.try :close
-          @zmq_context.try :terminate
+          @shutdown_socket.try(:close)
+          @beacon_socket.try(:close)
+          @zmq_context.try(:terminate)
         end
 
         def total_workers
@@ -222,7 +222,7 @@ module Protobuf
           next_reaping = time + reaping_interval
           next_cycle = time + maintenance_interval
           poller = ZMQ::Poller.new
-          poller.register_readable @shutdown_socket
+          poller.register_readable(@shutdown_socket)
 
           # If the poller returns 1, a shutdown signal has been received.
           # If the poller returns -1, something went wrong.
@@ -248,12 +248,12 @@ module Protobuf
 
         def init_beacon_socket
           @beacon_socket = UDPSocket.new
-          @beacon_socket.setsockopt ::Socket::SOL_SOCKET, ::Socket::SO_BROADCAST, true
-          @beacon_socket.connect beacon_ip, beacon_port
+          @beacon_socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_BROADCAST, true)
+          @beacon_socket.connect(beacon_ip, beacon_port)
         end
 
         def init_shutdown_socket
-          @shutdown_socket = @zmq_context.socket ZMQ::PAIR
+          @shutdown_socket = @zmq_context.socket(ZMQ::PAIR)
           zmq_error_check(@shutdown_socket.bind shutdown_uri)
         end
 

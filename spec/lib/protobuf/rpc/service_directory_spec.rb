@@ -149,7 +149,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     end
 
     context "receiving a heartbeat" do
-      let(:server) { ::Protobuf::Rpc::DynamicDiscovery::Server.new(:uuid => 'heartbeat') }
+      let(:server) { ::Protobuf::Rpc::DynamicDiscovery::Server.new(:uuid => 'heartbeat', :address => '127.0.0.1') }
       let(:beacon) { ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
         :server => server,
         :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
@@ -165,7 +165,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     end
 
     context "receiving a flatline" do
-      let(:server) { ::Protobuf::Rpc::DynamicDiscovery::Server.new(:uuid => 'flatline') }
+      let(:server) { ::Protobuf::Rpc::DynamicDiscovery::Server.new(:uuid => 'flatline', :address => '127.0.0.1') }
       let(:beacon) { ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
         :server => server,
         :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
