@@ -40,24 +40,25 @@ module Protobuf
     option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
 
     def start(app_file)
-      debug_say 'Configuring the rpc_server process'
+      debug_say('Configuring the rpc_server process')
 
       configure_logger
       configure_traps
-      configure_server_mode
+      configure_runner_mode
+      create_runner
+      configure_process_name(app_file)
       configure_gc
       configure_deprecation_warnings
 
-      require_application!(app_file) unless exit_requested?
-      configure_process_name(app_file) unless exit_requested?
-      start_server! unless exit_requested?
+      require_application(app_file) unless exit_requested?
+      start_server unless exit_requested?
     rescue => e
-      say_and_exit!('ERROR: RPC Server failed to start.', e)
+      say_and_exit('ERROR: RPC Server failed to start.', e)
     end
 
     desc 'version', 'Print ruby and protoc versions and exit.'
     def version
-      say "Ruby Protobuf v#{::Protobuf::VERSION}, protoc v#{::Protobuf::PROTOC_VERSION}"
+      say("Ruby Protobuf v#{::Protobuf::VERSION}, protoc v#{::Protobuf::PROTOC_VERSION}")
     end
 
     no_tasks do
@@ -73,7 +74,7 @@ module Protobuf
 
       # If we pause during request we don't need to pause in serialization
       def configure_gc
-        debug_say 'Configuring gc'
+        debug_say('Configuring gc')
 
         if defined?(JRUBY_VERSION)
           # GC.enable/disable are noop's on Jruby
@@ -85,7 +86,7 @@ module Protobuf
 
       # Setup the protobuf logger.
       def configure_logger
-        debug_say 'Configuring logger'
+        debug_say('Configuring logger')
         ::Protobuf::Logger.configure({ :file => options.log || STDOUT,
                                        :level => options.debug? ? ::Logger::DEBUG : options.level })
 
@@ -96,32 +97,32 @@ module Protobuf
 
       # Re-write the $0 var to have a nice process name in ps.
       def configure_process_name(app_file)
-        debug_say 'Configuring process name'
-        $0 = "rpc_server --#{@mode} #{options.host}:#{options.port} #{app_file}"
+        debug_say('Configuring process name')
+        $0 = "rpc_server --#{@runner_mode} #{options.host}:#{options.port} #{app_file}"
       end
 
       # Configure the mode of the server and the runner class.
-      def configure_server_mode
-        debug_say 'Configuring runner mode'
+      def configure_runner_mode
+        debug_say('Configuring runner mode')
 
         if multi_mode?
-          say 'WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow
-          server_socket!
+          say('WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow)
+          @runner_mode = :socket
         elsif options.zmq?
-          server_zmq!
+          @runner_mode = :zmq
         elsif options.evented?
-          server_evented!
+          @runner_mode = :evented
         else
           case server_type = ENV["PB_SERVER_TYPE"]
           when nil, /socket/i
-            server_socket!
+            @runner_mode = :socket
           when /zmq/i
-            server_zmq!
+            @runner_mode = :zmq
           when /evented/i
-            server_evented!
+            @runner_mode = :evented
           else
             say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
-            server_socket!
+            @runner_mode = :socket
           end
         end
       end
@@ -129,19 +130,34 @@ module Protobuf
       # Configure signal traps.
       # TODO add signal handling for hot-reloading the application.
       def configure_traps
-        debug_say 'Configuring traps'
+        debug_say('Configuring traps')
 
         exit_signals = [:INT, :TERM]
         exit_signals << :QUIT unless defined?(JRUBY_VERSION)
 
         exit_signals.each do |signal|
-          debug_say "Registering trap for exit signal #{signal}", :blue
+          debug_say("Registering trap for exit signal #{signal}", :blue)
 
           trap(signal) do
             @exit_requested = true
-            shutdown_server!
+            shutdown_server
           end
         end
+      end
+
+      # Create the runner for the configured mode
+      def create_runner
+        debug_say("Creating #{@runner_mode} runner")
+        @runner = case @runner_mode
+                  when :evented
+                    create_evented_runner
+                  when :zmq
+                    create_zmq_runner
+                  when :socket
+                    create_socket_runner
+                  else
+                    say_and_exit("Unknown runner mode: #{@runner_mode}")
+                  end
       end
 
       # Say something if we're in debug mode.
@@ -163,21 +179,23 @@ module Protobuf
       end
 
       # Require the application file given, exiting if the file doesn't exist.
-      def require_application!(app_file)
-        debug_say 'Requiring app file'
+      def require_application(app_file)
+        debug_say('Requiring app file')
         require app_file
       rescue LoadError => e
-        say_and_exit!("Failed to load application file #{app_file}", e)
+        say_and_exit("Failed to load application file #{app_file}", e)
       end
 
       def runner_options
-        opt = options.inject({}){|h,(k,v)|h[k.to_sym]=v;h} # Symbolize keys
+        # Symbolize keys
+        opt = options.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
+
         opt[:workers_only] = !!ENV['PB_WORKERS_ONLY'] || options.workers_only
 
         opt
       end
 
-      def say_and_exit!(message, exception = nil)
+      def say_and_exit(message, exception = nil)
         message = set_color(message, :red) if ::Protobuf::Logger.file == STDOUT
 
         ::Protobuf::Logger.error { message }
@@ -192,41 +210,38 @@ module Protobuf
         exit(1)
       end
 
-      def server_evented!
+      def create_evented_runner
         require 'protobuf/evented'
 
-        @mode = :evented
         @runner = ::Protobuf::Rpc::EventedRunner.new(runner_options)
       end
 
-      def server_socket!
+      def create_socket_runner
         require 'protobuf/socket'
 
-        @mode = :socket
         @runner = ::Protobuf::Rpc::SocketRunner.new(runner_options)
       end
 
-      def server_zmq!
+      def create_zmq_runner
         require 'protobuf/zmq'
 
-        @mode = :zmq
         @runner = ::Protobuf::Rpc::ZmqRunner.new(runner_options)
       end
 
-      def shutdown_server!
+      def shutdown_server
         ::Protobuf::Logger.info { 'RPC Server shutting down...' }
-        @runner.try :stop
+        @runner.try(:stop)
         ::Protobuf::Rpc::ServiceDirectory.instance.stop
         ::Protobuf::Logger.info { 'Shutdown complete' }
       end
 
       # Start the runner and log the relevant options.
-      def start_server!
-        debug_say 'Invoking server start'
+      def start_server
+        debug_say('Running server')
 
         @runner.run do
           ::Protobuf::Logger.info {
-            "pid #{::Process.pid} -- #{@mode} RPC Server listening at #{options.host}:#{options.port}"
+            "pid #{::Process.pid} -- #{@runner_mode} RPC Server listening at #{options.host}:#{options.port}"
           }
         end
       end
