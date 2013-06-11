@@ -435,7 +435,12 @@ by servers. Each beacon includes a list of services provided by the
 broadcasting server. The client randomly selects a server for the
 desired service each time a request is made.
 
-Check out the {Protobuf::ServiceDirectory} class for more details.
+*CAUTION:* When running multiple environments on a single network,
+e.g., qa and staging, be sure that each environment is setup with
+a unique broadcast port; otherwise, clients in one environment will
+make requests to servers in another environment.
+
+Check out {Protobuf::ServiceDirectory} for more details.
 
 ## 3. RPC Interop
 
