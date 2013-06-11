@@ -303,8 +303,7 @@ any other filter calls which would run afterwards, as well as canceling
 invocation of the service method. Note: You must actually return false,
 not just a "falsey" value such as nil.
 
-__After Filters__ – There is no request shortcutting since the after
-filter runs after the request. Duh.
+__After Filters__ – No request shortcutting.
 
 #### Filter options
 
@@ -414,6 +413,29 @@ end
 Many different options can be passed to the `.client` call above
 (such as `:timeout => 600`). See the `lib/protobuf/rpc/client.rb`
 and `lib/protobuf/rpc/service.rb` files for more documentation.
+
+### Dynamic Discovery (ZMQ Only)
+It is possible to setup the RPC server and client in a way that
+allows servers to be dynamically discovered by the client.
+
+#### In the client
+```ruby
+ServiceDirectory.start do |config|
+  config.port = 53000
+end
+```
+
+#### Starting the server
+```
+$ rpc_server -o myserver.com --broadcast-beacons ./config/environment.rb
+```
+
+The client will listen on the specified port for beacons broadcast
+by servers. Each beacon includes a list of services provided by the
+broadcasting server. The client randomly selects a server for the
+desired service each time a request is made.
+
+Check out the {Protobuf::ServiceDirectory} class for more details.
 
 ## 3. RPC Interop
 
