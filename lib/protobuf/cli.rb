@@ -190,7 +190,7 @@ module Protobuf
         # Symbolize keys
         opt = options.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
 
-        opt[:workers_only] = !!ENV['PB_WORKERS_ONLY'] || options.workers_only
+        opt[:workers_only] = (!!ENV['PB_WORKERS_ONLY']) || options.workers_only
 
         opt
       end

@@ -172,26 +172,34 @@ module Protobuf
         @socket.bind(self.class.address, self.class.port.to_i)
       end
 
+      def process_beacon(beacon)
+        case beacon.beacon_type
+        when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
+          add_listing_for(beacon.server)
+        when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
+          remove_listing_for(beacon.server)
+        end
+      end
+
       def run
-        begin
-          data, addr = @socket.recvfrom(2048)
-          beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new
+        loop do
+          process_beacon(wait_for_beacon)
+          remove_expired_listings
+        end
+      rescue => e
+        log_debug { sign_message("error: (#{e.class}) #{e.message}") }
+        retry
+      end
+
+      def wait_for_beacon
+        data, addr = @socket.recvfrom(2048)
+
+        ::Protobuf::Rpc::DynamicDiscovery::Beacon.new.tap do |beacon|
           beacon.parse_from_string(data) rescue nil
 
           # Favor the address captured by the socket
           beacon.try(:server).try(:address=, addr[3])
-
-          case beacon.beacon_type
-          when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
-            add_listing_for(beacon.server)
-          when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
-            remove_listing_for(beacon.server)
-          end
-
-          remove_expired_listings
-        rescue => e
-          log_debug { sign_message("error: (#{e.class}) #{e.message}") }
-        end while true
+        end
       end
     end
   end

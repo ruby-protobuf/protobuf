@@ -22,36 +22,17 @@ module Protobuf
           @thread.try(:join)
         end
 
-        def read_from_backend
-          [].tap do |frames|
-            zmq_error_check(@backend_socket.recv_strings(frames))
-          end
-        end
-
-        def read_from_frontend
-          [].tap do |frames|
-            zmq_error_check(@frontend_socket.recv_strings(frames))
-          end
-        end
-
         def run
-          idle_workers = []
+          @idle_workers = []
 
           catch(:shutdown) do
             while @poller.poll > 0
               @poller.readables.each do |readable|
                 case readable
                 when @frontend_socket
-                  if idle_workers.any?
-                    frames = read_from_frontend
-                    write_to_backend([idle_workers.shift, ""] + frames)
-                  end
+                  process_frontend
                 when @backend_socket
-                  worker, ignore, *frames = read_from_backend
-                  idle_workers << worker
-                  unless frames == [::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE]
-                    write_to_frontend(frames)
-                  end
+                  process_backend
                 when @shutdown_socket
                   throw :shutdown
                 end
@@ -62,20 +43,10 @@ module Protobuf
           teardown
         end
 
-        def write_to_backend(frames)
-          zmq_error_check(@backend_socket.send_strings(frames))
-        end
-
-        def write_to_frontend(frames)
-          zmq_error_check(@frontend_socket.send_strings(frames))
-        end
-
         def start
           log_debug { sign_message("starting broker") }
 
-          @thread = Thread.new do
-            self.run
-          end
+          @thread = Thread.new { self.run }
 
           self
         end
@@ -89,13 +60,6 @@ module Protobuf
           zmq_error_check(socket.connect(shutdown_uri))
           zmq_error_check(socket.send_string ".")
           zmq_error_check(socket.close)
-        end
-
-        def teardown
-          @frontend_socket.try(:close)
-          @backend_socket.try(:close)
-          @shutdown_socket.try(:close)
-          @zmq_context.try(:terminate)
         end
 
         private
@@ -124,6 +88,50 @@ module Protobuf
 
         def init_zmq_context
           @zmq_context = ZMQ::Context.new
+        end
+
+        def process_backend
+          worker, ignore, *frames = read_from_backend
+
+          @idle_workers << worker
+
+          unless frames == [::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE]
+            write_to_frontend(frames)
+          end
+        end
+
+        def process_frontend
+          if @idle_workers.any?
+            frames = read_from_frontend
+            write_to_backend([@idle_workers.shift, ""] + frames)
+          end
+        end
+
+        def read_from_backend
+          [].tap do |frames|
+            zmq_error_check(@backend_socket.recv_strings(frames))
+          end
+        end
+
+        def read_from_frontend
+          [].tap do |frames|
+            zmq_error_check(@frontend_socket.recv_strings(frames))
+          end
+        end
+
+        def teardown
+          @frontend_socket.try(:close)
+          @backend_socket.try(:close)
+          @shutdown_socket.try(:close)
+          @zmq_context.try(:terminate)
+        end
+
+        def write_to_backend(frames)
+          zmq_error_check(@backend_socket.send_strings(frames))
+        end
+
+        def write_to_frontend(frames)
+          zmq_error_check(@frontend_socket.send_strings(frames))
         end
       end
     end

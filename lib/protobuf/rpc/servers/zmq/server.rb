@@ -87,6 +87,8 @@ module Protobuf
         end
 
         def broadcast_heartbeat
+          @last_beacon = Time.now.to_i
+
           heartbeat = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT,
             :server => self.to_proto
@@ -95,6 +97,10 @@ module Protobuf
           @beacon_socket.send(heartbeat.serialize_to_string, 0)
 
           log_debug { sign_message("sent heartbeat to #{beacon_uri}") }
+        end
+
+        def broadcast_heartbeat?
+          Time.now.to_i >= next_beacon && broadcast_beacons?
         end
 
         def brokerless?
@@ -113,18 +119,43 @@ module Protobuf
           "tcp://#{frontend_ip}:#{frontend_port}"
         end
 
-        def maintenance_interval
-          [reaping_interval, beacon_interval].min
+        def next_maintenance
+          cycles = [next_reaping]
+          cycles << next_beacon if broadcast_beacons?
+
+          cycles.min
         end
 
         def minimum_timeout
           100
         end
 
+        def next_beacon
+          if @last_beacon.nil?
+            0
+          else
+            Time.now.to_i + beacon_interval
+          end
+        end
+
+        def next_reaping
+          if @last_reaping.nil?
+            0
+          else
+            Time.now.to_i + reaping_interval
+          end
+        end
+
         def reap_dead_workers
+          @last_reaping = Time.now.to_i
+
           @workers.keep_if do |worker|
             worker.alive? or worker.join && false
           end
+        end
+
+        def reap_dead_workers?
+          Time.now.to_i >= next_reaping
         end
 
         def reaping_interval
@@ -195,10 +226,19 @@ module Protobuf
           @shutdown_socket.try(:close)
           @beacon_socket.try(:close)
           @zmq_context.try(:terminate)
+          @last_reaping = @last_beacon = @timeout = nil
         end
 
         def total_workers
           @total_workers ||= [@options[:threads].to_i, 1].max
+        end
+
+        def timeout
+          if @timeout.nil?
+            0
+          else
+            @timeout = [minimum_timeout, 1_000 * next_maintenance].max
+          end
         end
 
         def to_proto
@@ -216,31 +256,18 @@ module Protobuf
         end
 
         def wait_for_shutdown_signal
-          time = Time.now.to_i
-          timeout = 0
-          next_beacon = 0
-          next_reaping = time + reaping_interval
-          next_cycle = time + maintenance_interval
           poller = ZMQ::Poller.new
           poller.register_readable(@shutdown_socket)
 
           # If the poller returns 1, a shutdown signal has been received.
           # If the poller returns -1, something went wrong.
           while poller.poll(timeout) === 0
-            if (time = Time.now.to_i) >= next_reaping
+            if reap_dead_workers?
               reap_dead_workers
               start_missing_workers
-              next_reaping = time + reaping_interval
-              next_cycle = [next_cycle, next_reaping].min
             end
 
-            if broadcast_beacons? && time >= next_beacon
-              broadcast_heartbeat
-              next_beacon = time + beacon_interval
-              next_cycle = [next_cycle, next_beacon].min
-            end
-
-            timeout = [minimum_timeout, 1000 * (next_cycle - time)].max
+            broadcast_heartbeat if broadcast_heartbeat?
           end
         end
 
