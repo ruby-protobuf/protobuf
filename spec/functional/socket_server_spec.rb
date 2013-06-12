@@ -4,14 +4,14 @@ require 'spec/support/test/resource_service'
 describe 'Functional Socket Client' do
   before(:all) do
     load "protobuf/socket.rb"
-    Thread.abort_on_exception = true
-    server = OpenStruct.new(:host => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
-    @server_thread = Thread.new(server) { |s| Protobuf::Rpc::SocketRunner.run(s) }
-    Thread.pass until Protobuf::Rpc::Socket::Server.running?
+    @options = OpenStruct.new(:host => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
+    @runner = ::Protobuf::Rpc::SocketRunner.new(@options)
+    @server_thread = Thread.new(@runner) { |runner| runner.run }
+    Thread.pass until @runner.running?
   end
 
   after(:all) do
-    Protobuf::Rpc::SocketRunner.stop
+    @runner.stop
     @server_thread.join
   end
 
@@ -56,3 +56,4 @@ describe 'Functional Socket Client' do
     error.message.should =~ /expected request.*ResourceFindRequest.*Resource instead/i
   end
 end
+

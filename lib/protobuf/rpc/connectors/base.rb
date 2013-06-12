@@ -17,7 +17,7 @@ module Protobuf
         :request        => nil,           # The request object sent by the client
         :request_type   => nil,           # The request type expected by the client
         :response_type  => nil,           # The response type expected by the client
-        :timeout        => 300,           # The default timeout for the request, also handled by client.rb
+        :timeout        => 15,            # The default timeout for the request, also handled by client.rb
         :client_host    => nil            # The hostname or address of this client
       }
 
