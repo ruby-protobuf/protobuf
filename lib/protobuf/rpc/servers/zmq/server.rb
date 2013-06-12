@@ -119,6 +119,10 @@ module Protobuf
           "tcp://#{frontend_ip}:#{frontend_port}"
         end
 
+        def maintenance_timeout
+          1_000 * (next_maintenance - Time.now.to_i)
+        end
+
         def next_maintenance
           cycles = [next_reaping]
           cycles << next_beacon if broadcast_beacons?
@@ -134,7 +138,7 @@ module Protobuf
           if @last_beacon.nil?
             0
           else
-            Time.now.to_i + beacon_interval
+            @last_beacon + beacon_interval
           end
         end
 
@@ -142,7 +146,7 @@ module Protobuf
           if @last_reaping.nil?
             0
           else
-            Time.now.to_i + reaping_interval
+            @last_reaping + reaping_interval
           end
         end
 
@@ -235,9 +239,9 @@ module Protobuf
 
         def timeout
           if @timeout.nil?
-            0
+            @timeout = 0
           else
-            @timeout = [minimum_timeout, 1_000 * next_maintenance].max
+            @timeout = [minimum_timeout, maintenance_timeout].max
           end
         end
 
