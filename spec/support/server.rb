@@ -53,8 +53,10 @@ class StubServer
 
   def start
     case
-    when @options.server == Protobuf::Rpc::Evented::Server then start_em_server
-    when @options.server == Protobuf::Rpc::Zmq::Server then start_zmq_server
+    when @options.server == Protobuf::Rpc::Evented::Server
+      start_em_server
+    when @options.server == Protobuf::Rpc::Zmq::Server
+      start_zmq_server
     else
       start_socket_server
     end
@@ -67,18 +69,25 @@ class StubServer
   end
 
   def start_em_server
-    @server_handle = EventMachine.start_server(@options.host, @options.port, StubProtobufServerFactory.build(@options.delay))
+    @server_handle = EventMachine.start_server(
+      @options.host,
+      @options.port,
+      StubProtobufServerFactory.build(@options.delay)
+    )
   end
 
   def start_socket_server
-    @sock_server = Thread.new(@options) { |opt| Protobuf::Rpc::SocketRunner.run(opt) }
-    @sock_server.abort_on_exception = true # Set for testing purposes
-    Thread.pass until Protobuf::Rpc::Socket::Server.running?
+    @sock_runner = ::Protobuf::Rpc::SocketRunner.new(opt)
+    @sock_thread = Thread.new(@sock_runner) { |runner| runner.run }
+    @sock_thread.abort_on_exception = true # Set for testing purposes
+    Thread.pass until @sock_runner.running?
   end
 
   def start_zmq_server
-    @zmq_server = Thread.new(@options) { |opt| Protobuf::Rpc::ZmqRunner.run(opt) }
-    Thread.pass until Protobuf::Rpc::Zmq::Server.running?
+    @zmq_runnger = ::Protobuf::Rpc::ZmqRunner.new(opt)
+    @zmq_thread = Thread.new(@zmq_runner) { |runner| runner.run }
+    @zmq_thread.abort_on_exception = true # Set for testing purposes
+    Thread.pass until @zmq_runner.running?
   end
 
   def stop
@@ -86,11 +95,11 @@ class StubServer
     when @options.server == Protobuf::Rpc::Evented::Server then
       EventMachine.stop_server(@server_handle) if @server_handle
     when @options.server == Protobuf::Rpc::Zmq::Server then
-      Protobuf::Rpc::ZmqRunner.stop
-      @zmq_server.join if @zmq_server
+      @zmq_runner.try :stop
+      @zmq_thread.join if @zmq_thread
     else
-      Protobuf::Rpc::SocketRunner.stop
-      @sock_server.join if @sock_server
+      @sock_runner.stop
+      @sock_thread.join if @sock_thread
     end
 
     @running = false

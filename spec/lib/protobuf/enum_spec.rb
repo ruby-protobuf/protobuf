@@ -6,7 +6,7 @@ describe Protobuf::Enum do
 
   before(:all) do
     Test::EnumTestType.define(:MINUS_ONE, -1)
-    Test::EnumTestType.define(name, tag)
+    Test::EnumTestType.define(:THREE, 3)
   end
 
   describe '.define' do

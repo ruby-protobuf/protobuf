@@ -96,6 +96,18 @@ module Protobuf
         rpcs.key?(name)
       end
 
+      # An array of defined service classes that contain implementation
+      # code
+      def self.implemented_services
+        classes = (self.subclasses || []).select do |subclass|
+          subclass.rpcs.any? do |(name, method)|
+            subclass.method_defined? name
+          end
+        end
+
+        classes.map &:name
+      end
+
       ##
       # Instance Methods
       #

@@ -1,9 +1,9 @@
 require 'protobuf/rpc/server'
 require 'protobuf/rpc/servers/zmq/util'
+
 module Protobuf
   module Rpc
     module Zmq
-
       class Worker
         include ::Protobuf::Rpc::Server
         include ::Protobuf::Rpc::Zmq::Util
@@ -11,63 +11,126 @@ module Protobuf
         ##
         # Constructor
         #
-        def initialize(options = {})
-          host = options[:host]
-          port = options[:worker_port]
-
-          @zmq_context = ::ZMQ::Context.new
-          @socket = @zmq_context.socket(::ZMQ::REQ)
-          zmq_error_check(@socket.connect("tcp://#{resolve_ip(host)}:#{port}"))
-
-          @poller = ::ZMQ::Poller.new
-          @poller.register(@socket, ::ZMQ::POLLIN)
-
-          # Send request to broker telling it we are ready
-          zmq_error_check(@socket.send_string(::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE))
+        def initialize(server)
+          @server = server
+          init_zmq_context
+          init_backend_socket
+          init_shutdown_socket
+        rescue
+          teardown
+          raise
         end
 
         ##
         # Instance Methods
         #
-        def handle_request(socket)
-          message_array = []
-          zmq_error_check(socket.recv_strings(message_array))
+        def alive?
+          @thread.try(:alive?) || false
+        end
 
-          @request_data = message_array[2]
-          @client_address = message_array[0]
-          log_debug { sign_message("handling request") } unless @request_data.nil?
+        def join
+          @thread.try(:join)
+        end
+
+        def process_request
+          @client_address, empty, @request_data = read_from_backend
+
+          unless @request_data.nil?
+            log_debug { sign_message("handling request") }
+            handle_client
+          end
+        end
+
+        def read_from_backend
+          [].tap do |frames|
+            zmq_error_check(@backend_socket.recv_strings(frames))
+          end
         end
 
         def run
-          while ::Protobuf::Rpc::Zmq::Server.running? do
-            # poll for 1_000 milliseconds then continue looping
-            # This lets us see whether we need to die
-            @poller.poll(1_000)
-            @poller.readables.each do |socket|
-              initialize_request!
-              handle_request(socket)
-              handle_client unless @request_data.nil?
+          poller = ::ZMQ::Poller.new
+          poller.register_readable(@backend_socket)
+          poller.register_readable(@shutdown_socket)
+
+          # Send request to broker telling it we are ready
+          write_to_backend([::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE])
+
+          catch(:shutdown) do
+            while poller.poll > 0
+              poller.readables.each do |readable|
+                case readable
+                when @backend_socket
+                  initialize_request!
+                  process_request
+                when @shutdown_socket
+                  throw :shutdown
+                end
+              end
             end
           end
         ensure
-          @socket.close
-          @zmq_context.terminate
+          teardown
         end
 
         def send_data
-          response_data = @response.to_s # to_s is aliases as serialize_to_string in Message
+          data = @response.serialize_to_string
 
-          response_message_set = [
-            @client_address, # client uuid address
-            "",
-            response_data
-          ]
+          @stats.response_size = data.size
 
-          @stats.response_size = response_data.size
-          zmq_error_check(@socket.send_strings(response_message_set))
+          write_to_backend([@client_address, "", data])
+        end
+
+        def shutdown_uri
+          "inproc://#{object_id}"
+        end
+
+        def signal_shutdown
+          socket = @zmq_context.socket ZMQ::PAIR
+          zmq_error_check(socket.connect(shutdown_uri))
+          zmq_error_check(socket.send_string("."))
+          zmq_error_check(socket.close)
+        end
+
+        def start
+          @thread = Thread.new do
+            begin
+              self.run
+            rescue => e
+              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
+              $stderr.puts(message)
+              log_error { message }
+            end
+          end
+
+          self
+        end
+
+        def teardown
+          @backend_socket.try(:close)
+          @shutdown_socket.try(:close)
+          @zmq_context.try(:terminate)
+        end
+
+        def write_to_backend(frames)
+          zmq_error_check(@backend_socket.send_strings(frames))
+        end
+
+        private
+
+        def init_zmq_context
+          @zmq_context = ZMQ::Context.new
+        end
+
+        def init_backend_socket
+          @backend_socket = @zmq_context.socket(ZMQ::REQ)
+          zmq_error_check(@backend_socket.connect(@server.backend_uri))
+        end
+
+        def init_shutdown_socket
+          @shutdown_socket = @zmq_context.socket(ZMQ::PAIR)
+          zmq_error_check(@shutdown_socket.bind(shutdown_uri))
         end
       end
-
     end
   end
 end

@@ -2,30 +2,33 @@ module Protobuf
   module Rpc
     class SocketRunner
 
-      def self.register_signals
-        # noop
+      def initialize(options)
+        @options = case
+                   when options.is_a?(OpenStruct) then
+                     options.marshal_dump
+                   when options.is_a?(Hash) then
+                     options
+                   when options.respond_to?(:to_hash) then
+                     options.to_hash
+                   else
+                     raise "Cannot parser Socket Server - server options"
+                   end
+
+        @server = ::Protobuf::Rpc::Socket::Server.new(@options)
       end
 
-      def self.run(server)
-        server_config = case
-                        when server.is_a?(OpenStruct) then
-                          server.marshal_dump
-                        when server.is_a?(Hash) then
-                          server
-                        when server.respond_to?(:to_hash) then
-                          server.to_hash
-                        else
-                          raise "Cannot parser Socket Server - server options"
-                        end
-
-				yield if block_given?
-        ::Protobuf::Rpc::Socket::Server.run(server_config)
+      def run
+        yield if block_given?
+        @server.run
       end
 
-      def self.stop
-        ::Protobuf::Rpc::Socket::Server.stop
+      def running?
+        @server.running?
       end
 
+      def stop
+        @server.stop
+      end
     end
   end
 end
