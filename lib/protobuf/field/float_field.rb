@@ -4,10 +4,6 @@ module Protobuf
   module Field
     class FloatField < BaseField
       def self.default; 0.0; end
-      def self.max;  1.0/0; end
-      def self.min; -1.0/0; end
-      def max;  1.0/0; end
-      def min; -1.0/0; end
 
       def wire_type
         WireType::FIXED32
@@ -22,7 +18,7 @@ module Protobuf
       end
 
       def acceptable?(val)
-        (val > min || val < max) rescue false
+        val.respond_to?(:to_f)
       end
     end
   end
