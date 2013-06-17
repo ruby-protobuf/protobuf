@@ -13,26 +13,26 @@ describe ::Protobuf::Rpc::Zmq::Util do
   describe '#zmq_error_check' do
     it 'raises when the error code is less than 0' do
       expect {
-        subject.zmq_error_check(-1)
-      }.to raise_error
+        subject.zmq_error_check(-1, :test)
+      }.to raise_error(/test/)
     end
 
     it 'retrieves the error string from ZeroMQ' do
       ZMQ::Util.stub(:error_string).and_return('an error from zmq')
       expect {
-        subject.zmq_error_check(-1)
+        subject.zmq_error_check(-1, :test)
       }.to raise_error(RuntimeError, /an error from zmq/i)
     end
 
     it 'does nothing if the error code is > 0' do
       expect {
-        subject.zmq_error_check(1)
+        subject.zmq_error_check(1, :test)
       }.to_not raise_error
     end
 
     it 'does nothing if the error code is == 0' do
       expect {
-        subject.zmq_error_check(0)
+        subject.zmq_error_check(0, :test)
       }.to_not raise_error
     end
   end

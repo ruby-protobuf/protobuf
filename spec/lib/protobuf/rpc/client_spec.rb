@@ -6,7 +6,7 @@ describe Protobuf::Rpc::Client do
     load 'protobuf/evented.rb'
   end
 
-  context "when using fiber based calls" do
+  context "when using fiber based calls", :skip => true do
     it "waits for response" do
       EventMachine.fiber_run do
         StubServer.new(:delay => 1) do |server|

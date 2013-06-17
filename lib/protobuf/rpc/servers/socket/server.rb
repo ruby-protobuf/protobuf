@@ -11,12 +11,16 @@ module Protobuf
 
         AUTO_COLLECT_TIMEOUT = 5 # seconds
 
-        def self.cleanup?
+        def initialize(options)
+          @options = options
+        end
+
+        def cleanup?
           # every 10 connections run a cleanup routine after closing the response
           @threads.size > (@threshold - 1) && (@threads.size % @threshold) == 0
         end
 
-        def self.cleanup_threads
+        def cleanup_threads
           log_debug { sign_message("Thread cleanup - #{@threads.size} - start") }
 
           @threads = @threads.select do |t|
@@ -32,11 +36,11 @@ module Protobuf
           log_debug { sign_message("Thread cleanup - #{@threads.size} - complete") }
         end
 
-        def self.log_signature
+        def log_signature
           @_log_signature ||= "server-#{self.class.name}"
         end
 
-        def self.new_worker(socket)
+        def new_worker(socket)
           Thread.new(socket) do |sock|
             ::Protobuf::Rpc::Socket::Worker.new(sock) do |s|
               s.close
@@ -44,12 +48,12 @@ module Protobuf
           end
         end
 
-        def self.run(options = {})
+        def run
           log_debug { sign_message("Run") }
-          host = options[:host]
-          port = options[:port]
-          backlog = options[:backlog]
-          @threshold = options[:threshold]
+          host = @options[:host]
+          port = @options[:port]
+          backlog = @options[:backlog]
+          @threshold = @options[:threshold]
 
           @threads = []
           @server = ::TCPServer.new(host, port)
@@ -62,8 +66,9 @@ module Protobuf
 
           while running?
             log_debug { sign_message("Waiting for connections") }
+            ready_cnxns = IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT) rescue nil
 
-            if ready_cnxns = IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT)
+            if ready_cnxns
               cnxns = ready_cnxns.first
               cnxns.each do |client|
                 case
@@ -96,16 +101,15 @@ module Protobuf
           raise #if running?
         end
 
-        def self.running?
-          @running
+        def running?
+          !!@running
         end
 
-        def self.stop
+        def stop
           @running = false
-          @server.close if @server
+          @server.try(:close)
         end
       end
-
     end
   end
 end
