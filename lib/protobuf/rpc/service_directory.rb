@@ -12,7 +12,7 @@ module Protobuf
       include ::Singleton
       include ::Protobuf::Logger::LogMethods
 
-      DEFAULT_ADDRESS = "255.255.255.255"
+      DEFAULT_ADDRESS = "0.0.0.0"
       DEFAULT_PORT = 53000
       DEFAULT_TIMEOUT = 1
 
