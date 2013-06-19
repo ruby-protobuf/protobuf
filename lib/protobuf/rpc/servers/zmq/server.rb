@@ -124,7 +124,7 @@ module Protobuf
         end
 
         def maintenance_timeout
-          1_000 * (next_maintenance - Time.now.to_i)
+          next_maintenance - Time.now.to_i
         end
 
         def next_maintenance
@@ -135,7 +135,7 @@ module Protobuf
         end
 
         def minimum_timeout
-          100
+          1
         end
 
         def next_beacon
@@ -220,8 +220,6 @@ module Protobuf
           else
             @timeout = [minimum_timeout, maintenance_timeout].max
           end
-
-          @timeout / 1000.0
         end
 
         def to_proto
@@ -268,8 +266,8 @@ module Protobuf
         end
 
         def start_broker
-          @broker = Thread.new do
-            ::Protobuf::Rpc::Zmq::Broker.new(self).run
+          @broker = Thread.new(self) do |server|
+            ::Protobuf::Rpc::Zmq::Broker.new(server).run
           end
         end
 
