@@ -177,8 +177,8 @@ module Protobuf
           start_missing_workers
           wait_for_shutdown_signal
           broadcast_flatline if broadcast_beacons?
-          stop_workers
-          stop_broker unless brokerless?
+          Thread.pass until reap_dead_workers.empty?
+          @broker.join unless brokerless?
         ensure
           @running = false
           teardown
@@ -192,17 +192,6 @@ module Protobuf
           "inproc://#{object_id}"
         end
 
-        def signal_shutdown
-          socket = @zmq_context.socket ZMQ::PAIR
-          zmq_error_check(socket.connect shutdown_uri)
-          zmq_error_check(socket.send_string ".")
-          zmq_error_check(socket.close)
-        end
-
-        def start_broker
-          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self).start
-        end
-
         def start_missing_workers
           missing_workers = total_workers - @workers.size
 
@@ -212,22 +201,9 @@ module Protobuf
           end
         end
 
-        def start_worker
-          @workers << ::Protobuf::Rpc::Zmq::Worker.new(self).start
-        end
-
         def stop
-          signal_shutdown
-        end
-
-        def stop_broker
-          @broker.signal_shutdown
-          @broker.join
-        end
-
-        def stop_workers
-          @workers.each(&:signal_shutdown)
-          Thread.pass until reap_dead_workers.empty?
+          @running = false
+          send_shutdown_signal
         end
 
         def teardown
@@ -294,6 +270,31 @@ module Protobuf
 
         def init_zmq_context
           @zmq_context = ZMQ::Context.new
+        end
+
+        def send_shutdown_signal
+          socket = @zmq_context.socket ZMQ::PAIR
+          zmq_error_check(socket.connect shutdown_uri)
+          zmq_error_check(socket.send_string ".")
+          zmq_error_check(socket.close)
+        end
+
+        def start_broker
+          @broker = Thread.new do
+            ::Protobuf::Rpc::Zmq::Broker.new(self).run
+          end
+        end
+
+        def start_worker
+          @workers << Thread.new(self) do |server|
+            begin
+              ::Protobuf::Rpc::Zmq::Worker.new(server).run
+            rescue => e
+              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
+              $stderr.puts(message)
+              log_error { message }
+            end
+          end
         end
       end
     end

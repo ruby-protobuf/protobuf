@@ -1,4 +1,3 @@
-
 module Protobuf
   module Rpc
     module Zmq
@@ -11,30 +10,24 @@ module Protobuf
           init_zmq_context
           init_backend_socket
           init_frontend_socket
-          init_shutdown_socket
           init_poller
         rescue
           teardown
           raise
         end
 
-        def join
-          @thread.try(:join)
-        end
-
         def run
-          running = true
           @idle_workers = []
 
-          while running && @poller.poll > 0
+          while running?
+            break if @poller.poll(500) < 0
+
             @poller.readables.each do |readable|
               case readable
               when @frontend_socket
                 process_frontend
               when @backend_socket
                 process_backend
-              when @shutdown_socket
-                running = false
               end
             end
           end
@@ -42,23 +35,8 @@ module Protobuf
           teardown
         end
 
-        def start
-          log_debug { sign_message("starting broker") }
-
-          @thread = Thread.new { self.run }
-
-          self
-        end
-
-        def shutdown_uri
-          "inproc://#{object_id}"
-        end
-
-        def signal_shutdown
-          socket = @zmq_context.socket(ZMQ::PAIR)
-          zmq_error_check(socket.connect(shutdown_uri))
-          zmq_error_check(socket.send_string ".")
-          zmq_error_check(socket.close)
+        def running?
+          @server.running? || @server.workers.any?
         end
 
         private
@@ -77,12 +55,6 @@ module Protobuf
           @poller = ZMQ::Poller.new
           @poller.register_readable(@frontend_socket)
           @poller.register_readable(@backend_socket)
-          @poller.register_readable(@shutdown_socket)
-        end
-
-        def init_shutdown_socket
-          @shutdown_socket = @zmq_context.socket(ZMQ::PAIR)
-          zmq_error_check(@shutdown_socket.bind(shutdown_uri))
         end
 
         def init_zmq_context
@@ -121,7 +93,6 @@ module Protobuf
         def teardown
           @frontend_socket.try(:close)
           @backend_socket.try(:close)
-          @shutdown_socket.try(:close)
           @zmq_context.try(:terminate)
         end
 

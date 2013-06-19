@@ -33,7 +33,7 @@ describe Protobuf::Rpc::Zmq::Server do
 
   describe '.stop' do
     it 'signals shutdown' do
-      subject.should_receive(:signal_shutdown)
+      subject.should_receive(:send_shutdown_signal)
       subject.stop
     end
 
