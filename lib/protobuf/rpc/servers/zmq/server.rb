@@ -23,7 +23,7 @@ module Protobuf
 
           init_zmq_context
           init_beacon_socket if broadcast_beacons?
-          init_shutdown_socket
+          init_shutdown_pipe
         rescue
           teardown
           raise
@@ -188,10 +188,6 @@ module Protobuf
           !!@running
         end
 
-        def shutdown_uri
-          "inproc://#{object_id}"
-        end
-
         def start_missing_workers
           missing_workers = total_workers - @workers.size
 
@@ -203,11 +199,12 @@ module Protobuf
 
         def stop
           @running = false
-          send_shutdown_signal
+          @shutdown_w.write('.')
         end
 
         def teardown
-          @shutdown_socket.try(:close)
+          @shutdown_r.try(:close)
+          @shutdown_w.try(:close)
           @beacon_socket.try(:close)
           @zmq_context.try(:terminate)
           @last_reaping = @last_beacon = @timeout = nil
@@ -223,6 +220,8 @@ module Protobuf
           else
             @timeout = [minimum_timeout, maintenance_timeout].max
           end
+
+          @timeout / 1000.0
         end
 
         def to_proto
@@ -240,12 +239,9 @@ module Protobuf
         end
 
         def wait_for_shutdown_signal
-          poller = ZMQ::Poller.new
-          poller.register_readable(@shutdown_socket)
+          loop do
+            break if IO.select([@shutdown_r], nil, nil, timeout)
 
-          # If the poller returns 1, a shutdown signal has been received.
-          # If the poller returns -1, something went wrong.
-          while poller.poll(timeout) === 0
             if reap_dead_workers?
               reap_dead_workers
               start_missing_workers
@@ -263,20 +259,12 @@ module Protobuf
           @beacon_socket.connect(beacon_ip, beacon_port)
         end
 
-        def init_shutdown_socket
-          @shutdown_socket = @zmq_context.socket(ZMQ::PAIR)
-          zmq_error_check(@shutdown_socket.bind shutdown_uri)
+        def init_shutdown_pipe
+          @shutdown_r, @shutdown_w = IO.pipe
         end
 
         def init_zmq_context
           @zmq_context = ZMQ::Context.new
-        end
-
-        def send_shutdown_signal
-          socket = @zmq_context.socket ZMQ::PAIR
-          zmq_error_check(socket.connect shutdown_uri)
-          zmq_error_check(socket.send_string ".")
-          zmq_error_check(socket.close)
         end
 
         def start_broker
