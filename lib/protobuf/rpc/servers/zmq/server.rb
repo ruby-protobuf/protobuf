@@ -15,7 +15,7 @@ module Protobuf
           :broadcast_beacons => false
         }
 
-        attr_accessor :options
+        attr_accessor :options, :workers
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
@@ -27,6 +27,10 @@ module Protobuf
         rescue
           teardown
           raise
+        end
+
+        def add_worker
+          @total_workers = total_workers + 1
         end
 
         def backend_ip
