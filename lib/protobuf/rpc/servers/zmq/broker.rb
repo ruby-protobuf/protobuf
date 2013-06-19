@@ -23,19 +23,18 @@ module Protobuf
         end
 
         def run
+          running = true
           @idle_workers = []
 
-          catch(:shutdown) do
-            while @poller.poll > 0
-              @poller.readables.each do |readable|
-                case readable
-                when @frontend_socket
-                  process_frontend
-                when @backend_socket
-                  process_backend
-                when @shutdown_socket
-                  throw :shutdown
-                end
+          while running && @poller.poll > 0
+            @poller.readables.each do |readable|
+              case readable
+              when @frontend_socket
+                process_frontend
+              when @backend_socket
+                process_backend
+              when @shutdown_socket
+                running = false
               end
             end
           end

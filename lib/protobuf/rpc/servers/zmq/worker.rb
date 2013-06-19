@@ -48,6 +48,8 @@ module Protobuf
         end
 
         def run
+          running = true
+
           poller = ::ZMQ::Poller.new
           poller.register_readable(@backend_socket)
           poller.register_readable(@shutdown_socket)
@@ -55,16 +57,14 @@ module Protobuf
           # Send request to broker telling it we are ready
           write_to_backend([::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE])
 
-          catch(:shutdown) do
-            while poller.poll > 0
-              poller.readables.each do |readable|
-                case readable
-                when @backend_socket
-                  initialize_request!
-                  process_request
-                when @shutdown_socket
-                  throw :shutdown
-                end
+          while running && poller.poll > 0
+            poller.readables.each do |readable|
+              case readable
+              when @backend_socket
+                initialize_request!
+                process_request
+              when @shutdown_socket
+                running = false
               end
             end
           end
