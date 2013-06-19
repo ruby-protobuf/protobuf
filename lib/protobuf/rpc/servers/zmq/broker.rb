@@ -108,15 +108,15 @@ module Protobuf
         end
 
         def read_from_backend
-          [].tap do |frames|
-            zmq_error_check(@backend_socket.recv_strings(frames))
-          end
+          frames = []
+          zmq_error_check(@backend_socket.recv_strings(frames))
+          frames
         end
 
         def read_from_frontend
-          [].tap do |frames|
-            zmq_error_check(@frontend_socket.recv_strings(frames))
-          end
+          frames = []
+          zmq_error_check(@frontend_socket.recv_strings(frames))
+          frames
         end
 
         def teardown
