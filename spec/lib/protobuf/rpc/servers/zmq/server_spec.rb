@@ -32,11 +32,6 @@ describe Protobuf::Rpc::Zmq::Server do
   end
 
   describe '.stop' do
-    it 'signals shutdown' do
-      subject.should_receive(:signal_shutdown)
-      subject.stop
-    end
-
     it 'sets running to false' do
       subject.instance_variable_set(:@workers, [])
       subject.stop

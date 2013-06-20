@@ -15,7 +15,7 @@ module Protobuf
           :broadcast_beacons => false
         }
 
-        attr_accessor :options
+        attr_accessor :options, :workers
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
@@ -23,10 +23,14 @@ module Protobuf
 
           init_zmq_context
           init_beacon_socket if broadcast_beacons?
-          init_shutdown_socket
+          init_shutdown_pipe
         rescue
           teardown
           raise
+        end
+
+        def add_worker
+          @total_workers = total_workers + 1
         end
 
         def backend_ip
@@ -120,7 +124,7 @@ module Protobuf
         end
 
         def maintenance_timeout
-          1_000 * (next_maintenance - Time.now.to_i)
+          next_maintenance - Time.now.to_i
         end
 
         def next_maintenance
@@ -131,7 +135,7 @@ module Protobuf
         end
 
         def minimum_timeout
-          100
+          0.1
         end
 
         def next_beacon
@@ -173,8 +177,8 @@ module Protobuf
           start_missing_workers
           wait_for_shutdown_signal
           broadcast_flatline if broadcast_beacons?
-          stop_workers
-          stop_broker unless brokerless?
+          Thread.pass until reap_dead_workers.empty?
+          @broker.join unless brokerless?
         ensure
           @running = false
           teardown
@@ -182,21 +186,6 @@ module Protobuf
 
         def running?
           !!@running
-        end
-
-        def shutdown_uri
-          "inproc://#{object_id}"
-        end
-
-        def signal_shutdown
-          socket = @zmq_context.socket ZMQ::PAIR
-          zmq_error_check(socket.connect shutdown_uri)
-          zmq_error_check(socket.send_string ".")
-          zmq_error_check(socket.close)
-        end
-
-        def start_broker
-          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self).start
         end
 
         def start_missing_workers
@@ -208,26 +197,14 @@ module Protobuf
           end
         end
 
-        def start_worker
-          @workers << ::Protobuf::Rpc::Zmq::Worker.new(self).start
-        end
-
         def stop
-          signal_shutdown
-        end
-
-        def stop_broker
-          @broker.signal_shutdown
-          @broker.join
-        end
-
-        def stop_workers
-          @workers.each(&:signal_shutdown)
-          Thread.pass until reap_dead_workers.empty?
+          @running = false
+          @shutdown_w.write('.')
         end
 
         def teardown
-          @shutdown_socket.try(:close)
+          @shutdown_r.try(:close)
+          @shutdown_w.try(:close)
           @beacon_socket.try(:close)
           @zmq_context.try(:terminate)
           @last_reaping = @last_beacon = @timeout = nil
@@ -260,12 +237,9 @@ module Protobuf
         end
 
         def wait_for_shutdown_signal
-          poller = ZMQ::Poller.new
-          poller.register_readable(@shutdown_socket)
+          loop do
+            break if IO.select([@shutdown_r], nil, nil, timeout)
 
-          # If the poller returns 1, a shutdown signal has been received.
-          # If the poller returns -1, something went wrong.
-          while poller.poll(timeout) === 0
             if reap_dead_workers?
               reap_dead_workers
               start_missing_workers
@@ -283,13 +257,30 @@ module Protobuf
           @beacon_socket.connect(beacon_ip, beacon_port)
         end
 
-        def init_shutdown_socket
-          @shutdown_socket = @zmq_context.socket(ZMQ::PAIR)
-          zmq_error_check(@shutdown_socket.bind shutdown_uri)
+        def init_shutdown_pipe
+          @shutdown_r, @shutdown_w = IO.pipe
         end
 
         def init_zmq_context
           @zmq_context = ZMQ::Context.new
+        end
+
+        def start_broker
+          @broker = Thread.new(self) do |server|
+            ::Protobuf::Rpc::Zmq::Broker.new(server).run
+          end
+        end
+
+        def start_worker
+          @workers << Thread.new(self) do |server|
+            begin
+              ::Protobuf::Rpc::Zmq::Worker.new(server).run
+            rescue => e
+              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
+              $stderr.puts(message)
+              log_error { message }
+            end
+          end
         end
       end
     end
