@@ -36,9 +36,8 @@ module Protobuf
 
       def register_signals
         trap(:TTIN) do
-          log_info { "TTIN received: Starting new worker" }
-          @server.start_worker
-          log_info { "Worker count : #{::Protobuf::Rpc::Zmq::Server.threads.size}" }
+          @server.add_worker
+          log_info { "Increased worker size to: #{@server.total_workers}" }
         end
       end
     end
