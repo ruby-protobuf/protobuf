@@ -20,6 +20,13 @@ module Protobuf
         CLIENT_RETRIES = (ENV['PB_CLIENT_RETRIES'] || 3)
 
         ##
+        # Class Methods
+        #
+        def self.zmq_context
+          @zmq_context ||= ZMQ::Context.new
+        end
+
+        ##
         # Instance methods
         #
 
@@ -47,7 +54,6 @@ module Protobuf
 
         def close_connection
           socket_close
-          zmq_context_terminate
         end
 
         # Establish a request socket connection to the remote rpc_server.
@@ -106,7 +112,7 @@ module Protobuf
               read_response
               return
             else
-              close_connection
+              socket_close
             end
           end
 
@@ -171,16 +177,7 @@ module Protobuf
         # an exit block to ensure the context is terminated correctly.
         #
         def zmq_context
-          @zmq_context ||= ::ZMQ::Context.new
-        end
-
-        # Terminate the zmq_context (if any).
-        #
-        def zmq_context_terminate
-          log_debug { sign_message("Terminating ZMQ Context")  }
-          @zmq_context.try(:terminate)
-          @zmq_context = nil
-          log_debug { sign_message("ZMQ Context terminated")  }
+          self.class.zmq_context
         end
 
         def zmq_error_check(return_code, source)
