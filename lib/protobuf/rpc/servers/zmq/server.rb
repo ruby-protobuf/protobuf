@@ -135,7 +135,7 @@ module Protobuf
         end
 
         def minimum_timeout
-          1
+          0.1
         end
 
         def next_beacon

@@ -183,7 +183,8 @@ module Protobuf
 
       def run
         loop do
-          process_beacon(wait_for_beacon)
+          beacon = wait_for_beacon
+          process_beacon(beacon)
           remove_expired_listings
         end
       rescue => e
@@ -195,7 +196,7 @@ module Protobuf
         data, addr = @socket.recvfrom(2048)
 
         beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new
-        beacon.parse_from_string(data) rescue nil
+        beacon.parse_from_string(data)
 
         # Favor the address captured by the socket
         beacon.try(:server).try(:address=, addr[3])
