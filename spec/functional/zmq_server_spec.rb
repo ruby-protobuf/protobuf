@@ -46,6 +46,27 @@ describe 'Functional ZMQ Client' do
     }.to_not raise_error
   end
 
+  it 'runs under heavy load' do
+    100.times do |x|
+      50.times.map do |y|
+        Thread.new do
+          client = ::Test::ResourceService.client
+
+          client.find(:name => 'Test Name', :active => true) do |c|
+            c.on_success do |succ|
+              succ.name.should eq("Test Name")
+              succ.status.should eq(::Test::StatusType::ENABLED)
+            end
+
+            c.on_failure do |err|
+              raise err.inspect
+            end
+          end
+        end
+      end.each(&:join)
+    end
+  end
+
   context 'when a message is malformed' do
     it 'calls the on_failure callback' do
       error = nil
