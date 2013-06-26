@@ -169,6 +169,11 @@ module Protobuf
       def init_socket
         @socket = UDPSocket.new
         @socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_REUSEADDR, true)
+
+        if defined?(::Socket::SO_REUSEPORT)
+          @socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_REUSEPORT, true)
+        end
+
         @socket.bind(self.class.address, self.class.port.to_i)
       end
 
