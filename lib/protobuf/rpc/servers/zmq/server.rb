@@ -49,6 +49,10 @@ module Protobuf
           [options[:beacon_interval].to_i, 1].max
         end
 
+        def beacon_ip
+          "255.255.255.255"
+        end
+
         def beacon_port
           unless @beacon_port
             unless port = options[:beacon_port]
@@ -62,7 +66,7 @@ module Protobuf
         end
 
         def beacon_uri
-          "udp://255.255.255.255:#{beacon_port}"
+          "udp://#{beacon_ip}:#{beacon_port}"
         end
 
         def broadcast_beacons?
