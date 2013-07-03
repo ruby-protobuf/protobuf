@@ -39,6 +39,10 @@ module Protobuf
           @server.add_worker
           log_info { "Increased worker size to: #{@server.total_workers}" }
         end
+
+        trap(:TTOU) do
+          log_info { "Current worker size: #{@server.workers.size}" }
+        end
       end
     end
   end

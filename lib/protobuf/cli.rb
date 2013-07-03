@@ -29,7 +29,6 @@ module Protobuf
     option :evented,                    :type => :boolean, :aliases => %w(-m), :desc => 'Evented Mode for server and client connections (uses EventMachine).'
     option :zmq,                        :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
 
-    option :beacon_address,             :type => :string,  :desc => 'Broadcast beacons to this address (defaul: value of ServiceDirectory.address)'
     option :beacon_interval,            :type => :numeric, :desc => 'Broadcast beacons every N seconds. (default: 5)'
     option :beacon_port,                :type => :numeric, :desc => 'Broadcast beacons to this port (default: value of ServiceDirectory.port)'
     option :broadcast_beacons,          :type => :boolean, :desc => 'Broadcast beacons for dynamic discovery (Currently only available with ZeroMQ).'
