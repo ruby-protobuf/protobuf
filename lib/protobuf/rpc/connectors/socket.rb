@@ -68,7 +68,6 @@ module Protobuf
           @socket.flush
           log_debug { sign_message("write closed") }
         end
-
       end
     end
   end
