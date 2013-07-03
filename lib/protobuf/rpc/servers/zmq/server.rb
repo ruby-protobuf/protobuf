@@ -50,15 +50,7 @@ module Protobuf
         end
 
         def beacon_ip
-          unless @beacon_ip
-            unless address = options[:beacon_address]
-              address = ::Protobuf::Rpc::ServiceDirectory.address
-            end
-
-            @beacon_ip = resolve_ip(address)
-          end
-
-          @beacon_ip
+          "255.255.255.255"
         end
 
         def beacon_port
