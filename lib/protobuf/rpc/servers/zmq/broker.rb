@@ -22,8 +22,11 @@ module Protobuf
           loop do
             rc = @poller.poll(500)
 
-            # Break unless we're running or a request was received.
-            break unless running? || rc > 0
+            # The server was shutdown and no requests are pending
+            break if rc == 0 && !running?
+
+            # Something went wrong
+            break if rc == -1
 
             @poller.readables.each do |readable|
               case readable

@@ -96,12 +96,12 @@ module Protobuf
 
             host ||= options[:host]
             port ||= options[:port]
-          end until usable_server?( host )
+          end until host_alive?( host )
 
           "tcp://#{host}:#{port}"
         end
 
-        def usable_server?(host)
+        def host_alive?(host)
           return true unless ping_port_enabled?
 
           begin

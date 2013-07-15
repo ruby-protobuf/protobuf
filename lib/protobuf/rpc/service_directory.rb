@@ -36,10 +36,6 @@ module Protobuf
           [super.to_i, 3].max
         end
 
-        def uri
-          "tcp://#{address}:#{port}"
-        end
-
         def __getobj__
           @server
         end
