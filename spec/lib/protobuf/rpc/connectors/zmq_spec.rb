@@ -52,8 +52,8 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
     context "when the service directory is not running" do
       let(:running?) { false }
 
-      it "does not search the directory" do
-        service_directory.should_not_receive(:lookup)
+      it "defaults to the options" do
+        service_directory.should_receive(:lookup) { nil }
         subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
       end
     end

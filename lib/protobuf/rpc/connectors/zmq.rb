@@ -88,14 +88,9 @@ module Protobuf
         #
         def lookup_server_uri
           begin
-            if service_directory.running?
-              listing = service_directory.lookup(service)
-              host = listing.try(:address)
-              port = listing.try(:port)
-            end
-
-            host ||= options[:host]
-            port ||= options[:port]
+            listing = service_directory.lookup(service)
+            host = listing.try(:address) || options[:host]
+            port = listing.try(:port) || options[:port]
           end until host_alive?( host )
 
           "tcp://#{host}:#{port}"
@@ -104,7 +99,9 @@ module Protobuf
         def host_alive?(host)
           return true unless ping_port_enabled?
 
-          TCPSocket.new(host, ping_port) && true
+          socket = TCPSocket.new(host, ping_port)
+
+          true
         rescue
           false
         ensure
