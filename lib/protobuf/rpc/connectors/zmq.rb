@@ -104,14 +104,11 @@ module Protobuf
         def host_alive?(host)
           return true unless ping_port_enabled?
 
-          begin
-            socket = TCPSocket.new(host, ping_port)
-            true
-          rescue
-            false
-          ensure
-            socket.close rescue nil
-          end
+          TCPSocket.new(host, ping_port) && true
+        rescue
+          false
+        ensure
+          socket.close rescue nil
         end
 
         # Trying a number of times, attempt to get a response from the server.
