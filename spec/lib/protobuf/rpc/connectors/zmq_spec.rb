@@ -58,7 +58,51 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       end
     end
 
+    it "checks if the server is alive" do
+      service_directory.should_receive(:lookup) { nil }
+      subject.should_receive(:host_alive?).with("127.0.0.1") { true }
+      subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
+    end
+
   end
 
-  pending
+  describe "#host_alive?" do
+    context "when the PB_RPC_PING_PORT is not set" do
+      before do
+        ENV.delete("PB_RPC_PING_PORT")
+      end
+
+      it "returns true" do
+        subject.send(:host_alive?, "yip.yip").should be_true
+      end
+
+      it "does not attempt a connection" do
+        TCPSocket.should_not_receive(:new)
+        subject.send(:host_alive?, "blargh.com")
+      end
+    end
+
+    context "when the PB_RPC_PING_PORT is set" do
+      before do
+        ENV["PB_RPC_PING_PORT"] = "3307"
+      end
+
+      it "returns true when the connection succeeds" do
+        TCPSocket.should_receive(:new).with("huzzah.com", 3307) { double(:close => nil) }
+        subject.send(:host_alive?, "huzzah.com").should be_true
+      end
+
+      it "returns false when the connection fails" do
+        TCPSocket.should_receive(:new).with("hayoob.com", 3307).and_raise(Errno::ECONNREFUSED)
+        subject.send(:host_alive?, "hayoob.com").should be_false
+      end
+
+      it "closes the socket" do
+        socket = double("TCPSocket")
+        socket.should_receive(:close)
+        TCPSocket.should_receive(:new).with("absorbalof.com", 3307) { socket }
+        subject.send(:host_alive?, "absorbalof.com").should be_true
+      end
+    end
+  end
 end
