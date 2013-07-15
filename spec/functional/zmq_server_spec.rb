@@ -104,7 +104,7 @@ describe 'Functional ZMQ Client' do
         c.on_success { raise "shouldn't pass" }
         c.on_failure { |e| error = e }
       end
-      error.message.should match(/The server took longer than 1 seconds to respond/i)
+      error.message.should match(/The server repeatedly failed to respond/)
     end
   end
 

@@ -19,8 +19,14 @@ module Protobuf
         def run
           @idle_workers = []
 
-          while running?
-            break if @poller.poll(500) < 0
+          loop do
+            rc = @poller.poll(500)
+
+            # The server was shutdown and no requests are pending
+            break if rc == 0 && !running?
+
+            # Something went wrong
+            break if rc == -1
 
             @poller.readables.each do |readable|
               case readable
