@@ -41,10 +41,16 @@ module Protobuf
           # Send request to broker telling it we are ready
           write_to_backend([::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE])
 
-          while running?
-            break if poller.poll(500) < 0
+          loop do
+            rc = poller.poll(500)
 
-            if poller.readables.any?
+            # The server was shutdown and no requests are pending
+            break if rc == 0 && !running?
+
+            # Something went wrong
+            break if rc == -1
+
+            if rc > 0
               initialize_request!
               process_request
             end

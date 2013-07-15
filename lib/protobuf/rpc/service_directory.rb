@@ -89,14 +89,16 @@ module Protobuf
       end
 
       def lookup(service)
-        @mutex.synchronize do
-          listings = @listings.values.select do |listing|
-            listing.services.any? do |listed_service|
-              listing.current? && listed_service == service.to_s
+        if running?
+          @mutex.synchronize do
+            listings = @listings.values.select do |listing|
+              listing.services.any? do |listed_service|
+                listing.current? && listed_service == service.to_s
+              end
             end
-          end
 
-          listings.sample
+            listings.sample
+          end
         end
       end
 
@@ -151,17 +153,6 @@ module Protobuf
 
         @socket.try(:close)
         @socket = nil
-      end
-
-      def wait_for(service, timeout = DEFAULT_TIMEOUT)
-        log_debug { sign_message("waiting for #{service}") }
-        Timeout.timeout(timeout) do
-          sleep(timeout / 10.0) until listing = lookup(service)
-          listing
-        end
-      rescue
-        log_info { sign_message("no listing found for #{service}") }
-        nil
       end
 
       private
