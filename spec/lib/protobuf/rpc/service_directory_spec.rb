@@ -31,6 +31,10 @@ describe ::Protobuf::Rpc::ServiceDirectory do
                           :ttl => 15) }
     let(:listing) { ::Protobuf::Rpc::ServiceDirectory::Listing.new(server) }
 
+    before do
+      instance.stub(:running?) { true }
+    end
+
     it "returns a listing for the given service" do
       instance.add_listing_for(server)
       instance.lookup("Known::Service").should eq listing
@@ -92,43 +96,6 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       expect {
         instance.start
       }.to change(instance, :running?).from(false).to(true)
-    end
-  end
-
-  describe "#wait_for" do
-    it "returns a listing for the given service" do
-      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
-      instance.add_listing_for server
-      instance.lookup("Test").should eq server
-    end
-
-    it "depends on #lookup" do
-      instance.stub(:lookup).with("Hayoob!") { "yup" }
-      instance.wait_for("Hayoob!").should eq "yup"
-    end
-
-    it "waits for the service to appear" do
-      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
-
-      t = Thread.new do
-        sleep 0.5
-        instance.add_listing_for server
-      end
-
-      duration { instance.wait_for("Test") }.should be_within(0.01).of(0.5)
-      t.join
-    end
-
-    it "returns nil if the service doesn't appear withint the timeout period" do
-      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
-
-      t = Thread.new do
-        sleep 0.5
-        instance.add_listing_for server
-      end
-
-      instance.wait_for("Test", 0.1).should be_nil
-      t.join
     end
   end
 
