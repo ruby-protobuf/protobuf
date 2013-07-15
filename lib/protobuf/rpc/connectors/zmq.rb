@@ -87,33 +87,23 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          server_host = server_port = nil
-
-          loop do
+          begin
             if service_directory.running?
               listing = service_directory.lookup(service)
-
-              if listing
-                server_host, server_port = listing.address, listing.port
-              end
+              host = listing.try(:address)
+              port = listing.try(:port)
             end
 
-            unless server_host && server_port
-              server_host, server_port = options[:host], options[:port]
-            end
+            host ||= options[:host]
+            port ||= options[:port]
+          end until usable_server?( host )
 
-            # TODO: Wonky double break is wonky. fix it.
-            if ping_port_enabled?
-              break if server_running?(server_host)
-            else
-              break
-            end
-          end
-
-          "tcp://#{server_host}:#{server_port}"
+          "tcp://#{host}:#{port}"
         end
 
-        def server_running?(host)
+        def usable_server?(host)
+          return true unless ping_port_enabled?
+
           begin
             socket = TCPSocket.new(host, ping_port)
             true
