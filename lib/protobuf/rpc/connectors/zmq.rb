@@ -43,7 +43,7 @@ module Protobuf
         #
         def send_request
           setup_connection
-          send_request_with_lazy_pirate
+          send_request_with_lazy_pirate unless error?
         end
 
         def log_signature
@@ -87,14 +87,41 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          if service_directory.running?
-            listing = service_directory.lookup(service)
-            host, port = listing.address, listing.port if listing
+          server_host = server_port = nil
+
+          loop do
+            if service_directory.running?
+              listing = service_directory.lookup(service)
+
+              if listing
+                server_host, server_port = listing.address, listing.port
+              end
+            end
+
+            unless server_host && server_port
+              server_host, server_port = options[:host], options[:port]
+            end
+
+            # TODO: Wonky double break is wonky. fix it.
+            if ping_port_enabled?
+              break if server_running?(server_host)
+            else
+              break
+            end
           end
 
-          host, port = options[:host], options[:port] unless host && port
+          "tcp://#{server_host}:#{server_port}"
+        end
 
-          "tcp://#{host}:#{port}"
+        def server_running?(host)
+          begin
+            socket = TCPSocket.new(host, ping_port)
+            true
+          rescue
+            false
+          ensure
+            socket.close rescue nil
+          end
         end
 
         # Trying a number of times, attempt to get a response from the server.
@@ -113,8 +140,6 @@ module Protobuf
           rescue RequestTimeout
             retry if attempt < CLIENT_RETRIES
             fail(:RPC_FAILED, "The server repeatedly failed to respond within #{timeout} seconds")
-          rescue => e
-            fail(:RPC_FAILED, "Unexpected error sending request: #{e}")
           end
         end
 
