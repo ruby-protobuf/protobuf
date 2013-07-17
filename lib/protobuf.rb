@@ -92,20 +92,22 @@ module Protobuf
 
 end
 
-require 'protobuf/rpc/client'
-require 'protobuf/rpc/service'
+unless ENV.key?('PB_NO_NETWORKING')
+  require 'protobuf/rpc/client'
+  require 'protobuf/rpc/service'
 
-env_connector_type = ENV.fetch('PB_CLIENT_TYPE') {
-  ::Protobuf::DEFAULT_CONNECTOR
-}.to_s.downcase.strip.to_sym
+  env_connector_type = ENV.fetch('PB_CLIENT_TYPE') {
+    ::Protobuf::DEFAULT_CONNECTOR
+  }.to_s.downcase.strip.to_sym
 
-if ::Protobuf::CONNECTORS.include?(env_connector_type)
-  require "protobuf/#{env_connector_type}"
-else
-  $stderr.puts <<-WARN
+  if ::Protobuf::CONNECTORS.include?(env_connector_type)
+    require "protobuf/#{env_connector_type}"
+  else
+    $stderr.puts <<-WARN
     [WARNING] Require attempted on an invalid connector type '#{env_connector_type}'.
               Falling back to default '#{::Protobuf::DEFAULT_CONNECTOR}' connector.
-  WARN
+    WARN
 
-  require "protobuf/#{::Protobuf::DEFAULT_CONNECTOR}"
+    require "protobuf/#{::Protobuf::DEFAULT_CONNECTOR}"
+  end
 end
