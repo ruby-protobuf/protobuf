@@ -1,3 +1,4 @@
+require 'stringio'
 require 'set'
 require 'protobuf/field'
 require 'protobuf/enum'
@@ -214,7 +215,7 @@ module Protobuf
     end
 
     def parse_from_string(string)
-      parse_from(StringIO.new(string))
+      parse_from(::StringIO.new(string))
     end
 
     def respond_to_has?(key)
