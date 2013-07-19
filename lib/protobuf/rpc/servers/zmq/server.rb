@@ -167,8 +167,10 @@ module Protobuf
 
           start_broker unless brokerless?
           start_missing_workers
+
+          yield if block_given? # runs on startup
           wait_for_shutdown_signal
-          broadcast_flatline if broadcast_beacons?
+          broadcast_flatline if broadcast_beacons? 
           Thread.pass until reap_dead_workers.empty?
           @broker.join unless brokerless?
         ensure
