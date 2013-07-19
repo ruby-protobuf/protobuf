@@ -2,6 +2,7 @@ module Protobuf
   class Lifecycle
 
     def self.register( event_name, &blk )
+      raise "Lifecycle register must have a block" unless block_given?
       event_name = normalized_event_name( event_name )
 
       lifecycle_events[ event_name ] ||= []
