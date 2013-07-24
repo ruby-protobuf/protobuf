@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-require 'protobuf/generators/field_generator.rb'
+require 'protobuf/generators/field_generator'
 
 describe ::Protobuf::Generators::FieldGenerator do
 

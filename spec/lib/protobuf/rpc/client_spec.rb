@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'spec/support/test/resource_service'
+require 'spec/support/test/resource.pb'
 
 describe Protobuf::Rpc::Client do
   before(:each) do
