@@ -7,9 +7,23 @@ describe ::Protobuf::CLI do
     File.expand_path('../../../support/test_app_file.rb', __FILE__)
   end
 
-  let(:sock_runner) { double "SocketRunner", run: nil, register_signals: nil }
-  let(:zmq_runner) { double "ZmqRunner", run: nil, register_signals: nil }
-  let(:evented_runner) { double "EventedRunner", run: nil, register_signals: nil }
+  let(:sock_runner) { 
+    runner = double("SocketRunner", :register_signals => nil)
+    runner.stub(:run) { ::Protobuf::Lifecycle.trigger( "after_server_bind" ) }
+    runner
+  }
+
+  let(:zmq_runner) { 
+    runner = double "ZmqRunner", register_signals: nil
+    runner.stub(:run) { ::Protobuf::Lifecycle.trigger( "after_server_bind" ) }
+    runner
+  }
+
+  let(:evented_runner) { 
+    runner = double "EventedRunner", register_signals: nil
+    runner.stub(:run) { ::Protobuf::Lifecycle.trigger( "after_server_bind" ) }
+    runner
+  }
 
   before(:each) do
     ::Protobuf::Rpc::SocketRunner.stub(:new) { sock_runner }

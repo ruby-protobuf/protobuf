@@ -34,6 +34,14 @@ module Protobuf
         def send_request
           raise 'If you inherit a Connector from Base you must implement send_request'
         end
+
+        def ping_port
+          @ping_port ||= ENV["PB_RPC_PING_PORT"]
+        end
+
+        def ping_port_enabled?
+          ENV.has_key?("PB_RPC_PING_PORT")
+        end
       end
     end
   end
