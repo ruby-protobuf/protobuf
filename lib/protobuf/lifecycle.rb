@@ -9,16 +9,20 @@ module Protobuf
       lifecycle_events[ event_name ] << blk
     end
 
-    def self.trigger( event_name )
+    def self.trigger( event_name, *args )
       event_name = normalized_event_name( event_name )
 
       if lifecycle_events.has_key?( event_name )
         lifecycle_events[ event_name ].each do |block|
-          block.call
+          if ! args.empty? && block.arity != 0
+            block.call(*args)
+          else
+            block.call
+          end
         end
       end
     end
-    
+
     def self.normalized_event_name( event_name )
       return "#{event_name}".downcase
     end

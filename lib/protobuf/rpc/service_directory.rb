@@ -4,6 +4,7 @@ require 'socket'
 require 'thread'
 require 'timeout'
 
+require 'protobuf/lifecycle'
 require 'protobuf/rpc/dynamic_discovery.pb'
 
 module Protobuf
@@ -73,19 +74,21 @@ module Protobuf
 
       def add_listing_for(server)
         if server && server.uuid
-
-          log_debug do
-            action = @listings[server.uuid] ? "Updating" : "Adding";
-            sign_message("#{action} server: #{server.inspect}")
-          end
-
           @mutex.synchronize do
-            @listings[server.uuid] = Listing.new(server)
-          end
+            action = @listings.key?(server.uuid) ? :updated : :added
+            log_debug { sign_message("#{action} server: #{server.inspect}") }
 
+            listing = Listing.new(server)
+            @listings[server.uuid] = listing
+            trigger(action, listing)
+          end
         else
           log_info { sign_message("Cannot add server without uuid: #{server.inspect}") }
         end
+      end
+
+      def each_listing(&block)
+        @listings.each_value(&block)
       end
 
       def lookup(service)
@@ -105,7 +108,12 @@ module Protobuf
       def remove_expired_listings
         @mutex.synchronize do
           @listings.delete_if do |uuid, listing|
-            listing.expired?
+            if listing.expired?
+              trigger(:removed, listing)
+              true
+            else
+              false
+            end
           end
         end
       end
@@ -115,7 +123,8 @@ module Protobuf
           log_debug { sign_message("Removing server: #{server.inspect}") }
 
           @mutex.synchronize do
-            @listings.delete(server.uuid)
+            deleted_listing = @listings.delete(server.uuid)
+            trigger(:removed, deleted_listing)
           end
 
         else
@@ -186,6 +195,10 @@ module Protobuf
       rescue => e
         log_debug { sign_message("error: (#{e.class}) #{e.message}") }
         retry
+      end
+
+      def trigger(action, listing)
+        ::Protobuf::Lifecycle.trigger("directory.listing.#{action}", listing)
       end
 
       def wait_for_beacon
