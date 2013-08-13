@@ -43,7 +43,7 @@ module Protobuf
         #
         def send_request
           setup_connection
-          send_request_with_lazy_pirate
+          send_request_with_lazy_pirate unless error?
         end
 
         def log_signature
@@ -87,14 +87,25 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          if service_directory.running?
+          begin
             listing = service_directory.lookup(service)
-            host, port = listing.address, listing.port if listing
-          end
-
-          host, port = options[:host], options[:port] unless host && port
+            host = listing.try(:address) || options[:host]
+            port = listing.try(:port) || options[:port]
+          end until host_alive?( host )
 
           "tcp://#{host}:#{port}"
+        end
+
+        def host_alive?(host)
+          return true unless ping_port_enabled?
+
+          socket = TCPSocket.new(host, ping_port.to_i)
+
+          true
+        rescue
+          false
+        ensure
+          socket.close rescue nil
         end
 
         # Trying a number of times, attempt to get a response from the server.
@@ -113,8 +124,6 @@ module Protobuf
           rescue RequestTimeout
             retry if attempt < CLIENT_RETRIES
             fail(:RPC_FAILED, "The server repeatedly failed to respond within #{timeout} seconds")
-          rescue => e
-            fail(:RPC_FAILED, "Unexpected error sending request: #{e}")
           end
         end
 

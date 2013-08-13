@@ -31,6 +31,10 @@ describe ::Protobuf::Rpc::ServiceDirectory do
                           :ttl => 15) }
     let(:listing) { ::Protobuf::Rpc::ServiceDirectory::Listing.new(server) }
 
+    before do
+      instance.stub(:running?) { true }
+    end
+
     it "returns a listing for the given service" do
       instance.add_listing_for(server)
       instance.lookup("Known::Service").should eq listing
@@ -54,17 +58,55 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     end
   end
 
-  describe "#remove_expired_listings" do
+  describe '#add_listing_for' do
+    let(:server) { double('server', { :uuid => '123',
+                                      :services => ['Known::Service'],
+                                      :address => "0.0.0.0",
+                                      :port => 9999,
+                                      :ttl => 15 }) }
+
+    it 'adds the listing to the known @listings' do
+      expect {
+        ::Protobuf::Lifecycle.should_receive(:trigger)
+                              .with('directory.listing.added', an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing))
+                              .once
+        instance.add_listing_for(server)
+      }.to change(listings, :size).from(0).to(1)
+    end
+  end
+
+  describe '#each_listing' do
+    let(:listing_doubles) { { '1' => double('listing 1'),
+                              '2' => double('listing 2'),
+                              '3' => double('listing 3') } }
+
     before do
-      instance.instance_variable_set(:@listings, {
-        '1' => double(:expired? => true),
-        '2' => double(:expired? => true),
-        '3' => double(:expired? => false),
-      })
+      instance.instance_variable_set(:@listings, listing_doubles)
+    end
+
+    it 'invokes the given block for each listing known by the directory' do
+      yielded_listings = []
+      instance.each_listing do |listing|
+        yielded_listings << listing
+      end
+      yielded_listings.should eq(listing_doubles.values)
+    end
+  end
+
+  describe "#remove_expired_listings" do
+    let(:listing_doubles) { { '1' => double(:expired? => true),
+                              '2' => double(:expired? => true),
+                              '3' => double(:expired? => false) } }
+
+    before do
+      instance.instance_variable_set(:@listings, listing_doubles)
     end
 
     it "removes expired listings" do
       expect {
+        ::Protobuf::Lifecycle.should_receive(:trigger)
+                              .with('directory.listing.removed', an_instance_of(RSpec::Mocks::Mock))
+                              .twice
         instance.remove_expired_listings
       }.to change(listings, :size).from(3).to(1)
       listings.keys.should eq ['3']
@@ -92,43 +134,6 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       expect {
         instance.start
       }.to change(instance, :running?).from(false).to(true)
-    end
-  end
-
-  describe "#wait_for" do
-    it "returns a listing for the given service" do
-      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
-      instance.add_listing_for server
-      instance.lookup("Test").should eq server
-    end
-
-    it "depends on #lookup" do
-      instance.stub(:lookup).with("Hayoob!") { "yup" }
-      instance.wait_for("Hayoob!").should eq "yup"
-    end
-
-    it "waits for the service to appear" do
-      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
-
-      t = Thread.new do
-        sleep 0.5
-        instance.add_listing_for server
-      end
-
-      duration { instance.wait_for("Test") }.should be_within(0.01).of(0.5)
-      t.join
-    end
-
-    it "returns nil if the service doesn't appear withint the timeout period" do
-      server = double(:uuid => 1, :ttl => 5, :services => ["Test"])
-
-      t = Thread.new do
-        sleep 0.5
-        instance.add_listing_for server
-      end
-
-      instance.wait_for("Test", 0.1).should be_nil
-      t.join
     end
   end
 

@@ -1,5 +1,6 @@
 require 'thor'
 require 'protobuf/version'
+require 'protobuf/lifecycle'
 require 'protobuf/logger'
 require 'protobuf/rpc/servers/evented_runner'
 require 'protobuf/rpc/servers/socket_runner'
@@ -87,7 +88,7 @@ module Protobuf
       def configure_logger
         debug_say('Configuring logger')
         ::Protobuf::Logger.configure({ :file => options.log || STDOUT,
-                                       :level => options.debug? ? ::Logger::DEBUG : options.level })
+                                     :level => options.debug? ? ::Logger::DEBUG : options.level })
 
         # Debug output the server options to the log file.
         ::Protobuf::Logger.debug { 'Debugging options:' }
@@ -242,9 +243,10 @@ module Protobuf
           ::Protobuf::Logger.info {
             "pid #{::Process.pid} -- #{@runner_mode} RPC Server listening at #{options.host}:#{options.port}"
           }
+
+          ::Protobuf::Lifecycle.trigger( "after_server_bind" )
         end
       end
     end
   end
 end
-
