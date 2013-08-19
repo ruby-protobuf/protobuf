@@ -1,6 +1,6 @@
 require 'benchmark'
 require 'support/all'
-require 'support/test/resource.pb'
+require 'support/test/resource_service'
 
 begin
   require 'perftools'

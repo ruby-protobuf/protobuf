@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'spec/support/test/resource.pb'
+require 'spec/support/test/resource_service'
 require 'protobuf/rpc/servers/evented_runner'
 require 'protobuf/evented'
 

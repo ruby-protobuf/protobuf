@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'spec/support/test/resource.pb'
+require 'spec/support/test/resource_service'
 
 describe 'Functional EventMachine Client' do
   before(:each) do
