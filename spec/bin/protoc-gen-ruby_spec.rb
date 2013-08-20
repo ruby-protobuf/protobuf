@@ -6,7 +6,7 @@ describe 'protoc-gen-ruby' do
   let(:binpath) { ::File.expand_path('../../../bin/protoc-gen-ruby', __FILE__) }
   let(:request_bytes) { ::Google::Protobuf::Compiler::CodeGeneratorRequest.new(:file_to_generate => [ "test/foo.proto" ]) }
   let(:expected_file) { ::Google::Protobuf::Compiler::CodeGeneratorResponse::File.new(:name => 'test/foo.pb.rb') }
-  let(:expected_response_bytes) { ::Google::Protobuf::Compiler::CodeGeneratorRequest.new(:files => [ expected_file ]).serialize_to_string }
+  let(:expected_response_bytes) { ::Google::Protobuf::Compiler::CodeGeneratorRequest.encode(:files => [ expected_file ]) }
 
   it 'reads the serialized request bytes and outputs serialized response bytes' do
     ::IO.popen(binpath, 'w+') do |pipe|

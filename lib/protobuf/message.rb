@@ -23,6 +23,10 @@ module Protobuf
                       end
     end
 
+    def self.decode(bytes)
+      self.new.decode(bytes)
+    end
+
     # Define a field. Don't use this method directly.
     def self.define_field(rule, type, fname, tag, options)
       field_array = options[:extension] ? extension_fields : fields
@@ -98,7 +102,7 @@ module Protobuf
     # Find a field object by +tag+ number.
     def self.get_field_by_tag(tag)
       fields[tag]
-    rescue TypeError => e
+    rescue TypeError
       tag = tag.nil? ? 'nil' : tag.to_s
       raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
     end
@@ -148,6 +152,16 @@ module Protobuf
 
     def clone
       copy_to(super, :clone)
+    end
+
+    # Decode the given string bytes into this object.
+    def decode(string)
+      decode_from(::StringIO.new(string))
+    end
+
+    # Decode the given stream into this object.
+    def decode_from(stream)
+      Decoder.decode(stream, self)
     end
 
     def dup
@@ -237,14 +251,6 @@ module Protobuf
       to_hash.inspect
     end
 
-    def parse_from(stream)
-      Decoder.decode(stream, self)
-    end
-
-    def parse_from_string(string)
-      parse_from(::StringIO.new(string))
-    end
-
     def respond_to_has?(key)
       self.respond_to?(key) && self.has_field?(key)
     end
@@ -303,6 +309,10 @@ module Protobuf
     ##
     # Instance Aliases
     #
+    alias_method :parse_from_string, :decode
+    alias_method :deserialize, :decode
+    alias_method :parse_from, :decode_from
+    alias_method :deserialize_from, :decode_from
     alias_method :to_s, :encode
     alias_method :bytes, :encode
     alias_method :serialize, :encode

@@ -19,8 +19,7 @@ module Protobuf
     end
 
     def initialize(request_bytes)
-      @request = ::Google::Protobuf::Compiler::CodeGeneratorRequest.new
-      @request.parse_from_string(request_bytes)
+      @request = ::Google::Protobuf::Compiler::CodeGeneratorRequest.decode(request_bytes)
       @generated_files = []
     end
 

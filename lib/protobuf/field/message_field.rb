@@ -14,9 +14,7 @@ module Protobuf
       end
 
       def decode(bytes)
-        message = type.new
-        message.parse_from_string(bytes)
-        message
+        type.decode(bytes)
       end
 
       def encode(value)

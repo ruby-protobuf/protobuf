@@ -204,8 +204,7 @@ module Protobuf
       def wait_for_beacon
         data, addr = @socket.recvfrom(2048)
 
-        beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new
-        beacon.parse_from_string(data)
+        beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.decode(data)
 
         # Favor the address captured by the socket
         beacon.try(:server).try(:address=, addr[3])

@@ -19,11 +19,11 @@ describe ::Protobuf::CodeGenerator do
     let(:file_generator2) { mock('file generator 2', :generate_output_file => output_file2) }
 
     let(:request_bytes) do
-      COMPILER::CodeGeneratorRequest.new(:proto_file => [ input_file1, input_file2 ]).serialize_to_string
+      COMPILER::CodeGeneratorRequest.encode(:proto_file => [ input_file1, input_file2 ])
     end
 
     let(:expected_response_bytes) do
-      COMPILER::CodeGeneratorResponse.new(:file => [ output_file1, output_file2 ]).serialize_to_string
+      COMPILER::CodeGeneratorResponse.encode(:file => [ output_file1, output_file2 ])
     end
 
     before do

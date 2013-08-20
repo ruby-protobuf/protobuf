@@ -159,7 +159,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         :server => server,
         :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
       )}
-      let(:payload) { beacon.serialize_to_string }
+      let(:payload) { beacon.encode }
 
       it "adds a listing" do
         instance.should_receive(:add_listing_for).with(server)
@@ -175,7 +175,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         :server => server,
         :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
       )}
-      let(:payload) { beacon.serialize_to_string }
+      let(:payload) { beacon.encode }
 
       it "removes a listing" do
         instance.should_receive(:remove_listing_for).with(server)
