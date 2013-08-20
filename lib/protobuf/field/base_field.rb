@@ -1,4 +1,3 @@
-require 'protobuf'
 require 'protobuf/wire_type'
 require 'protobuf/field/field_array'
 

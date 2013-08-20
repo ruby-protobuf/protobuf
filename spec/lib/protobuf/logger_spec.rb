@@ -1,5 +1,6 @@
 require 'protobuf/logger'
 require 'stringio'
+require 'fileutils'
 
 describe Protobuf::Logger do
 
@@ -9,6 +10,10 @@ describe Protobuf::Logger do
     Protobuf::Logger.reset_device!
     Protobuf::Logger.file = '/dev/null'
     Protobuf::Logger.level = ::Logger::INFO
+  end
+
+  after(:all) do
+    ::FileUtils.rm_f('myfile.log')
   end
 
   describe '.instance' do

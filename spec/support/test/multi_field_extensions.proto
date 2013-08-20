@@ -2,22 +2,32 @@ package test;
 
 message Header {
   extensions 100 to max;
+
   enum Type   {
     PayloadTypeA = 1;
     PayloadTypeB = 2;
   }
+
   required Type type = 1;
 }
 
 message PayloadA {
+  message Foo {
+    optional string foo_a = 1;
+  }
+
   extend Header {
     optional PayloadA payload = 100;
   }
 }
 
 message PayloadB {
-  //extend Header {
-  // UNCOMMENT TO TEST FAILING WITH MULTIPLE FIELDS
+  message Foo {
+    optional string foo_b = 1;
+  }
+
+  // UNCOMMENT TO TEST RUNTIME FAILING WITH MULTIPLE FIELDS
+  // extend Header {
   //  optional PayloadB payload = 101;
   //}
 }
