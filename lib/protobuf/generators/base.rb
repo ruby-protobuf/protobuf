@@ -1,4 +1,3 @@
-require 'protobuf/code_generator'
 require 'protobuf/generators/printable'
 
 module Protobuf

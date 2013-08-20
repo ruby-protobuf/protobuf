@@ -51,9 +51,28 @@ describe ::Protobuf::Generators::FieldGenerator do
 
       context 'when the type is a string' do
         let(:type_enum) { :TYPE_STRING }
-        let(:default_value) { "a default 'string'" }
+        let(:default_value) { "a default \"string\"" }
 
-        it { should eq "optional ::Protobuf::Field::StringField, :foo_bar, 3, :default => 'a default \\'string\\''\n" }
+        it { should eq %Q{optional ::Protobuf::Field::StringField, :foo_bar, 3, :default => "a default \"string\""\n} }
+      end
+
+      context 'when float or double field type' do
+        let(:type_enum) { :TYPE_DOUBLE }
+
+        context 'when the default value is "nan"' do
+          let(:default_value) { 'nan' }
+          it { should match(/::Float::NAN/) }
+        end
+
+        context 'when the default value is "inf"' do
+          let(:default_value) { 'inf' }
+          it { should match(/::Float::INFINITY/) }
+        end
+
+        context 'when the default value is "-inf"' do
+          let(:default_value) { '-inf' }
+          it { should match(/-::Float::INFINITY/) }
+        end
       end
     end
 

@@ -4,6 +4,19 @@ module Protobuf
   module Generators
     class FieldGenerator < Base
 
+      ##
+      # Constants
+      #
+      PROTO_INFINITY_DEFAULT          = /^inf$/i.freeze
+      PROTO_NEGATIVE_INFINITY_DEFAULT = /^-inf$/i.freeze
+      PROTO_NAN_DEFAULT               = /^nan$/i.freeze
+      RUBY_INFINITY_DEFAULT           = '::Float::INFINITY'.freeze
+      RUBY_NEGATIVE_INFINITY_DEFAULT  = '-::Float::INFINITY'.freeze
+      RUBY_NAN_DEFAULT                = '::Float::NAN'.freeze
+
+      ##
+      # Attributes
+      #
       attr_reader :field_options
 
       def applicable_options
@@ -13,15 +26,15 @@ module Protobuf
       def default_value
         @default_value ||= begin
                              if defaulted?
-                               raw_default_value = descriptor.default_value
-
                                case descriptor.type.name
                                when :TYPE_ENUM then
-                                 "#{type_name}::#{raw_default_value}"
-                               when :TYPE_STRING then
-                                 "'#{raw_default_value.gsub(/'/, '\\\\\'')}'"
+                                 enum_default_value
+                               when :TYPE_STRING, :TYPE_BYTES then
+                                 string_default_value
+                               when :TYPE_FLOAT, :TYPE_DOUBLE then
+                                 float_double_default_value
                                else
-                                 raw_default_value
+                                 verbatim_default_value
                                end
                              end
                            end
@@ -84,6 +97,33 @@ module Protobuf
                            type_name = "::Protobuf::Field::#{modulize(type_name)}Field"
                          end
                        end
+      end
+
+      private
+
+      def enum_default_value
+        "#{type_name}::#{verbatim_default_value}"
+      end
+
+      def float_double_default_value
+        case verbatim_default_value
+        when PROTO_INFINITY_DEFAULT then
+          RUBY_INFINITY_DEFAULT
+        when PROTO_NEGATIVE_INFINITY_DEFAULT then
+          RUBY_NEGATIVE_INFINITY_DEFAULT
+        when PROTO_NAN_DEFAULT then
+          RUBY_NAN_DEFAULT
+        else
+          verbatim_default_value
+        end
+      end
+
+      def string_default_value
+        %Q{"#{verbatim_default_value.gsub(/'/, '\\\\\'')}"}
+      end
+
+      def verbatim_default_value
+        descriptor.default_value
       end
 
     end
