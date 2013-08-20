@@ -1,5 +1,0 @@
-message CollisionTest {
-  optional string a = 1;
-  optional string b = 1;
-}
-
