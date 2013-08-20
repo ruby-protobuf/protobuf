@@ -5,18 +5,6 @@ require 'protobuf/enum'
 require 'protobuf/exceptions'
 require 'protobuf/message/decoder'
 
-# Define Float::INFINITY if it's not already defined (e.g. < ruby 1.9)
-unless defined?(::Float::INFINITY)
-  puts 'DEFINING INFINITY'
-  ::Float::INFINITY = (1.0 / 0.0).freeze
-end
-
-# Define Float::NAN if it's not already defined (e.g. < ruby 1.9)
-unless defined?(::Float::NAN)
-  puts 'DEFINING NAN'
-  ::Float::NAN = (0.0 / 0.0).freeze
-end
-
 module Protobuf
   class Message
 
