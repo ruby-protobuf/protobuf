@@ -34,8 +34,7 @@ module Protobuf
         generate_file(file_descriptor)
       end
 
-      response = ::Google::Protobuf::Compiler::CodeGeneratorResponse.new(:file => @generated_files)
-      return response.serialize_to_string
+      return ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => @generated_files)
     end
 
   end

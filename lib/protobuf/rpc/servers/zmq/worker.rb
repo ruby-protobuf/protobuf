@@ -64,7 +64,7 @@ module Protobuf
         end
 
         def send_data
-          data = @response.serialize_to_string
+          data = @response.encode
 
           @stats.response_size = data.size
 

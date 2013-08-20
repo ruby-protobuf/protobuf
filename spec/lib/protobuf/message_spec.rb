@@ -50,6 +50,14 @@ describe Protobuf::Message do
     end
   end
 
+  describe '.encode' do
+    let(:values) { { :name => "Jim" } }
+
+    it 'creates a new message object with the given values and returns the encoded bytes' do
+      ::Test::Resource.encode(values).should eq ::Test::Resource.new(values).encode
+    end
+  end
+
   describe '#initialize' do
     it "initializes the enum getter to 0" do
       test_enum = Test::EnumTestMessage.new
@@ -89,7 +97,7 @@ describe Protobuf::Message do
       it "accepts UTF-8 strings into string fields" do
         message = ::Test::Resource.new(:name => "Kyle Redfearn\u0060s iPad")
 
-        expect { message.serialize_to_string }.to_not raise_error
+        expect { message.encode }.to_not raise_error
       end
 
       it "keeps utf-8 when utf-8 is input for string fields" do
@@ -118,7 +126,7 @@ describe Protobuf::Message do
 
       it "raises a 'message not initialized' error" do
         expect {
-          message.serialize_to_string
+          message.encode
         }.to raise_error(Protobuf::SerializationError, /required/i)
       end
     end
@@ -129,7 +137,7 @@ describe Protobuf::Message do
       it "does not raise an error when repeated fields are []" do
         expect {
           message.repeated_enum = []
-          message.serialize_to_string
+          message.encode
         }.to_not raise_error
       end
 

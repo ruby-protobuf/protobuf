@@ -47,6 +47,11 @@ module Protobuf
       end
     end
 
+    # Create a new object with the given values and return the encoded bytes.
+    def self.encode(values = {})
+      self.new(values).encode
+    end
+
     # Reserve field numbers for extensions. Don't use this method directly.
     def self.extensions(range)
       extension_fields.add_range(range)
@@ -175,6 +180,28 @@ module Protobuf
       end
     end
 
+    def encode
+      stream = ""
+
+      each_field_for_serialization do |field, value|
+        if field.repeated?
+          if field.packed?
+            key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
+            packed_value = value.map { |val| field.encode(val) }.join
+            stream << ::Protobuf::Field::VarintField.encode(key)
+            stream << ::Protobuf::Field::VarintField.encode(packed_value.size)
+            stream << packed_value
+          else
+            value.each { |val| write_pair(stream, field, val) }
+          end
+        else
+          write_pair(stream, field, value)
+        end
+      end
+
+      return stream
+    end
+
     # Returns extension fields. See Message#fields method.
     def extension_fields
       self.class.extension_fields
@@ -227,28 +254,6 @@ module Protobuf
         (self.__send__(key).present? || [true, false].include?(self.__send__(key)))
     end
 
-    def serialize_to_string
-      stream = ""
-
-      each_field_for_serialization do |field, value|
-        if field.repeated?
-          if field.packed?
-            key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
-            packed_value = value.map { |val| field.encode(val) }.join
-            stream << ::Protobuf::Field::VarintField.encode(key)
-            stream << ::Protobuf::Field::VarintField.encode(packed_value.size)
-            stream << packed_value
-          else
-            value.each { |val| write_pair(stream, field, val) }
-          end
-        else
-          write_pair(stream, field, value)
-        end
-      end
-
-      return stream
-    end
-
     def set_field(tag, bytes)
       field = (get_field_by_tag(tag) || get_ext_field_by_tag(tag))
       field.set(self, bytes) if field
@@ -298,11 +303,12 @@ module Protobuf
     ##
     # Instance Aliases
     #
+    alias_method :to_s, :encode
+    alias_method :bytes, :encode
+    alias_method :serialize, :encode
+    alias_method :serialize_to_string, :encode
     alias_method :to_hash_value, :to_hash
     alias_method :to_proto_hash, :to_hash
-    alias_method :to_s, :serialize_to_string
-    alias_method :bytes, :serialize_to_string
-    alias_method :serialize, :serialize_to_string
     alias_method :responds_to_has?, :respond_to_has?
     alias_method :respond_to_and_has?, :respond_to_has?
     alias_method :responds_to_and_has?, :respond_to_has?

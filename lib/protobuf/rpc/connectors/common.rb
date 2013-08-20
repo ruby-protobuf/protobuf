@@ -114,7 +114,7 @@ module Protobuf
                      :request_proto => @options[:request],
                      :caller => request_caller }
 
-          return ::Protobuf::Socketrpc::Request.new(fields).serialize_to_string
+          return ::Protobuf::Socketrpc::Request.encode(fields)
         rescue => e
           fail(:INVALID_REQUEST_PROTO, "Could not set request proto: #{e.message}")
         end
