@@ -13,22 +13,44 @@ module Test
       define :PayloadTypeA, 1
       define :PayloadTypeB, 2
     end
-    
+
   end
-  class PayloadA < ::Protobuf::Message; end
-  class PayloadB < ::Protobuf::Message; end
-  
+
+  class PayloadA < ::Protobuf::Message
+    class Foo < ::Protobuf::Message; end
+
+  end
+
+  class PayloadB < ::Protobuf::Message
+    class Foo < ::Protobuf::Message; end
+
+  end
+
+
+
   ##
   # Message Fields
   #
   class Header
     required ::Test::Header::Type, :type, 1
-    
     # Extension Fields
     extensions 100...536870912
     optional ::Test::PayloadA, :payload, 100, :extension => true
   end
-  
-  
+
+  class PayloadA
+    class Foo
+      optional ::Protobuf::Field::StringField, :foo_a, 1
+    end
+
+  end
+
+  class PayloadB
+    class Foo
+      optional ::Protobuf::Field::StringField, :foo_b, 1
+    end
+
+  end
+
 end
 

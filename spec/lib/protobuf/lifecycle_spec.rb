@@ -27,7 +27,7 @@ describe ::Protobuf::Lifecycle do
   it "only registers blocks for event callbacks" do
     expect {
       subject.register("something")
-    }.to raise_error( /block/ ) 
+    }.to raise_error( /block/ )
   end
 
   it "calls the registered block when triggered" do
@@ -58,6 +58,36 @@ describe ::Protobuf::Lifecycle do
     this.should eq("not nil")
     that.should_not be_nil
     that.should eq("not nil")
+  end
+
+  context 'when the registered block has arity' do
+    context 'and the triggered event does not have args' do
+      it 'does not pass the args' do
+        outer_bar = nil
+
+        subject.register('foo') do |bar|
+          bar.should be_nil
+          outer_bar = 'triggered'
+        end
+
+        subject.trigger('foo')
+        outer_bar.should eq 'triggered'
+      end
+    end
+
+    context 'and the triggered event has arguments' do
+      it 'does not pass the args' do
+        outer_bar = nil
+
+        subject.register('foo') do |bar|
+          bar.should_not be_nil
+          outer_bar = bar
+        end
+
+        subject.trigger('foo', 'baz')
+        outer_bar.should eq 'baz'
+      end
+    end
   end
 
   context "normalized event names" do

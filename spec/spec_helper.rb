@@ -8,10 +8,12 @@ require 'pry'
 
 $: << ::File.expand_path('..', File.dirname(__FILE__))
 $: << ::File.expand_path('../spec/support', File.dirname(__FILE__))
-#$: << ::File.expand_path('../lib', File.dirname(__FILE__))
 
 require 'protobuf'
 require ::File.dirname(__FILE__) + '/support/all'
+
+$: << ::File.expand_path("../../lib/protobuf/descriptors", __FILE__)
+require 'google/protobuf/compiler/plugin.pb'
 
 # Including a way to turn on debug logger for spec runs
 if ENV["DEBUG"]
