@@ -4,8 +4,8 @@ module Protobuf
   module Field
     class VarintField < BaseField
       INT32_MAX  =  2**31 - 1
-      INT32_MIN  = -2**31 
-      INT64_MAX  =  2**63 - 1 
+      INT32_MIN  = -2**31
+      INT64_MAX  =  2**63 - 1
       INT64_MIN  = -2**63
       UINT32_MAX =  2**32 - 1
       UINT64_MAX =  2**64 - 1
@@ -26,15 +26,12 @@ module Protobuf
       end
 
       def self.encode(value)
-        return [value].pack('C') if value < 128
-
         bytes = []
-        until value == 0
+        until value < 128
           bytes << (0x80 | (value & 0x7f))
           value >>= 7
         end
-        bytes[-1] &= 0x7f
-        bytes.pack('C*')
+        (bytes << value).pack('C*')
       end
 
       ##

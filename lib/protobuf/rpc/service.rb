@@ -100,12 +100,12 @@ module Protobuf
       # code
       def self.implemented_services
         classes = (self.subclasses || []).select do |subclass|
-          subclass.rpcs.any? do |(name, method)|
+          subclass.rpcs.any? do |(name, _)|
             subclass.method_defined? name
           end
         end
 
-        classes.map &:name
+        classes.map(&:name)
       end
 
       ##
@@ -138,7 +138,7 @@ module Protobuf
       #
       def request
         @_request ||= if @_request_bytes.present?
-            request_type.new.parse_from_string(@_request_bytes)
+            request_type.decode(@_request_bytes)
           else
             request_type.new
           end

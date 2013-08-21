@@ -2,6 +2,14 @@ require 'spec_helper'
 
 describe Protobuf::Message do
 
+  describe '.decode' do
+    let(:message) { ::Test::Resource.new(:name => "Jim") }
+
+    it 'creates a new message object decoded from the given bytes' do
+      ::Test::Resource.decode(message.encode).should eq message
+    end
+  end
+
   describe '.define_field' do
     context 'when defining a field with a tag that has already been used' do
       it 'raises a TagCollisionError' do
@@ -50,6 +58,14 @@ describe Protobuf::Message do
     end
   end
 
+  describe '.encode' do
+    let(:values) { { :name => "Jim" } }
+
+    it 'creates a new message object with the given values and returns the encoded bytes' do
+      ::Test::Resource.encode(values).should eq ::Test::Resource.new(values).encode
+    end
+  end
+
   describe '#initialize' do
     it "initializes the enum getter to 0" do
       test_enum = Test::EnumTestMessage.new
@@ -69,7 +85,7 @@ describe Protobuf::Message do
 
     it "does not try to set attributes which have nil values" do
       Test::EnumTestMessage.any_instance.should_not_receive("non_default_enum=")
-      test_enum = Test::EnumTestMessage.new(:non_default_enum => nil)
+      Test::EnumTestMessage.new(:non_default_enum => nil)
     end
 
     it "takes a hash as an initialization argument" do
@@ -89,7 +105,7 @@ describe Protobuf::Message do
       it "accepts UTF-8 strings into string fields" do
         message = ::Test::Resource.new(:name => "Kyle Redfearn\u0060s iPad")
 
-        expect { message.serialize_to_string }.to_not raise_error
+        expect { message.encode }.to_not raise_error
       end
 
       it "keeps utf-8 when utf-8 is input for string fields" do
@@ -97,8 +113,7 @@ describe Protobuf::Message do
         name.force_encoding("UTF-8")
 
         message = ::Test::Resource.new(:name => name)
-        new_message = ::Test::Resource.new
-        new_message.parse_from_string(message.serialize_to_string)
+        new_message = ::Test::Resource.decode(message.encode)
         (new_message.name == name).should be_true
       end
 
@@ -107,8 +122,7 @@ describe Protobuf::Message do
         name.force_encoding("ASCII-8BIT")
 
         message = ::Test::Resource.new(:name => name)
-        new_message = ::Test::Resource.new
-        new_message.parse_from_string(message.serialize_to_string)
+        new_message = ::Test::Resource.decode(message.encode)
         (new_message.name == "my name").should be_true
       end
     end
@@ -118,7 +132,7 @@ describe Protobuf::Message do
 
       it "raises a 'message not initialized' error" do
         expect {
-          message.serialize_to_string
+          message.encode
         }.to raise_error(Protobuf::SerializationError, /required/i)
       end
     end
@@ -129,7 +143,7 @@ describe Protobuf::Message do
       it "does not raise an error when repeated fields are []" do
         expect {
           message.repeated_enum = []
-          message.serialize_to_string
+          message.encode
         }.to_not raise_error
       end
 

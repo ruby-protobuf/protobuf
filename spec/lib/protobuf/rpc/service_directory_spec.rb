@@ -58,17 +58,55 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     end
   end
 
-  describe "#remove_expired_listings" do
+  describe '#add_listing_for' do
+    let(:server) { double('server', { :uuid => '123',
+                                      :services => ['Known::Service'],
+                                      :address => "0.0.0.0",
+                                      :port => 9999,
+                                      :ttl => 15 }) }
+
+    it 'adds the listing to the known @listings' do
+      expect {
+        ::Protobuf::Lifecycle.should_receive(:trigger)
+                              .with('directory.listing.added', an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing))
+                              .once
+        instance.add_listing_for(server)
+      }.to change(listings, :size).from(0).to(1)
+    end
+  end
+
+  describe '#each_listing' do
+    let(:listing_doubles) { { '1' => double('listing 1'),
+                              '2' => double('listing 2'),
+                              '3' => double('listing 3') } }
+
     before do
-      instance.instance_variable_set(:@listings, {
-        '1' => double(:expired? => true),
-        '2' => double(:expired? => true),
-        '3' => double(:expired? => false),
-      })
+      instance.instance_variable_set(:@listings, listing_doubles)
+    end
+
+    it 'invokes the given block for each listing known by the directory' do
+      yielded_listings = []
+      instance.each_listing do |listing|
+        yielded_listings << listing
+      end
+      yielded_listings.should eq(listing_doubles.values)
+    end
+  end
+
+  describe "#remove_expired_listings" do
+    let(:listing_doubles) { { '1' => double(:expired? => true),
+                              '2' => double(:expired? => true),
+                              '3' => double(:expired? => false) } }
+
+    before do
+      instance.instance_variable_set(:@listings, listing_doubles)
     end
 
     it "removes expired listings" do
       expect {
+        ::Protobuf::Lifecycle.should_receive(:trigger)
+                              .with('directory.listing.removed', an_instance_of(RSpec::Mocks::Mock))
+                              .twice
         instance.remove_expired_listings
       }.to change(listings, :size).from(3).to(1)
       listings.keys.should eq ['3']
@@ -121,7 +159,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         :server => server,
         :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
       )}
-      let(:payload) { beacon.serialize_to_string }
+      let(:payload) { beacon.encode }
 
       it "adds a listing" do
         instance.should_receive(:add_listing_for).with(server)
@@ -137,7 +175,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         :server => server,
         :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
       )}
-      let(:payload) { beacon.serialize_to_string }
+      let(:payload) { beacon.encode }
 
       it "removes a listing" do
         instance.should_receive(:remove_listing_for).with(server)

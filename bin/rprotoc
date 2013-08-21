@@ -1,62 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require 'ffi'
+command = [ 'protoc', ARGV ].flatten.join(' ')
 
-base_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$stderr.puts "[DEPRECATED] `rprotoc` is deprecated. Use `protoc --ruby_out ...` instead."
+$stdout.puts command
 
-GENERATOR_FILE_PATH = case
-                      when File.exists?(File.join(base_dir, "ruby_generator.bundle")) then
-                        File.join(base_dir, "ruby_generator.bundle")
-                      when File.exists?(File.join(base_dir, "ruby_generator.dll")) then
-                        File.join(base_dir, "ruby_generator.dll")
-                      else
-                        File.join(base_dir, "ruby_generator.so")
-                      end
-
-unless File.exists?(GENERATOR_FILE_PATH)
-  $stdout << <<-WARNING
-    Cannot locate shared object to plugin to protocol buffers generator.
-    Thought the file would be located at #{GENERATOR_FILE_PATH}
-
-    If you are running on Windows you should compile protocol buffer
-    definitions on another VM and then use those definitions locally.
-
-    Only the compiler is restricted by this.  The definitions should work without issue.
-  WARNING
-  $stdout << $/
-
-  exit 1
-end
-
-module Protobuf
-  module RProtoC
-    extend FFI::Library
-    ffi_lib ::GENERATOR_FILE_PATH
-    attach_function :_rprotoc_extern, [:int, :pointer], :int32
-
-    def self.compile_proto(args)
-      GC.disable # Don't want strings to be GC'd while protoc has them
-      args = args.dup
-      args.unshift("rprotoc")
-      args << "--help" if args.size == 1
-
-      ptr_params = []
-      args.each do |param|
-        ptr_params << ::FFI::MemoryPointer.from_string(param.dup)
-      end
-      ptr_params << nil
-
-      argv = ::FFI::MemoryPointer.new(:pointer, ptr_params.size)
-      ptr_params.each_with_index do |param_pointer, index|
-        argv[index].put_pointer(0, param_pointer)
-      end
-
-      self._rprotoc_extern(ptr_params.compact.size, argv)
-    ensure
-      GC.enable
-    end
-  end
-end
-
-::Protobuf::RProtoC.compile_proto(ARGV)
+exec command

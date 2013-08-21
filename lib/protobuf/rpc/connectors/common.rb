@@ -74,8 +74,7 @@ module Protobuf
           log_debug { sign_message("Parsing response from server (connection closed)") }
 
           # Parse out the raw response
-          response_wrapper = Protobuf::Socketrpc::Response.new
-          response_wrapper.parse_from_string(@response_data)
+          response_wrapper = Protobuf::Socketrpc::Response.decode(@response_data)
 
           # Determine success or failure based on parsed data
           if response_wrapper.has_field?(:error_reason)
@@ -88,8 +87,7 @@ module Protobuf
             log_debug { sign_message("Successful response parsed") }
 
             # Ensure client_response is an instance
-            response_type = @options[:response_type].new
-            parsed = response_type.parse_from_string(response_wrapper.response_proto.to_s)
+            parsed = @options[:response_type].decode(response_wrapper.response_proto.to_s)
 
             if parsed.nil? and not response_wrapper.has_field?(:error_reason)
               fail(:BAD_RESPONSE_PROTO, 'Unable to parse response from server')
@@ -114,7 +112,7 @@ module Protobuf
                      :request_proto => @options[:request],
                      :caller => request_caller }
 
-          return ::Protobuf::Socketrpc::Request.new(fields).serialize_to_string
+          return ::Protobuf::Socketrpc::Request.encode(fields)
         rescue => e
           fail(:INVALID_REQUEST_PROTO, "Could not set request proto: #{e.message}")
         end
@@ -139,7 +137,7 @@ module Protobuf
         #
         def timeout_wrap(&block)
           ::Timeout.timeout(options[:timeout], &block)
-        rescue ::Timeout::Error => e
+        rescue ::Timeout::Error
           fail(:RPC_FAILED, "The server took longer than #{options[:timeout]} seconds to respond")
         end
 
