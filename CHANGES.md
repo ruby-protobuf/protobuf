@@ -4,6 +4,8 @@
 - New compiler supports protobuf compilation/runtime with protoc <= v2.5.0 (c++ compiler removed). [#109]
 - Deprecated rprotoc in favor of protoc. [0bc9674]
 - Added service dynamic discovery to the ZMQ connector and server. [#91, @devin-c]
+- No longer creating `-java` platform gem due to removal of c++ compiler.
+- Added WTFPL license.
 
 2.0.0
 -----------
@@ -63,4 +65,4 @@
 
 ####  Other changes
 
-* Moved files out of `lib/protobuf/common` folder into `lib/protobuf`. Files affected are logger, wire_type, util. The only update would need to be the require path to these files since the modules were always `Protobuf::{TYPE}`.
+* Moved files out of `lib/protobuf/common` folder into `lib/protobuf`. Files affected are logger, wire\_type, util. The only update would need to be the require path to these files since the modules were always `Protobuf::{TYPE}`.
