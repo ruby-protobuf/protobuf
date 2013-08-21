@@ -9,7 +9,6 @@ doc
 .yardoc
 .DS_Store
 *.so
-*.bin
 Gemfile.lock
 tmp/*
 ext/defs
