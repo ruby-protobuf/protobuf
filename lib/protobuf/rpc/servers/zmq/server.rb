@@ -79,7 +79,7 @@ module Protobuf
             :server => self.to_proto
           )
 
-          @beacon_socket.send flatline.serialize_to_string, 0
+          @beacon_socket.send(flatline.encode, 0)
         end
 
         def broadcast_heartbeat
@@ -90,7 +90,7 @@ module Protobuf
             :server => self.to_proto
           )
 
-          @beacon_socket.send(heartbeat.serialize_to_string, 0)
+          @beacon_socket.send(heartbeat.encode, 0)
 
           log_debug { sign_message("sent heartbeat to #{beacon_uri}") }
         end

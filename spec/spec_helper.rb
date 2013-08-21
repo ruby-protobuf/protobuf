@@ -6,17 +6,17 @@ require 'bundler'
 Bundler.setup :default, :development, :test
 require 'pry'
 
-$: << ::File.expand_path('..', File.dirname(__FILE__))
-$: << ::File.expand_path('../spec/support', File.dirname(__FILE__))
+$: << ::File.expand_path('../..', __FILE__)
+$: << ::File.expand_path('../support', __FILE__)
 
 require 'protobuf'
-require ::File.dirname(__FILE__) + '/support/all'
+require ::File.expand_path('../support/all', __FILE__)
 
 $: << ::File.expand_path("../../lib/protobuf/descriptors", __FILE__)
 require 'google/protobuf/compiler/plugin.pb'
 
 # Including a way to turn on debug logger for spec runs
-if ENV["DEBUG"]
+if ENV.key?('DEBUG')
   debug_log = ::File.expand_path('../debug_specs.log', File.dirname(__FILE__) )
   ::Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
 end
@@ -29,21 +29,18 @@ ENV.delete("PB_IGNORE_DEPRECATIONS")
   c.mock_with :rspec
 
   c.before(:suite) do
-    unless defined?(JRUBY_VERSION)
-      unless ENV['NO_COMPILE_TEST_PROTOS']
-        $stdout.puts 'Compiling test protos (use NO_COMPILE_TEST_PROTOS=1 to skip)'
-        proto_path = File.expand_path("../support/", __FILE__)
-        cmd = %Q{ rprotoc --proto_path=#{proto_path} --ruby_out=#{proto_path} #{File.join(proto_path, '**', '*.proto')} }
-        puts cmd
-        %x{#{cmd}}
-      end
+    unless ENV['NO_COMPILE_TEST_PROTOS']
+      $stdout.puts 'Compiling test protos (use NO_COMPILE_TEST_PROTOS=1 to skip)'
+      proto_path = File.expand_path("../support/", __FILE__)
+      cmd = %Q{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
+      puts cmd
+      %x{#{cmd}}
     end
   end
 end
 
-Dir[File.expand_path('../support/**/*.pb.rb', __FILE__)].each do |proto_file|
-  require proto_file
-end
+support_proto_glob = File.expand_path('../support/**/*.pb.rb', __FILE__)
+Dir[support_proto_glob].each { |proto_file| require proto_file }
 
 class ::Protobuf::Rpc::Client
   def ==(other)

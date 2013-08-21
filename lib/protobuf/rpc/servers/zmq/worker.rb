@@ -25,7 +25,7 @@ module Protobuf
         # Instance Methods
         #
         def process_request
-          @client_address, empty, @request_data = read_from_backend
+          @client_address, _, @request_data = read_from_backend
 
           unless @request_data.nil?
             log_debug { sign_message("handling request") }
@@ -64,7 +64,7 @@ module Protobuf
         end
 
         def send_data
-          data = @response.serialize_to_string
+          data = @response.encode
 
           @stats.response_size = data.size
 
