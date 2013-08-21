@@ -1,8 +1,11 @@
+# encoding: utf-8
+
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
 require 'protobuf/message'
 require 'protobuf/rpc/service'
+
 
 ##
 # Imports
@@ -19,7 +22,7 @@ module GoogleUnittest
     define :FOREIGN_BAR, 5
     define :FOREIGN_BAZ, 6
   end
-  
+
   class TestSparseEnum < ::Protobuf::Enum
     define :SPARSE_A, 123
     define :SPARSE_B, 62374
@@ -29,8 +32,8 @@ module GoogleUnittest
     define :SPARSE_F, 0
     define :SPARSE_G, 2
   end
-  
-  
+
+
   ##
   # Message Classes
   #
@@ -40,9 +43,11 @@ module GoogleUnittest
       define :BAR, 2
       define :BAZ, 3
     end
-    
+
     class NestedMessage < ::Protobuf::Message; end
+
   end
+
   class TestDeprecatedFields < ::Protobuf::Message; end
   class ForeignMessage < ::Protobuf::Message; end
   class TestAllExtensions < ::Protobuf::Message; end
@@ -62,7 +67,9 @@ module GoogleUnittest
   class TestLazyMessage < ::Protobuf::Message; end
   class TestNestedMessageHasBits < ::Protobuf::Message
     class NestedMessage < ::Protobuf::Message; end
+
   end
+
   class TestCamelCaseFieldNames < ::Protobuf::Message; end
   class TestFieldOrderings < ::Protobuf::Message; end
   class TestExtremeDefaultValues < ::Protobuf::Message; end
@@ -80,13 +87,17 @@ module GoogleUnittest
       define :DYNAMIC_BAR, 2201
       define :DYNAMIC_BAZ, 2202
     end
-    
+
     class DynamicMessageType < ::Protobuf::Message; end
+
   end
+
   class TestRepeatedScalarDifferentTagSizes < ::Protobuf::Message; end
   class TestParsingMerge < ::Protobuf::Message
     class RepeatedFieldsGenerator < ::Protobuf::Message; end
+
   end
+
   class TestCommentInjectionMessage < ::Protobuf::Message; end
   class FooRequest < ::Protobuf::Message; end
   class FooResponse < ::Protobuf::Message; end
@@ -94,7 +105,8 @@ module GoogleUnittest
   class FooServerMessage < ::Protobuf::Message; end
   class BarRequest < ::Protobuf::Message; end
   class BarResponse < ::Protobuf::Message; end
-  
+
+
   ##
   # Message Fields
   #
@@ -102,7 +114,7 @@ module GoogleUnittest
     class NestedMessage
       optional ::Protobuf::Field::Int32Field, :bb, 1
     end
-    
+
     optional ::Protobuf::Field::Int32Field, :optional_int32, 1
     optional ::Protobuf::Field::Int64Field, :optional_int64, 2
     optional ::Protobuf::Field::Uint32Field, :optional_uint32, 3
@@ -173,17 +185,16 @@ module GoogleUnittest
     optional ::Protobuf::Field::StringField, :default_string_piece, 84, :default => "abc"
     optional ::Protobuf::Field::StringField, :default_cord, 85, :default => "123"
   end
-  
+
   class TestDeprecatedFields
     optional ::Protobuf::Field::Int32Field, :deprecated_int32, 1, :deprecated => true
   end
-  
+
   class ForeignMessage
     optional ::Protobuf::Field::Int32Field, :c, 1
   end
-  
+
   class TestAllExtensions
-    
     # Extension Fields
     extensions 1...536870912
     optional ::Protobuf::Field::Int32Field, :optional_int32_extension, 1, :extension => true
@@ -259,7 +270,7 @@ module GoogleUnittest
     optional ::GoogleUnittest::TestRequired, :single, 1000, :extension => true
     repeated ::GoogleUnittest::TestRequired, :multi, 1001, :extension => true
   end
-  
+
   class TestRequired
     required ::Protobuf::Field::Int32Field, :a, 1
     optional ::Protobuf::Field::Int32Field, :dummy2, 2
@@ -295,86 +306,85 @@ module GoogleUnittest
     optional ::Protobuf::Field::Int32Field, :dummy32, 32
     required ::Protobuf::Field::Int32Field, :c, 33
   end
-  
+
   class TestRequiredForeign
     optional ::GoogleUnittest::TestRequired, :optional_message, 1
     repeated ::GoogleUnittest::TestRequired, :repeated_message, 2
     optional ::Protobuf::Field::Int32Field, :dummy, 3
   end
-  
+
   class TestForeignNested
     optional ::GoogleUnittest::TestAllTypes::NestedMessage, :foreign_nested, 1
   end
-  
+
   class TestReallyLargeTagNumber
     optional ::Protobuf::Field::Int32Field, :a, 1
     optional ::Protobuf::Field::Int32Field, :bb, 268435455
   end
-  
+
   class TestRecursiveMessage
     optional ::GoogleUnittest::TestRecursiveMessage, :a, 1
     optional ::Protobuf::Field::Int32Field, :i, 2
   end
-  
+
   class TestMutualRecursionA
     optional ::GoogleUnittest::TestMutualRecursionB, :bb, 1
   end
-  
+
   class TestMutualRecursionB
     optional ::GoogleUnittest::TestMutualRecursionA, :a, 1
     optional ::Protobuf::Field::Int32Field, :optional_int32, 2
   end
-  
+
   class TestDupFieldNumber
     optional ::Protobuf::Field::Int32Field, :a, 1
   end
-  
+
   class TestEagerMessage
     optional ::GoogleUnittest::TestAllTypes, :sub_message, 1
   end
-  
+
   class TestLazyMessage
     optional ::GoogleUnittest::TestAllTypes, :sub_message, 1
   end
-  
+
   class TestNestedMessageHasBits
     class NestedMessage
       repeated ::Protobuf::Field::Int32Field, :nestedmessage_repeated_int32, 1
       repeated ::GoogleUnittest::ForeignMessage, :nestedmessage_repeated_foreignmessage, 2
     end
-    
+
     optional ::GoogleUnittest::TestNestedMessageHasBits::NestedMessage, :optional_nested_message, 1
   end
-  
+
   class TestCamelCaseFieldNames
-    optional ::Protobuf::Field::Int32Field, :primitivefield, 1
-    optional ::Protobuf::Field::StringField, :stringfield, 2
-    optional ::GoogleUnittest::ForeignEnum, :enumfield, 3
-    optional ::GoogleUnittest::ForeignMessage, :messagefield, 4
-    optional ::Protobuf::Field::StringField, :stringpiecefield, 5
-    optional ::Protobuf::Field::StringField, :cordfield, 6
-    repeated ::Protobuf::Field::Int32Field, :repeatedprimitivefield, 7
-    repeated ::Protobuf::Field::StringField, :repeatedstringfield, 8
-    repeated ::GoogleUnittest::ForeignEnum, :repeatedenumfield, 9
-    repeated ::GoogleUnittest::ForeignMessage, :repeatedmessagefield, 10
-    repeated ::Protobuf::Field::StringField, :repeatedstringpiecefield, 11
-    repeated ::Protobuf::Field::StringField, :repeatedcordfield, 12
+    optional ::Protobuf::Field::Int32Field, :PrimitiveField, 1
+    optional ::Protobuf::Field::StringField, :StringField, 2
+    optional ::GoogleUnittest::ForeignEnum, :EnumField, 3
+    optional ::GoogleUnittest::ForeignMessage, :MessageField, 4
+    optional ::Protobuf::Field::StringField, :StringPieceField, 5
+    optional ::Protobuf::Field::StringField, :CordField, 6
+    repeated ::Protobuf::Field::Int32Field, :RepeatedPrimitiveField, 7
+    repeated ::Protobuf::Field::StringField, :RepeatedStringField, 8
+    repeated ::GoogleUnittest::ForeignEnum, :RepeatedEnumField, 9
+    repeated ::GoogleUnittest::ForeignMessage, :RepeatedMessageField, 10
+    repeated ::Protobuf::Field::StringField, :RepeatedStringPieceField, 11
+    repeated ::Protobuf::Field::StringField, :RepeatedCordField, 12
   end
-  
+
   class TestFieldOrderings
     optional ::Protobuf::Field::StringField, :my_string, 11
     optional ::Protobuf::Field::Int64Field, :my_int, 1
     optional ::Protobuf::Field::FloatField, :my_float, 101
-    
     # Extension Fields
     extensions 2...11
     extensions 12...101
     optional ::Protobuf::Field::StringField, :my_extension_string, 50, :extension => true
     optional ::Protobuf::Field::Int32Field, :my_extension_int, 5, :extension => true
   end
-  
+
   class TestExtremeDefaultValues
-    optional ::Protobuf::Field::BytesField, :escaped_bytes, 1, :default => "\0\001\a\b\f\n\r\t\v\\\'\"\xfe"
+    optional ::Protobuf::Field::BytesField, :escaped_bytes, 1, :default => "\000\001\007\010\014\n\r\t\013\\\\'\"\376"
     optional ::Protobuf::Field::Uint32Field, :large_uint32, 2, :default => 4294967295
     optional ::Protobuf::Field::Uint64Field, :large_uint64, 3, :default => 18446744073709551615
     optional ::Protobuf::Field::Int32Field, :small_int32, 4, :default => -2147483647
@@ -389,39 +399,39 @@ module GoogleUnittest
     optional ::Protobuf::Field::FloatField, :negative_float, 11, :default => -1.5
     optional ::Protobuf::Field::FloatField, :large_float, 12, :default => 2e+08
     optional ::Protobuf::Field::FloatField, :small_negative_float, 13, :default => -8e-28
-    optional ::Protobuf::Field::DoubleField, :inf_double, 14, :default => Float::INFINITY
-    optional ::Protobuf::Field::DoubleField, :neg_inf_double, 15, :default => -Float::INFINITY
-    optional ::Protobuf::Field::DoubleField, :nan_double, 16, :default => Float::NAN
-    optional ::Protobuf::Field::FloatField, :inf_float, 17, :default => Float::INFINITY
-    optional ::Protobuf::Field::FloatField, :neg_inf_float, 18, :default => -Float::INFINITY
-    optional ::Protobuf::Field::FloatField, :nan_float, 19, :default => Float::NAN
+    optional ::Protobuf::Field::DoubleField, :inf_double, 14, :default => ::Float::INFINITY
+    optional ::Protobuf::Field::DoubleField, :neg_inf_double, 15, :default => -::Float::INFINITY
+    optional ::Protobuf::Field::DoubleField, :nan_double, 16, :default => ::Float::NAN
+    optional ::Protobuf::Field::FloatField, :inf_float, 17, :default => ::Float::INFINITY
+    optional ::Protobuf::Field::FloatField, :neg_inf_float, 18, :default => -::Float::INFINITY
+    optional ::Protobuf::Field::FloatField, :nan_float, 19, :default => ::Float::NAN
     optional ::Protobuf::Field::StringField, :cpp_trigraph, 20, :default => "? ? ?? ?? ??? ??/ ??-"
     optional ::Protobuf::Field::StringField, :string_with_zero, 23, :default => "hel lo"
-    optional ::Protobuf::Field::BytesField, :bytes_with_zero, 24, :default => "wor ld"
+    optional ::Protobuf::Field::BytesField, :bytes_with_zero, 24, :default => "wor\000ld"
     optional ::Protobuf::Field::StringField, :string_piece_with_zero, 25, :default => "ab c"
     optional ::Protobuf::Field::StringField, :cord_with_zero, 26, :default => "12 3"
   end
-  
+
   class SparseEnumMessage
     optional ::GoogleUnittest::TestSparseEnum, :sparse_enum, 1
   end
-  
+
   class OneString
     optional ::Protobuf::Field::StringField, :data, 1
   end
-  
+
   class MoreString
     repeated ::Protobuf::Field::StringField, :data, 1
   end
-  
+
   class OneBytes
     optional ::Protobuf::Field::BytesField, :data, 1
   end
-  
+
   class MoreBytes
     repeated ::Protobuf::Field::BytesField, :data, 1
   end
-  
+
   class TestPackedTypes
     repeated ::Protobuf::Field::Int32Field, :packed_int32, 90, :packed => true
     repeated ::Protobuf::Field::Int64Field, :packed_int64, 91, :packed => true
@@ -438,26 +448,25 @@ module GoogleUnittest
     repeated ::Protobuf::Field::BoolField, :packed_bool, 102, :packed => true
     repeated ::GoogleUnittest::ForeignEnum, :packed_enum, 103, :packed => true
   end
-  
+
   class TestUnpackedTypes
-    repeated ::Protobuf::Field::Int32Field, :unpacked_int32, 90, :packed => false
-    repeated ::Protobuf::Field::Int64Field, :unpacked_int64, 91, :packed => false
-    repeated ::Protobuf::Field::Uint32Field, :unpacked_uint32, 92, :packed => false
-    repeated ::Protobuf::Field::Uint64Field, :unpacked_uint64, 93, :packed => false
-    repeated ::Protobuf::Field::Sint32Field, :unpacked_sint32, 94, :packed => false
-    repeated ::Protobuf::Field::Sint64Field, :unpacked_sint64, 95, :packed => false
-    repeated ::Protobuf::Field::Fixed32Field, :unpacked_fixed32, 96, :packed => false
-    repeated ::Protobuf::Field::Fixed64Field, :unpacked_fixed64, 97, :packed => false
-    repeated ::Protobuf::Field::Sfixed32Field, :unpacked_sfixed32, 98, :packed => false
-    repeated ::Protobuf::Field::Sfixed64Field, :unpacked_sfixed64, 99, :packed => false
-    repeated ::Protobuf::Field::FloatField, :unpacked_float, 100, :packed => false
-    repeated ::Protobuf::Field::DoubleField, :unpacked_double, 101, :packed => false
-    repeated ::Protobuf::Field::BoolField, :unpacked_bool, 102, :packed => false
-    repeated ::GoogleUnittest::ForeignEnum, :unpacked_enum, 103, :packed => false
+    repeated ::Protobuf::Field::Int32Field, :unpacked_int32, 90
+    repeated ::Protobuf::Field::Int64Field, :unpacked_int64, 91
+    repeated ::Protobuf::Field::Uint32Field, :unpacked_uint32, 92
+    repeated ::Protobuf::Field::Uint64Field, :unpacked_uint64, 93
+    repeated ::Protobuf::Field::Sint32Field, :unpacked_sint32, 94
+    repeated ::Protobuf::Field::Sint64Field, :unpacked_sint64, 95
+    repeated ::Protobuf::Field::Fixed32Field, :unpacked_fixed32, 96
+    repeated ::Protobuf::Field::Fixed64Field, :unpacked_fixed64, 97
+    repeated ::Protobuf::Field::Sfixed32Field, :unpacked_sfixed32, 98
+    repeated ::Protobuf::Field::Sfixed64Field, :unpacked_sfixed64, 99
+    repeated ::Protobuf::Field::FloatField, :unpacked_float, 100
+    repeated ::Protobuf::Field::DoubleField, :unpacked_double, 101
+    repeated ::Protobuf::Field::BoolField, :unpacked_bool, 102
+    repeated ::GoogleUnittest::ForeignEnum, :unpacked_enum, 103
   end
-  
+
   class TestPackedExtensions
-    
     # Extension Fields
     extensions 1...536870912
     repeated ::Protobuf::Field::Int32Field, :packed_int32_extension, 90, :packed => true, :extension => true
@@ -475,12 +484,12 @@ module GoogleUnittest
     repeated ::Protobuf::Field::BoolField, :packed_bool_extension, 102, :packed => true, :extension => true
     repeated ::GoogleUnittest::ForeignEnum, :packed_enum_extension, 103, :packed => true, :extension => true
   end
-  
+
   class TestDynamicExtensions
     class DynamicMessageType
       optional ::Protobuf::Field::Int32Field, :dynamic_field, 2100
     end
-    
+
     optional ::Protobuf::Field::Fixed32Field, :scalar_extension, 2000
     optional ::GoogleUnittest::ForeignEnum, :enum_extension, 2001
     optional ::GoogleUnittest::TestDynamicExtensions::DynamicEnumType, :dynamic_enum_extension, 2002
@@ -489,7 +498,7 @@ module GoogleUnittest
     repeated ::Protobuf::Field::StringField, :repeated_extension, 2005
     repeated ::Protobuf::Field::Sint32Field, :packed_extension, 2006, :packed => true
   end
-  
+
   class TestRepeatedScalarDifferentTagSizes
     repeated ::Protobuf::Field::Fixed32Field, :repeated_fixed32, 12
     repeated ::Protobuf::Field::Int32Field, :repeated_int32, 13
@@ -498,7 +507,7 @@ module GoogleUnittest
     repeated ::Protobuf::Field::FloatField, :repeated_float, 262142
     repeated ::Protobuf::Field::Uint64Field, :repeated_uint64, 262143
   end
-  
+
   class TestParsingMerge
     class RepeatedFieldsGenerator
       repeated ::GoogleUnittest::TestAllTypes, :field1, 1
@@ -507,28 +516,28 @@ module GoogleUnittest
       repeated ::GoogleUnittest::TestAllTypes, :ext1, 1000
       repeated ::GoogleUnittest::TestAllTypes, :ext2, 1001
     end
-    
+
     required ::GoogleUnittest::TestAllTypes, :required_all_types, 1
     optional ::GoogleUnittest::TestAllTypes, :optional_all_types, 2
     repeated ::GoogleUnittest::TestAllTypes, :repeated_all_types, 3
-    
     # Extension Fields
     extensions 1000...536870912
     optional ::GoogleUnittest::TestAllTypes, :optional_ext, 1000, :extension => true
     repeated ::GoogleUnittest::TestAllTypes, :repeated_ext, 1001, :extension => true
   end
-  
+
   class TestCommentInjectionMessage
     optional ::Protobuf::Field::StringField, :a, 1, :default => "*/ <- Neither should this."
   end
-  
-  
+
+
   ##
-  # Services
+  # Service Classes
   #
   class TestService < ::Protobuf::Rpc::Service
     rpc :foo, ::GoogleUnittest::FooRequest, ::GoogleUnittest::FooResponse
     rpc :bar, ::GoogleUnittest::BarRequest, ::GoogleUnittest::BarResponse
   end
+
 end
 
