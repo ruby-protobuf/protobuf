@@ -87,7 +87,7 @@ describe Protobuf::Rpc::Connectors::Common do
     before { subject.stub(:validate_request_type!).and_return(true) }
     before { subject.should_not_receive(:fail) }
 
-    its(:request_bytes) { should eq expected.serialize_to_string }
+    its(:request_bytes) { should eq expected.encode }
   end
 
   describe "#verify_callbacks" do

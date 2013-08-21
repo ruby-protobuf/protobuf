@@ -46,7 +46,7 @@ module Protobuf
       end
 
       def encode(value)
-        value = value.serialize_to_string if value.is_a?(::Protobuf::Message)
+        value = value.encode if value.is_a?(::Protobuf::Message)
         value.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 
         string_size = ::Protobuf::Field::VarintField.encode(value.size)

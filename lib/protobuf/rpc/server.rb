@@ -67,7 +67,7 @@ module Protobuf
       # Parse the incoming request object into our expected request object
       def parse_request_from_buffer
         log_debug { sign_message("Parsing request from buffer: #{@request_data}") }
-        @request.parse_from_string(@request_data)
+        @request.decode(@request_data)
       rescue => error
         exc = ::Protobuf::Rpc::BadRequestData.new("Unable to parse request: #{error.message}")
         log_error { exc.message }

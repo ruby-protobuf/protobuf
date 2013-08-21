@@ -131,7 +131,7 @@ describe Protobuf::Rpc::Service do
 
       context 'when calling the rpc method' do
         context 'when response is implied' do
-          subject { NewTestService.new(:find_with_implied_response, request.serialize_to_string) }
+          subject { NewTestService.new(:find_with_implied_response, request.encode) }
 
           before { subject.find_with_implied_response }
           its(:response) { should be_a(Test::Resource) }
@@ -139,7 +139,7 @@ describe Protobuf::Rpc::Service do
         end
 
         context 'when using respond_with paradigm' do
-          subject { NewTestService.new(:find_with_respond_with, request.serialize_to_string) }
+          subject { NewTestService.new(:find_with_respond_with, request.encode) }
 
           before { subject.find_with_respond_with }
           its(:response) { should be_a(Test::Resource) }
@@ -148,7 +148,7 @@ describe Protobuf::Rpc::Service do
       end
 
       context 'when calling rpc_failed in the method' do
-        subject { NewTestService.new(:find_with_rpc_failed, request.serialize_to_string) }
+        subject { NewTestService.new(:find_with_rpc_failed, request.encode) }
 
         it 'invokes the rpc_failed callback with the error' do
           error = nil

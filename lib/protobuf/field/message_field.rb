@@ -14,13 +14,11 @@ module Protobuf
       end
 
       def decode(bytes)
-        message = type.new
-        message.parse_from_string(bytes)
-        message
+        type.decode(bytes)
       end
 
       def encode(value)
-        bytes = value.serialize_to_string
+        bytes = value.encode
         result = ::Protobuf::Field::VarintField.encode(bytes.size)
         result << bytes
       end
