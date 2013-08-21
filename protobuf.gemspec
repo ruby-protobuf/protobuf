@@ -6,6 +6,7 @@ require "protobuf/version"
   s.name          = 'protobuf'
   s.version       = ::Protobuf::VERSION
   s.date          = ::Time.now.strftime('%Y-%m-%d')
+  s.license       = 'WTFPL'
 
   s.authors       = ['BJ Neilsen', 'Brandon Dewitt', 'Devin Christensen']
   s.email         = ['bj.neilsen+protobuf@gmail.com', 'brandonsdewitt+protobuf@gmail.com', 'quixoten@gmail.com']
