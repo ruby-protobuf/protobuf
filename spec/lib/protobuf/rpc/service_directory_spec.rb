@@ -154,17 +154,11 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     end
 
     describe "#each_listing" do
-      let(:listing_doubles) { { '1' => double('listing 1'),
-                                '2' => double('listing 2'),
-                                '3' => double('listing 3') } }
-
-      before do
+      it "should yield to a block for each listing" do
         send_beacon(:heartbeat, hello_server)
         send_beacon(:heartbeat, echo_server)
         send_beacon(:heartbeat, combo_server)
-      end
 
-      it 'invokes the given block for each listing known by the directory' do
         expect { |block|
           subject.each_listing(&block)
         }.to yield_control.exactly(3).times
@@ -188,10 +182,8 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
       it "should not return expired listings" do
         send_beacon(:heartbeat, hello_server_with_short_ttl)
-        send_beacon(:heartbeat, hello_server)
         sleep 1
-        uuids = 100.times.map { subject.lookup("HelloService").uuid }
-        uuids.count("hello_server_with_short_ttl").should eq 0
+        subject.lookup("HelloService").should be_nil
       end
 
       it "should not return flatlined servers" do
@@ -201,6 +193,14 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
         uuids = 100.times.map { subject.lookup("EchoService").uuid }
         uuids.count("combo").should eq 100
+      end
+
+      it "should return up-to-date listings" do
+        send_beacon(:heartbeat, echo_server)
+        echo_server.port = "7777"
+        send_beacon(:heartbeat, echo_server)
+
+        subject.lookup("EchoService").port.should eq "7777"
       end
     end
 
