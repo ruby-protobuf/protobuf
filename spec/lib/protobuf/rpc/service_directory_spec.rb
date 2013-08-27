@@ -3,185 +3,268 @@ require 'spec_helper'
 require 'protobuf/rpc/service_directory'
 
 describe ::Protobuf::Rpc::ServiceDirectory do
-  let(:instance) { ::Protobuf::Rpc::ServiceDirectory.instance }
+  subject { described_class.instance }
 
-  def listings
-    instance.instance_variable_get(:@listings)
+  let(:echo_server) {
+    ::Protobuf::Rpc::DynamicDiscovery::Server.new(
+      :uuid => 'echo',
+      :address => '127.0.0.1',
+      :port => '1111',
+      :ttl => 10,
+      :services => %w[EchoService]
+    )
+  }
+
+  let(:hello_server) {
+    ::Protobuf::Rpc::DynamicDiscovery::Server.new(
+      :uuid => "hello",
+      :address => '127.0.0.1',
+      :port => "1112",
+      :ttl => 10,
+      :services => %w[HelloService]
+    )
+  }
+
+  let(:hello_server_with_short_ttl) {
+    ::Protobuf::Rpc::DynamicDiscovery::Server.new(
+      :uuid => "hello_server_with_short_ttl",
+      :address => '127.0.0.1',
+      :port => '1113',
+      :ttl => 1,
+      :services => %w[HelloService]
+    )
+  }
+
+  let(:combo_server) {
+    ::Protobuf::Rpc::DynamicDiscovery::Server.new(
+      :uuid => "combo",
+      :address => '127.0.0.1',
+      :port => '1114',
+      :ttl => 10,
+      :services => %w[HelloService EchoService]
+    )
+  }
+
+  before(:all) do
+    @address = "127.0.0.1"
+    @port = 33333
+    @socket = UDPSocket.new
+
+    described_class.address = @address
+    described_class.port = @port
   end
 
-  def duration
-    start = Time.now.to_f
-    yield
-    Time.now.to_f - start
+  def expect_event_trigger(event)
+    ::Protobuf::Lifecycle
+      .should_receive(:trigger)
+      .with(event,
+            an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing))
+      .once
   end
 
-  after do
-    instance.stop
+  def send_beacon(type, server)
+    type = type.to_s.upcase
+    beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
+      :server => server,
+      :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType.fetch(type)
+    )
+
+    @socket.send(beacon.encode, 0, @address, @port)
+    sleep 0.01 # give the service directory time to process the beacon
   end
 
-  it "is a singleton" do
-    instance.should be_a_kind_of(Singleton)
+  it "should be a singleton" do
+    subject.should be_a_kind_of(Singleton)
   end
 
-  describe "#lookup" do
-    let(:server) { double('server', :uuid => '123',
-                          :services => ['Known::Service'],
-                          :address => "0.0.0.0",
-                          :port => 9999,
-                          :ttl => 15) }
-    let(:listing) { ::Protobuf::Rpc::ServiceDirectory::Listing.new(server) }
-
-    before do
-      instance.stub(:running?) { true }
-    end
-
-    it "returns a listing for the given service" do
-      instance.add_listing_for(server)
-      instance.lookup("Known::Service").should eq listing
-    end
-
-    it "returns random listings" do
-      instance.add_listing_for double(:uuid => 1, :ttl => 5, :services => ["Test"])
-      instance.add_listing_for double(:uuid => 2, :ttl => 5, :services => ["Test"])
-
-      uuids = 100.times.map { instance.lookup("Test").uuid }
-      uuids.count(1).should be_within(25).of(50)
-      uuids.count(2).should be_within(25).of(50)
-    end
-
-    it "does not return expired listings" do
-      instance.instance_variable_set(:@listings, {
-        '1' => double(:current? => false, :services => ["Test"]),
-      })
-
-      instance.lookup("Test").should be_nil
-    end
+  it "should be configured to listen to address 127.0.0.1" do
+    described_class.address.should eq '127.0.0.1'
   end
 
-  describe '#add_listing_for' do
-    let(:server) { double('server', { :uuid => '123',
-                                      :services => ['Known::Service'],
-                                      :address => "0.0.0.0",
-                                      :port => 9999,
-                                      :ttl => 15 }) }
-
-    it 'adds the listing to the known @listings' do
-      expect {
-        ::Protobuf::Lifecycle.should_receive(:trigger)
-                              .with('directory.listing.added', an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing))
-                              .once
-        instance.add_listing_for(server)
-      }.to change(listings, :size).from(0).to(1)
-    end
+  it "should be configured to listen to port 33333" do
+    described_class.port.should eq 33333
   end
 
-  describe '#each_listing' do
-    let(:listing_doubles) { { '1' => double('listing 1'),
-                              '2' => double('listing 2'),
-                              '3' => double('listing 3') } }
-
-    before do
-      instance.instance_variable_set(:@listings, listing_doubles)
-    end
-
-    it 'invokes the given block for each listing known by the directory' do
-      yielded_listings = []
-      instance.each_listing do |listing|
-        yielded_listings << listing
-      end
-      yielded_listings.should eq(listing_doubles.values)
-    end
+  it "should defer .start to the instance#start" do
+    described_class.instance.should_receive(:start)
+    described_class.start
   end
 
-  describe "#remove_expired_listings" do
-    let(:listing_doubles) { { '1' => double(:expired? => true),
-                              '2' => double(:expired? => true),
-                              '3' => double(:expired? => false) } }
-
-    before do
-      instance.instance_variable_set(:@listings, listing_doubles)
-    end
-
-    it "removes expired listings" do
-      expect {
-        ::Protobuf::Lifecycle.should_receive(:trigger)
-                              .with('directory.listing.removed', an_instance_of(RSpec::Mocks::Mock))
-                              .twice
-        instance.remove_expired_listings
-      }.to change(listings, :size).from(3).to(1)
-      listings.keys.should eq ['3']
-    end
+  it "should yeild itself to blocks passed to .start" do
+    described_class.instance.stub(:start)
+    expect { |b| described_class.start(&b) }.to yield_with_args(described_class)
   end
 
-  describe "#start" do
-    it "creates a thread" do
-      Thread.should_receive(:new)
-      instance.start
-    end
-
-    it "initializes the socket" do
-      instance.should_receive :init_socket
-      instance.start
-    end
-
-    it "calls #run" do
-      instance.should_receive(:run)
-      instance.start
-      sleep 0.01
-    end
-
-    it "changes the running state" do
-      expect {
-        instance.start
-      }.to change(instance, :running?).from(false).to(true)
-    end
+  it "should defer .stop to the instance#stop" do
+    described_class.instance.should_receive(:stop)
+    described_class.stop
   end
 
-  describe "a running service directory" do
-    let(:socket) { UDPSocket.new }
+  context "stopped" do
+    before { subject.stop }
 
-    def thread
-      instance.instance_variable_get(:@thread)
-    end
-
-    before do
-      described_class.start do |config|
-        config.address = "127.0.0.1"
-        config.port = 33333
-      end
-
-      socket.connect described_class.address, described_class.port
-    end
-
-    context "receiving a heartbeat" do
-      let(:server) { ::Protobuf::Rpc::DynamicDiscovery::Server.new(:uuid => 'heartbeat', :address => '127.0.0.1') }
-      let(:beacon) { ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
-        :server => server,
-        :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
-      )}
-      let(:payload) { beacon.encode }
-
-      it "adds a listing" do
-        instance.should_receive(:add_listing_for).with(server)
-        instance.should_receive(:remove_expired_listings)
-        socket.send(payload, 0)
-        sleep 0.01
+    describe "#lookup" do
+      it "should return nil" do
+        send_beacon(:heartbeat, echo_server)
+        subject.lookup("EchoService").should be_nil
       end
     end
 
-    context "receiving a flatline" do
-      let(:server) { ::Protobuf::Rpc::DynamicDiscovery::Server.new(:uuid => 'flatline', :address => '127.0.0.1') }
-      let(:beacon) { ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
-        :server => server,
-        :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
-      )}
-      let(:payload) { beacon.encode }
+    describe "#restart" do
+      it "should start the service" do
+        subject.restart
+        subject.should be_running
+      end
+    end
 
-      it "removes a listing" do
-        instance.should_receive(:remove_listing_for).with(server)
-        instance.should_receive(:remove_expired_listings)
-        socket.send(payload, 0)
-        sleep 0.01
+    describe "#running" do
+      it "should be false" do
+        subject.should_not be_running
+      end
+    end
+
+    describe "#stop" do
+      it "has no effect" do
+        subject.stop
+      end
+    end
+  end
+
+  context "started" do
+    before { subject.start }
+    after { subject.stop }
+
+    it { should be_running }
+
+    it "should trigger added events" do
+      expect_event_trigger("directory.listing.added")
+      send_beacon(:heartbeat, echo_server)
+    end
+
+    it "should trigger updated events" do
+      send_beacon(:heartbeat, echo_server)
+      expect_event_trigger("directory.listing.updated")
+      send_beacon(:heartbeat, echo_server)
+    end
+
+    it "should trigger removed events" do
+      send_beacon(:heartbeat, echo_server)
+      expect_event_trigger("directory.listing.removed")
+      send_beacon(:flatline, echo_server)
+    end
+
+    describe "#each_listing" do
+      it "should yield to a block for each listing" do
+        send_beacon(:heartbeat, hello_server)
+        send_beacon(:heartbeat, echo_server)
+        send_beacon(:heartbeat, combo_server)
+
+        expect { |block|
+          subject.each_listing(&block)
+        }.to yield_control.exactly(3).times
+      end
+    end
+
+    describe "#lookup" do
+      it "should provide listings by service" do
+        send_beacon(:heartbeat, hello_server)
+        subject.lookup("HelloService").to_hash.should eq hello_server.to_hash
+      end
+
+      it "should return random listings" do
+        send_beacon(:heartbeat, hello_server)
+        send_beacon(:heartbeat, combo_server)
+
+        uuids = 100.times.map { subject.lookup("HelloService").uuid }
+        uuids.count("hello").should be_within(25).of(50)
+        uuids.count("combo").should be_within(25).of(50)
+      end
+
+      it "should not return expired listings" do
+        send_beacon(:heartbeat, hello_server_with_short_ttl)
+        sleep 1
+        subject.lookup("HelloService").should be_nil
+      end
+
+      it "should not return flatlined servers" do
+        send_beacon(:heartbeat, echo_server)
+        send_beacon(:heartbeat, combo_server)
+        send_beacon(:flatline, echo_server)
+
+        uuids = 100.times.map { subject.lookup("EchoService").uuid }
+        uuids.count("combo").should eq 100
+      end
+
+      it "should return up-to-date listings" do
+        send_beacon(:heartbeat, echo_server)
+        echo_server.port = "7777"
+        send_beacon(:heartbeat, echo_server)
+
+        subject.lookup("EchoService").port.should eq "7777"
+      end
+    end
+
+    describe "#restart" do
+      it "should clear all listings" do
+        send_beacon(:heartbeat, echo_server)
+        send_beacon(:heartbeat, combo_server)
+        subject.restart
+        subject.lookup("EchoService").should be_nil
+      end
+    end
+
+    describe "#running" do
+      it "should be true" do
+        subject.should be_running
+      end
+    end
+
+    describe "#stop" do
+      it "should clear all listings" do
+        send_beacon(:heartbeat, echo_server)
+        send_beacon(:heartbeat, combo_server)
+        subject.stop
+        subject.lookup("EchoService").should be_nil
+      end
+
+      it "should stop the server" do
+        subject.stop
+        subject.should_not be_running
+      end
+    end
+  end
+
+  if ENV.key?("BENCH")
+    context "performance" do
+      let(:servers) {
+        100.times.collect do |x|
+          ::Protobuf::Rpc::DynamicDiscovery::Server.new(
+            :uuid => server_name = "performance_server#{x + 1}",
+            :address => '127.0.0.1',
+            :port => (5555 + x).to_s,
+            :ttl => rand(1..5),
+            :services => 10.times.collect { |y| "PerformanceService#{y}" }
+          )
+        end
+      }
+
+      before do
+        require 'benchmark'
+        subject.start
+        servers.each { |server| send_beacon(:heartbeat, server) }
+      end
+
+      after do
+        subject.stop
+      end
+
+      it "should perform lookups in constant time" do
+        print "\n\n"
+        Benchmark.bm(17) do |x|
+          x.report("  1_000 lookups:") {   1_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
+          x.report(" 10_000 lookups:") {  10_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
+          x.report("100_000 lookups:") { 100_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
+        end
       end
     end
   end
