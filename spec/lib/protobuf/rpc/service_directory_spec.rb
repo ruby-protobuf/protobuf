@@ -233,4 +233,38 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       end
     end
   end
+
+  if ENV.key?("BENCH")
+    context "performance" do
+      let(:servers) {
+        100.times.collect do |x|
+          ::Protobuf::Rpc::DynamicDiscovery::Server.new(
+            :uuid => server_name = "performance_server#{x + 1}",
+            :address => '127.0.0.1',
+            :port => (5555 + x).to_s,
+            :ttl => 10,
+            :services => 10.times.collect { |y| "PerformanceService#{y}" }
+          )
+        end
+      }
+
+      before do
+        require 'benchmark'
+        subject.start
+        servers.each { |server| send_beacon(:heartbeat, server) }
+      end
+
+      after do
+        subject.stop
+      end
+
+      it "should perform lookups in constant time" do
+        puts ""
+        Benchmark.bm do |x|
+          x.report { 100_000.times { subject.lookup("PerformanceService#{rand(1..10)}") } }
+        end
+        puts ""
+      end
+    end
+  end
 end
