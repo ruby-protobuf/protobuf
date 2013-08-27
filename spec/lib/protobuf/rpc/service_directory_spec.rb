@@ -261,7 +261,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       it "should perform lookups in constant time" do
         puts ""
         Benchmark.bm do |x|
-          x.report { 100_000.times { subject.lookup("PerformanceService#{rand(1..10)}") } }
+          x.report { 1_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
         end
         puts ""
       end
