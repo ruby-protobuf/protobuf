@@ -242,7 +242,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
             :uuid => server_name = "performance_server#{x + 1}",
             :address => '127.0.0.1',
             :port => (5555 + x).to_s,
-            :ttl => 10,
+            :ttl => rand(1..5),
             :services => 10.times.collect { |y| "PerformanceService#{y}" }
           )
         end
@@ -259,11 +259,12 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       end
 
       it "should perform lookups in constant time" do
-        puts ""
-        Benchmark.bm do |x|
-          x.report { 1_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
+        print "\n\n"
+        Benchmark.bm(17) do |x|
+          x.report("  1_000 lookups:") {   1_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
+          x.report(" 10_000 lookups:") {  10_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
+          x.report("100_000 lookups:") { 100_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
         end
-        puts ""
       end
     end
   end
