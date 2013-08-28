@@ -1,4 +1,4 @@
 module Protobuf
-  VERSION = '2.7.11'
+  VERSION = '2.8.1'
   PROTOC_VERSION = '2.5.0'
 end
