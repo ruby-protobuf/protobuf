@@ -3,8 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/protobuf.png)](http://badge.fury.io/rb/protobuf)
 [![Build Status](https://secure.travis-ci.org/localshred/protobuf.png?branch=master)](https://travis-ci.org/localshred/protobuf)
 
-___See [CHANGES.md](https://github.com/localshred/protobuf/blob/master/CHANGES.md) for up-to-date 
- API changes.___
+___See [CHANGES.md](https://github.com/localshred/protobuf/blob/master/CHANGES.md) or [Release Notes](https://github.com/localshred/protobuf/releases) for significant version changes.___
 
 Protobuf is an implementation of [Google's protocol buffers][google-pb] in ruby, version 2.5.0 is currently supported.
 
