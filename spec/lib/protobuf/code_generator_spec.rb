@@ -15,8 +15,8 @@ describe ::Protobuf::CodeGenerator do
     let(:output_file1) { COMPILER::CodeGeneratorResponse::File.new(:name => 'test/foo.pb.rb') }
     let(:output_file2) { COMPILER::CodeGeneratorResponse::File.new(:name => 'test/bar.pb.rb') }
 
-    let(:file_generator1) { mock('file generator 1', :generate_output_file => output_file1) }
-    let(:file_generator2) { mock('file generator 2', :generate_output_file => output_file2) }
+    let(:file_generator1) { double('file generator 1', :generate_output_file => output_file1) }
+    let(:file_generator2) { double('file generator 2', :generate_output_file => output_file2) }
 
     let(:request_bytes) do
       COMPILER::CodeGeneratorRequest.encode(:proto_file => [ input_file1, input_file2 ])

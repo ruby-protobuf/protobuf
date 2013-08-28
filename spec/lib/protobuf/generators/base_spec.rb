@@ -5,10 +5,10 @@ require 'protobuf/generators/base'
 
 describe ::Protobuf::Generators::Base do
 
-  subject { described_class.new(mock) }
+  subject { described_class.new(double) }
 
   context 'namespaces' do
-    let(:descriptor) { mock(:name => 'Baz') }
+    let(:descriptor) { double(:name => 'Baz') }
     subject { described_class.new(descriptor, 0, :namespace => [ :foo, :bar ]) }
     its(:type_namespace) { should eq [ :foo, :bar, 'Baz' ] }
     its(:fully_qualified_type_namespace) { should eq '.foo.bar.Baz' }
@@ -55,7 +55,7 @@ describe ::Protobuf::Generators::Base do
       end
     end
 
-    subject { ToStringTest.new(mock) }
+    subject { ToStringTest.new(double) }
 
     it 'compiles and returns the contents' do
       10.times do
