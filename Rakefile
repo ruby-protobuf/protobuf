@@ -1,5 +1,5 @@
-$:.push File.expand_path("./", File.dirname(__FILE__))
-$:.push File.expand_path("./spec", File.dirname(__FILE__))
+$: << ::File.expand_path('../', __FILE__)
+$: << ::File.expand_path('../spec', __FILE__)
 
 require "rubygems"
 require "rubygems/package_task"
@@ -13,17 +13,3 @@ task :default => :spec
 
 desc "Run specs"
 RSpec::Core::RakeTask.new(:spec)
-
-##
-# rake-compiler
-#
-spec = Gem::Specification.load("protobuf.gemspec")
-
-Gem::PackageTask.new(spec) do |pkg|
-end
-
-if RUBY_PLATFORM =~ /java/
-  require "rake/javaextensiontask"
-else
-  require "rake/extensiontask"
-end

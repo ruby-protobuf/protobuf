@@ -67,7 +67,7 @@ describe Protobuf::Rpc::ServiceDispatcher do
 
       context 'an object that responds to to_hash but is not a hash' do
         let(:hashable) do
-          mock('hashable', :to_hash => { :name => 'hashable' })
+          double('hashable', :to_hash => { :name => 'hashable' })
         end
         before { subject.callable_method.should_receive(:call) }
         before { subject.service.stub(:response).and_return(hashable) }
@@ -78,7 +78,7 @@ describe Protobuf::Rpc::ServiceDispatcher do
 
       context 'an object that responds to to_proto' do
         let(:protoable) do
-          mock('protoable', :to_proto => Test::Resource.new(:name => 'protoable'))
+          double('protoable', :to_proto => Test::Resource.new(:name => 'protoable'))
         end
         before { subject.callable_method.should_receive(:call) }
         before { subject.service.stub(:response).and_return(protoable) }

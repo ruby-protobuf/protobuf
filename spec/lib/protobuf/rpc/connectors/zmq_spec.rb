@@ -12,20 +12,20 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
     :port => "9400"
   }}
 
-  let(:socket_mock) do
-    sm = mock(::ZMQ::Socket)
+  let(:socket_double) do
+    sm = double(::ZMQ::Socket)
     sm.stub(:connect).and_return(0)
     sm
   end
 
-  let(:zmq_context_mock) do
-    zc = mock(::ZMQ::Context)
-    zc.stub(:socket).and_return(socket_mock)
+  let(:zmq_context_double) do
+    zc = double(::ZMQ::Context)
+    zc.stub(:socket).and_return(socket_double)
     zc
   end
 
   before do
-    ::ZMQ::Context.stub(:new).and_return(zmq_context_mock)
+    ::ZMQ::Context.stub(:new).and_return(zmq_context_double)
   end
 
   describe "#lookup_server_uri" do

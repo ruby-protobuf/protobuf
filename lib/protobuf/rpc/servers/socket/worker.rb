@@ -20,8 +20,6 @@ module Protobuf
           request_buffer << read_data
           @request_data = request_buffer.data
 
-          @stats.request_size = request_buffer.size
-
           log_debug { sign_message("handling request") }
           handle_client if request_buffer.flushed?
         end

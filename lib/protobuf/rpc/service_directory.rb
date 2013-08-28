@@ -1,6 +1,7 @@
 require 'delegate'
 require 'singleton'
 require 'socket'
+require 'set'
 require 'thread'
 require 'timeout'
 
@@ -21,20 +22,32 @@ module Protobuf
         attr_reader :expires_at
 
         def initialize(server)
-          @server = server
-          @expires_at = Time.now.to_i + ttl
+          update(server)
         end
 
         def current?
           !expired?
         end
 
+        def eql?(other)
+          uuid.eql?(other.uuid)
+        end
+
         def expired?
           Time.now.to_i >= @expires_at
         end
 
+        def hash
+          uuid.hash
+        end
+
         def ttl
-          [super.to_i, 3].max
+          [super.to_i, 1].max
+        end
+
+        def update(server)
+          @server = server
+          @expires_at = Time.now.to_i + ttl
         end
 
         def __getobj__
@@ -65,70 +78,22 @@ module Protobuf
         self.instance.stop
       end
 
+      #
       # Instance Methods
       #
       def initialize
-        @listings = {}
-        @mutex = Mutex.new
-      end
-
-      def add_listing_for(server)
-        if server && server.uuid
-          @mutex.synchronize do
-            action = @listings.key?(server.uuid) ? :updated : :added
-            log_debug { sign_message("#{action} server: #{server.inspect}") }
-
-            listing = Listing.new(server)
-            @listings[server.uuid] = listing
-            trigger(action, listing)
-          end
-        else
-          log_info { sign_message("Cannot add server without uuid: #{server.inspect}") }
-        end
+        reset
       end
 
       def each_listing(&block)
-        @listings.each_value(&block)
+        @listings_by_uuid.each_value(&block)
       end
 
       def lookup(service)
         if running?
-          @mutex.synchronize do
-            listings = @listings.values.select do |listing|
-              listing.services.any? do |listed_service|
-                listing.current? && listed_service == service.to_s
-              end
-            end
-
-            listings.sample
+          if @listings_by_service.key?(service)
+            @listings_by_service[service].entries.sample
           end
-        end
-      end
-
-      def remove_expired_listings
-        @mutex.synchronize do
-          @listings.delete_if do |uuid, listing|
-            if listing.expired?
-              trigger(:removed, listing)
-              true
-            else
-              false
-            end
-          end
-        end
-      end
-
-      def remove_listing_for(server)
-        if server && server.uuid
-          log_debug { sign_message("Removing server: #{server.inspect}") }
-
-          @mutex.synchronize do
-            deleted_listing = @listings.delete(server.uuid)
-            trigger(:removed, deleted_listing)
-          end
-
-        else
-          log_info { sign_message("Cannot remove server without uuid: #{server.inspect}") }
         end
       end
 
@@ -154,17 +119,33 @@ module Protobuf
       def stop
         log_info { sign_message("Stopping directory") }
 
-        @mutex.synchronize do
-          @thread.try(:kill)
-          @thread = nil
-          @listings = {}
-        end
-
+        @thread.try(:kill).try(:join)
         @socket.try(:close)
-        @socket = nil
+
+        reset
       end
 
       private
+
+      def add_or_update_listing(uuid, server)
+        listing = @listings_by_uuid[uuid]
+
+        if listing
+          action = :updated
+          listing.update(server)
+        else
+          action = :added
+          listing = Listing.new(server)
+          @listings_by_uuid[uuid] = listing
+        end
+
+        listing.services.each do |service|
+          @listings_by_service[service] << listing
+        end
+
+        trigger(action, listing)
+        log_debug { sign_message("#{action} server: #{server.inspect}") }
+      end
 
       def init_socket
         @socket = UDPSocket.new
@@ -178,30 +159,22 @@ module Protobuf
       end
 
       def process_beacon(beacon)
-        case beacon.beacon_type
-        when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
-          add_listing_for(beacon.server)
-        when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
-          remove_listing_for(beacon.server)
+        server = beacon.server
+        uuid = server.try(:uuid)
+
+        if server && uuid
+          case beacon.beacon_type
+          when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT
+            add_or_update_listing(uuid, server)
+          when ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE
+            remove_listing(uuid)
+          end
+        else
+          log_info { sign_message("Ignoring incomplete beacon: #{beacon.inspect}") }
         end
       end
 
-      def run
-        loop do
-          beacon = wait_for_beacon
-          process_beacon(beacon)
-          remove_expired_listings
-        end
-      rescue => e
-        log_debug { sign_message("error: (#{e.class}) #{e.message}") }
-        retry
-      end
-
-      def trigger(action, listing)
-        ::Protobuf::Lifecycle.trigger("directory.listing.#{action}", listing)
-      end
-
-      def wait_for_beacon
+      def read_beacon
         data, addr = @socket.recvfrom(2048)
 
         beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.decode(data)
@@ -210,6 +183,55 @@ module Protobuf
         beacon.try(:server).try(:address=, addr[3])
 
         beacon
+      end
+
+      def remove_expired_listings
+        log_debug { sign_message("Removing expired listings") }
+        @listings_by_uuid.each do |uuid, listing|
+          remove_listing(uuid) if listing.expired?
+        end
+      end
+
+      def remove_listing(uuid)
+        listing = @listings_by_uuid[uuid] or return
+
+        log_debug { sign_message("Removing listing: #{listing.inspect}") }
+
+        @listings_by_service.each do |service, listings|
+          listings.delete(listing)
+        end
+
+        trigger(:removed, @listings_by_uuid.delete(uuid))
+      end
+
+      def reset
+        @thread = nil
+        @socket = nil
+        @listings_by_uuid = {}
+        @listings_by_service = Hash.new { |h, k| h[k] = Set.new }
+      end
+
+      def run
+        sweep_interval = 1 # sweep expired listings every 1 second
+        next_sweep = Time.now.to_i + sweep_interval
+
+        loop do
+          timeout = [next_sweep - Time.now.to_i, 0.1].max
+          readable = IO.select([@socket], nil, nil, timeout)
+          process_beacon(read_beacon) if readable
+
+          if Time.now.to_i >= next_sweep
+            remove_expired_listings
+            next_sweep = Time.now.to_i + sweep_interval
+          end
+        end
+      rescue => e
+        log_debug { sign_message("ERROR: (#{e.class}) #{e.message}\n#{e.backtrace.join("\n")}") }
+        retry
+      end
+
+      def trigger(action, listing)
+        ::Protobuf::Lifecycle.trigger("directory.listing.#{action}", listing)
       end
     end
   end

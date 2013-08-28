@@ -1,3 +1,11 @@
+2.8.1
+----------
+
+- Improve `ServiceDirectory` lookup speed ~10x, lookups now done in constant time (devin-c).
+- Add Timestamp to end of rpc stat log (represents ending time of request processing).
+- Set `request_size` in the rpc stat within ZMQ Worker (previously missing).
+- Ensure `request_size` and `response_size` are set on rpc stat for client requests.
+
 2.8.0
 -----------
 
