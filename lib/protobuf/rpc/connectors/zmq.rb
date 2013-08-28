@@ -115,7 +115,6 @@ module Protobuf
         def send_request_with_lazy_pirate
           attempt = 0
           timeout = options[:timeout].to_f
-          @stats.request_size = @request_data.size
 
           begin
             attempt += 1
