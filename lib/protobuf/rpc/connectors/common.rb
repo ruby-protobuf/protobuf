@@ -74,7 +74,7 @@ module Protobuf
           log_debug { sign_message("Parsing response from server (connection closed)") }
 
           # Parse out the raw response
-          @stats.response_size = @response_data.size
+          @stats.response_size = @response_data.size unless @response_data.nil?
           response_wrapper = Protobuf::Socketrpc::Response.decode(@response_data)
 
           # Determine success or failure based on parsed data

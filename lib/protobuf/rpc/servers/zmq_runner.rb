@@ -20,7 +20,7 @@ module Protobuf
       def run
         @server = ::Protobuf::Rpc::Zmq::Server.new(@options)
         register_signals
-        @server.run do 
+        @server.run do
           yield if block_given?
         end
       end

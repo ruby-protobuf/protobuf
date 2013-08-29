@@ -416,7 +416,7 @@ describe Protobuf::Rpc::ServiceFilters do
           subject.__send__(:run_filters, :endpoint)
           subject.called.should eq([ :filter_with_error3, :custom_error_occurred ])
           subject.ex_class.should eq CustomError3
-        }.not_to raise_error(CustomError3)
+        }.not_to raise_error
       end
     end
 
@@ -437,7 +437,7 @@ describe Protobuf::Rpc::ServiceFilters do
             subject.__send__(:run_filters, :endpoint)
             subject.called.should eq([ :filter_with_error1, :custom_error_occurred ])
             subject.ex_class.should eq CustomError1
-          }.not_to raise_error(CustomError1)
+          }.not_to raise_error
         end
       end
     end
@@ -457,7 +457,7 @@ describe Protobuf::Rpc::ServiceFilters do
           subject.__send__(:run_filters, :endpoint)
           subject.called.should eq([ :filter_with_error1, :block_rescue_handler ])
           subject.ex_class.should eq CustomError1
-        }.not_to raise_error(CustomError1)
+        }.not_to raise_error
       end
     end
 

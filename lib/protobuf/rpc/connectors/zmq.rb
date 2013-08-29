@@ -89,6 +89,7 @@ module Protobuf
         def lookup_server_uri
           begin
             listing = service_directory.lookup(service)
+
             host = listing.try(:address) || options[:host]
             port = listing.try(:port) || options[:port]
           end until host_alive?( host )
@@ -144,9 +145,11 @@ module Protobuf
             raise RequestTimeout
           end
         ensure
-          log_debug { sign_message("Closing Socket")  }
-          zmq_error_check(socket.close, :socket_close)
-          log_debug { sign_message("Socket closed")  }
+          unless socket.nil?
+            log_debug { sign_message("Closing Socket")  }
+            zmq_error_check(socket.close, :socket_close)
+            log_debug { sign_message("Socket closed")  }
+          end
         end
 
         # The service we're attempting to connect to

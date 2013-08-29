@@ -38,12 +38,6 @@ ENV.delete("PB_IGNORE_DEPRECATIONS")
       %x{#{cmd}}
     end
   end
-
-  c.around(:each) do |example|
-    Timeout::timeout(10) {
-      example.run
-    }
-  end
 end
 
 support_proto_glob = File.expand_path('../support/**/*.pb.rb', __FILE__)
