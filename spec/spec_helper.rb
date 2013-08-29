@@ -1,6 +1,7 @@
 require 'simplecov'
 SimpleCov.start
 
+require 'timeout'
 require 'rubygems'
 require 'bundler'
 Bundler.setup :default, :development, :test
@@ -36,6 +37,12 @@ ENV.delete("PB_IGNORE_DEPRECATIONS")
       puts cmd
       %x{#{cmd}}
     end
+  end
+
+  c.around(:each) do |example|
+    Timeout::timeout(10) {
+      example.run
+    }
   end
 end
 

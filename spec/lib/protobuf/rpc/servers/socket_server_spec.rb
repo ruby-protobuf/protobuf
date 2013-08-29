@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'spec/support/test/resource_service'
 require 'protobuf/rpc/servers/socket_runner'
-require 'protobuf/evented'
 require 'protobuf/socket'
 
 describe Protobuf::Rpc::Socket::Server do
@@ -30,11 +29,6 @@ describe Protobuf::Rpc::Socket::Server do
 
   it "provides a stop method" do
     @server.should respond_to(:stop)
-  end
-
-  it "provides a Runner class" do
-    runner_class = described_class.to_s.gsub(/Evented::Server/, "EventedRunner")
-    expect { runner_class.constantize }.to_not raise_error
   end
 
   it "signals the Server is running" do

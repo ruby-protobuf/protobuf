@@ -2,7 +2,6 @@ require 'thor'
 require 'protobuf/version'
 require 'protobuf/lifecycle'
 require 'protobuf/logger'
-require 'protobuf/rpc/servers/evented_runner'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq_runner'
 
@@ -27,7 +26,6 @@ module Protobuf
     option :level,                      :type => :numeric, :default => ::Logger::INFO, :aliases => %w(-v), :desc => 'Log level to use, 0-5 (see http://www.ruby-doc.org/stdlib/libdoc/logger/rdoc/)'
 
     option :socket,                     :type => :boolean, :aliases => %w(-s), :desc => 'Socket Mode for server and client connections.'
-    option :evented,                    :type => :boolean, :aliases => %w(-m), :desc => 'Evented Mode for server and client connections (uses EventMachine).'
     option :zmq,                        :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
 
     option :beacon_interval,            :type => :numeric, :desc => 'Broadcast beacons every N seconds. (default: 5)'
@@ -110,16 +108,12 @@ module Protobuf
           @runner_mode = :socket
         elsif options.zmq?
           @runner_mode = :zmq
-        elsif options.evented?
-          @runner_mode = :evented
         else
           case server_type = ENV["PB_SERVER_TYPE"]
           when nil, /socket/i
             @runner_mode = :socket
           when /zmq/i
             @runner_mode = :zmq
-          when /evented/i
-            @runner_mode = :evented
           else
             say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
             @runner_mode = :socket
@@ -149,8 +143,6 @@ module Protobuf
       def create_runner
         debug_say("Creating #{@runner_mode} runner")
         @runner = case @runner_mode
-                  when :evented
-                    create_evented_runner
                   when :zmq
                     create_zmq_runner
                   when :socket
@@ -171,11 +163,7 @@ module Protobuf
 
       # Internal helper to determine if the modes are multi-set which is not valid.
       def multi_mode?
-        [
-          options.zmq?,
-          options.evented?,
-          options.socket?,
-        ].count(true) > 1
+        options.zmq? && options.socket?
       end
 
       # Require the application file given, exiting if the file doesn't exist.
@@ -208,12 +196,6 @@ module Protobuf
         end
 
         exit(1)
-      end
-
-      def create_evented_runner
-        require 'protobuf/evented'
-
-        @runner = ::Protobuf::Rpc::EventedRunner.new(runner_options)
       end
 
       def create_socket_runner
