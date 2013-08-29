@@ -6,15 +6,12 @@ require 'protobuf/rpc/service_directory'
 describe 'Functional ZMQ Client' do
   before(:all) do
     load "protobuf/zmq.rb"
-    options = {
-      :host => "127.0.0.1",
-      :port => 9399,
-      :worker_port => 9408,
-      :backlog => 100,
-      :threshold => 100,
-      :threads => 5
-    }
-    @runner = ::Protobuf::Rpc::ZmqRunner.new(options)
+    @runner = ::Protobuf::Rpc::ZmqRunner.new({ :host => "127.0.0.1",
+                                               :port => 9399,
+                                               :worker_port => 9408,
+                                               :backlog => 100,
+                                               :threshold => 100,
+                                               :threads => 5 })
     @server_thread = Thread.new(@runner) { |runner| runner.run }
     Thread.pass until @runner.running?
   end
@@ -42,22 +39,24 @@ describe 'Functional ZMQ Client' do
   end
 
   it 'runs under heavy load' do
-    10.times.map do |y|
-      Thread.new do
-        client = ::Test::ResourceService.client
+    100.times do |x|
+      50.times.map do |y|
+        Thread.new do
+          client = ::Test::ResourceService.client
 
-        client.find(:name => 'Test Name', :active => true) do |c|
-          c.on_success do |succ|
-            succ.name.should eq("Test Name")
-            succ.status.should eq(::Test::StatusType::ENABLED)
-          end
+          client.find(:name => 'Test Name', :active => true) do |c|
+            c.on_success do |succ|
+              succ.name.should eq("Test Name")
+              succ.status.should eq(::Test::StatusType::ENABLED)
+            end
 
-          c.on_failure do |err|
-            raise err.inspect
+            c.on_failure do |err|
+              raise err.inspect
+            end
           end
         end
-      end
-    end.each(&:join)
+      end.each(&:join)
+    end
   end
 
   context 'when a message is malformed' do
