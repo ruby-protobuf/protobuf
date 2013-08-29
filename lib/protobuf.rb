@@ -19,7 +19,7 @@ require 'active_support/json'
 module Protobuf
 
   # See Protobuf#connector_type documentation.
-  CONNECTORS = [ :socket, :zmq, :evented ].freeze
+  CONNECTORS = [ :socket, :zmq ].freeze
 
   # Default is Socket as it has no external dependencies.
   DEFAULT_CONNECTOR = :socket
@@ -64,7 +64,7 @@ module Protobuf
   # This optomization provides a huge boost in speed to rpc requests.
   def self.gc_pause_server_request?
     return @_gc_pause_server_request unless @_gc_pause_server_request.nil?
-    gc_pause_server_request = false
+    self.gc_pause_server_request = false
   end
 
   def self.gc_pause_server_request=(value)
@@ -83,7 +83,7 @@ module Protobuf
   # The rpc_server option will override the ENV setting.
   def self.print_deprecation_warnings?
     return @_print_deprecation_warnings unless @_print_deprecation_warnings.nil?
-    print_deprecation_warnings = ENV.key?('PB_IGNORE_DEPRECATIONS') ? false : true
+    self.print_deprecation_warnings = ENV.key?('PB_IGNORE_DEPRECATIONS') ? false : true
   end
 
   def self.print_deprecation_warnings=(value)

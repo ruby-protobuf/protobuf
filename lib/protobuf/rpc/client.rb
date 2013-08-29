@@ -134,7 +134,7 @@ module Protobuf
         end
       end
 
-      # Send the request to the service through eventmachine.
+      # Send the request to the service.
       # This method is usually never called directly
       # but is invoked by method_missing (see docs above).
       #
