@@ -62,14 +62,14 @@ class StubServer
   end
 
   def start_socket_server
-    @sock_runner = ::Protobuf::Rpc::SocketRunner.new(opt)
+    @sock_runner = ::Protobuf::Rpc::SocketRunner.new(options)
     @sock_thread = Thread.new(@sock_runner) { |runner| runner.run }
     @sock_thread.abort_on_exception = true # Set for testing purposes
     Thread.pass until @sock_runner.running?
   end
 
   def start_zmq_server
-    @zmq_runnger = ::Protobuf::Rpc::ZmqRunner.new(opt)
+    @zmq_runner = ::Protobuf::Rpc::ZmqRunner.new(options)
     @zmq_thread = Thread.new(@zmq_runner) { |runner| runner.run }
     @zmq_thread.abort_on_exception = true # Set for testing purposes
     Thread.pass until @zmq_runner.running?

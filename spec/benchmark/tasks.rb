@@ -1,4 +1,5 @@
 require 'benchmark'
+require 'protobuf/socket'
 require 'support/all'
 require 'support/test/resource_service'
 
@@ -105,7 +106,7 @@ namespace :benchmark do
     args.with_defaults(:number => 1000, :length => 100)
 
     Benchmark.bm(10) do |bench|
-      # zmq_client_zmq_server(args[:number], args[:length], bench)
+      zmq_client_zmq_server(args[:number], args[:length], bench)
       sock_client_sock_server(args[:number], args[:length], bench)
     end
   end
