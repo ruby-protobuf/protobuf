@@ -1,3 +1,8 @@
+2.8.2
+----------
+
+- Remove the <4.0 version constraint on ActiveSupport.
+
 2.8.1
 ----------
 
