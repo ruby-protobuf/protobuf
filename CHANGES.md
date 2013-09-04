@@ -1,3 +1,8 @@
+2.8.3
+----------
+
+- Add Deprecation warning when requiring `protobuf/evented`. Version 3.x will not support the eventmachine transport layer for client or server.
+
 2.8.2
 ----------
 
