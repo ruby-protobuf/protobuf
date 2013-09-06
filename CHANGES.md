@@ -1,3 +1,8 @@
+2.8.4
+----------
+
+- Fix issue where frozen strings assigned in a repeated field would cause encoding runtime errors. (#117)
+
 2.8.3
 ----------
 
