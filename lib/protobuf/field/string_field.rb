@@ -10,8 +10,9 @@ module Protobuf
         bytes
       end
 
+      # TODO: make replace character configurable?
       def encode(value)
-        # TODO: make replace character configurable?
+        value = value.dup if value.frozen?
         value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
         value.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 

@@ -49,6 +49,8 @@ module Test
   class ResourceFindRequest
     required ::Protobuf::Field::StringField, :name, 1
     optional ::Protobuf::Field::BoolField, :active, 2
+    repeated ::Protobuf::Field::StringField, :widgets, 3
+    repeated ::Protobuf::Field::BytesField, :widget_bytes, 4
   end
 
   class ResourceSleepRequest
