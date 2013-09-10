@@ -49,6 +49,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     @address = "127.0.0.1"
     @port = 33333
     @socket = UDPSocket.new
+    EchoService = Class.new
 
     described_class.address = @address
     described_class.port = @port
@@ -202,6 +203,13 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
         subject.lookup("EchoService").port.should eq "7777"
       end
+
+      context 'when given service identifier is a class name' do
+        it 'returns the listing corresponding to the class name' do
+          send_beacon(:heartbeat, echo_server)
+          subject.lookup(EchoService).uuid.should eq echo_server.uuid
+        end
+      end
     end
 
     describe "#restart" do
@@ -239,7 +247,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       let(:servers) {
         100.times.collect do |x|
           ::Protobuf::Rpc::DynamicDiscovery::Server.new(
-            :uuid => server_name = "performance_server#{x + 1}",
+            :uuid => "performance_server#{x + 1}",
             :address => '127.0.0.1',
             :port => (5555 + x).to_s,
             :ttl => rand(1..5),
