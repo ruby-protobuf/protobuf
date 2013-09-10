@@ -91,8 +91,8 @@ module Protobuf
 
       def lookup(service)
         if running?
-          if @listings_by_service.key?(service)
-            @listings_by_service[service].entries.sample
+          if @listings_by_service.key?(service.to_s)
+            @listings_by_service[service.to_s].entries.sample
           end
         end
       end
