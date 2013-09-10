@@ -1,3 +1,8 @@
+2.8.5
+----------
+
+- Fix issue where ServiceDirectory lookups were failing when given a class name, breaking the directory load balancing. (#119)
+
 2.8.4
 ----------
 
