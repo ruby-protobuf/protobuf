@@ -1,3 +1,18 @@
+2.8.5
+----------
+
+- Fix issue where ServiceDirectory lookups were failing when given a class name, breaking the directory load balancing. (#119)
+
+2.8.4
+----------
+
+- Fix issue where frozen strings assigned in a repeated field would cause encoding runtime errors. (#117)
+
+2.8.3
+----------
+
+- Add Deprecation warning when requiring `protobuf/evented`. Version 3.x will not support the eventmachine transport layer for client or server.
+
 2.8.2
 ----------
 
