@@ -1,3 +1,8 @@
+2.8.6
+---------
+
+- Fix string/byte encoding issue when unicode characters present. Reported by @foxban. This was also backported to v2.7.12. [#120]
+
 2.8.5
 ----------
 
@@ -34,6 +39,11 @@
 - Added service dynamic discovery to the ZMQ connector and server. [#91, @devin-c]
 - No longer creating `-java` platform gem due to removal of c++ compiler.
 - Added WTFPL license.
+
+2.7.12
+-----------
+
+- Backport string/byte encoding issue when unicode characters present. [code: #122, original issue: #120]
 
 2.0.0
 -----------
