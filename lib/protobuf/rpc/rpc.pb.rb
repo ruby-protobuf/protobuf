@@ -4,22 +4,13 @@
 require 'protobuf/message'
 
 module Protobuf
+
   module Socketrpc
+  
     ##
     # Enum Classes
     #
-    class ErrorReason < ::Protobuf::Enum; end
-    
-    ##
-    # Message Classes
-    #
-    class Request < ::Protobuf::Message; end
-    class Response < ::Protobuf::Message; end
-    
-    ##
-    # Enum Values
-    #
-    class ErrorReason
+    class ErrorReason < ::Protobuf::Enum
       define :BAD_REQUEST_DATA, 0
       define :BAD_REQUEST_PROTO, 1
       define :SERVICE_NOT_FOUND, 2
@@ -31,6 +22,13 @@ module Protobuf
       define :UNKNOWN_HOST, 8
       define :IO_ERROR, 9
     end
+    
+    
+    ##
+    # Message Classes
+    #
+    class Request < ::Protobuf::Message; end
+    class Response < ::Protobuf::Message; end
     
     ##
     # Message Fields
@@ -49,5 +47,8 @@ module Protobuf
       optional ::Protobuf::Socketrpc::ErrorReason, :error_reason, 4
     end
     
+    
   end
+  
 end
+

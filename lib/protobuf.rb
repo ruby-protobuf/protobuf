@@ -24,7 +24,7 @@ module Protobuf
   # Default is Socket as it has no external dependencies.
   DEFAULT_CONNECTOR = :socket
 
-	module_function
+  module_function
 
   # Client Host
   #
@@ -62,14 +62,14 @@ module Protobuf
   # the Garbage Collector when handling an rpc request.
   # Once the request is completed, the GC is enabled again.
   # This optomization provides a huge boost in speed to rpc requests.
-	def self.gc_pause_server_request?
-		return @_gc_pause_server_request unless @_gc_pause_server_request.nil?
-		gc_pause_server_request = false
-	end
+  def self.gc_pause_server_request?
+    return @_gc_pause_server_request unless @_gc_pause_server_request.nil?
+    gc_pause_server_request = false
+  end
 
-	def self.gc_pause_server_request=(value)
-		@_gc_pause_server_request = !!value
-	end
+  def self.gc_pause_server_request=(value)
+    @_gc_pause_server_request = !!value
+  end
 
   # Print Deprecation Warnings
   #
@@ -81,31 +81,33 @@ module Protobuf
   # ENV['PB_IGNORE_DEPRECATIONS'] to a non-empty value.
   #
   # The rpc_server option will override the ENV setting.
-	def self.print_deprecation_warnings?
-		return @_print_deprecation_warnings unless @_print_deprecation_warnings.nil?
-		print_deprecation_warnings = ENV.key?('PB_IGNORE_DEPRECATIONS') ? false : true
-	end
+  def self.print_deprecation_warnings?
+    return @_print_deprecation_warnings unless @_print_deprecation_warnings.nil?
+    print_deprecation_warnings = ENV.key?('PB_IGNORE_DEPRECATIONS') ? false : true
+  end
 
-	def self.print_deprecation_warnings=(value)
-		@_print_deprecation_warnings = !!value
-	end
+  def self.print_deprecation_warnings=(value)
+    @_print_deprecation_warnings = !!value
+  end
 
 end
 
-require 'protobuf/rpc/client'
-require 'protobuf/rpc/service'
+unless ENV.key?('PB_NO_NETWORKING')
+  require 'protobuf/rpc/client'
+  require 'protobuf/rpc/service'
 
-env_connector_type = ENV.fetch('PB_CLIENT_TYPE') {
-  ::Protobuf::DEFAULT_CONNECTOR
-}.to_s.downcase.strip.to_sym
+  env_connector_type = ENV.fetch('PB_CLIENT_TYPE') {
+    ::Protobuf::DEFAULT_CONNECTOR
+  }.to_s.downcase.strip.to_sym
 
-if ::Protobuf::CONNECTORS.include?(env_connector_type)
-  require "protobuf/#{env_connector_type}"
-else
-  $stderr.puts <<-WARN
+  if ::Protobuf::CONNECTORS.include?(env_connector_type)
+    require "protobuf/#{env_connector_type}"
+  else
+    $stderr.puts <<-WARN
     [WARNING] Require attempted on an invalid connector type '#{env_connector_type}'.
               Falling back to default '#{::Protobuf::DEFAULT_CONNECTOR}' connector.
-  WARN
+    WARN
 
-  require "protobuf/#{::Protobuf::DEFAULT_CONNECTOR}"
+    require "protobuf/#{::Protobuf::DEFAULT_CONNECTOR}"
+  end
 end

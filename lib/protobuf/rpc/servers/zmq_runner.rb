@@ -1,35 +1,50 @@
+require 'ostruct'
+
 module Protobuf
   module Rpc
     class ZmqRunner
       include ::Protobuf::Logger::LogMethods
 
-      def self.register_signals
-        trap(:TTIN) do 
-          log_info { "TTIN received: Starting new worker" }
-          ::Protobuf::Rpc::Zmq::Server.start_worker
-          log_info { "Worker count : #{::Protobuf::Rpc::Zmq::Server.threads.size}" }
+      def initialize(options)
+        @options = case
+                   when options.is_a?(OpenStruct) then
+                     options.marshal_dump
+                   when options.respond_to?(:to_hash) then
+                     options.to_hash
+                   else
+                     raise "Cannot parser Zmq Server - server options"
+                   end
+
+      end
+
+      def run
+        @server = ::Protobuf::Rpc::Zmq::Server.new(@options)
+        register_signals
+        @server.run do 
+          yield if block_given?
         end
       end
 
-      def self.run(server)
-        server_config = case
-                        when server.is_a?(OpenStruct) then
-                          server.marshal_dump
-                        when server.respond_to?(:to_hash) then
-                          server.to_hash
-                        else
-                          raise "Cannot parser Zmq Server - server options"
-                        end
-
-				yield if block_given?
-
-        ::Protobuf::Rpc::Zmq::Server.run(server_config)
+      def running?
+        @server.try :running?
       end
 
-      def self.stop
-        ::Protobuf::Rpc::Zmq::Server.stop
+      def stop
+        @server.try :stop
       end
 
+      private
+
+      def register_signals
+        trap(:TTIN) do
+          @server.add_worker
+          log_info { "Increased worker size to: #{@server.total_workers}" }
+        end
+
+        trap(:TTOU) do
+          log_info { "Current worker size: #{@server.workers.size}" }
+        end
+      end
     end
   end
 end

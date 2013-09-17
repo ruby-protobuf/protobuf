@@ -96,6 +96,18 @@ module Protobuf
         rpcs.key?(name)
       end
 
+      # An array of defined service classes that contain implementation
+      # code
+      def self.implemented_services
+        classes = (self.subclasses || []).select do |subclass|
+          subclass.rpcs.any? do |(name, _)|
+            subclass.method_defined? name
+          end
+        end
+
+        classes.map(&:name)
+      end
+
       ##
       # Instance Methods
       #
@@ -120,6 +132,18 @@ module Protobuf
       #
       def response
         @_response ||= response_type.new
+      end
+
+      # Request object for this rpc cycle. Not assignable.
+      #
+      def request
+        @_request ||= if @_request_bytes.present?
+            request_type.decode(@_request_bytes)
+          else
+            request_type.new
+          end
+      rescue => e
+        raise BadRequestProto, "Unable to parse request: #{e.message}"
       end
 
       # Convenience method to get back to class method.
@@ -147,18 +171,6 @@ module Protobuf
 
       def response_type
         @_response_type ||= rpcs[@method_name].response_type
-      end
-
-      # Request object for this rpc cycle. Not assignable.
-      #
-      def request
-        @_request ||= if @_request_bytes.present?
-            request_type.new.parse_from_string(@_request_bytes)
-          else
-            request_type.new
-          end
-      rescue => e
-        raise BadRequestProto, "Unable to parse request: #{e.message}"
       end
 
       def request_type

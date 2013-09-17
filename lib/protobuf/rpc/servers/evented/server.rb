@@ -19,7 +19,6 @@ module Protobuf
 
           @request_buffer << data
           @request_data = @request_buffer.data
-          @stats.request_size = @request_buffer.size
 
           handle_client if @request_buffer.flushed?
         end

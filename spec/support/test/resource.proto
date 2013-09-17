@@ -10,6 +10,12 @@ enum StatusType {
 message ResourceFindRequest {
   required string name = 1;
   optional bool active = 2;
+  repeated string widgets = 3;
+  repeated bytes widget_bytes = 4;
+}
+
+message ResourceSleepRequest {
+  optional int32 sleep = 1;
 }
 
 message Resource {
@@ -78,4 +84,5 @@ extend Nested.NestedLevelOne {
 
 service ResourceService {
   rpc Find (ResourceFindRequest) returns (Resource);
+  rpc FindWithSleep (ResourceSleepRequest) returns (Resource);
 }

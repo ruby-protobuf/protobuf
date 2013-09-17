@@ -1,4 +1,5 @@
 require 'date'
+require 'time'
 require 'protobuf/logger'
 
 module Protobuf
@@ -11,6 +12,8 @@ module Protobuf
 
       def initialize(mode = :SERVER)
         @mode = mode
+        @request_size = 0
+        @response_size = 0
         start
       end
 
@@ -27,7 +30,7 @@ module Protobuf
       end
 
       def method_name
-        @method_name ||= @dispatcher.try(:service).try(:rpc)
+        @method_name ||= @dispatcher.try(:service).try(:method_name)
       end
 
       def server=(peer)
@@ -43,16 +46,20 @@ module Protobuf
       end
 
       def sizes
-        "#{@request_size || 0}B/#{@response_size || 0}B" if stopped?
+        if stopped?
+          "#{@request_size}B/#{@response_size}B"
+        else
+          "#{@request_size}B/-"
+        end
       end
 
       def start
-        @start_time ||= Time.now
+        @start_time ||= ::Time.now
       end
 
       def stop
         start unless @start_time
-        @end_time ||= Time.now
+        @end_time ||= ::Time.now
       end
 
       def stopped?
@@ -77,13 +84,14 @@ module Protobuf
           server? ? client : server,
           trace_id,
           rpc,
+          sizes,
           elapsed_time,
-          sizes
+          @end_time.try(:iso8601)
         ].compact.join(' - ')
       end
 
       def trace_id
-        Thread.current.object_id.to_s(16)
+        ::Thread.current.object_id.to_s(16)
       end
 
     end

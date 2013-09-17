@@ -55,7 +55,6 @@ module Protobuf
           return if error?
           response_buffer = ::Protobuf::Rpc::Buffer.new(:read)
           response_buffer << read_data
-          @stats.response_size = response_buffer.size
           @response_data = response_buffer.data
           parse_response if response_buffer.flushed?
         end
@@ -68,7 +67,6 @@ module Protobuf
           @socket.flush
           log_debug { sign_message("write closed") }
         end
-
       end
     end
   end

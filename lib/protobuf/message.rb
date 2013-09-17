@@ -1,3 +1,4 @@
+require 'stringio'
 require 'set'
 require 'protobuf/field'
 require 'protobuf/enum'
@@ -22,6 +23,10 @@ module Protobuf
                       end
     end
 
+    def self.decode(bytes)
+      self.new.decode(bytes)
+    end
+
     # Define a field. Don't use this method directly.
     def self.define_field(rule, type, fname, tag, options)
       field_array = options[:extension] ? extension_fields : fields
@@ -44,6 +49,11 @@ module Protobuf
       define_method("#{fname}!") do
         @values[fname]
       end
+    end
+
+    # Create a new object with the given values and return the encoded bytes.
+    def self.encode(values = {})
+      self.new(values).encode
     end
 
     # Reserve field numbers for extensions. Don't use this method directly.
@@ -92,7 +102,7 @@ module Protobuf
     # Find a field object by +tag+ number.
     def self.get_field_by_tag(tag)
       fields[tag]
-    rescue TypeError => e
+    rescue TypeError
       tag = tag.nil? ? 'nil' : tag.to_s
       raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
     end
@@ -144,6 +154,16 @@ module Protobuf
       copy_to(super, :clone)
     end
 
+    # Decode the given string bytes into this object.
+    def decode(string)
+      decode_from(::StringIO.new(string))
+    end
+
+    # Decode the given stream into this object.
+    def decode_from(stream)
+      Decoder.decode(stream, self)
+    end
+
     def dup
       copy_to(super, :dup)
     end
@@ -172,6 +192,28 @@ module Protobuf
           yield(field, value)
         end
       end
+    end
+
+    def encode
+      stream = ""
+
+      each_field_for_serialization do |field, value|
+        if field.repeated?
+          if field.packed?
+            key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
+            packed_value = value.map { |val| field.encode(val) }.join
+            stream << ::Protobuf::Field::VarintField.encode(key)
+            stream << ::Protobuf::Field::VarintField.encode(packed_value.size)
+            stream << packed_value
+          else
+            value.each { |val| write_pair(stream, field, val) }
+          end
+        else
+          write_pair(stream, field, value)
+        end
+      end
+
+      return stream
     end
 
     # Returns extension fields. See Message#fields method.
@@ -209,14 +251,6 @@ module Protobuf
       to_hash.inspect
     end
 
-    def parse_from(stream)
-      Decoder.decode(stream, self)
-    end
-
-    def parse_from_string(string)
-      parse_from(StringIO.new(string))
-    end
-
     def respond_to_has?(key)
       self.respond_to?(key) && self.has_field?(key)
     end
@@ -224,28 +258,6 @@ module Protobuf
     def respond_to_has_and_present?(key)
       self.respond_to_has?(key) &&
         (self.__send__(key).present? || [true, false].include?(self.__send__(key)))
-    end
-
-    def serialize_to_string
-      stream = ""
-
-      each_field_for_serialization do |field, value|
-        if field.repeated?
-          if field.packed?
-            key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
-            packed_value = value.map { |val| field.encode(val) }.join
-            stream << ::Protobuf::Field::VarintField.encode(key)
-            stream << ::Protobuf::Field::VarintField.encode(packed_value.size)
-            stream << packed_value
-          else
-            value.each { |val| write_pair(stream, field, val) }
-          end
-        else
-          write_pair(stream, field, value)
-        end
-      end
-
-      return stream
     end
 
     def set_field(tag, bytes)
@@ -297,11 +309,16 @@ module Protobuf
     ##
     # Instance Aliases
     #
+    alias_method :parse_from_string, :decode
+    alias_method :deserialize, :decode
+    alias_method :parse_from, :decode_from
+    alias_method :deserialize_from, :decode_from
+    alias_method :to_s, :encode
+    alias_method :bytes, :encode
+    alias_method :serialize, :encode
+    alias_method :serialize_to_string, :encode
     alias_method :to_hash_value, :to_hash
     alias_method :to_proto_hash, :to_hash
-    alias_method :to_s, :serialize_to_string
-    alias_method :bytes, :serialize_to_string
-    alias_method :serialize, :serialize_to_string
     alias_method :responds_to_has?, :respond_to_has?
     alias_method :respond_to_and_has?, :respond_to_has?
     alias_method :responds_to_and_has?, :respond_to_has?

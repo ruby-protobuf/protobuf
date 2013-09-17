@@ -3,20 +3,17 @@
 [![Gem Version](https://badge.fury.io/rb/protobuf.png)](http://badge.fury.io/rb/protobuf)
 [![Build Status](https://secure.travis-ci.org/localshred/protobuf.png?branch=master)](https://travis-ci.org/localshred/protobuf)
 
-___IMPORTANT: Those upgrading from version 1.4.2 to 2.X should read the
-[UPGRADING.md](https://github.com/localshred/protobuf/blob/master/UPGRADING.md) notes___
+___See [CHANGES.md](https://github.com/localshred/protobuf/blob/master/CHANGES.md) for up-to-date 
+ API changes.___
 
-Protobuf is an implementation of [Google's protocol buffers][google-pb] in ruby.
-We currently support version 2.4.1 with support for the new 2.5 coming shortly after
-it becomes final.
+Protobuf is an implementation of [Google's protocol buffers][google-pb] in ruby, version 2.5.0 is currently supported.
 
 ---
 
 ## Install
 
-You will likely need to install protobuf from your favorite package manager
-or from source. This gem currently supports protobuf 2.4.1. You may alternatively
-specify a `PROTOC_SRC` when installing with rubygems (see below).
+You will need to install protobuf from your favorite package manager
+or from source. This gem currently supports protobuf <= 2.5.0.
 
 ### OSX Install
 
@@ -31,21 +28,17 @@ $ sudo apt-get install -y protobuf
 
 ### Gem Install
 
-Once the protobuf package is installed, go ahead and install with rubygems.
-If you'd like to skip installing the protobuf package (above) and specify an
-alternate location for the protobuf package, for instance if you have a custom
-protoc package, then specify it with `PROTOC_SRC=/path/to/src`.
+Once the protobuf package is installed, install this gem with rubygems/bundler.
 _Please note that this will void your warranty as it were. If you compiled with
 a custom protobuf package and are having issues it may be difficult to troubleshoot._
 
 ```shell
 $ gem install protobuf
-
-# Provide an alternative protoc source directory to build from.
-$ PROTOC_SRC=/path/to/protobuf/src gem install protobuf
 ```
 
-## 1. Generating ruby classes from `.proto` files
+------
+
+## Generating ruby classes from `.proto` files
 
 Protocol Buffers are great because they allow you to clearly define data storage
 or data transfer packets. Google officially supports Java, C++, and Python for
@@ -53,24 +46,23 @@ compilation and usage. Let's make it ruby aware!
 
 Let's say you have a `defs.proto` file that defines a User message.
 
-```
+```protobuf
 package foo;
 message User {
-  required string first_name = 1;
-  required string last_name = 2;
+  optional string first_name = 1;
+  optional string last_name = 2;
 }
 ```
 
 Now let's compile that definition to ruby:
 
-```
-$ rprotoc defs.proto --ruby_out ./lib
+```shell
+$ protoc defs.proto --ruby_out ./lib
 ```
 
 The previous line will take whatever is defined in `defs.proto` and
 output ruby classes to the `./lib` directory, obeying the package
-directive. Assuming that's all `defs.proto` had defined, `./lib`
-should now look like this:
+directive. Your `./lib` should now look like this:
 
 ```
 - lib
@@ -85,18 +77,16 @@ module Foo
   class User < ::Protobuf::Message; end
 
   class User
-    required :string, :first_name, 1
-    required :string, :last_name, 2
+    optional ::Protobuf::Field::StringField, :first_name, 1
+    optional ::Protobuf::Field::StringField, :last_name, 2
   end
 end
 ```
 
-___Note:__ The generator will pre-define all the classes empty and then
-re-open to apply the defined fields. This is an optimization to prevent
-recursive field errors._
+__Note:__ The generator will pre-define all message/enum classes empty and then
+re-open to apply the defined fields. This is to prevent field dependency errors.
 
-The generated class is now just a plain old ruby object.
-You can use it however you wish.
+The generated class is now just a plain old ruby object. You can use it however you wish.
 
 ```ruby
 require 'lib/foo/user.pb'
@@ -129,25 +119,20 @@ inflated_user = Foo::User.new.parse_from_string(bytes)
 inflated_user == user #=> true
 ```
 
-## 2. RPC
+## Callings Services with RPC
 
-RPC is one of many technologies that tries to solve the problem of getting
-smaller pieces of data from one place to another. Many will argue for or
-against RPC and its usefulness, but I'm not going to do that here. Google's
-Protocol Buffers provides support for Services with RPC and that's why you're here.
+Google's Protocol Buffers provides support for Services with RPC.
 
-Any discussion about RPC leads to a discussion about clients and servers
-and the remote procedures themselves. For our purposes, we'll talk about
-a `Client` (process that is calling the server/service), a `Service`
-(the remote procedure), and a `Server` (the process that manages one or more
-services). We'll start with the Service first.
+For our purposes, we'll talk about a `Client` (process that is calling
+the server/service), a `Service` (the remote procedure), and a `Server`
+(the process that manages one or more services). We'll start with the Service first.
 
 ### Services
 
 Services are simply classes that have endpoint methods defined. Here's what
 one looks like in protobuf:
 
-```
+```protobuf
 package foo;
 message UserRequest {
   optional string email = 1;
@@ -177,14 +162,12 @@ __Important Note: The UserService class here is a *stub*. You should not
 provide your implementation in this generated file as subsequent generations
 will wipe out your implmentation. Read on to learn how to use this stub.__
 
-Did you read the note above? Go read it. I'll wait.
-
-Ok, now that you have a generated service stub, you'll want to require it
-from `lib` and implement the methods. Create a service implementation file
-in your project. In rails I'd put this in `app/services/user_service.rb`.
+Now that you have a generated service stub, you'll want to require it
+from `lib` and provide the implementation. Create a service implementation file
+in your project. In rails I'd put this in `app/services/foo/user_service.rb`.
 
 ```ruby
-# app/services/user_service.rb
+# app/services/foo/user_service.rb
 require 'lib/foo/user.pb'
 
 # Reopen the class and provide the implementation for each rpc method defined.
@@ -195,10 +178,12 @@ module Foo
     # response -> Foo::UserResponse
     def find
       # request.email will be the unpacked string that was sent by the client request
+      users = []
       User.find_by_email(request.email).each do |user|
-        # must only use a proto instance of Foo::User when appending to the `users` field
-        response.users << user.to_proto
+        users << user.to_proto
       end
+      
+      respond_with(:users => users)
     end
 
   end
@@ -209,7 +194,7 @@ Simply implement the instance method for the defined rpc. You can provide
 any other methods in this class as helpers, but only those defined in the
 proto file will be callable by remote clients. Every request made by a client
 will provide a non-empty request of the defined type. The server creates a new
-service instance based on the request, so you should not be constrained to just
+service instance for every request, so you should not be constrained to just
 the endpoint method. This is similar to rails controllers where only methods
 defined by the routes file are hooked up to HTTP requests, but it's very common
 to implement private methods to aid in code quality and simpilicity.
@@ -221,7 +206,7 @@ entirely. If you need to create your own response object (a valid case), simply 
 `respond_with(new_response)`. The returned object should conform to one of three properties:
 
 1. Response should be of same type as defined by the rpc definition (in this case, `Foo::UserList`), or
-2. Response should be a hash. This hash will be used to construct an instance of the defined type and should therefore conform to the appropriate fields for that type.
+2. Response should be a hash, respond to `to_hash`, or respond to `to_proto_hash`. The hash will be used to construct an instance of the defined type and should therefore conform to the appropriate fields for that type.
 3. Response should respond to the `to_proto` method. The object returned by `to_proto` should be an instance of the defined response type.
 
 If at any time the implementation encounters an error, the client can be
@@ -300,11 +285,10 @@ or `respond_with` just like you can in the endpoint methods.
 
 __Before Filters__ – Returning `false` from a before filter will cancel
 any other filter calls which would run afterwards, as well as canceling
-invocation of the service method. Note: You must actually return false,
-not just a "falsey" value such as nil.
+invocation of the service method. _Note: You must actually return `false`,
+not just a "falsey" value such as `nil`._
 
-__After Filters__ – There is no request shortcutting since the after
-filter runs after the request. Duh.
+__After Filters__ – No request shortcutting.
 
 #### Filter options
 
@@ -334,10 +318,8 @@ would have the filter applied.
 
 ### Servers
 
-A service is nothing without being hooked up to a socket. It's the
-nerdy kid waiting by the telephone for someone to call without knowing
-that the phone company disconnected their house. Sad and pathetic.
-So hook up the phone lines!
+Services need to be hooked up to a socket to be called by clients.
+Use the provided program `rpc_server`:
 
 ```
 $ rpc_server -o myserver.com -p 9399 -l ./log/protobuf.log ./config/environment.rb
@@ -364,7 +346,7 @@ result in shutting the server down gracefully.
 
 ```
 $ ps aux | grep rpc_server
-1234 ... rpc_server myservice.com:9399
+1234 ... rpc_server myserver.com:9399
 
 $ kill -QUIT 1234
 rpc_server shutdown
@@ -372,8 +354,11 @@ rpc_server shutdown
 
 ### Clients
 
-A lot of work has gone into making the client calls simple and easy
-to use yet still powerful. Clients have a DSL that feels very ajaxy.
+Calling a service with a clients feels very ajaxy. If you prefer
+a simpler syntax I highly recommend using [ActiveRemote](https://github.com/liveh2o/active_remote)
+which was developed in conjunction with this library to make 
+interacting with a remote service feel identical to using an
+ActiveRecord model. Seriously, it's wicked cool.
 
 ```ruby
 # require the defs from the shared gem/repo
@@ -385,18 +370,18 @@ req = Foo::UserRequest.new(:email => 'jeff@gmail.com')
 # Use the UserService class to generate a client, invoke the rpc method
 # while passing the request object.
 # We could also simply pass a hash to find.
-Foo::UserService.client.find(req) do |c|
+Foo::UserService.client.find(req) do |client|
   # This block will be executed (registering the callbacks)
   # before the request actualy occurs.
-  # the `c` param in this block is the `.client` object
-  # that is generated from the call above
+  # the `client` param in this block is the object
+  # that is created by `Foo::UserService.client`.
 
   # Register a block for execution when the response
   # is deemed successful from the service. Accepts
-  # the unpacked response as its only parameter
+  # the unpacked response as its only parameter.
   c.on_success do |response|
-    response.users.each do |u|
-      puts u.inspect
+    response.users.each do |user|
+      puts user.inspect
     end
   end
 
@@ -405,8 +390,8 @@ Foo::UserService.client.find(req) do |c|
   # or server-side failure. The object passed to the
   # block has a `message` and a `code` attribute
   # to aid in logging/diagnosing the failure.
-  c.on_failure do |err|
-    puts 'It failed: ' + err.message
+  c.on_failure do |error|
+    puts 'It failed: ' + error.message
   end
 end
 ```
@@ -414,6 +399,44 @@ end
 Many different options can be passed to the `.client` call above
 (such as `:timeout => 600`). See the `lib/protobuf/rpc/client.rb`
 and `lib/protobuf/rpc/service.rb` files for more documentation.
+
+### Dynamic Service Discovery (ZMQ Only)
+It is possible to setup the RPC server and client in a way that
+allows servers/services to be dynamically discovered by client processes.
+
+#### In the client
+```ruby
+ServiceDirectory.start do |config|
+  config.port = 53000
+end
+
+# If your server also runs this code, it will default to the
+# given port when sending beacons and have its own service
+# directory. You can prevent this code from running on the
+# server if needed:
+unless defined?(::Protobuf::CLI)
+  ServiceDirectory.start do |config|
+    config.port = 53000
+  end
+end
+```
+
+#### Starting the server with dynamic discovery enabled
+```
+$ rpc_server --broadcast-beacons --beacon-port 53000 ...
+```
+
+The client will listen on the specified port for beacons broadcast
+by servers. Each beacon includes a list of services provided by the
+broadcasting server. The client randomly selects a server for the
+desired service each time a request is made.
+
+__CAUTION:__ When running multiple environments on a single network,
+e.g., qa and staging, be sure that each environment is setup with
+a unique beacon port; otherwise, clients in one environment ___will___
+make requests to servers in the other environment.
+
+Check out the source for Protobuf::ServiceDirectory for more details.
 
 ## 3. RPC Interop
 
