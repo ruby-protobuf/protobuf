@@ -18,8 +18,9 @@ module Protobuf
       end
 
       def decode(bytes)
-        bytes.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
-        bytes
+        bytes_to_decode = bytes.dup
+        bytes_to_decode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+        bytes_to_decode
       end
 
       def define_setter
@@ -46,11 +47,12 @@ module Protobuf
       end
 
       def encode(value)
-        value = value.serialize_to_string if value.is_a?(::Protobuf::Message)
-        value.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+        value_to_encode = value.dup
+        value_to_encode = value.serialize_to_string if value.is_a?(::Protobuf::Message)
+        value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 
-        string_size = ::Protobuf::Field::VarintField.encode(value.size)
-        string_size << value
+        string_size = ::Protobuf::Field::VarintField.encode(value_to_encode.size)
+        string_size << value_to_encode
       end
 
       def wire_type
