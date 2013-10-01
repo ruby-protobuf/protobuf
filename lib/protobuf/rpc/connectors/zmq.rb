@@ -87,18 +87,22 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          listings = service_directory.all_listings_for(service)
-          if listings
-            listings.each do |listing|
-              host = listing.try(:address)
-              port = listing.try(:port)
-              return "tcp://#{host}:#{port}" if host_alive?(host)
+          5.times do
+            listings = service_directory.all_listings_for(service)
+            if listings
+              listings.each do |listing|
+                host = listing.try(:address)
+                port = listing.try(:port)
+                return "tcp://#{host}:#{port}" if host_alive?(host)
+              end
             end
-          end
 
-          host = options[:host]
-          port = options[:port]
-          return "tcp://#{host}:#{port}" if host_alive?(host)
+            host = options[:host]
+            port = options[:port]
+            return "tcp://#{host}:#{port}" if host_alive?(host)
+
+            sleep 1
+          end
 
           raise "Host not found for service #{service}"
         end
