@@ -45,7 +45,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       end
 
       it "defaults to the options" do
-        service_directory.stub(:all_listings_for).and_return(nil)
+        service_directory.stub(:all_listings_for).and_return([])
         subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
       end
     end
@@ -54,13 +54,13 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       let(:running?) { false }
 
       it "defaults to the options" do
-        service_directory.stub(:all_listings_for).and_return(nil)
+        service_directory.stub(:all_listings_for).and_return([])
         subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
       end
     end
 
     it "checks if the server is alive" do
-      service_directory.stub(:all_listings_for).and_return(nil)
+      service_directory.stub(:all_listings_for).and_return([])
       subject.should_receive(:host_alive?).with("127.0.0.1") { true }
       subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
     end

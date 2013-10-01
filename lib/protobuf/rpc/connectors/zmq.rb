@@ -88,13 +88,10 @@ module Protobuf
         #
         def lookup_server_uri
           5.times do
-            listings = service_directory.all_listings_for(service)
-            if listings
-              listings.each do |listing|
-                host = listing.try(:address)
-                port = listing.try(:port)
-                return "tcp://#{host}:#{port}" if host_alive?(host)
-              end
+            service_directory.all_listings_for(service).each do |listing|
+              host = listing.try(:address)
+              port = listing.try(:port)
+              return "tcp://#{host}:#{port}" if host_alive?(host)
             end
 
             host = options[:host]

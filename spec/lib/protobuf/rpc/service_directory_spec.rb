@@ -155,11 +155,19 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     end
 
     describe "#all_listings_for" do
-      it "returns all listings for a given service" do
-        send_beacon(:heartbeat, hello_server)
-        send_beacon(:heartbeat, combo_server)
+      context "when listings are present" do
+        it "returns all listings for a given service" do
+          send_beacon(:heartbeat, hello_server)
+          send_beacon(:heartbeat, combo_server)
 
-        subject.all_listings_for("HelloService").size.should eq(2)
+          subject.all_listings_for("HelloService").size.should eq(2)
+        end
+      end
+
+      context "when no listings are present" do
+        it "returns and empty array" do
+          subject.all_listings_for("HelloService").size.should eq(0)
+        end
       end
     end
 
