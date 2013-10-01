@@ -156,7 +156,7 @@ module Protobuf
           end
         ensure
           log_debug { sign_message("Closing Socket")  }
-          zmq_error_check(socket.close, :socket_close)
+          zmq_error_check(socket.close, :socket_close) if socket
           log_debug { sign_message("Socket closed")  }
         end
 
