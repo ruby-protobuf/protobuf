@@ -3,6 +3,7 @@
 pkg/*
 .bundle
 .rvmrc
+.rspec
 *.log
 coverage
 doc
