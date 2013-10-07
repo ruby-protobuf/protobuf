@@ -205,5 +205,9 @@ module Protobuf
       end
 
     end
+
+    if ActiveSupport::VERSION::MAJOR > 2
+      ActiveSupport.run_load_hooks(:protobuf_rpc_service, Service)
+    end
   end
 end
