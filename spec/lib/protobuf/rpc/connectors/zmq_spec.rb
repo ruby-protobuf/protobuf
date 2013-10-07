@@ -31,6 +31,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
   describe "#lookup_server_uri" do
     let(:service_directory) { double('ServiceDirectory', :running? => running? ) }
     let(:listing) { double('Listing', :address => '127.0.0.2', :port => 9399) }
+    let(:listings) { [listing] }
     let(:running?) { true }
 
     before do
@@ -39,12 +40,12 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
 
     context "when the service directory is running" do
       it "searches the service directory" do
-        service_directory.should_receive(:lookup).and_return(listing)
+        service_directory.stub(:all_listings_for).and_return(listings)
         subject.send(:lookup_server_uri).should eq "tcp://127.0.0.2:9399"
       end
 
       it "defaults to the options" do
-        service_directory.should_receive(:lookup) { nil }
+        service_directory.stub(:all_listings_for).and_return([])
         subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
       end
     end
@@ -53,15 +54,23 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       let(:running?) { false }
 
       it "defaults to the options" do
-        service_directory.should_receive(:lookup) { nil }
+        service_directory.stub(:all_listings_for).and_return([])
         subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
       end
     end
 
     it "checks if the server is alive" do
-      service_directory.should_receive(:lookup) { nil }
+      service_directory.stub(:all_listings_for).and_return([])
       subject.should_receive(:host_alive?).with("127.0.0.1") { true }
       subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
+    end
+
+    context "when no host is alive" do
+      it "raises an error" do
+        service_directory.stub(:all_listings_for).and_return(listings)
+        subject.stub(:host_alive?).and_return(false)
+        expect { subject.send(:lookup_server_uri) }.to raise_error
+      end
     end
 
   end
