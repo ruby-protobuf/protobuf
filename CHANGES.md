@@ -1,3 +1,9 @@
+2.8.7
+---------
+
+- Fire ActiveSupport load hooks when RPC Server and Client classes are loaded. [#126, @liveh2o]
+- Prevent infinite loop when doing service lookup from directory. [#125, @brianstien]
+
 2.8.6
 ---------
 
