@@ -28,6 +28,14 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
     ::ZMQ::Context.stub(:new).and_return(zmq_context_double)
   end
 
+  before(:all) do
+    @ping_port_before = ENV['PB_RPC_PING_PORT']
+  end
+
+  after(:all) do
+    ENV['PB_RPC_PING_PORT'] = @ping_port_before
+  end
+
   describe "#lookup_server_uri" do
     let(:service_directory) { double('ServiceDirectory', :running? => running? ) }
     let(:listing) { double('Listing', :address => '127.0.0.2', :port => 9399) }

@@ -4,29 +4,21 @@ require 'spec/support/test/resource_service'
 require 'protobuf/rpc/service_directory'
 
 describe 'Functional ZMQ Client' do
-  let(:options) {{
-    :host => "127.0.0.1",
-    :port => 9399,
-    :worker_port => 9400,
-    :backlog => 100,
-    :threshold => 100,
-    :threads => 5
-  }}
-
-  let(:server) { ::Protobuf::Rpc::Zmq::Server.new(options) }
-  let!(:server_thread) { Thread.new(server) { |server| server.run } }
-
   before(:all) do
     load "protobuf/zmq.rb"
+    @runner = ::Protobuf::Rpc::ZmqRunner.new({ :host => "127.0.0.1",
+                                               :port => 9399,
+                                               :worker_port => 9408,
+                                               :backlog => 100,
+                                               :threshold => 100,
+                                               :threads => 5 })
+    @server_thread = Thread.new(@runner) { |runner| runner.run }
+    Thread.pass until @runner.running?
   end
 
-  before do
-    Thread.pass until server.running?
-  end
-
-  after do
-    server.stop
-    server_thread.join
+  after(:all) do
+    @runner.stop
+    @server_thread.join
   end
 
   it 'runs fine when required fields are set' do
@@ -47,8 +39,8 @@ describe 'Functional ZMQ Client' do
   end
 
   it 'runs under heavy load' do
-    100.times do |x|
-      50.times.map do |y|
+    10.times do |x|
+      5.times.map do |y|
         Thread.new do
           client = ::Test::ResourceService.client
 

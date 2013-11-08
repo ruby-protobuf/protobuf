@@ -12,7 +12,7 @@ Thread.abort_on_exception = true
 
 module StubProtobufServerFactory
   def self.build(delay)
-    new_server = Class.new(Protobuf::Rpc::Evented::Server) do
+    new_server = Class.new(Protobuf::Rpc::Socket::Server) do
       def self.sleep_interval
         @sleep_interval
       end
@@ -43,7 +43,7 @@ class StubServer
                                 :port => 9399,
                                 :worker_port => 9400,
                                 :delay => 0,
-                                :server => Protobuf::Rpc::Evented::Server }.merge(options))
+                                :server => Protobuf::Rpc::Socket::Server }.merge(options))
 
     start
     yield self
@@ -53,38 +53,23 @@ class StubServer
 
   def start
     case
-    when @options.server == Protobuf::Rpc::Evented::Server
-      start_em_server
     when @options.server == Protobuf::Rpc::Zmq::Server
       start_zmq_server
     else
       start_socket_server
     end
     log_debug { sign_message("Server started #{@options.host}:#{@options.port}") }
-  rescue => ex
-    if ex =~ /no acceptor/ # Means EM didn't shutdown in the next_tick yet
-      stop
-      retry
-    end
-  end
-
-  def start_em_server
-    @server_handle = EventMachine.start_server(
-      @options.host,
-      @options.port,
-      StubProtobufServerFactory.build(@options.delay)
-    )
   end
 
   def start_socket_server
-    @sock_runner = ::Protobuf::Rpc::SocketRunner.new(opt)
+    @sock_runner = ::Protobuf::Rpc::SocketRunner.new(options)
     @sock_thread = Thread.new(@sock_runner) { |runner| runner.run }
     @sock_thread.abort_on_exception = true # Set for testing purposes
     Thread.pass until @sock_runner.running?
   end
 
   def start_zmq_server
-    @zmq_runnger = ::Protobuf::Rpc::ZmqRunner.new(opt)
+    @zmq_runner = ::Protobuf::Rpc::ZmqRunner.new(options)
     @zmq_thread = Thread.new(@zmq_runner) { |runner| runner.run }
     @zmq_thread.abort_on_exception = true # Set for testing purposes
     Thread.pass until @zmq_runner.running?
@@ -92,8 +77,6 @@ class StubServer
 
   def stop
     case
-    when @options.server == Protobuf::Rpc::Evented::Server then
-      EventMachine.stop_server(@server_handle) if @server_handle
     when @options.server == Protobuf::Rpc::Zmq::Server then
       @zmq_runner.try :stop
       @zmq_thread.join if @zmq_thread

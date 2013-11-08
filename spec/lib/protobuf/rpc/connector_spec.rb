@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'protobuf/socket'
-require 'protobuf/evented'
 require 'protobuf/zmq'
 
 describe ::Protobuf::Rpc::Connector do
@@ -14,13 +13,8 @@ describe ::Protobuf::Rpc::Connector do
     end
 
     context 'Protobuf.connector_type is not a known value' do
-      before { ::Protobuf.connector_type = :socket }
+      before { ::Protobuf.stub(:connector_type) { :foo } }
       it { should eq ::Protobuf::Rpc::Connectors::Socket }
-    end
-
-    context 'Protobuf.connector_type is evented' do
-      before { ::Protobuf.connector_type = :evented }
-      it { should eq ::Protobuf::Rpc::Connectors::EventMachine }
     end
 
     context 'Protobuf.connector_type is zmq' do

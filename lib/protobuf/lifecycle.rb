@@ -1,19 +1,19 @@
 module Protobuf
   class Lifecycle
 
-    def self.register( event_name, &blk )
+    def self.register(event_name, &blk)
       raise "Lifecycle register must have a block" unless block_given?
-      event_name = normalized_event_name( event_name )
+      event_name = normalized_event_name(event_name)
 
       lifecycle_events[ event_name ] ||= []
       lifecycle_events[ event_name ] << blk
     end
 
-    def self.trigger( event_name, *args )
-      event_name = normalized_event_name( event_name )
+    def self.trigger(event_name, *args)
+      event_name = normalized_event_name(event_name)
 
-      if lifecycle_events.has_key?( event_name )
-        lifecycle_events[ event_name ].each do |block|
+      if lifecycle_events.has_key?(event_name)
+        lifecycle_events[event_name].each do |block|
           if ! args.empty? && block.arity != 0
             block.call(*args)
           else
@@ -23,7 +23,7 @@ module Protobuf
       end
     end
 
-    def self.normalized_event_name( event_name )
+    def self.normalized_event_name(event_name)
       return "#{event_name}".downcase
     end
 

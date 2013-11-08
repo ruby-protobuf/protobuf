@@ -7,20 +7,14 @@ describe ::Protobuf::CLI do
     File.expand_path('../../../support/test_app_file.rb', __FILE__)
   end
 
-  let(:sock_runner) { 
+  let(:sock_runner) {
     runner = double("SocketRunner", :register_signals => nil)
     runner.stub(:run) { ::Protobuf::Lifecycle.trigger( "after_server_bind" ) }
     runner
   }
 
-  let(:zmq_runner) { 
+  let(:zmq_runner) {
     runner = double "ZmqRunner", register_signals: nil
-    runner.stub(:run) { ::Protobuf::Lifecycle.trigger( "after_server_bind" ) }
-    runner
-  }
-
-  let(:evented_runner) { 
-    runner = double "EventedRunner", register_signals: nil
     runner.stub(:run) { ::Protobuf::Lifecycle.trigger( "after_server_bind" ) }
     runner
   }
@@ -28,7 +22,6 @@ describe ::Protobuf::CLI do
   before(:each) do
     ::Protobuf::Rpc::SocketRunner.stub(:new) { sock_runner }
     ::Protobuf::Rpc::ZmqRunner.stub(:new) { zmq_runner }
-    ::Protobuf::Rpc::EventedRunner.stub(:new) { evented_runner }
   end
 
   describe '#start' do
@@ -176,7 +169,6 @@ describe ::Protobuf::CLI do
         let(:runner) { ::Protobuf::Rpc::SocketRunner }
 
         before do
-          ::Protobuf::Rpc::EventedRunner.should_not_receive(:new)
           ::Protobuf::Rpc::ZmqRunner.should_not_receive(:new)
         end
 
@@ -185,7 +177,7 @@ describe ::Protobuf::CLI do
           described_class.start(args)
         end
 
-        it 'is activated by PB_SERVER_TYPE=Socket ENV variable' do 
+        it 'is activated by PB_SERVER_TYPE=Socket ENV variable' do
           ENV['PB_SERVER_TYPE'] = "Socket"
           runner.should_receive(:new).and_return(sock_runner)
           described_class.start(args)
@@ -198,40 +190,12 @@ describe ::Protobuf::CLI do
         end
       end
 
-      context 'evented' do
-        let(:test_args) { [ '--evented' ] }
-        let(:runner) { ::Protobuf::Rpc::EventedRunner }
-
-        before do
-          ::Protobuf::Rpc::SocketRunner.should_not_receive(:new)
-          ::Protobuf::Rpc::ZmqRunner.should_not_receive(:new)
-        end
-
-        it 'is activated by the --evented switch' do
-          runner.should_receive(:new).and_return(evented_runner)
-          described_class.start(args)
-        end
-
-        it 'is activated by PB_SERVER_TYPE=Evented ENV variable' do 
-          ENV['PB_SERVER_TYPE'] = "Evented"
-          runner.should_receive(:new).and_return(evented_runner)
-          described_class.start(args)
-          ENV.delete('PB_SERVER_TYPE')
-        end
-
-        it 'configures the connector type to be evented' do
-          load "protobuf/evented.rb"
-          ::Protobuf.connector_type.should == :evented
-        end
-      end
-
       context 'zmq workers only' do
         let(:test_args) { [ '--workers_only', '--zmq' ] }
         let(:runner) { ::Protobuf::Rpc::ZmqRunner }
 
         before do
           ::Protobuf::Rpc::SocketRunner.should_not_receive(:new)
-          ::Protobuf::Rpc::EventedRunner.should_not_receive(:new)
         end
 
         it 'is activated by the --workers_only switch' do
@@ -242,7 +206,7 @@ describe ::Protobuf::CLI do
           described_class.start(args)
         end
 
-        it 'is activated by PB_WORKERS_ONLY=1 ENV variable' do 
+        it 'is activated by PB_WORKERS_ONLY=1 ENV variable' do
           ENV['PB_WORKERS_ONLY'] = "1"
           runner.should_receive(:new) do |options|
             options[:workers_only].should be_true
@@ -259,7 +223,6 @@ describe ::Protobuf::CLI do
 
         before do
           ::Protobuf::Rpc::SocketRunner.should_not_receive(:new)
-          ::Protobuf::Rpc::EventedRunner.should_not_receive(:new)
         end
 
         it 'is activated by the --worker_port switch' do
@@ -277,7 +240,6 @@ describe ::Protobuf::CLI do
 
         before do
           ::Protobuf::Rpc::SocketRunner.should_not_receive(:new)
-          ::Protobuf::Rpc::EventedRunner.should_not_receive(:new)
         end
 
         it 'is activated by the --zmq switch' do
@@ -285,7 +247,7 @@ describe ::Protobuf::CLI do
           described_class.start(args)
         end
 
-        it 'is activated by PB_SERVER_TYPE=Zmq ENV variable' do 
+        it 'is activated by PB_SERVER_TYPE=Zmq ENV variable' do
           ENV['PB_SERVER_TYPE'] = "Zmq"
           runner.should_receive(:new)
           described_class.start(args)

@@ -26,15 +26,15 @@ describe ::Protobuf do
       described_class.connector_type.should eq :socket
     end
 
-    it 'accepts socket, evented, or zmq' do
-      [:socket, :evented, :zmq].each do |type|
+    it 'accepts socket or zmq' do
+      [:socket, :zmq].each do |type|
         described_class.connector_type = type
         described_class.connector_type.should eq type
       end
     end
 
     it 'does not accept other types' do
-      [:hello, :world].each do |type|
+      [:hello, :world, :evented].each do |type|
         expect {
           described_class.connector_type = type
         }.to raise_error(ArgumentError)
