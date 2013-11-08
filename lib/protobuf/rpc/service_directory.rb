@@ -85,14 +85,22 @@ module Protobuf
         reset
       end
 
+      def all_listings_for(service)
+        if running? && @listings_by_service.key?(service.to_s)
+          @listings_by_service[service.to_s].entries.shuffle
+        else
+          []
+        end
+      end
+
       def each_listing(&block)
         @listings_by_uuid.each_value(&block)
       end
 
       def lookup(service)
         if running?
-          if @listings_by_service.key?(service)
-            @listings_by_service[service].entries.sample
+          if @listings_by_service.key?(service.to_s)
+            @listings_by_service[service.to_s].entries.sample
           end
         end
       end

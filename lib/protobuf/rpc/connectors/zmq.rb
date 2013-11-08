@@ -87,14 +87,21 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          begin
-            listing = service_directory.lookup(service)
+          5.times do
+            service_directory.all_listings_for(service).each do |listing|
+              host = listing.try(:address)
+              port = listing.try(:port)
+              return "tcp://#{host}:#{port}" if host_alive?(host)
+            end
 
-            host = listing.try(:address) || options[:host]
-            port = listing.try(:port) || options[:port]
-          end until host_alive?( host )
+            host = options[:host]
+            port = options[:port]
+            return "tcp://#{host}:#{port}" if host_alive?(host)
 
-          "tcp://#{host}:#{port}"
+            sleep 1
+          end
+
+          raise "Host not found for service #{service}"
         end
 
         def host_alive?(host)
@@ -145,11 +152,9 @@ module Protobuf
             raise RequestTimeout
           end
         ensure
-          unless socket.nil?
-            log_debug { sign_message("Closing Socket")  }
-            zmq_error_check(socket.close, :socket_close)
-            log_debug { sign_message("Socket closed")  }
-          end
+          log_debug { sign_message("Closing Socket")  }
+          zmq_error_check(socket.close, :socket_close) if socket
+          log_debug { sign_message("Socket closed")  }
         end
 
         # The service we're attempting to connect to

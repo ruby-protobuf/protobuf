@@ -49,6 +49,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     @address = "127.0.0.1"
     @port = 33333
     @socket = UDPSocket.new
+    EchoService = Class.new
 
     described_class.address = @address
     described_class.port = @port
@@ -153,6 +154,23 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       send_beacon(:flatline, echo_server)
     end
 
+    describe "#all_listings_for" do
+      context "when listings are present" do
+        it "returns all listings for a given service" do
+          send_beacon(:heartbeat, hello_server)
+          send_beacon(:heartbeat, combo_server)
+
+          subject.all_listings_for("HelloService").size.should eq(2)
+        end
+      end
+
+      context "when no listings are present" do
+        it "returns and empty array" do
+          subject.all_listings_for("HelloService").size.should eq(0)
+        end
+      end
+    end
+
     describe "#each_listing" do
       it "should yield to a block for each listing" do
         send_beacon(:heartbeat, hello_server)
@@ -202,6 +220,13 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
         subject.lookup("EchoService").port.should eq "7777"
       end
+
+      context 'when given service identifier is a class name' do
+        it 'returns the listing corresponding to the class name' do
+          send_beacon(:heartbeat, echo_server)
+          subject.lookup(EchoService).uuid.should eq echo_server.uuid
+        end
+      end
     end
 
     describe "#restart" do
@@ -239,7 +264,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       let(:servers) {
         100.times.collect do |x|
           ::Protobuf::Rpc::DynamicDiscovery::Server.new(
-            :uuid => server_name = "performance_server#{x + 1}",
+            :uuid => "performance_server#{x + 1}",
             :address => '127.0.0.1',
             :port => (5555 + x).to_s,
             :ttl => rand(1..5),

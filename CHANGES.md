@@ -1,3 +1,34 @@
+2.8.7
+---------
+
+- Fire ActiveSupport load hooks when RPC Server and Client classes are loaded. [#126, @liveh2o]
+- Prevent infinite loop when doing service lookup from directory. [#125, @brianstien]
+
+2.8.6
+---------
+
+- Fix string/byte encoding issue when unicode characters present. Reported by @foxban. This was also backported to v2.7.12. [#120]
+
+2.8.5
+----------
+
+- Fix issue where ServiceDirectory lookups were failing when given a class name, breaking the directory load balancing. (#119)
+
+2.8.4
+----------
+
+- Fix issue where frozen strings assigned in a repeated field would cause encoding runtime errors. (#117)
+
+2.8.3
+----------
+
+- Add Deprecation warning when requiring `protobuf/evented`. Version 3.x will not support the eventmachine transport layer for client or server.
+
+2.8.2
+----------
+
+- Remove the <4.0 version constraint on ActiveSupport.
+
 2.8.1
 ----------
 
@@ -14,6 +45,11 @@
 - Added service dynamic discovery to the ZMQ connector and server. [#91, @devin-c]
 - No longer creating `-java` platform gem due to removal of c++ compiler.
 - Added WTFPL license.
+
+2.7.12
+-----------
+
+- Backport string/byte encoding issue when unicode characters present. [code: #122, original issue: #120]
 
 2.0.0
 -----------
