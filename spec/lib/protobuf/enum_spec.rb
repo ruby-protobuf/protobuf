@@ -53,7 +53,7 @@ describe Protobuf::Enum do
   end
 
   describe '.name_by_value' do
-    it 'get the name by value of the enum given the enum' do 
+    it 'get the name by value of the enum given the enum' do
       Test::EnumTestType.name_by_value(::Test::EnumTestType::THREE).should eq name
     end
 
