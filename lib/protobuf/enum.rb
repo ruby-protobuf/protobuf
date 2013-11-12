@@ -32,6 +32,10 @@ module Protobuf
       value_by_name(name_by_value(value))
     end
 
+    def self.integer_values
+      self.values.values.map(&:to_i)
+    end
+
     def self.name_by_value(value)
       (!value.nil? && value.respond_to?(:to_i)) ? @names[value.to_i] : nil
     end

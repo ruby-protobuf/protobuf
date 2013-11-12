@@ -95,6 +95,20 @@ describe Protobuf::Enum do
     end
   end
 
+  describe '.integer_values' do
+    before do
+      IntegerValuesEnumTest = ::Class.new(::Protobuf::Enum) do
+        define :FOO, 1
+        define :BAR, 2
+        define :BAZ, 5
+      end
+    end
+
+    it 'provides an array of the integer values' do
+      IntegerValuesEnumTest.integer_values.should eq([ 1, 2, 5 ])
+    end
+  end
+
   context 'when coercing from enum' do
     subject { Test::StatusType::PENDING }
     it { should eq(0) }
