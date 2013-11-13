@@ -19,17 +19,17 @@ require "protobuf/version"
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency 'activesupport'
-  s.add_dependency 'multi_json'
-  s.add_dependency 'thor'
+  s.add_dependency 'activesupport', '~> 4.0'
+  s.add_dependency 'multi_json', '~> 1.8'
+  s.add_dependency 'thor', '~> 0.18'
 
-  s.add_development_dependency 'eventmachine'
-  s.add_development_dependency 'ffi-rzmq'
-  s.add_development_dependency 'pry-nav'
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'rspec'
-  s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'yard'
-  s.add_development_dependency 'timecop'
+  s.add_development_dependency 'eventmachine', '~> 1.0'
+  s.add_development_dependency 'ffi-rzmq', '~> 1.0'
+  s.add_development_dependency 'pry-nav', '~> 0.2'
+  s.add_development_dependency 'rake', '~> 10.1'
+  s.add_development_dependency 'rspec', '~> 2.14'
+  s.add_development_dependency 'simplecov', '~> 0.8'
+  s.add_development_dependency 'yard', '~> 0.8'
+  s.add_development_dependency 'timecop', '~> 0.6'
   # s.add_development_dependency 'perftools.rb'
 end
