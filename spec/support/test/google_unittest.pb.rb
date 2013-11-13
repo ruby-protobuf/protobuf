@@ -1,4 +1,4 @@
-# encoding: utf-8
+# encoding: UTF-8
 
 ##
 # This file is auto-generated. DO NOT EDIT!
