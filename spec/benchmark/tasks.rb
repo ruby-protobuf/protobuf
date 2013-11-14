@@ -1,4 +1,5 @@
 require 'benchmark'
+require 'protobuf/socket'
 require 'support/all'
 require 'support/test/resource_service'
 
@@ -28,43 +29,8 @@ namespace :benchmark do
     end
   end
 
-  def em_client_em_server(number_tests, test_length, global_bench = nil)
-    EM.stop if EM.reactor_running?
-
-    EventMachine.fiber_run do
-      StubServer.new(:server => Protobuf::Rpc::Evented::Server) do |server|
-        benchmark_wrapper(global_bench) do |bench|
-          bench.report("ES / EC") do
-            (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
-          end
-        end
-      end
-
-      EM.stop
-    end
-  end
-
-  def em_client_sock_server(number_tests, test_length, global_bench = nil)
-    EM.stop if EM.reactor_running?
-
-    EventMachine.fiber_run do
-      StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server|
-        client = ::Test::ResourceService.client(:port => 9399)
-
-        benchmark_wrapper(global_bench) do |bench|
-          bench.report("SS / EC") do
-            (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
-          end
-        end
-      end
-
-      EM.stop
-    end
-  end
-
   def sock_client_sock_server(number_tests, test_length, global_bench = nil)
     load "protobuf/socket.rb"
-    EM.stop if EM.reactor_running?
 
     StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |server|
       client = ::Test::ResourceService.client(:port => 9399)
@@ -75,26 +41,6 @@ namespace :benchmark do
         end
       end
     end
-  end
-
-  def sock_client_em_server(number_tests, test_length, global_bench = nil)
-    load "protobuf/socket.rb"
-    EM.stop if EM.reactor_running?
-    em_thread = Thread.new { EM.run }
-    Thread.pass until EM.reactor_running?
-
-    StubServer.new(:port => 9399) do |server|
-      client = ::Test::ResourceService.client(:port => 9399)
-
-      benchmark_wrapper(global_bench) do |bench|
-        bench.report("ES / SC") do
-          (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
-        end
-      end
-    end
-
-    EM.stop
-    Thread.kill(em_thread) if em_thread
   end
 
   def zmq_client_zmq_server(number_tests, test_length, global_bench = nil)
@@ -149,28 +95,10 @@ namespace :benchmark do
     puts args[:profile_output]
   end
 
-  desc "benchmark EventMachine client with EventMachine server"
-  task :em_client_em_server, [:number, :length] do |t, args|
-    args.with_defaults(:number => 1000, :length => 100)
-    em_client_em_server(args[:number], args[:length])
-  end
-
-  desc "benchmark EventMachine client with Socket server"
-  task :em_client_sock_server, [:number, :length] do |t, args|
-    args.with_defaults(:number => 1000, :length => 100)
-    em_client_sock_server(args[:number], args[:length])
-  end
-
   desc "benchmark Socket client with Socket server"
   task :sock_client_sock_server, [:number, :length] do |t, args|
     args.with_defaults(:number => 1000, :length => 100)
     sock_client_sock_server(args[:number], args[:length])
-  end
-
-  desc "benchmark Socket client with EventMachine server"
-  task :sock_client_em_server, [:number, :length] do |t, args|
-    args.with_defaults(:number => 1000, :length => 100)
-    sock_client_em_server(args[:number], args[:length])
   end
 
   desc "benchmark server performance"
@@ -178,11 +106,8 @@ namespace :benchmark do
     args.with_defaults(:number => 1000, :length => 100)
 
     Benchmark.bm(10) do |bench|
-      # zmq_client_zmq_server(args[:number], args[:length], bench)
-      #      em_client_em_server(args[:number], args[:length], bench)
-      #      em_client_sock_server(args[:number], args[:length], bench)
+      zmq_client_zmq_server(args[:number], args[:length], bench)
       sock_client_sock_server(args[:number], args[:length], bench)
-      #      sock_client_em_server(args[:number], args[:length], bench)
     end
   end
 end

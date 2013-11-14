@@ -1,6 +1,7 @@
 require 'simplecov'
 SimpleCov.start
 
+require 'timeout'
 require 'rubygems'
 require 'bundler'
 Bundler.setup :default, :development, :test

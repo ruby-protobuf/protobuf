@@ -22,7 +22,7 @@ module Protobuf
       end
 
       def enable_gc!
-        ::GC.enable && ::GC.start if ::Protobuf.gc_pause_server_request?
+        ::GC.enable if ::Protobuf.gc_pause_server_request?
       end
 
       # Invoke the service method dictated by the proto wrapper request object
