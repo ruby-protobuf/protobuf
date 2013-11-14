@@ -1,3 +1,8 @@
+2.8.8
+---------
+
+- ServiceDirectory beacons broadcast on same ip as listening clients. [#133, @devin-c]
+
 2.8.7
 ---------
 

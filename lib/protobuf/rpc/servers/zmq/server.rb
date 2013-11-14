@@ -33,10 +33,6 @@ module Protobuf
           @total_workers = total_workers + 1
         end
 
-        def backend_ip
-          frontend_ip
-        end
-
         def backend_port
           options[:worker_port] || frontend_port + 1
         end
@@ -106,6 +102,7 @@ module Protobuf
         def frontend_ip
           @frontend_ip ||= resolve_ip(options[:host])
         end
+        alias_method :backend_ip, :frontend_ip
 
         def frontend_port
           options[:port]
@@ -170,7 +167,7 @@ module Protobuf
 
           yield if block_given? # runs on startup
           wait_for_shutdown_signal
-          broadcast_flatline if broadcast_beacons? 
+          broadcast_flatline if broadcast_beacons?
           Thread.pass until reap_dead_workers.empty?
           @broker.join unless brokerless?
         ensure
@@ -248,6 +245,13 @@ module Protobuf
         def init_beacon_socket
           @beacon_socket = UDPSocket.new
           @beacon_socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_BROADCAST, true)
+          @beacon_socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_REUSEADDR, true)
+
+          if defined?(::Socket::SO_REUSEPORT)
+            @beacon_socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_REUSEPORT, true)
+          end
+
+          @beacon_socket.bind(frontend_ip, beacon_port)
           @beacon_socket.connect(beacon_ip, beacon_port)
         end
 
