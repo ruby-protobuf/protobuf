@@ -14,7 +14,7 @@ module Protobuf
 
           print_class(descriptor.name, :enum) do
             if allow_alias?
-              puts "option :allow_alias => true"
+              puts "set_option :allow_alias"
               puts
             end
 
