@@ -20,6 +20,7 @@ require "protobuf/version"
   s.require_paths = ["lib"]
 
   s.add_dependency 'activesupport'
+  s.add_dependency 'middleware'
   s.add_dependency 'multi_json'
   s.add_dependency 'thor'
 
@@ -31,5 +32,4 @@ require "protobuf/version"
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'timecop'
-  # s.add_development_dependency 'perftools.rb'
 end
