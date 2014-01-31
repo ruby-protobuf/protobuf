@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/protobuf.png)](http://badge.fury.io/rb/protobuf)
 [![Build Status](https://secure.travis-ci.org/localshred/protobuf.png?branch=master)](https://travis-ci.org/localshred/protobuf)
+[![Gitter chat](https://badges.gitter.im/localshred/protobuf.png)](https://gitter.im/localshred/protobuf)
 
 ___See [CHANGES.md](https://github.com/localshred/protobuf/blob/master/CHANGES.md) or [Release Notes](https://github.com/localshred/protobuf/releases) for significant version changes.___
 
