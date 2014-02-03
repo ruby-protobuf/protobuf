@@ -7,16 +7,7 @@ ENV['PB_NO_NETWORKING'] = '1'
 
 $LOAD_PATH << ::File.expand_path("../../lib", __FILE__)
 require 'protobuf'
-
-# Setup the loadpath so that plugin.pb will
-# be able to require the descriptor.pb file.
-#
-$LOAD_PATH << ::File.expand_path("../../lib/protobuf/descriptors", __FILE__)
-require 'google/protobuf/compiler/plugin.pb'
-
-# Read the request bytes from STDIN, pass to the CodeGenerator, and
-# write to STDOUT the generated response_bytes.
-#
+require 'protobuf/descriptors'
 require 'protobuf/code_generator'
 
 request_bytes = STDIN.read
