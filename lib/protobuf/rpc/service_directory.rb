@@ -5,7 +5,6 @@ require 'set'
 require 'thread'
 require 'timeout'
 
-require 'protobuf/lifecycle'
 require 'protobuf/rpc/dynamic_discovery.pb'
 
 module Protobuf
@@ -239,7 +238,7 @@ module Protobuf
       end
 
       def trigger(action, listing)
-        ::Protobuf::Lifecycle.trigger("directory.listing.#{action}", listing)
+        ::ActiveSupport::Notifications.instrument("directory.listing.#{action}", :listing => listing)
       end
     end
   end
