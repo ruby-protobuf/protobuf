@@ -243,7 +243,7 @@ module Protobuf
             "pid #{::Process.pid} -- #{@runner_mode} RPC Server listening at #{options.host}:#{options.port}"
           }
 
-          ::ActiveSupport::Notifications.instrument( "after_server_bind")
+          ::ActiveSupport::Notifications.instrument("after_server_bind")
         end
       end
     end
