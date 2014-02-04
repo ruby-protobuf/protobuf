@@ -8,7 +8,7 @@ module Protobuf
       event_name = normalized_event_name( event_name )
 
       log_warn {
-        message = "Lifecycle events have been deprecated. Use ::ActiveSupport::Notifications.subscribe('#{event_name}')"
+        message = "[DEPRECATED] Lifecycle events have been deprecated. Use ::ActiveSupport::Notifications.subscribe('#{event_name}')"
         sign_message(message)
       }
 
@@ -19,7 +19,7 @@ module Protobuf
 
     def self.trigger( event_name, *args )
       log_warn {
-        message = "Lifecycle events have been deprecated. Use ::ActiveSupport::Notifications.instrument(...)"
+        message = "[DEPRECATED] Lifecycle events have been deprecated. Use ::ActiveSupport::Notifications.instrument(...)"
         sign_message(message)
       }
 
