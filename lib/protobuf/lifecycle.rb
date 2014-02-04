@@ -7,10 +7,12 @@ module Protobuf
 
       event_name = normalized_event_name( event_name )
 
-      log_warn {
-        message = "[DEPRECATED] Lifecycle events have been deprecated. Use ::ActiveSupport::Notifications.subscribe('#{event_name}')"
-        sign_message(message)
-      }
+      if ::Protobuf.print_deprecation_warnings?
+        $stderr.puts <<-ERROR
+            [DEPRECATED] ::Protobuf::Lifecycle has been deprecated and will be removed in a future version.
+                         Use ::ActiveSupport::Notifications.subscribe('#{event_name}')
+        ERROR
+      end
 
       ::ActiveSupport::Notifications.subscribe(event_name) do |name, start, finish, id, args|
         blk.call(*args)
@@ -18,10 +20,12 @@ module Protobuf
     end
 
     def self.trigger( event_name, *args )
-      log_warn {
-        message = "[DEPRECATED] Lifecycle events have been deprecated. Use ::ActiveSupport::Notifications.instrument(...)"
-        sign_message(message)
-      }
+      if ::Protobuf.print_deprecation_warnings?
+        $stderr.puts <<-ERROR
+            [DEPRECATED] ::Protobuf::Lifecycle has been deprecated and will be removed in a future version.
+                         Use ::ActiveSupport::Notifications.instrument(...)
+        ERROR
+      end
 
       event_name = normalized_event_name( event_name )
 
