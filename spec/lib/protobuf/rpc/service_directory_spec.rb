@@ -56,10 +56,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
   end
 
   def expect_event_trigger(event)
-    ::Protobuf::Lifecycle
-      .should_receive(:trigger)
-      .with(event,
-            an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing))
+    ::ActiveSupport::Notifications
+      .should_receive(:instrument)
+      .with(event, hash_including(:listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing)))
       .once
   end
 
