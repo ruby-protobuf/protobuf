@@ -13,3 +13,10 @@ task :default => :spec
 
 desc "Run specs"
 RSpec::Core::RakeTask.new(:spec)
+
+task :console do
+  require 'pry'
+  require 'protobuf'
+  ARGV.clear
+  ::Pry.start
+end
