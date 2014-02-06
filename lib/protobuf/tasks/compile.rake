@@ -3,14 +3,15 @@ require 'fileutils'
 namespace :protobuf do
 
   desc 'Clean & Compile the protobuf source to ruby classes. Pass PB_NO_CLEAN=1 if you do not want to force-clean first.'
-  task :compile, [ :package, :source, :destination, :plugin ] do |tasks, args|
+  task :compile, [ :package, :source, :destination, :plugin, :file_extension ] do |tasks, args|
     args.with_defaults(:destination => 'lib')
     args.with_defaults(:source => 'definitions')
     args.with_defaults(:plugin => 'ruby')
+    args.with_defaults(:file_extension => '.pb.rb')
 
     unless do_not_clean?
       force_clean!
-      ::Rake::Task[:clean].invoke(args[:package], args[:destination])
+      ::Rake::Task[:clean].invoke(args[:package], args[:destination], args[:file_extension])
     end
 
     command = []
@@ -26,10 +27,12 @@ namespace :protobuf do
   end
 
   desc 'Clean the generated *.pb.rb files from the destination package. Pass PB_FORCE_CLEAN=1 to skip confirmation step.'
-  task :clean, [ :package, :destination ] do |task, args|
+  task :clean, [ :package, :destination, :file_extension ] do |task, args|
     args.with_defaults(:destination => 'lib')
+    args.with_defaults(:file_extension => '.pb.rb')
 
-    files_to_clean = ::File.join(args[:destination], args[:package], '**', '*.pb.rb')
+    file_extension = args[:file_extension].sub(/\*?\.+/, '')
+    files_to_clean = ::File.join(args[:destination], args[:package], '**', "*.#{file_extension}")
 
     if force_clean? || permission_to_clean?(files_to_clean)
       ::Dir.glob(files_to_clean).each do |file|
