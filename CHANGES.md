@@ -1,3 +1,8 @@
+2.8.10
+---------
+
+- Allow passing a file extension to compile/clean rake tasks. [#143, @localshred]
+
 2.8.9
 ---------
 
