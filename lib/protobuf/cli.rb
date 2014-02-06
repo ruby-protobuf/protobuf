@@ -1,6 +1,5 @@
 require 'thor'
 require 'protobuf/version'
-require 'protobuf/lifecycle'
 require 'protobuf/logger'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq_runner'
@@ -226,7 +225,7 @@ module Protobuf
             "pid #{::Process.pid} -- #{@runner_mode} RPC Server listening at #{options.host}:#{options.port}"
           }
 
-          ::Protobuf::Lifecycle.trigger( "after_server_bind" )
+          ::ActiveSupport::Notifications.instrument("after_server_bind")
         end
       end
     end
