@@ -16,11 +16,8 @@ module Protobuf
           request_buffer = Protobuf::Rpc::Buffer.new(:read)
           @complete_cb = complete_cb
 
-          log_debug { sign_message("stats are #{@stats.to_s}") }
           request_buffer << read_data
           @request_data = request_buffer.data
-
-          log_debug { sign_message("handling request") }
 
           if request_buffer.flushed?
             gc_pause do
