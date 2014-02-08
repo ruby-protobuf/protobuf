@@ -46,6 +46,7 @@ module Protobuf
         handle_error(error)
       ensure
         send_response
+        @response
       end
 
       # Client error handler. Receives an exception object and writes it into the @response
@@ -78,7 +79,6 @@ module Protobuf
       # Write the response wrapper to the client
       def send_response
         log_debug { sign_message("Sending response to client: #{@response.inspect}") }
-        send_data
       ensure
         @stats.stop
         log_info { @stats.to_s }
