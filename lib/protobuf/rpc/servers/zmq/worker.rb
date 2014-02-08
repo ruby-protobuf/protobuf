@@ -31,8 +31,8 @@ module Protobuf
           unless @request_data.nil?
             log_debug { sign_message("handling request") }
             gc_pause do
-              @response = handle_client
-              send_data
+              encoded_response = handle_client
+              send_data(encoded_response)
             end
           end
         end
@@ -69,11 +69,7 @@ module Protobuf
           @server.running?
         end
 
-        def send_data
-          data = @response.encode
-
-          @stats.response_size = data.size
-
+        def send_data(data)
           write_to_backend([@client_address, "", data])
         end
 
