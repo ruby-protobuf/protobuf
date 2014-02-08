@@ -21,7 +21,11 @@ module Protobuf
           @request_data = request_buffer.data
 
           log_debug { sign_message("handling request") }
-          handle_client if request_buffer.flushed?
+
+          if request_buffer.flushed?
+            @response = handle_client
+            send_data
+          end
         end
 
         def read_data

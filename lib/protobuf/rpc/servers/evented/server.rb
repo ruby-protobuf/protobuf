@@ -20,7 +20,10 @@ module Protobuf
           @request_buffer << data
           @request_data = @request_buffer.data
 
-          handle_client if @request_buffer.flushed?
+          if @request_buffer.flushed?
+            @response = handle_client
+            send_data
+          end
         end
 
         def send_data
