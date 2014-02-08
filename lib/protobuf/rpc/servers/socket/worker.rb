@@ -23,8 +23,10 @@ module Protobuf
           log_debug { sign_message("handling request") }
 
           if request_buffer.flushed?
-            @response = handle_client
-            send_data
+            gc_pause do
+              @response = handle_client
+              send_data
+            end
           end
         end
 

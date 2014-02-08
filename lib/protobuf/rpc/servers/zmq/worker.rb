@@ -29,8 +29,10 @@ module Protobuf
 
           unless @request_data.nil?
             log_debug { sign_message("handling request") }
-            @response = handle_client
-            send_data
+            gc_pause do
+              @response = handle_client
+              send_data
+            end
           end
         end
 
