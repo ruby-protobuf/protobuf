@@ -29,7 +29,8 @@ module Protobuf
 
           unless @request_data.nil?
             log_debug { sign_message("handling request") }
-            handle_client
+            @response = handle_client
+            send_data
           end
         end
 
