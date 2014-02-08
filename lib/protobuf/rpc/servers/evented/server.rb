@@ -22,17 +22,16 @@ module Protobuf
 
           if @request_buffer.flushed?
             gc_pause do
-              @response = handle_client
-              send_data
+              encoded_response = handle_client
+              send_data(encoded_response)
             end
           end
         end
 
-        def send_data
+        def send_data(data)
           response_buffer = Protobuf::Rpc::Buffer.new(:write)
-          response_buffer.set_data(@response)
-          @stats.response_size = response_buffer.size
-          log_debug { sign_message("sending data: #{response_buffer.inspect}") }
+          response_buffer.set_data(data)
+
           super(response_buffer.write)
         end
       end
