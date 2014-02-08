@@ -21,8 +21,10 @@ module Protobuf
           @request_data = @request_buffer.data
 
           if @request_buffer.flushed?
-            @response = handle_client
-            send_data
+            gc_pause do
+              @response = handle_client
+              send_data
+            end
           end
         end
 

@@ -25,6 +25,14 @@ module Protobuf
         ::GC.enable && ::GC.start if ::Protobuf.gc_pause_server_request?
       end
 
+      def gc_pause
+        disable_gc!
+
+        yield
+
+        enable_gc!
+      end
+
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
         parse_request_from_buffer
@@ -34,7 +42,6 @@ module Protobuf
         @stats.dispatcher = @dispatcher
         log_info { @stats.to_s }
 
-        disable_gc!
         @dispatcher.invoke!
         if @dispatcher.success?
           @response.response_proto = @dispatcher.response
@@ -82,7 +89,6 @@ module Protobuf
       ensure
         @stats.stop
         log_info { @stats.to_s }
-        enable_gc!
       end
     end
   end
