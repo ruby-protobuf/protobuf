@@ -35,6 +35,8 @@ module Protobuf
 
       # Invoke the service method dictated by the proto wrapper request object
       def handle_client
+        log_debug { sign_message("handling request") }
+
         parse_request_from_buffer
         @stats.client = @request.caller
 

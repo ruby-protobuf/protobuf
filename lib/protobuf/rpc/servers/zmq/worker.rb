@@ -29,7 +29,6 @@ module Protobuf
           @client_address, _, @request_data = read_from_backend
 
           unless @request_data.nil?
-            log_debug { sign_message("handling request") }
             gc_pause do
               encoded_response = handle_client
               send_data(encoded_response)
