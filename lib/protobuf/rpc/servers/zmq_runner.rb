@@ -43,6 +43,7 @@ module Protobuf
 
         trap(:TTOU) do
           log_info { "Current worker size: #{@server.workers.size}" }
+          log_info { "Current worker size: #{@server.busy_worker_count}" }
         end
       end
     end

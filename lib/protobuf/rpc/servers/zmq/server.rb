@@ -12,7 +12,8 @@ module Protobuf
 
         DEFAULT_OPTIONS = {
           :beacon_interval => 5,
-          :broadcast_beacons => false
+          :broadcast_beacons => false,
+          :broadcast_busy => false
         }
 
         attr_accessor :options, :workers
@@ -31,6 +32,10 @@ module Protobuf
 
         def add_worker
           @total_workers = total_workers + 1
+        end
+
+        def all_workers_busy?
+          workers.all? { |thread| !!thread.thread_variable_get(:busy) }
         end
 
         def backend_ip
@@ -101,6 +106,10 @@ module Protobuf
 
         def brokerless?
           !!options[:workers_only]
+        end
+
+        def busy_worker_count
+          workers.all? { |thread| !!thread.thread_variable_get(:busy) }
         end
 
         def frontend_ip
@@ -239,7 +248,14 @@ module Protobuf
               start_missing_workers
             end
 
-            broadcast_heartbeat if broadcast_heartbeat?
+            if broadcast_heartbeat?
+              if all_workers_busy? && options[:broadcast_busy]
+                broadcast_flatline
+              else
+                broadcast_heartbeat
+              end
+            end
+
           end
         end
 
