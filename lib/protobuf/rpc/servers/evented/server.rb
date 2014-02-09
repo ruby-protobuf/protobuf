@@ -9,7 +9,6 @@ module Protobuf
 
         # Initialize a new read buffer for storing client request info
         def post_init
-          initialize_request!
           @request_buffer = Protobuf::Rpc::Buffer.new(:read)
         end
 
