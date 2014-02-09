@@ -12,8 +12,6 @@ module Protobuf
           @socket = sock
           @complete_cb = complete_cb
 
-          initialize_request!
-
           if @request_data = read_data
             gc_pause do
               encoded_response = handle_client

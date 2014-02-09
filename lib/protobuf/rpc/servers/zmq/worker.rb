@@ -53,7 +53,6 @@ module Protobuf
             break if rc == -1
 
             if rc > 0
-              initialize_request!
               process_request
             end
           end
