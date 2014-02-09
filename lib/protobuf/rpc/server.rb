@@ -9,20 +9,12 @@ require 'protobuf/rpc/service_dispatcher'
 module Protobuf
   module Rpc
     module Server
-      def disable_gc!
-        ::GC.disable if ::Protobuf.gc_pause_server_request?
-      end
-
-      def enable_gc!
-        ::GC.enable if ::Protobuf.gc_pause_server_request?
-      end
-
       def gc_pause
-        disable_gc!
+        ::GC.disable if ::Protobuf.gc_pause_server_request?
 
         yield
 
-        enable_gc!
+        ::GC.enable if ::Protobuf.gc_pause_server_request?
       end
 
       # Invoke the service method dictated by the proto wrapper request object
