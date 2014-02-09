@@ -36,11 +36,6 @@ module Protobuf
         log_info { env.stats.to_s }
 
         env.encoded_response
-      rescue => exception
-        log_exception(exception)
-
-        response = PbError.new(exception.message).to_response
-        response.encode
       end
 
       def log_signature
@@ -57,9 +52,9 @@ module Protobuf
       def initialize_env!(request_data)
         # TODO: Figure out a better way to handle logging with signatures
         @_env = Env.new(
-         'encoded_request' => request_data,
-         'log_signature' => log_signature,
-         'stats' => Stat.new(:SERVER)
+          'encoded_request' => request_data,
+          'log_signature' => log_signature,
+          'stats' => Stat.new(:SERVER)
         )
       end
     end
