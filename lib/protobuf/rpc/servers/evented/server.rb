@@ -15,11 +15,10 @@ module Protobuf
         # Receive a chunk of data, potentially flushed to handle_client
         def receive_data(data)
           @request_buffer << data
-          @request_data = @request_buffer.data
 
           if @request_buffer.flushed?
             gc_pause do
-              encoded_response = handle_client
+              encoded_response = handle_request(@request_buffer.data)
               send_data(encoded_response)
             end
           end

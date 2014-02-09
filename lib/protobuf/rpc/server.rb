@@ -34,11 +34,11 @@ module Protobuf
       end
 
       # Invoke the service method dictated by the proto wrapper request object
-      def handle_client
+      def handle_request(data)
         log_debug { sign_message("handling request") }
         initialize_request!
+        parse_request_data(data)
 
-        parse_request_from_buffer
         @stats.client = @request.caller
 
         @dispatcher = ::Protobuf::Rpc::ServiceDispatcher.new(@request)
@@ -46,6 +46,7 @@ module Protobuf
         log_info { @stats.to_s }
 
         @dispatcher.invoke!
+
         if @dispatcher.success?
           @response.response_proto = @dispatcher.response
         else
@@ -75,10 +76,10 @@ module Protobuf
       end
 
       # Parse the incoming request object into our expected request object
-      def parse_request_from_buffer
-        log_debug { sign_message("Parsing request from buffer: #{@request_data}") }
-        @stats.request_size = @request_data.size
-        @request.decode(@request_data)
+      def parse_request_data(data)
+        log_debug { sign_message("Parsing request from buffer: #{data}") }
+        @stats.request_size = data.size
+        @request.decode(data)
       rescue => error
         exc = ::Protobuf::Rpc::BadRequestData.new("Unable to parse request: #{error.message}")
         log_error { exc.message }

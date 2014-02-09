@@ -12,11 +12,12 @@ module Protobuf
           @socket = sock
           @complete_cb = complete_cb
 
-          if @request_data = read_data
-            gc_pause do
-              encoded_response = handle_client
-              send_data(encoded_response)
-            end
+          data = read_data
+          return unless data
+
+          gc_pause do
+            encoded_response = handle_request(data)
+            send_data(encoded_response)
           end
         end
 
