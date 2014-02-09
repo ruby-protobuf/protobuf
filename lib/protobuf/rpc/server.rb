@@ -27,10 +27,6 @@ module Protobuf
         # Create an env object that holds different parts of the environment and
         # is available to all of the middlewares.
         initialize_env!(request_data)
-        env.stats.request_size = request_data.size
-
-        env.request = decode_request_data(request_data)
-        env.stats.client = env.request.caller
 
         # Invoke the middleware stack, the last of which is the service
         # dispatcher. The dispatcher sets either an error object or a
@@ -56,18 +52,6 @@ module Protobuf
       end
 
     private
-
-      # Decode the incoming request object into our expected request object
-      #
-      def decode_request_data(data)
-        log_debug { sign_message("Decoding request: #{data}") }
-
-        Socketrpc::Request.decode(data)
-      rescue => error
-        exception = BadRequestData.new("Unable to decode request: #{error.message}")
-        log_error { exception.message }
-        raise exception
-      end
 
       # Encode the response wrapper to return to the client
       #
@@ -112,7 +96,12 @@ module Protobuf
       # memoized since servers aren't always reinitialized with each request
       #
       def initialize_env!(request_data)
-        @_env = Env.new('request' => request_data, 'stats' => Stat.new(:SERVER))
+        # TODO: Figure out a better way to handle logging with signatures
+        @_env = Env.new(
+         'encoded_request' => request_data,
+         'log_signature' => log_signature,
+         'stats' => Stat.new(:SERVER)
+        )
       end
     end
   end
