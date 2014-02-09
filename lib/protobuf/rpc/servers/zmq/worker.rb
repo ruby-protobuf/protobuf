@@ -55,7 +55,6 @@ module Protobuf
 
             if rc > 0
               ::Thread.current[:busy] = true
-              initialize_request!
               process_request
               ::Thread.current[:busy] = false
             end
