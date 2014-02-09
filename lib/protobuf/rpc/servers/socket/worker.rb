@@ -4,22 +4,17 @@ require 'protobuf/logger'
 module Protobuf
   module Rpc
     module Socket
-
       class Worker
         include ::Protobuf::Rpc::Server
         include ::Protobuf::Logger::LogMethods
 
         def initialize(sock, &complete_cb)
           @socket = sock
-          initialize_request!
-
-          request_buffer = Protobuf::Rpc::Buffer.new(:read)
           @complete_cb = complete_cb
 
-          request_buffer << read_data
-          @request_data = request_buffer.data
+          initialize_request!
 
-          if request_buffer.flushed?
+          if @request_data = read_data
             gc_pause do
               encoded_response = handle_client
               send_data(encoded_response)
@@ -35,7 +30,7 @@ module Protobuf
           end
           str_size_io = size_io.string
 
-          "#{str_size_io}-#{@socket.read(str_size_io.to_i)}"
+          @socket.read(str_size_io.to_i)
         end
 
         def send_data(data)
@@ -57,7 +52,6 @@ module Protobuf
           ! @socket.nil? && ! @socket.closed?
         end
       end
-
     end
   end
 end
