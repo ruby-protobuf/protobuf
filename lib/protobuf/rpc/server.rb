@@ -3,6 +3,7 @@ require 'protobuf/logger'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'
 require 'protobuf/rpc/error'
+require 'protobuf/rpc/middleware'
 require 'protobuf/rpc/stat'
 require 'protobuf/rpc/service_dispatcher'
 
@@ -22,22 +23,29 @@ module Protobuf
       def handle_request(request_data)
         log_debug { sign_message("Handling request") }
 
-        initialize_stats!
-        stats.request_size = request_data.size
+        # Create an env object that holds different parts of the environment and
+        # is available to all of the middlewares.
+        initialize_env!
+        env['stats'].request_size = request_data.size
 
-        request = decode_request_data(request_data)
-        stats.client = request.caller
+        env['request'] = decode_request_data(request_data)
+        env['stats'].client = env['request'].caller
 
-        response_data = dispatch_request(request)
+        # Invoke the middleware stack, the last of which is the service
+        # dispatcher. The dispatcher sets either an error object or a
+        # protobuf response object to env['response'].
+        env = Rpc.middleware.call(env)
+
+        response_data = handle_response(env['response'])
       rescue => error
         log_exception(error)
         response_data = handle_error(error)
       ensure
         encoded_response = encode_response_data(response_data)
-        stats.stop
+        env['stats'].stop
 
         # Log the response stats
-        log_info { stats.to_s }
+        log_info { env['stats'].to_s }
 
         return encoded_response
       end
@@ -60,24 +68,6 @@ module Protobuf
         raise exception
       end
 
-      # Dispatch the request to the service
-      #
-      def dispatch_request(request)
-        dispatcher = ServiceDispatcher.new(request)
-        stats.dispatcher = dispatcher
-
-        # Log the request stats
-        log_info { stats.to_s }
-
-        dispatcher.invoke!
-
-        if dispatcher.success?
-          Socketrpc::Response.new(:response_proto => response_data)
-        else
-          handle_error(dispatcher.error)
-        end
-      end
-
       # Encode the response wrapper to return to the client
       #
       def encode_response_data(response)
@@ -88,7 +78,7 @@ module Protobuf
         log_exception(error)
         encoded_response = handle_error(error).encode
       ensure
-        stats.response_size = encoded_response.size
+        env['stats'].response_size = encoded_response.size
         encoded_response
       end
 
@@ -104,13 +94,30 @@ module Protobuf
         end
       end
 
-      # Initialize a new stats tracker
+      # The middleware stack returns either an error or response proto. Package
+      # it up so that it's in the correct spot in the respone wrapper
+      #
+      def handle_response(response)
+        if response < Protobuf::Rpc::PbError
+          handle_error(response)
+        else
+          Socketrpc::Response.new(:response_proto => response)
+        end
+      end
+
+      # Initialize a new environment object
       #
       # NOTE: This has to be reinitialized with each request and can't be
-      # memoized since servers aren't reinitialized with each request
+      # memoized since servers aren't always reinitialized with each request
       #
-      def initialize_stats!
-        @_stats = Stat.new(:SERVER)
+      def initialize_env!
+        # TODO: Add extra info about the environment (i.e. variables) and other
+        # information that might be useful
+        @_env = {
+          'request' => nil,
+          'response' => nil,
+          'stats' => Stat.new(:SERVER)
+        }
       end
 
       def stats
