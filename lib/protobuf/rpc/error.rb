@@ -13,8 +13,20 @@ module Protobuf
         super message
       end
 
-      def to_response
-        Socketrpc::Response.new(:error => message, :error_reason => error_type)
+      def to_response(response=nil)
+        if response
+$stderr.puts <<-WARN
+  [DEPRECATED] Passing response wrappers when converting errors to responses is deprecated.
+               Versions >= 3.0 will no longer provide this interface and will simply
+               initialize a response wrapper and return it.
+WARN
+        else
+          response = Socketrpc::Response.new
+        end
+
+        response.error = message
+        response.error_reason = error_type
+        response
       end
     end
   end
