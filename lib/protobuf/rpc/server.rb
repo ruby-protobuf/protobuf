@@ -9,80 +9,112 @@ require 'protobuf/rpc/service_dispatcher'
 module Protobuf
   module Rpc
     module Server
-
-      def initialize_request!
-        log_debug { sign_message('Post init') }
-        @request = ::Protobuf::Socketrpc::Request.new
-        @response = ::Protobuf::Socketrpc::Response.new
-        @stats = Protobuf::Rpc::Stat.new(:SERVER)
-      end
-
-      def disable_gc!
+      def gc_pause
         ::GC.disable if ::Protobuf.gc_pause_server_request?
-      end
 
-      def enable_gc!
+        yield
+
         ::GC.enable && ::GC.start if ::Protobuf.gc_pause_server_request?
       end
 
       # Invoke the service method dictated by the proto wrapper request object
-      def handle_client
-        parse_request_from_buffer
-        @stats.client = @request.caller
+      #
+      def handle_request(request_data)
+        log_debug { sign_message("Handling request") }
 
-        @dispatcher = ::Protobuf::Rpc::ServiceDispatcher.new(@request)
-        @stats.dispatcher = @dispatcher
-        log_info { @stats.to_s }
+        initialize_stats!
+        stats.request_size = request_data.size
 
-        disable_gc!
-        @dispatcher.invoke!
-        if @dispatcher.success?
-          @response.response_proto = @dispatcher.response
-        else
-          handle_error(@dispatcher.error)
-        end
+        request = decode_request_data(request_data)
+        stats.client = request.caller
+
+        response_data = dispatch_request(request)
       rescue => error
         log_exception(error)
-        handle_error(error)
+        response_data = handle_error(error)
       ensure
-        send_response
-      end
+        encoded_response = encode_response_data(response_data)
+        stats.stop
 
-      # Client error handler. Receives an exception object and writes it into the @response
-      def handle_error(error)
-        log_debug { sign_message("handle_error: #{error.inspect}") }
-        if error.respond_to?(:to_response)
-          error.to_response(@response)
-        else
-          message = error.respond_to?(:message) ? error.message : error.to_s
-          code = error.respond_to?(:code) ? error.code : 'RPC_ERROR'
-          ::Protobuf::Rpc::PbError.new(message, code).to_response(@response)
-        end
+        # Log the response stats
+        log_info { stats.to_s }
+
+        return encoded_response
       end
 
       def log_signature
         @_log_signature ||= "[server-#{self.class.name}]"
       end
 
-      # Parse the incoming request object into our expected request object
-      def parse_request_from_buffer
-        log_debug { sign_message("Parsing request from buffer: #{@request_data}") }
-        @stats.request_size = @request_data.size
-        @request.decode(@request_data)
+    private
+
+      # Decode the incoming request object into our expected request object
+      #
+      def decode_request_data(data)
+        log_debug { sign_message("Decoding request: #{data}") }
+
+        Socketrpc::Request.decode(data)
       rescue => error
-        exc = ::Protobuf::Rpc::BadRequestData.new("Unable to parse request: #{error.message}")
-        log_error { exc.message }
-        raise exc
+        exception = BadRequestData.new("Unable to decode request: #{error.message}")
+        log_error { exception.message }
+        raise exception
       end
 
-      # Write the response wrapper to the client
-      def send_response
-        log_debug { sign_message("Sending response to client: #{@response.inspect}") }
-        send_data
+      # Dispatch the request to the service
+      #
+      def dispatch_request(request)
+        dispatcher = ServiceDispatcher.new(request)
+        stats.dispatcher = dispatcher
+
+        # Log the request stats
+        log_info { stats.to_s }
+
+        dispatcher.invoke!
+
+        if dispatcher.success?
+          Socketrpc::Response.new(:response_proto => response_data)
+        else
+          handle_error(dispatcher.error)
+        end
+      end
+
+      # Encode the response wrapper to return to the client
+      #
+      def encode_response_data(response)
+        log_debug { sign_message("Encoding response: #{response.inspect}") }
+
+        encoded_response = response.encode
+      rescue => error
+        log_exception(error)
+        encoded_response = handle_error(error).encode
       ensure
-        @stats.stop
-        log_info { @stats.to_s }
-        enable_gc!
+        stats.response_size = encoded_response.size
+        encoded_response
+      end
+
+      # Embed exceptions in a response wrapper
+      #
+      def handle_error(error)
+        log_debug { sign_message("handle_error: #{error.inspect}") }
+
+        if error.respond_to?(:to_response)
+          error.to_response
+        else
+          PbError.new(error.message).to_response
+        end
+      end
+
+      # Initialize a new stats tracker
+      #
+      # NOTE: This has to be reinitialized with each request and can't be
+      # memoized since servers aren't reinitialized with each request
+      #
+      def initialize_stats!
+        @_stats = Stat.new(:SERVER)
+      end
+
+      def stats
+        @_stats
       end
     end
   end

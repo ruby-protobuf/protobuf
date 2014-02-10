@@ -9,25 +9,25 @@ module Protobuf
 
         # Initialize a new read buffer for storing client request info
         def post_init
-          initialize_request!
           @request_buffer = Protobuf::Rpc::Buffer.new(:read)
         end
 
         # Receive a chunk of data, potentially flushed to handle_client
         def receive_data(data)
-          log_debug { sign_message("receive_data: #{data}") }
-
           @request_buffer << data
-          @request_data = @request_buffer.data
 
-          handle_client if @request_buffer.flushed?
+          if @request_buffer.flushed?
+            gc_pause do
+              encoded_response = handle_request(@request_buffer.data)
+              send_data(encoded_response)
+            end
+          end
         end
 
-        def send_data
+        def send_data(data)
           response_buffer = Protobuf::Rpc::Buffer.new(:write)
-          response_buffer.set_data(@response)
-          @stats.response_size = response_buffer.size
-          log_debug { sign_message("sending data: #{response_buffer.inspect}") }
+          response_buffer.set_data(data)
+
           super(response_buffer.write)
         end
       end
