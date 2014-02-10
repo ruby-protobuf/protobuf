@@ -39,7 +39,7 @@ module Protobuf
         # Log the response stats
         log_info { stats.to_s }
 
-        encoded_response
+        return encoded_response
       end
 
       def log_signature
