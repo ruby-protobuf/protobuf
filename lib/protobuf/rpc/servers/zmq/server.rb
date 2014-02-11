@@ -13,8 +13,8 @@ module Protobuf
         DEFAULT_OPTIONS = {
           :beacon_interval => 5,
           :broadcast_beacons => false,
-          :zmq_inproc => true
-          :broadcast_busy => false
+          :broadcast_busy => false,
+          :zmq_inproc => true,
         }
 
         attr_accessor :options, :workers
