@@ -10,13 +10,13 @@ module Protobuf
       self.get_option(:allow_alias)
     end
 
-    # Public: Get an array of EnumValue objects with the given value.
+    # Public: Get an array of EnumValue objects with the given number.
     #
     # number - An object that responds to to_i.
     #
     # Returns an array with zero or more EnumValue objects or nil.
     #
-    def self.all_enum_values_by_value(number)
+    def self.all_enum_values_by_number(number)
       self.enum_values.values.select do |enum_value|
         enum_value.to_i == number.to_i
       end
@@ -33,12 +33,12 @@ module Protobuf
     #     define :OFF, 2
     #   end
     #
-    #   StateMachine.all_values #=> [ 1, 2 ]
+    #   StateMachine.all_numbers #=> [ 1, 2 ]
     #
     # Returns an array of unique integers.
     #
-    def self.all_values
-      self.enum_values.values.map(&:to_i).uniq
+    def self.all_numbers
+      @all_numbers ||= self.enum_values.values.map(&:to_i).uniq
     end
 
     # Internal: DSL method to define a protobuf EnumValue. The given name will
@@ -64,7 +64,7 @@ module Protobuf
 
     # Public: Get the EnumValue associated with the given name.
     #
-    # name - An object that responds to to_sym. Case-sensitive.
+    # name - A string-like object. Case-sensitive.
     #
     # Example
     #
@@ -82,7 +82,7 @@ module Protobuf
     # if the given name does not have a correlating value.
     #
     def self.enum_value_by_name(name)
-      self.const_get(name.to_sym)
+      self.const_get(name)
     rescue NameError, NoMethodError
       nil
     end
@@ -131,7 +131,7 @@ module Protobuf
       when Numeric then
         enum_value_by_value(value.to_i)
       when String, Symbol then
-        enum_value_by_name(value.to_sym)
+        enum_value_by_name(value)
       else
         nil
       end

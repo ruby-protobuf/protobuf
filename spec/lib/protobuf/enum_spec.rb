@@ -24,11 +24,11 @@ describe Protobuf::Enum do
     end
   end
 
-  describe '.all_enum_values_by_value' do
+  describe '.all_enum_values_by_number' do
     it 'returns an array of EnumValues for the given tag' do
-      expect(EnumAliasTest.all_enum_values_by_value(1)).to eq([ EnumAliasTest::FOO, EnumAliasTest::BAR ])
-      expect(EnumAliasTest.all_enum_values_by_value(2)).to eq([ EnumAliasTest::BAZ ])
-      expect(EnumAliasTest.all_enum_values_by_value(3)).to eq([])
+      expect(EnumAliasTest.all_enum_values_by_number(1)).to eq([ EnumAliasTest::FOO, EnumAliasTest::BAR ])
+      expect(EnumAliasTest.all_enum_values_by_number(2)).to eq([ EnumAliasTest::BAZ ])
+      expect(EnumAliasTest.all_enum_values_by_number(3)).to eq([])
     end
   end
 
@@ -170,14 +170,14 @@ describe Protobuf::Enum do
     end
   end
 
-  describe '.all_values' do
+  describe '.all_numbers' do
     it 'provides an array of the integer values' do
-      expect(Test::EnumTestType.all_values).to include(-1, 1, 2, 3)
+      expect(Test::EnumTestType.all_numbers).to include(-1, 1, 2, 3)
     end
 
     context 'when enum allows aliases' do
       it 'returns a unique array of all defined enum values' do
-        expect(EnumAliasTest.all_values).to include(1, 2)
+        expect(EnumAliasTest.all_numbers).to include(1, 2)
       end
     end
   end
