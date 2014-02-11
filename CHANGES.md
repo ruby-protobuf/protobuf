@@ -1,3 +1,11 @@
+2.8.11
+---------
+
+- Default ZMQ server to use inproc protocol instead of tcp (zero-copy between server-broker-worker)
+- Add 'broadcast_busy' functionality that removes server from cluster if the workers are full
+- Add cli option for --no-zmq_inproc
+- Add cli option for --broadcast_busy
+
 2.8.10
 ---------
 
