@@ -37,6 +37,7 @@ module Protobuf
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
     option :workers_only,               :type => :boolean, :default => false, :desc => "Starts process with only workers (no broker/frontend is started) only relevant for Zmq Server"
     option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
+    option :zmq_inproc,                 :type => :boolean, :default => true, :desc => 'Use inproc protocol for zmq Server/Broker/Worker'
 
     def start(app_file)
       debug_say('Configuring the rpc_server process')
