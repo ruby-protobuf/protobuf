@@ -76,12 +76,20 @@ module Protobuf
         private
 
         def init_zmq_context
-          @zmq_context = ZMQ::Context.new
+          if inproc?
+            @zmq_context = @server.zmq_context
+          else
+            @zmq_context = ZMQ::Context.new
+          end
         end
 
         def init_backend_socket
           @backend_socket = @zmq_context.socket(ZMQ::REQ)
           zmq_error_check(@backend_socket.connect(@server.backend_uri))
+        end
+
+        def inproc?
+          !!@server.try(:inproc?)
         end
 
         def read_from_backend
