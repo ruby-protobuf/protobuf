@@ -17,11 +17,7 @@ module Protobuf
         }
 
         attr_accessor :options, :workers
-
-        # Share zmq_context when using inproc
-        def self.zmq_context
-          @zmq_context ||= ZMQ::Context.new
-        end
+        attr_reader :zmq_context
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
@@ -120,6 +116,10 @@ module Protobuf
 
         def frontend_uri
           "tcp://#{frontend_ip}:#{frontend_port}"
+        end
+
+        def inproc?
+          !!self.options[:zmq_inproc]
         end
 
         def maintenance_timeout
@@ -270,15 +270,7 @@ module Protobuf
         end
 
         def init_zmq_context
-          if inproc?
-            @zmq_context = self.class.zmq_context
-          else
-            @zmq_context = ZMQ::Context.new
-          end
-        end
-
-        def inproc?
-          !!self.options[:zmq_inproc]
+          @zmq_context = ZMQ::Context.new
         end
 
         def start_broker
