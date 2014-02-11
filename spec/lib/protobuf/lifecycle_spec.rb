@@ -5,23 +5,12 @@ describe ::Protobuf::Lifecycle do
   subject { described_class }
 
   before(:each) do
-    described_class.lifecycle_events = {}
+    ::ActiveSupport::Notifications.notifier = ::ActiveSupport::Notifications::Fanout.new
   end
 
   it "registers a string as the event_name" do
-    expect {
-      subject.register("something") do
-        true
-      end
-    }.to change { subject.lifecycle_events.size }.by(1)
-  end
-
-  it "registers a symbol as the event_name" do
-    expect {
-      subject.register("something") do
-        true
-      end
-    }.to change { subject.lifecycle_events.size }.by(1)
+    ::ActiveSupport::Notifications.should_receive(:subscribe).with("something")
+      subject.register("something") { true }
   end
 
   it "only registers blocks for event callbacks" do

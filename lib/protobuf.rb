@@ -4,6 +4,7 @@ require 'pp'
 require 'stringio'
 require 'active_support/core_ext/object/blank'
 require 'active_support/version'
+require 'active_support/notifications'
 
 if ActiveSupport::VERSION::MAJOR > 2
   require 'active_support/core_ext/object/try'

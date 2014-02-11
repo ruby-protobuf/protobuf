@@ -9,13 +9,13 @@ describe ::Protobuf::CLI do
 
   let(:sock_runner) {
     runner = double("SocketRunner", :register_signals => nil)
-    runner.stub(:run) { ::Protobuf::Lifecycle.trigger( "after_server_bind" ) }
+    runner.stub(:run) { ::ActiveSupport::Notifications.publish( "after_server_bind" ) }
     runner
   }
 
   let(:zmq_runner) {
     runner = double "ZmqRunner", register_signals: nil
-    runner.stub(:run) { ::Protobuf::Lifecycle.trigger( "after_server_bind" ) }
+    runner.stub(:run) { ::ActiveSupport::Notifications.publish( "after_server_bind" ) }
     runner
   }
 
