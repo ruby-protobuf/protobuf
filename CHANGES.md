@@ -1,10 +1,15 @@
+2.8.12
+---------
+
+- Fix thread busy access in zmq server/worker. [#151, @abrandoned]
+
 2.8.11
 ---------
 
-- Default ZMQ server to use inproc protocol instead of tcp (zero-copy between server-broker-worker)
-- Add 'broadcast_busy' functionality that removes server from cluster if the workers are full
-- Add cli option for --no-zmq_inproc
-- Add cli option for --broadcast_busy
+- Default ZMQ server to use inproc protocol instead of tcp (zero-copy between server-broker-worker). [#145, @brianstien]
+- Add `broadcast_busy` functionality that removes server from cluster if the workers are full. [#149, @abrandoned]
+- Add cli option for `--no-zmq_inproc`. [#149, @abrandoned]
+- Add cli option for `--broadcast_busy`. [#149, @abrandoned]
 
 2.8.10
 ---------
