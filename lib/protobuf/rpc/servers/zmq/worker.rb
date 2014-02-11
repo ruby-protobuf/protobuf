@@ -51,8 +51,10 @@ module Protobuf
             break if rc == -1
 
             if rc > 0
+              ::Thread.current.thread_variable_set(:busy, true)
               initialize_request!
               process_request
+              ::Thread.current.thread_variable_set(:busy, false)
             end
           end
         ensure
