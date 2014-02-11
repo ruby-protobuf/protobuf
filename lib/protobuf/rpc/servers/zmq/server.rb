@@ -105,7 +105,7 @@ module Protobuf
         end
 
         def busy_worker_count
-          workers.all? { |thread| !!thread.thread_variable_get(:busy) }
+          workers.count { |thread| !!thread.thread_variable_get(:busy) }
         end
 
         def frontend_ip
