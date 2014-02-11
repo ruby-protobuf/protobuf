@@ -56,10 +56,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
   end
 
   def expect_event_trigger(event)
-    ::Protobuf::Lifecycle
-      .should_receive(:trigger)
-      .with(event,
-            an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing))
+    ::ActiveSupport::Notifications
+      .should_receive(:instrument)
+      .with(event, hash_including(:listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing)))
       .once
   end
 
@@ -152,6 +151,23 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       send_beacon(:heartbeat, echo_server)
       expect_event_trigger("directory.listing.removed")
       send_beacon(:flatline, echo_server)
+    end
+
+    describe "#all_listings_for" do
+      context "when listings are present" do
+        it "returns all listings for a given service" do
+          send_beacon(:heartbeat, hello_server)
+          send_beacon(:heartbeat, combo_server)
+
+          subject.all_listings_for("HelloService").size.should eq(2)
+        end
+      end
+
+      context "when no listings are present" do
+        it "returns and empty array" do
+          subject.all_listings_for("HelloService").size.should eq(0)
+        end
+      end
     end
 
     describe "#each_listing" do

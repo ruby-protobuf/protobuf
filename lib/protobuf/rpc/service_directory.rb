@@ -5,7 +5,6 @@ require 'set'
 require 'thread'
 require 'timeout'
 
-require 'protobuf/lifecycle'
 require 'protobuf/rpc/dynamic_discovery.pb'
 
 module Protobuf
@@ -83,6 +82,14 @@ module Protobuf
       #
       def initialize
         reset
+      end
+
+      def all_listings_for(service)
+        if running? && @listings_by_service.key?(service.to_s)
+          @listings_by_service[service.to_s].entries.shuffle
+        else
+          []
+        end
       end
 
       def each_listing(&block)
@@ -231,7 +238,7 @@ module Protobuf
       end
 
       def trigger(action, listing)
-        ::Protobuf::Lifecycle.trigger("directory.listing.#{action}", listing)
+        ::ActiveSupport::Notifications.instrument("directory.listing.#{action}", :listing => listing)
       end
     end
   end

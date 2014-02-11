@@ -1,3 +1,26 @@
+2.8.10
+---------
+
+- Allow passing a file extension to compile/clean rake tasks. [#143, @localshred]
+
+2.8.9
+---------
+
+- Deprecated Protobuf::Lifecycle module in favor of using ActiveSupport::Notifications. [#139, @devin-c]
+- Modify `$LOAD_PATH` inside descriptors.rb to make it easier for other libraries to write their own compiler plugins using our pre-compiled descriptors. [#141, @localshred]
+- Add protobuf:clean and protobuf:compile rake tasks for use in external libraries to compile source definitions to a destination. [#142, @localshred]
+
+2.8.8
+---------
+
+- ServiceDirectory beacons broadcast on same ip as listening clients. [#133, @devin-c]
+
+2.8.7
+---------
+
+- Fire ActiveSupport load hooks when RPC Server and Client classes are loaded. [#126, @liveh2o]
+- Prevent infinite loop when doing service lookup from directory. [#125, @brianstien]
+
 2.8.6
 ---------
 
