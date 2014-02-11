@@ -1,5 +1,6 @@
 require 'protobuf/rpc/server'
 require 'protobuf/rpc/servers/zmq/util'
+require 'thread'
 
 module Protobuf
   module Rpc
@@ -51,10 +52,10 @@ module Protobuf
             break if rc == -1
 
             if rc > 0
-              ::Thread.current.thread_variable_set(:busy, true)
+              ::Thread.current[:busy] = true
               initialize_request!
               process_request
-              ::Thread.current.thread_variable_set(:busy, false)
+              ::Thread.current[:busy] = false
             end
           end
         ensure
