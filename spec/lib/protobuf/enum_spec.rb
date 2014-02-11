@@ -24,14 +24,6 @@ describe Protobuf::Enum do
     end
   end
 
-  describe '.all_enum_values_by_number' do
-    it 'returns an array of EnumValues for the given tag' do
-      expect(EnumAliasTest.all_enum_values_by_number(1)).to eq([ EnumAliasTest::FOO, EnumAliasTest::BAR ])
-      expect(EnumAliasTest.all_enum_values_by_number(2)).to eq([ EnumAliasTest::BAZ ])
-      expect(EnumAliasTest.all_enum_values_by_number(3)).to eq([])
-    end
-  end
-
   describe '.define' do
     it 'defines a constant enum value on the parent class' do
       expect(Test::EnumTestType.constants).to include(name)
@@ -51,6 +43,36 @@ describe Protobuf::Enum do
           DefineEnumAlias.define(:BAR, 1)
         }.not_to raise_error
       end
+    end
+  end
+
+  describe '.enums' do
+    it 'provides an array of defined EnumValue objects' do
+      expect(Test::EnumTestType.enums).to eq([
+        Test::EnumTestType::ONE,
+        Test::EnumTestType::TWO,
+        Test::EnumTestType::MINUS_ONE,
+        Test::EnumTestType::THREE
+      ])
+    end
+
+    context 'when enum allows aliases' do
+      it 'treats aliased values as valid' do
+        expect(EnumAliasTest.enums).to eq([
+          EnumAliasTest::FOO,
+          EnumAliasTest::BAR,
+          EnumAliasTest::BAZ
+        ])
+      end
+    end
+  end
+
+
+  describe '.enums_for_tag' do
+    it 'returns an array of EnumValues for the given tag, if any' do
+      expect(EnumAliasTest.enums_for_tag(1)).to eq([ EnumAliasTest::FOO, EnumAliasTest::BAR ])
+      expect(EnumAliasTest.enums_for_tag(2)).to eq([ EnumAliasTest::BAZ ])
+      expect(EnumAliasTest.enums_for_tag(3)).to eq([])
     end
   end
 
@@ -90,65 +112,66 @@ describe Protobuf::Enum do
     end
   end
 
-  describe '.enum_value_by_value' do
+  describe '.enum_for_tag' do
     it 'gets the EnumValue corresponding to the given value (tag)' do
-      expect(Test::EnumTestType.enum_value_by_value(tag)).to eq(Test::EnumTestType.const_get(name))
+      expect(Test::EnumTestType.enum_for_tag(tag)).to eq(Test::EnumTestType.const_get(name))
+      expect(Test::EnumTestType.enum_for_tag(-5)).to be_nil
     end
   end
 
-  describe '.name_by_value' do
+  describe '.name_for_tag' do
     it 'get the name by value of the enum given the enum' do
-      expect(Test::EnumTestType.name_by_value(::Test::EnumTestType::THREE)).to eq(name)
+      expect(Test::EnumTestType.name_for_tag(::Test::EnumTestType::THREE)).to eq(name)
     end
 
     it 'gets the name of the enum corresponding to the given value (tag)' do
-      expect(Test::EnumTestType.name_by_value(tag)).to eq(name)
+      expect(Test::EnumTestType.name_for_tag(tag)).to eq(name)
     end
 
     it 'gets the name when the tag is coercable to an int' do
-      expect(Test::EnumTestType.name_by_value("3")).to eq(name)
+      expect(Test::EnumTestType.name_for_tag("3")).to eq(name)
     end
 
     it 'returns nil when tag does not correspond to a name' do
-      expect(Test::EnumTestType.name_by_value(12345)).to be_nil
+      expect(Test::EnumTestType.name_for_tag(12345)).to be_nil
     end
 
     context 'when given name is nil' do
       it 'returns a nil' do
-        expect(Test::EnumTestType.name_by_value(nil)).to be_nil
+        expect(Test::EnumTestType.name_for_tag(nil)).to be_nil
       end
     end
 
     context 'when enum allows aliases' do
       it 'returns the first defined name for that value' do
-        expect(EnumAliasTest.name_by_value(1)).to eq(:FOO)
+        expect(EnumAliasTest.name_for_tag(1)).to eq(:FOO)
       end
     end
   end
 
-  describe '.valid_value?' do
+  describe '.valid_tag?' do
     context 'when tag is defined' do
-      specify { expect(Test::EnumTestType.valid_value?(tag)).to be_true }
+      specify { expect(Test::EnumTestType.valid_tag?(tag)).to be_true }
     end
 
     context 'when tag is not defined' do
-      specify { expect(Test::EnumTestType.valid_value?(300)).to be_false }
+      specify { expect(Test::EnumTestType.valid_tag?(300)).to be_false }
     end
 
     context 'when enum allows aliases' do
       it 'treats aliased values as valid' do
-        expect(EnumAliasTest.valid_value?(1)).to be_true
+        expect(EnumAliasTest.valid_tag?(1)).to be_true
       end
     end
   end
 
-  describe '.enum_value_by_name' do
+  describe '.enum_for_name' do
     it 'gets the EnumValue corresponding to the given name' do
-      expect(Test::EnumTestType.enum_value_by_name(name)).to eq(Test::EnumTestType::THREE)
+      expect(Test::EnumTestType.enum_for_name(name)).to eq(Test::EnumTestType::THREE)
     end
   end
 
-  describe '.enum_values' do
+  describe '.values' do
     it 'provides a hash of defined EnumValue objects' do
       expect(Test::EnumTestType.values).to eq({
         :MINUS_ONE => Test::EnumTestType::MINUS_ONE,
@@ -159,9 +182,8 @@ describe Protobuf::Enum do
     end
 
     context 'when enum allows aliases' do
-
       it 'treats aliased values as valid' do
-        expect(EnumAliasTest.enum_values).to eq({
+        expect(EnumAliasTest.values).to eq({
           :FOO => EnumAliasTest::FOO,
           :BAR => EnumAliasTest::BAR,
           :BAZ => EnumAliasTest::BAZ
@@ -170,14 +192,14 @@ describe Protobuf::Enum do
     end
   end
 
-  describe '.all_numbers' do
+  describe '.all_tags' do
     it 'provides an array of the integer values' do
-      expect(Test::EnumTestType.all_numbers).to include(-1, 1, 2, 3)
+      expect(Test::EnumTestType.all_tags).to include(1, 2, -1, 3)
     end
 
     context 'when enum allows aliases' do
       it 'returns a unique array of all defined enum values' do
-        expect(EnumAliasTest.all_numbers).to include(1, 2)
+        expect(EnumAliasTest.all_tags).to include(1, 2)
       end
     end
   end

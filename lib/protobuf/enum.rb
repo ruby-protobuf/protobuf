@@ -10,18 +10,6 @@ module Protobuf
       self.get_option(:allow_alias)
     end
 
-    # Public: Get an array of EnumValue objects with the given number.
-    #
-    # number - An object that responds to to_i.
-    #
-    # Returns an array with zero or more EnumValue objects or nil.
-    #
-    def self.all_enum_values_by_number(number)
-      self.enum_values.values.select do |enum_value|
-        enum_value.to_i == number.to_i
-      end
-    end
-
     # Public: Get all integer tag values defined by this enum.
     #
     # Examples
@@ -33,12 +21,12 @@ module Protobuf
     #     define :OFF, 2
     #   end
     #
-    #   StateMachine.all_numbers #=> [ 1, 2 ]
+    #   StateMachine.all_tags #=> [ 1, 2 ]
     #
     # Returns an array of unique integers.
     #
-    def self.all_numbers
-      @all_numbers ||= self.enum_values.values.map(&:to_i).uniq
+    def self.all_tags
+      @all_tags ||= self.enums.map(&:to_i).uniq
     end
 
     # Internal: DSL method to define a protobuf EnumValue. The given name will
@@ -50,16 +38,47 @@ module Protobuf
     #     define :ON, 1
     #     define :OFF, 2
     #   end
+    #
     #   StateMachine::ON  #=> #<StateMachine::ON=1>
     #   StateMachine::OFF #=> #<StateMachine::OFF=2>
     #
     # Returns nothing.
     #
     def self.define(name, value)
-      enum_value = ::Protobuf::EnumValue.new(self, name, value)
-      @enum_values ||= {}
-      @enum_values[name] = enum_value
-      const_set(name, enum_value)
+      enum = ::Protobuf::EnumValue.new(self, name, value)
+      @enums ||= []
+      @enums << enum
+      const_set(name, enum)
+    end
+
+    # Public: The internal values hash.
+    #
+    def self.enums
+      @enums
+    end
+
+    # Public: Get an array of EnumValue objects with the given tag.
+    #
+    # tag - An object that responds to to_i.
+    #
+    # Examples
+    #
+    #   class StateMachine < ::Protobuf::Enum
+    #     set_option :allow_alias
+    #     define :ON, 1
+    #     define :STARTED, 1
+    #     define :OFF, 2
+    #   end
+    #
+    #   StateMachine.enums_for_tag(1) #=> [ #<StateMachine::ON=1>, #<StateMachine::STARTED=1> ]
+    #   StateMachine.enums_for_tag(2) #=> [ #<StateMachine::OFF=2> ]
+    #
+    # Returns an array with zero or more EnumValue objects or nil.
+    #
+    def self.enums_for_tag(tag)
+      self.enums.select { |enum|
+        enum.to_i == tag.to_i
+      }
     end
 
     # Public: Get the EnumValue associated with the given name.
@@ -73,35 +92,29 @@ module Protobuf
     #     define :OFF, 2
     #   end
     #
-    #   StateMachine.enum_value_by_name(:ON)  # => #<StateMachine::ON=1>
-    #   StateMachine.enum_value_by_name("ON") # => #<StateMachine::ON=1>
-    #   StateMachine.enum_value_by_name(:on)  # => nil
-    #   StateMachine.enum_value_by_name(:FOO) # => nil
+    #   StateMachine.enum_for_name(:ON)  # => #<StateMachine::ON=1>
+    #   StateMachine.enum_for_name("ON") # => #<StateMachine::ON=1>
+    #   StateMachine.enum_for_name(:on)  # => nil
+    #   StateMachine.enum_for_name(:FOO) # => nil
     #
     # Returns the EnumValue object with the given name. `nil` will be returned
     # if the given name does not have a correlating value.
     #
-    def self.enum_value_by_name(name)
+    def self.enum_for_name(name)
       self.const_get(name)
-    rescue NameError, NoMethodError
+    rescue ::NameError
       nil
     end
 
-    # Public: Get the EnumValue object corresponding to the given number.
+    # Public: Get the EnumValue object corresponding to the given tag.
     #
-    # number - An object that responds to to_i.
+    # tag - An object that responds to to_i.
     #
-    # Returns an EnumValue object or nil. If the number corresponds to multiple
+    # Returns an EnumValue object or nil. If the tag corresponds to multiple
     #   EnumValue objects an array of EnumValue objects will be returned.
     #
-    def self.enum_value_by_value(number)
-      enum_value_by_name(name_by_value(number))
-    end
-
-    # Public: The internal values hash.
-    #
-    def self.enum_values
-      @enum_values
+    def self.enum_for_tag(tag)
+      self.enums_for_tag(tag).first
     end
 
     # Public: Get an EnumValue by a variety of type-checking mechanisms.
@@ -124,14 +137,14 @@ module Protobuf
     #
     # Returns an EnumValue object or nil.
     #
-    def self.fetch(value)
-      case value
+    def self.fetch(candidate)
+      case candidate
       when ::Protobuf::EnumValue then
-        value
+        candidate
       when Numeric then
-        enum_value_by_value(value.to_i)
+        enum_for_tag(candidate.to_i)
       when String, Symbol then
-        enum_value_by_name(value)
+        enum_for_name(candidate)
       else
         nil
       end
@@ -149,9 +162,9 @@ module Protobuf
     #     define :OFF, 2
     #   end
     #
-    #   StateMachine.name_by_value(1) # => :ON
-    #   StateMachine.name_by_value(2) # => :OFF
-    #   StateMachine.name_by_value(3) # => nil
+    #   StateMachine.name_for_tag(1) # => :ON
+    #   StateMachine.name_for_tag(2) # => :OFF
+    #   StateMachine.name_for_tag(3) # => nil
     #
     #   # With aliases
     #   class StateMachine < ::Protobuf::Enum
@@ -161,40 +174,48 @@ module Protobuf
     #     define :OFF, 2
     #   end
     #
-    #   StateMachine.name_by_value(1) # => :STARTED
-    #   StateMachine.name_by_value(2) # => :OFF
+    #   StateMachine.name_for_tag(1) # => :STARTED
+    #   StateMachine.name_for_tag(2) # => :OFF
     #
     # Returns the symbol name of the enum constant given it's associated value.
     #   If the given value has multiple names associated (due to allow_alias)
     #   the first defined name will be returned. `nil` will be returned when
     #   the given value does not have a correlating name.
     #
-    def self.name_by_value(number)
-      self.enum_values.values.detect { |enum_value|
-        enum_value.to_i == number.to_i
-      }.try(:name)
+    def self.name_for_tag(tag)
+      self.enum_for_tag(tag).try(:name)
     end
 
     # Public: Check if the given tag value is defined by this Enum.
-    # See name_by_value.
     #
     # number - An object that responds to to_i.
     #
     # Returns a boolean.
     #
-    def self.valid_value?(number)
-      !! name_by_value(number)
+    def self.valid_tag?(tag)
+      tag.respond_to?(:to_i) && self.all_tags.include?(tag.to_i)
     end
 
     ##
     # Class Aliases
+    # Public: [DEPRECATED] Return a hash of EnumValue objects keyed
+    # by their :name.
     #
     class << self
       # Deprecated:
       alias_method :valid_tag?, :valid_value?
+    def self.values
+      self.warn_deprecated(:values, :enums)
 
       # Deprecated:
       alias_method :values, :enum_values
+      @values ||= begin
+                    self.enums.inject({}) do |hash, enum|
+                      hash[enum.name] = enum
+                      hash
+                    end
+                  end
+    end
 
       # Deprecated: Alias of name_by_value.
       alias_method :get_name_by_tag, :name_by_value
