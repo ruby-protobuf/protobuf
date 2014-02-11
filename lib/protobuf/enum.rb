@@ -1,8 +1,16 @@
 require 'protobuf/enum_value'
 require 'protobuf/optionable'
+require 'protobuf/deprecator'
 
 module Protobuf
   class Enum
+
+    ##
+    # Deprecations
+    #
+
+    extend ::Protobuf::Deprecator
+
     # Public: Allows setting Options on the Enum class.
     include ::Protobuf::Optionable
 
@@ -196,19 +204,12 @@ module Protobuf
       tag.respond_to?(:to_i) && self.all_tags.include?(tag.to_i)
     end
 
-    ##
-    # Class Aliases
     # Public: [DEPRECATED] Return a hash of EnumValue objects keyed
     # by their :name.
     #
-    class << self
-      # Deprecated:
-      alias_method :valid_tag?, :valid_value?
     def self.values
       self.warn_deprecated(:values, :enums)
 
-      # Deprecated:
-      alias_method :values, :enum_values
       @values ||= begin
                     self.enums.inject({}) do |hash, enum|
                       hash[enum.name] = enum
@@ -217,12 +218,15 @@ module Protobuf
                   end
     end
 
-      # Deprecated: Alias of name_by_value.
-      alias_method :get_name_by_tag, :name_by_value
+    ##
+    # Deprecations
+    #
 
-      # Deprecated: Alias of enum_value_by_value.
-      alias_method :value_by_name, :enum_value_by_value
-    end
+    deprecate_method :enum_by_value,   :enum_for_tag
+    deprecate_method :name_by_value,   :name_for_tag
+    deprecate_method :get_name_by_tag, :name_for_tag
+    deprecate_method :value_by_name,   :enum_for_name
 
   end
 end
+
