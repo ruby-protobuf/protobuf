@@ -3,6 +3,7 @@ require 'protobuf/rpc/servers/zmq/worker'
 require 'protobuf/rpc/servers/zmq/broker'
 require 'protobuf/rpc/dynamic_discovery.pb'
 require 'securerandom'
+require 'thread'
 
 module Protobuf
   module Rpc
@@ -37,7 +38,7 @@ module Protobuf
         end
 
         def all_workers_busy?
-          workers.all? { |thread| !!thread.thread_variable_get(:busy) }
+          workers.all? { |thread| !!thread[:busy] }
         end
 
         def backend_port
@@ -111,7 +112,7 @@ module Protobuf
         end
 
         def busy_worker_count
-          workers.count { |thread| !!thread.thread_variable_get(:busy) }
+          workers.count { |thread| !!thread[:busy] }
         end
 
         def frontend_ip
