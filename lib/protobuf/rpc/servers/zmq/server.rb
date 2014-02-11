@@ -12,10 +12,12 @@ module Protobuf
 
         DEFAULT_OPTIONS = {
           :beacon_interval => 5,
-          :broadcast_beacons => false
+          :broadcast_beacons => false,
+          :zmq_inproc => true
         }
 
         attr_accessor :options, :workers
+        attr_reader :zmq_context
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
@@ -38,7 +40,11 @@ module Protobuf
         end
 
         def backend_uri
-          "tcp://#{backend_ip}:#{backend_port}"
+          if inproc?
+            "inproc://#{backend_ip}:#{backend_port}"
+          else
+            "tcp://#{backend_ip}:#{backend_port}"
+          end
         end
 
         def beacon_interval
@@ -110,6 +116,10 @@ module Protobuf
 
         def frontend_uri
           "tcp://#{frontend_ip}:#{frontend_port}"
+        end
+
+        def inproc?
+          !!self.options[:zmq_inproc]
         end
 
         def maintenance_timeout
