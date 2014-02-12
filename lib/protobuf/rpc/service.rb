@@ -186,18 +186,6 @@ module Protobuf
       end
       alias_method :return_from_whence_you_came, :respond_with
 
-      # Renamed attribute from prior implementaiton due to lack of clarity
-      # in what the variable contained. DEPRECATED.
-      def rpc
-        if ::Protobuf.print_deprecation_warnings?
-          $stderr.puts <<-ERROR
-            [WARNING] Service#rpc method has been deprecated
-                      and will be removed in a future version of protobuf.
-          ERROR
-        end
-        @method_name
-      end
-
       # Automatically fail a service method.
       #
       def rpc_failed(message)

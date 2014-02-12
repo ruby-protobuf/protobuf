@@ -4,6 +4,8 @@ Unreleased (3.x)
 - Add support for enum aliases. [#134, @localshred]
 - Clean up the Enum class API with several methods deprecated. See #134 for more comprehensive
 documentation about which methods are going and away and which are being renamed. [#134, @localshred]
+- Remove previously deprecated `bin/rprotoc` executable. [13fbdb9]
+- Remove previously deprecated `Service#rpc` method. [f391294]
 
 --------
 
@@ -22,7 +24,6 @@ Stable
 - Add `broadcast_busy` functionality that removes server from cluster if the workers are full. [#149, @abrandoned]
 - Add cli option for `--no-zmq_inproc`. [#149, @abrandoned]
 - Add cli option for `--broadcast_busy`. [#149, @abrandoned]
->>>>>>> 2-8-stable
 
 2.8.10
 ---------
