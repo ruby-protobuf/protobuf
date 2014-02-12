@@ -18,11 +18,11 @@ module Protobuf
         names.each do |name|
           class_eval <<-METHOD, __FILE__, __LINE__ + 1
             def #{name}
-              self[:#{name}]
+              self['#{name}']
             end
 
             def #{name}=(value)
-              self[:#{name}] = value
+              self['#{name}'] = value
             end
           METHOD
         end
@@ -36,6 +36,10 @@ module Protobuf
                     :response,
                     :service_name,
                     :stats
+
+      def initialize(env = {})
+        merge!(env)
+      end
     end
   end
 end
