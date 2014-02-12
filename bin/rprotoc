@@ -1,8 +1,0 @@
-#!/usr/bin/env ruby
-
-command = [ 'protoc', ARGV ].flatten.join(' ')
-
-$stderr.puts "[DEPRECATED] `rprotoc` is deprecated. Use `protoc --ruby_out ...` instead."
-$stdout.puts command
-
-exec command
