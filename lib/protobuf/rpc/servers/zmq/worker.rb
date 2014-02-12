@@ -26,11 +26,12 @@ module Protobuf
         # Instance Methods
         #
         def process_request
-          @client_address, _, @request_data = read_from_backend
+          client_address, _, data = read_from_backend
+          return unless data
 
-          unless @request_data.nil?
-            log_debug { sign_message("handling request") }
-            handle_client
+          gc_pause do
+            encoded_response = handle_request(data)
+            write_to_backend([client_address, "", encoded_response])
           end
         end
 
@@ -53,7 +54,6 @@ module Protobuf
 
             if rc > 0
               ::Thread.current[:busy] = true
-              initialize_request!
               process_request
               ::Thread.current[:busy] = false
             end
@@ -64,14 +64,6 @@ module Protobuf
 
         def running?
           @server.running?
-        end
-
-        def send_data
-          data = @response.encode
-
-          @stats.response_size = data.size
-
-          write_to_backend([@client_address, "", data])
         end
 
         private

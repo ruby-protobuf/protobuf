@@ -4,9 +4,7 @@ require 'protobuf/rpc/servers/socket/worker'
 module Protobuf
   module Rpc
     module Socket
-
       class Server
-        include ::Protobuf::Rpc::Server
         include ::Protobuf::Logger::LogMethods
 
         AUTO_COLLECT_TIMEOUT = 5 # seconds
