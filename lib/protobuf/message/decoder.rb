@@ -22,9 +22,9 @@ module Protobuf
           when ::Protobuf::WireType::FIXED32 then
             read_fixed32(stream)
           when ::Protobuf::WireType::START_GROUP then
-            raise NotImplementedError, 'Group is deprecated.'
+            read_group(tag, stream)
           when ::Protobuf::WireType::END_GROUP then
-            raise NotImplementedError, 'Group is deprecated.'
+            raise InvalidWireType, wire_type
           else
             raise InvalidWireType, wire_type
           end
@@ -68,5 +68,35 @@ module Protobuf
       stream.read(value_length)
     end
 
+    def read_group(group_tag, stream)
+      # Very inefficient (hey, groups are deprecated), but works as expected.
+
+      start_pos = stream.pos
+      until stream.eof?
+        last_pos = stream.pos
+        tag, wire_type = read_key(stream)
+        case wire_type
+        when ::Protobuf::WireType::VARINT then
+          read_varint(stream)
+        when ::Protobuf::WireType::FIXED64 then
+          read_fixed64(stream)
+        when ::Protobuf::WireType::LENGTH_DELIMITED then
+          read_length_delimited(stream)
+        when ::Protobuf::WireType::FIXED32 then
+          read_fixed32(stream)
+        when ::Protobuf::WireType::START_GROUP then
+          read_group(tag, stream)
+        when ::Protobuf::WireType::END_GROUP then
+          if group_tag == tag
+            stream.pos = start_pos
+            bytes = stream.read(last_pos - start_pos)
+            read_key(stream) # drop the end group tag
+            return bytes
+          end
+        end
+      end
+
+      raise InvalidWireType, "No matching end group tag"
+    end
   end
 end
