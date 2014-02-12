@@ -19,6 +19,15 @@ module Test
     define :TWO, 2
   end
 
+  class AliasedEnum < ::Protobuf::Enum
+    set_option :allow_alias
+
+    define :THREE, 3
+    define :TRES, 3
+    define :FOUR, 4
+    define :CUATRO, 4
+  end
+
 
   ##
   # Message Classes
@@ -33,6 +42,9 @@ module Test
     optional ::Test::EnumTestType, :non_default_enum, 1
     optional ::Test::EnumTestType, :default_enum, 2, :default => ::Test::EnumTestType::ONE
     repeated ::Test::EnumTestType, :repeated_enums, 3
+    optional ::Test::AliasedEnum, :alias_non_default_enum, 4
+    optional ::Test::AliasedEnum, :alias_default_enum, 5, :default => ::Test::AliasedEnum::CUATRO
+    repeated ::Test::AliasedEnum, :alias_repeated_enums, 6
   end
 
 

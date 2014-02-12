@@ -4,15 +4,7 @@ module Protobuf
   module Field
     class EnumField < VarintField
       def acceptable?(val)
-        case val
-        when Symbol then
-          raise TypeError, "Enum #{val} is not known for type #{@type}" unless @type.const_defined?(val)
-        when EnumValue then
-          raise TypeError, "Enum #{val} is not owned by #{@type}" if val.parent_class != @type
-        else
-          raise TypeError, "Tag #{val} is not valid for Enum #{@type}" unless @type.valid_tag?(val)
-        end
-        true
+        ! @type.fetch(val).nil?
       end
 
       def encode(value)

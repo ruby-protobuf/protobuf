@@ -1,3 +1,17 @@
+Unreleased (3.x)
+---------
+
+- Add support for enum aliases. [#134, @localshred]
+- Clean up the Enum class API with several methods deprecated. See #134 for more comprehensive
+documentation about which methods are going and away and which are being renamed. [#134, @localshred]
+
+
+--------
+
+
+Stable
+--------
+
 2.8.10
 ---------
 

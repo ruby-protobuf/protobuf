@@ -31,11 +31,10 @@ ENV.delete("PB_IGNORE_DEPRECATIONS")
 
   c.before(:suite) do
     unless ENV['NO_COMPILE_TEST_PROTOS']
+      require 'rake'
+      load ::File.expand_path('../../Rakefile', __FILE__)
       $stdout.puts 'Compiling test protos (use NO_COMPILE_TEST_PROTOS=1 to skip)'
-      proto_path = File.expand_path("../support/", __FILE__)
-      cmd = %Q{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
-      puts cmd
-      %x{#{cmd}}
+      ::Rake::Task['spec:compile_test_protos']
     end
   end
 end

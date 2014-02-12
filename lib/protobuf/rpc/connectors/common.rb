@@ -40,7 +40,7 @@ module Protobuf
         # @param [String] message The error message
         def fail(code, message)
           @error =  ClientError.new
-          @error.code = code.is_a?(Symbol) ? Protobuf::Socketrpc::ErrorReason.values[code] : code
+          @error.code = Protobuf::Socketrpc::ErrorReason.fetch(code)
           @error.message = message
           log_debug { sign_message("Server failed request (invoking on_failure): #{@error.inspect}") }
 
