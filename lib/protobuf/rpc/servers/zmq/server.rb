@@ -3,6 +3,7 @@ require 'protobuf/rpc/servers/zmq/worker'
 require 'protobuf/rpc/servers/zmq/broker'
 require 'protobuf/rpc/dynamic_discovery.pb'
 require 'securerandom'
+require 'thread'
 
 module Protobuf
   module Rpc
@@ -12,10 +13,13 @@ module Protobuf
 
         DEFAULT_OPTIONS = {
           :beacon_interval => 5,
-          :broadcast_beacons => false
+          :broadcast_beacons => false,
+          :broadcast_busy => false,
+          :zmq_inproc => true,
         }
 
         attr_accessor :options, :workers
+        attr_reader :zmq_context
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
@@ -33,12 +37,20 @@ module Protobuf
           @total_workers = total_workers + 1
         end
 
+        def all_workers_busy?
+          workers.all? { |thread| !!thread[:busy] }
+        end
+
         def backend_port
           options[:worker_port] || frontend_port + 1
         end
 
         def backend_uri
-          "tcp://#{backend_ip}:#{backend_port}"
+          if inproc?
+            "inproc://#{backend_ip}:#{backend_port}"
+          else
+            "tcp://#{backend_ip}:#{backend_port}"
+          end
         end
 
         def beacon_interval
@@ -99,6 +111,10 @@ module Protobuf
           !!options[:workers_only]
         end
 
+        def busy_worker_count
+          workers.count { |thread| !!thread[:busy] }
+        end
+
         def frontend_ip
           @frontend_ip ||= resolve_ip(options[:host])
         end
@@ -110,6 +126,10 @@ module Protobuf
 
         def frontend_uri
           "tcp://#{frontend_ip}:#{frontend_port}"
+        end
+
+        def inproc?
+          !!self.options[:zmq_inproc]
         end
 
         def maintenance_timeout
@@ -236,7 +256,14 @@ module Protobuf
               start_missing_workers
             end
 
-            broadcast_heartbeat if broadcast_heartbeat?
+            if broadcast_heartbeat?
+              if all_workers_busy? && options[:broadcast_busy]
+                broadcast_flatline
+              else
+                broadcast_heartbeat
+              end
+            end
+
           end
         end
 

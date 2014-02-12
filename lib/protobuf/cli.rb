@@ -30,11 +30,13 @@ module Protobuf
     option :beacon_interval,            :type => :numeric, :desc => 'Broadcast beacons every N seconds. (default: 5)'
     option :beacon_port,                :type => :numeric, :desc => 'Broadcast beacons to this port (default: value of ServiceDirectory.port)'
     option :broadcast_beacons,          :type => :boolean, :desc => 'Broadcast beacons for dynamic discovery (Currently only available with ZeroMQ).'
+    option :broadcast_busy,             :type => :boolean, :default => false, :desc => 'Remove busy nodes from cluster when all workers are busy (Currently only available with ZeroMQ).'
     option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
     option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
     option :workers_only,               :type => :boolean, :default => false, :desc => "Starts process with only workers (no broker/frontend is started) only relevant for Zmq Server"
     option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
+    option :zmq_inproc,                 :type => :boolean, :default => true, :desc => 'Use inproc protocol for zmq Server/Broker/Worker'
 
     def start(app_file)
       debug_say('Configuring the rpc_server process')

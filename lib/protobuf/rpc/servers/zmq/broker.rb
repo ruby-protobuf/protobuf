@@ -64,7 +64,15 @@ module Protobuf
         end
 
         def init_zmq_context
-          @zmq_context = ZMQ::Context.new
+          if inproc?
+            @zmq_context = @server.zmq_context
+          else
+            @zmq_context = ZMQ::Context.new
+          end
+        end
+
+        def inproc?
+          !!@server.try(:inproc?)
         end
 
         def process_backend
