@@ -20,6 +20,7 @@ require "protobuf/version"
   s.require_paths = ["lib"]
 
   s.add_dependency 'activesupport'
+  s.add_dependency 'middleware'
   s.add_dependency 'multi_json'
   s.add_dependency 'thor'
 

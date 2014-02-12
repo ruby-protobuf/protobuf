@@ -3,19 +3,30 @@ require 'protobuf/logger'
 module Protobuf
   module Rpc
     class ServiceDispatcher
-
       include ::Protobuf::Logger::LogMethods
 
       attr_accessor :service, :service_klass, :callable_method, :outer_request
       attr_accessor :definition, :response, :error
 
-      def initialize(wrapper_request)
-        self.error = nil
-        self.outer_request = wrapper_request
+      def initialize(app)
+        @app = app
+      end
+
+      def call(env)
+        self.outer_request = env.request
+
+        env.stats.dispatcher = self
 
         init_service
         init_method if service_klass.present?
         register_rpc_failed if service.present?
+
+        # Log the request stats
+        log_info { env.stats.to_s }
+
+        invoke!
+
+        env
       end
 
       # Call the given service method. If we get to this point and an error
@@ -27,7 +38,7 @@ module Protobuf
           validate_response
         end
 
-        return error || response
+        env.response = error || response
       end
 
       # We're successful if the error is not populated.
