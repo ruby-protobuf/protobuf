@@ -25,27 +25,27 @@ module Protobuf
 
         # Create an env object that holds different parts of the environment and
         # is available to all of the middlewares.
-        initialize_env!
-        env['stats'].request_size = request_data.size
+        initialize_env!(request_data)
+        env.stats.request_size = request_data.size
 
-        env['request'] = decode_request_data(request_data)
-        env['stats'].client = env['request'].caller
+        env.request = decode_request_data(request_data)
+        env.stats.client = env.request.caller
 
         # Invoke the middleware stack, the last of which is the service
         # dispatcher. The dispatcher sets either an error object or a
-        # protobuf response object to env['response'].
+        # protobuf response object to env.response.
         env = Rpc.middleware.call(env)
 
-        response_data = handle_response(env['response'])
+        response_data = handle_response(env.response)
       rescue => error
         log_exception(error)
         response_data = handle_error(error)
       ensure
         encoded_response = encode_response_data(response_data)
-        env['stats'].stop
+        env.stats.stop
 
         # Log the response stats
-        log_info { env['stats'].to_s }
+        log_info { env.stats.to_s }
 
         return encoded_response
       end
@@ -78,7 +78,7 @@ module Protobuf
         log_exception(error)
         encoded_response = handle_error(error).encode
       ensure
-        env['stats'].response_size = encoded_response.size
+        env.stats.response_size = encoded_response.size
         encoded_response
       end
 
@@ -110,18 +110,8 @@ module Protobuf
       # NOTE: This has to be reinitialized with each request and can't be
       # memoized since servers aren't always reinitialized with each request
       #
-      def initialize_env!
-        # TODO: Add extra info about the environment (i.e. variables) and other
-        # information that might be useful
-        @_env = {
-          'request' => nil,
-          'response' => nil,
-          'stats' => Stat.new(:SERVER)
-        }
-      end
-
-      def stats
-        @_stats
+      def initialize_env!(request_data)
+        @_env = Env.new('request' => request_data, 'stats' => Stat.new(:SERVER))
       end
     end
   end

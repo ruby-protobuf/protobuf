@@ -13,16 +13,16 @@ module Protobuf
       end
 
       def call(env)
-        self.outer_request = env['request']
+        self.outer_request = env.request
 
-        env['stats'].dispatcher = self
+        env.stats.dispatcher = self
 
         init_service
         init_method if service_klass.present?
         register_rpc_failed if service.present?
 
         # Log the request stats
-        log_info { env['stats'].to_s }
+        log_info { env.stats.to_s }
 
         invoke!
 
@@ -38,7 +38,7 @@ module Protobuf
           validate_response
         end
 
-        env['response'] = error || response
+        env.response = error || response
       end
 
       # We're successful if the error is not populated.
