@@ -1,5 +1,6 @@
 require 'middleware'
 
+require 'protobuf/rpc/middleware/exception_handler'
 require 'protobuf/rpc/middleware/request_decoder'
 require 'protobuf/rpc/middleware/response_encoder'
 require 'protobuf/rpc/middleware/runner'
@@ -16,4 +17,5 @@ module Protobuf
 
   Rpc.middleware.use(Rpc::Middleware::RequestDecoder)
   Rpc.middleware.use(Rpc::Middleware::ResponseEncoder)
+  Rpc.middleware.use(Rpc::Middleware::ExceptionHandler)
 end
