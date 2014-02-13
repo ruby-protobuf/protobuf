@@ -1,8 +1,8 @@
 require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/exceptions'
-require 'protobuf/message/decoder'
 require 'protobuf/message/dsl/fields'
+require 'protobuf/message/encoding'
 
 module Protobuf
   class Message
@@ -10,17 +10,9 @@ module Protobuf
     ##
     # Includes & Extends
     #
-    def self.decode(bytes)
-      self.new.decode(bytes)
-    end
-
-    # Create a new object with the given values and return the encoded bytes.
-    def self.encode(values = {})
-      self.new(values).encode
-    end
-
 
     extend ::Protobuf::Message::DSL::Fields
+    include ::Protobuf::Message::Encoding
 
     ##
     # Constructor
@@ -55,16 +47,6 @@ module Protobuf
       copy_to(super, :clone)
     end
 
-    # Decode the given string bytes into this object.
-    def decode(string)
-      decode_from(::StringIO.new(string))
-    end
-
-    # Decode the given stream into this object.
-    def decode_from(stream)
-      Decoder.decode(stream, self)
-    end
-
     def dup
       copy_to(super, :dup)
     end
@@ -82,39 +64,16 @@ module Protobuf
 
     def each_field_for_serialization
       all_fields.each do |field|
-        next unless __field_must_be_serialized__?(field)
+        next unless field_must_be_serialized?(field)
 
         value = @values[field.name]
 
         if value.nil?
-          # Only way you can get here is if you are required and nil
-          raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
+          raise ::Protobuf::SerializationError, "Required field #{self.name}##{field.name} does not have a value."
         else
           yield(field, value)
         end
       end
-    end
-
-    def encode
-      stream = ""
-
-      each_field_for_serialization do |field, value|
-        if field.repeated?
-          if field.packed?
-            key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
-            packed_value = value.map { |val| field.encode(val) }.join
-            stream << ::Protobuf::Field::VarintField.encode(key)
-            stream << ::Protobuf::Field::VarintField.encode(packed_value.size)
-            stream << packed_value
-          else
-            value.each { |val| write_pair(stream, field, val) }
-          end
-        else
-          write_pair(stream, field, value)
-        end
-      end
-
-      return stream
     end
 
     # Returns extension fields. See Message#fields method.
@@ -157,11 +116,6 @@ module Protobuf
     def respond_to_has_and_present?(key)
       self.respond_to_has?(key) &&
         (self.__send__(key).present? || [true, false].include?(self.__send__(key)))
-    end
-
-    def set_field(tag, bytes)
-      field = (get_field_by_tag(tag) || get_ext_field_by_tag(tag))
-      field.set(self, bytes) if field
     end
 
     # Return a hash-representation of the given fields for this message type.
@@ -208,14 +162,6 @@ module Protobuf
     ##
     # Instance Aliases
     #
-    alias_method :parse_from_string, :decode
-    alias_method :deserialize, :decode
-    alias_method :parse_from, :decode_from
-    alias_method :deserialize_from, :decode_from
-    alias_method :to_s, :encode
-    alias_method :bytes, :encode
-    alias_method :serialize, :encode
-    alias_method :serialize_to_string, :encode
     alias_method :to_hash_value, :to_hash
     alias_method :to_proto_hash, :to_hash
     alias_method :responds_to_has?, :respond_to_has?
@@ -250,17 +196,6 @@ module Protobuf
         end
       end
       object
-    end
-
-    def __field_must_be_serialized__?(field)
-      field.required? || !@values[field.name].nil?
-    end
-
-    # Encode key and value, and write to +stream+.
-    def write_pair(stream, field, value)
-      key = (field.tag << 3) | field.wire_type
-      stream << ::Protobuf::Field::VarintField.encode(key)
-      stream << field.encode(value)
     end
 
   end
