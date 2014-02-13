@@ -1,5 +1,8 @@
 require 'middleware'
 
+require 'protobuf/rpc/middleware/exception_handler'
+require 'protobuf/rpc/middleware/request_decoder'
+require 'protobuf/rpc/middleware/response_encoder'
 require 'protobuf/rpc/middleware/runner'
 
 module Protobuf
@@ -11,4 +14,8 @@ module Protobuf
     # Ensure the middleware stack is initialized
     middleware
   end
+
+  Rpc.middleware.use(Rpc::Middleware::RequestDecoder)
+  Rpc.middleware.use(Rpc::Middleware::ResponseEncoder)
+  Rpc.middleware.use(Rpc::Middleware::ExceptionHandler)
 end

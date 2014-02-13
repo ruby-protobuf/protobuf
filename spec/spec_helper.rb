@@ -11,6 +11,7 @@ $: << ::File.expand_path('../..', __FILE__)
 $: << ::File.expand_path('../support', __FILE__)
 
 require 'protobuf'
+require 'protobuf/rpc/server'
 require ::File.expand_path('../support/all', __FILE__)
 
 $: << ::File.expand_path("../../lib/protobuf/descriptors", __FILE__)
