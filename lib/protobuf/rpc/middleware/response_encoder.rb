@@ -11,10 +11,12 @@ module Protobuf
         end
 
         def call(env)
-          @env = app.call(env)
-          @env.encoded_response = encode_response_data(@env.response)
+          @env = env
 
-          @env
+          env = app.call(env)
+          env.encoded_response = encode_response_data(env.response)
+
+          env
         end
 
         def log_signature
@@ -34,13 +36,8 @@ module Protobuf
           log_exception(exception)
 
           # Rescue encoding exceptions, re-wrap them as generic protobuf errors,
-          # and set it as the encoded response so we always have something to
-          # send back
-          error = PbError.new(exception.message)
-          env.response = error
-          env.encoded_response = error.to_response.encode
-        ensure
-          return env.encoded_response
+          # and re-raise them
+          raise PbError.new(exception.message)
         end
 
         # The middleware stack returns either an error or response proto. Package

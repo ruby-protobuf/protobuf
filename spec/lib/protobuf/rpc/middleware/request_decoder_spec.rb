@@ -49,19 +49,10 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
     end
 
     context "when decoding fails" do
-      let(:error) { Protobuf::Rpc::BadRequestData.new("Unable to decode request: Boom!") }
-      let(:response) { error.to_response }
+      before { Protobuf::Socketrpc::Request.stub(:decode).and_raise(RuntimeError) }
 
-      before { Protobuf::Socketrpc::Request.stub(:decode).and_raise(RuntimeError, 'Boom!') }
-
-      it "does not call the stack" do
-        app.should_not_receive(:call)
-        subject.call(env)
-      end
-
-      it "sets Env#response" do
-        stack_env = subject.call(env)
-        stack_env.response.should eq error
+      it "raises a bad request data exception" do
+        expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::BadRequestData)
       end
     end
   end

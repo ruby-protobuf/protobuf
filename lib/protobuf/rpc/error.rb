@@ -13,6 +13,10 @@ module Protobuf
         super message
       end
 
+      def encode
+        to_response.encode
+      end
+
       def to_response
         Socketrpc::Response.new(:error => message, :error_reason => error_type)
       end

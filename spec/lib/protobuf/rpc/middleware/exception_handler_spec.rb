@@ -17,6 +17,7 @@ describe Protobuf::Rpc::Middleware::ExceptionHandler do
     end
 
     context "when exceptions occur" do
+      let(:encoded_error) { error.encode }
       let(:error) { Protobuf::Rpc::MethodNotFound.new('Boom!') }
 
       before { app.stub(:call).and_raise(error, 'Boom!') }
@@ -26,17 +27,22 @@ describe Protobuf::Rpc::Middleware::ExceptionHandler do
       end
 
       context "when exception is a Protobuf error" do
-        let(:error) { Protobuf::Rpc::MethodNotFound.new('Boom!') }
-
-        before { app.stub(:call).and_raise(error) }
-
         it "does not wrap the exception in a generic Protobuf error" do
           stack_env = subject.call(env)
-          stack_env.response.should eq error
+
+          # Can't compare the error instances because the response has been
+          # raised and thus has a backtrace while the error does not.
+          stack_env.response.class.should eq error.class
+        end
+
+        it "encodes the response" do
+          stack_env = subject.call(env)
+          stack_env.encoded_response.should eq encoded_error
         end
       end
 
       context "when exception is not a Protobuf error" do
+        let(:encoded_error) { error.encode }
         let(:error) { Protobuf::Rpc::PbError.new('Boom!') }
 
         before { app.stub(:call).and_raise(RuntimeError, 'Boom!') }
@@ -44,6 +50,11 @@ describe Protobuf::Rpc::Middleware::ExceptionHandler do
         it "wraps the exception in a generic Protobuf error" do
           stack_env = subject.call(env)
           stack_env.response.should eq error
+        end
+
+        it "encodes the wrapped exception" do
+          stack_env = subject.call(env)
+          stack_env.encoded_response.should eq encoded_error
         end
       end
     end
