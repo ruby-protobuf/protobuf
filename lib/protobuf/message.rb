@@ -1,54 +1,17 @@
-require 'stringio'
-require 'set'
 require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/exceptions'
 require 'protobuf/message/decoder'
+require 'protobuf/message/dsl/fields'
 
 module Protobuf
   class Message
 
     ##
-    # Class Methods
+    # Includes & Extends
     #
-    def self.all_fields
-      @all_fields ||= begin
-                        all_fields_array = []
-                        max_fields = fields.size > extension_fields.size ? fields.size : extension_fields.size
-                        max_fields.times do |field_number|
-                          all_fields_array << (fields[field_number] || extension_fields[field_number])
-                        end
-                        all_fields_array.compact!
-                        all_fields_array
-                      end
-    end
-
     def self.decode(bytes)
       self.new.decode(bytes)
-    end
-
-    # Define a field. Don't use this method directly.
-    def self.define_field(rule, type, fname, tag, options)
-      field_array = options[:extension] ? extension_fields : fields
-      field_name_hash = options[:extension] ? extension_field_name_to_tag : field_name_to_tag
-
-      previous_tag_field = get_field_by_tag(tag) || get_ext_field_by_tag(tag)
-      if previous_tag_field
-        raise TagCollisionError, %!Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
-      end
-
-      previous_name_field = get_field_by_name(fname) || get_ext_field_by_name(fname)
-      if previous_name_field
-        raise DuplicateFieldNameError, %!Field name #{fname} has already been used in "#{self.name}".!
-      end
-
-      field_definition = ::Protobuf::Field.build(self, rule, type, fname, tag, options)
-      field_name_hash[fname] = tag
-      field_array[tag] = field_definition
-
-      define_method("#{fname}!") do
-        @values[fname]
-      end
     end
 
     # Create a new object with the given values and return the encoded bytes.
@@ -56,71 +19,8 @@ module Protobuf
       self.new(values).encode
     end
 
-    # Reserve field numbers for extensions. Don't use this method directly.
-    def self.extensions(range)
-      extension_fields.add_range(range)
-    end
 
-    def self.extension_field_name_to_tag
-      @extension_fields_by_name ||= {}
-    end
-
-    # An extension field object.
-    def self.extension_fields
-      @extension_fields ||= ::Protobuf::Field::ExtensionFields.new
-    end
-
-    def self.extension_tag?(tag)
-      extension_fields.include_tag?(tag)
-    end
-
-    # A collection of field object.
-    def self.fields
-      @fields ||= []
-    end
-
-    def self.field_name_to_tag
-      @field_name_to_tag ||= {}
-    end
-
-    def self.get_ext_field_by_name(name)
-      tag = extension_field_name_to_tag[name.to_sym]
-      extension_fields[tag] unless tag.nil?
-    end
-
-    def self.get_ext_field_by_tag(tag)
-      extension_fields[tag]
-    end
-
-    # Find a field object by +name+.
-    def self.get_field_by_name(name)
-      name = name.to_sym if name.respond_to?(:to_sym)
-      tag = field_name_to_tag[name]
-      fields[tag] unless tag.nil?
-    end
-
-    # Find a field object by +tag+ number.
-    def self.get_field_by_tag(tag)
-      fields[tag]
-    rescue TypeError
-      tag = tag.nil? ? 'nil' : tag.to_s
-      raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
-    end
-
-    # Define a optional field. Don't use this method directly.
-    def self.optional(type, name, tag, options = {})
-      define_field(:optional, type, name, tag, options)
-    end
-
-    # Define a repeated field. Don't use this method directly.
-    def self.repeated(type, name, tag, options = {})
-      define_field(:repeated, type, name, tag, options)
-    end
-
-    # Define a required field. Don't use this method directly.
-    def self.required(type, name, tag, options = {})
-      define_field(:required, type, name, tag, options)
-    end
+    extend ::Protobuf::Message::DSL::Fields
 
     ##
     # Constructor
@@ -134,6 +34,7 @@ module Protobuf
     ##
     # Public Instance Methods
     #
+
     def all_fields
       self.class.all_fields
     end
@@ -225,20 +126,18 @@ module Protobuf
       self.class.fields
     end
 
-    def get_ext_field_by_name(name) # :nodoc:
+    def get_ext_field_by_name(name)
       self.class.get_ext_field_by_name(name)
     end
 
-    def get_ext_field_by_tag(tag) # :nodoc:
+    def get_ext_field_by_tag(tag)
       self.class.get_ext_field_by_tag(tag)
     end
 
-    # Returns field object or +nil+.
     def get_field_by_name(name)
       self.class.get_field_by_name(name)
     end
 
-    # Returns field object or +nil+.
     def get_field_by_tag(tag)
       self.class.get_field_by_tag(tag)
     end
