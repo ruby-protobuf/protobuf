@@ -13,19 +13,7 @@ module Protobuf
         def call(env)
           @env = env
 
-          if @env.request = decode_request_data(@env.encoded_request)
-            @env.caller = @env.request.caller
-            @env.service_name = @env.request.service_name
-            @env.method_name = @env.request.method_name
-
-            # TODO: Figure out a better way to do stat tracking
-            @env.stats.request_size = @env.encoded_request.size
-            @env.stats.client = @env.request.caller
-
-            @env = app.call(@env)
-          end
-
-          @env
+          call_app
         end
 
         def log_signature
@@ -33,6 +21,22 @@ module Protobuf
         end
 
       private
+
+        def call_app
+          if env.request = decode_request_data(env.encoded_request)
+            env.caller = env.request.caller
+            env.service_name = env.request.service_name
+            env.method_name = env.request.method_name
+
+            # TODO: Figure out a better way to do stat tracking
+            env.stats.request_size = env.encoded_request.size
+            env.stats.client = env.request.caller
+
+            app.call(env)
+          else
+            env
+          end
+        end
 
         # Decode the incoming request object into our expected request object
         #
