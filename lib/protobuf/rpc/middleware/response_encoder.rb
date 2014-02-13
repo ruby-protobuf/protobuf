@@ -2,7 +2,7 @@ module Protobuf
   module Rpc
     module Middleware
       class ResponseEncoder
-        include Logger::LogMethods
+        include ::Protobuf::Logger::LogMethods
 
         attr_reader :app, :env
 
@@ -12,11 +12,7 @@ module Protobuf
 
         def call(env)
           @env = app.call(env)
-
           @env.encoded_response = encode_response_data(@env.response)
-
-          # TODO: Extract this when stats are moved to a middleware
-          @env.stats.response_size = @env.encoded_response.size
 
           @env
         end

@@ -24,6 +24,10 @@ module Protobuf
             def #{name}=(value)
               self['#{name}'] = value
             end
+
+            def #{name}?
+              ! self['#{name}'].nil?
+            end
           METHOD
         end
       end
@@ -38,10 +42,12 @@ module Protobuf
                     :request,
                     :response,
                     :service_name,
-                    :stats
+                    :worker_id
 
-      def initialize(env = {})
-        merge!(env)
+      def initialize(options={})
+        merge!(options)
+
+        self['worker_id'] = ::Thread.current.object_id.to_s(16)
       end
     end
   end

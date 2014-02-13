@@ -6,8 +6,7 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
   let(:env) {
     Protobuf::Rpc::Env.new(
       'encoded_request' => encoded_request,
-      'log_signature' => 'log_signature',
-      'stats' => Protobuf::Rpc::Stat.new(:SERVER)
+      'log_signature' => 'log_signature'
     )
   }
   let(:encoded_request) { request.encode }
@@ -47,16 +46,6 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
     it "sets Env#method_name" do
       stack_env = subject.call(env)
       stack_env.method_name.should eq method_name
-    end
-
-    it "sets Env#stats.request_size" do
-      stack_env = subject.call(env)
-      stack_env.stats.request_size.should eq encoded_request.size
-    end
-
-    it "sets Env#stats.client" do
-      stack_env = subject.call(env)
-      stack_env.stats.client.should eq caller
     end
 
     context "when decoding fails" do

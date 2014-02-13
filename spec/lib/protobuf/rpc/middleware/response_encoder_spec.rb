@@ -5,8 +5,7 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
   let(:env) {
     Protobuf::Rpc::Env.new(
       'response' => response_proto,
-      'log_signature' => 'log_signature',
-      'stats' => Protobuf::Rpc::Stat.new(:SERVER)
+      'log_signature' => 'log_signature'
     )
   }
   let(:encoded_response) { response.encode }
@@ -30,18 +29,12 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
       subject.call(env)
     end
 
-    it "sets Env#stats.request_size" do
-      stack_env = subject.call(env)
-      stack_env.stats.response_size.should eq encoded_response.size
-    end
-
     context "when response is a Protobuf error" do
       let(:encoded_response) { response.encode }
       let(:env) {
         Protobuf::Rpc::Env.new(
           'response' => error,
-          'log_signature' => 'log_signature',
-          'stats' => Protobuf::Rpc::Stat.new(:SERVER)
+          'log_signature' => 'log_signature'
         )
       }
       let(:error) { Protobuf::Rpc::RpcError.new }

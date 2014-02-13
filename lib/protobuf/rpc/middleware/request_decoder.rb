@@ -2,7 +2,7 @@ module Protobuf
   module Rpc
     module Middleware
       class RequestDecoder
-        include Logger::LogMethods
+        include ::Protobuf::Logger::LogMethods
 
         attr_reader :app, :env
 
@@ -27,10 +27,6 @@ module Protobuf
             env.caller = env.request.caller
             env.service_name = env.request.service_name
             env.method_name = env.request.method_name
-
-            # TODO: Figure out a better way to do stat tracking
-            env.stats.request_size = env.encoded_request.size
-            env.stats.client = env.request.caller
 
             app.call(env)
           else

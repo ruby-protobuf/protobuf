@@ -5,28 +5,28 @@ module Protobuf
     class ServiceDispatcher
       include ::Protobuf::Logger::LogMethods
 
-      attr_accessor :service, :service_klass, :callable_method, :outer_request
-      attr_accessor :definition, :response, :error
+      attr_accessor :callable_method, :definition, :env, :error, :response, :service, :service_klass
 
       def initialize(app)
-        @app = app
+        # End of the line...
       end
 
       def call(env)
-        self.outer_request = env.request
-
-        env.stats.dispatcher = self
+        @env = env
 
         init_service
         init_method if service_klass.present?
         register_rpc_failed if service.present?
 
-        # Log the request stats
-        log_info { env.stats.to_s }
-
         invoke!
 
-        env
+        self.env
+      end
+
+      # We're in error if the error is populated.
+      #
+      def error?
+        ! success?
       end
 
       # Call the given service method. If we get to this point and an error
@@ -41,16 +41,14 @@ module Protobuf
         env.response = error || response
       end
 
+      def outer_request
+        env.request
+      end
+
       # We're successful if the error is not populated.
       #
       def success?
         error.nil?
-      end
-
-      # We're in error if the error is populated.
-      #
-      def error?
-        ! success?
       end
 
       private
@@ -136,8 +134,6 @@ module Protobuf
           assign_error(BadResponseProto, "Response proto changed from #{expected.name} to #{actual.name}")
         end
       end
-
     end
   end
 end
-
