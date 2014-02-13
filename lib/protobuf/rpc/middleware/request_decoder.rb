@@ -50,7 +50,9 @@ module Protobuf
           # Rescue decoding exceptions, re-wrap them as bad request data errors,
           # and set the response so we can safely short-curcuit the rest of the
           # middleware call.
-          env.response = BadRequestData.new("Unable to decode request: #{exception.message}").to_response
+          error = BadRequestData.new("Unable to decode request: #{exception.message}")
+          env.response = error
+          env.encoded_response = error.to_response.encode
 
           return nil # Explicitly return nil so we don't continue up the stack
         end
