@@ -16,8 +16,8 @@ module Protobuf
     middleware
   end
 
+  Rpc.middleware.use(Rpc::Middleware::ExceptionHandler)
   Rpc.middleware.use(Rpc::Middleware::RequestDecoder)
   Rpc.middleware.use(Rpc::Middleware::Logger)
   Rpc.middleware.use(Rpc::Middleware::ResponseEncoder)
-  Rpc.middleware.use(Rpc::Middleware::ExceptionHandler)
 end

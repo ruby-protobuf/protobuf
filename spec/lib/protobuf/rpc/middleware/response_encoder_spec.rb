@@ -47,19 +47,10 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
     end
 
     context "when encoding fails" do
-      let(:error) { Protobuf::Rpc::PbError.new('Boom!') }
-      let(:response) { error.to_response }
+      before { Protobuf::Socketrpc::Response.stub(:encode).and_raise(RuntimeError) }
 
-      before { Protobuf::Socketrpc::Response.stub(:encode).and_raise(RuntimeError, 'Boom!') }
-
-      it "sets Env#response" do
-        stack_env = subject.call(env)
-        stack_env.response.should eq error
-      end
-
-      it "encodes the response" do
-        stack_env = subject.call(env)
-        stack_env.encoded_response.should eq encoded_response
+      it "raises a bad request data exception" do
+        expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::PbError)
       end
     end
   end

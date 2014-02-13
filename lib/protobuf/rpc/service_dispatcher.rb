@@ -14,10 +14,9 @@ module Protobuf
       def call(env)
         @env = env
 
-        init_service
-        init_method if service_klass.present?
-        register_rpc_failed if service.present?
-
+        init_service!
+        init_method!
+        register_rpc_failed
         invoke!
 
         self.env
@@ -51,11 +50,7 @@ module Protobuf
         error.nil?
       end
 
-      private
-
-      def assign_error(error_klass, message)
-        self.error = error_klass.new(message)
-      end
+    private
 
       # Prod the object to see if we can produce a proto object as a response
       # candidate. Either way, return the candidate for validation.
@@ -78,32 +73,31 @@ module Protobuf
 
       # Get the method for the current request.
       #
-      def init_method
+      def init_method!
         method_name = outer_request.method_name.underscore.to_sym
         request_proto = outer_request.has_field?(:request_proto) ? outer_request.request_proto : nil
 
-        if service_klass.rpc_method?(method_name)
-          self.service = service_klass.new(method_name, request_proto, outer_request.caller)
-          self.callable_method = service.callable_rpc_method(method_name)
-          self.definition = service.rpcs[method_name]
-        else
-          assign_error(MethodNotFound, "#{service.class.name}##{method_name} is not a defined rpc method.")
+        self.service = service_klass.new(method_name, request_proto, outer_request.caller)
+
+        unless service_klass.rpc_method?(method_name)
+          raise MethodNotFound, "#{service.class.name}##{method_name} is not a defined rpc method."
         end
-      rescue NameError => e
-        # FIXME I think this is no longer applicable since the method extract
-        # is now wrapped in a lambda (@see Service#callable_rpc_method).
-        log_exception(e)
-        assign_error(MethodNotFound, "#{service.class.name}##{method_name} is not implemented.")
+
+        unless self.service.respond_to?(method_name)
+          raise MethodNotFound, "#{service.class.name}##{method_name} is not implemented."
+        end
+
+        self.callable_method = service.callable_rpc_method(method_name)
+        self.definition = service.rpcs[method_name]
       end
 
       # Constantize the service for this request. Initialization of the service
       # happens when we verify that the method is callable for this service.
       #
-      def init_service
+      def init_service!
         self.service_klass = outer_request.service_name.constantize
-      rescue NameError => e
-        log_exception(e)
-        assign_error(ServiceNotFound, "Service class #{outer_request.service_name} is not defined.")
+      rescue NameError
+        raise ServiceNotFound, "Service class #{outer_request.service_name} is not defined."
       end
 
       # Make sure we get rpc errors back.
@@ -116,7 +110,8 @@ module Protobuf
       # as the callable to the service when an `rpc_failed` call is invoked.
       #
       def rpc_failed_callback(message)
-        assign_error(RpcFailed, (message.respond_to?(:message) ? message.message : message))
+        self.error = RpcFailed.new(message.respond_to?(:message) ? message.message : message)
+
         log_error { sign_message("RPC Failed: #{error.message}") }
       end
 
@@ -128,11 +123,11 @@ module Protobuf
         expected = definition.response_type
         actual = candidate.class
 
-        if expected == actual
-          self.response = candidate
-        else
-          assign_error(BadResponseProto, "Response proto changed from #{expected.name} to #{actual.name}")
+        if expected != actual
+          raise BadResponseProto, "Response proto changed from #{expected.name} to #{actual.name}"
         end
+
+        self.response = candidate
       end
     end
   end

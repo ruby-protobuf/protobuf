@@ -16,8 +16,9 @@ module Protobuf
           log_exception(exception)
 
           # Rescue exceptions, re-wrap them as generic Protobuf errors,
-          # and set the response
+          # and encode them
           env.response = wrap_exception(exception)
+          env.encoded_response = env.response.encode
           env
         end
 
