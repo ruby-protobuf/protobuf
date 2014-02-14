@@ -1,5 +1,3 @@
-require 'set'
-
 module Protobuf
   class Message
     module Fields
@@ -37,7 +35,7 @@ module Protobuf
       #
 
       def all_fields
-        @all_fields ||= ::Set.new(field_store.values).to_a
+        @all_fields ||= field_store.values.uniq
       end
 
       def extension_fields
@@ -90,9 +88,9 @@ module Protobuf
         field_store[tag] = field
 
         class_eval(<<-RAW_GETTER, __FILE__, __LINE__ + 1)
-            define_method("#{field_name}!") do
-              @values[:#{field_name}]
-            end
+          define_method("#{field_name}!") do
+            @values[:#{field_name}]
+          end
         RAW_GETTER
       end
 
