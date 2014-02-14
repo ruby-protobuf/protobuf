@@ -4,7 +4,7 @@ require 'protobuf/message/encoder'
 
 module Protobuf
   class Message
-    module Encoding
+    module Serialization
 
       module ClassMethods
         def decode(bytes)
@@ -64,6 +64,7 @@ module Protobuf
       alias_method :bytes, :encode
       alias_method :serialize, :encode
       alias_method :serialize_to_string, :encode
+      alias_method :serialize_to, :encode_to
 
       private
 

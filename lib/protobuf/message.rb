@@ -1,8 +1,8 @@
 require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/exceptions'
-require 'protobuf/message/encoding'
 require 'protobuf/message/fields'
+require 'protobuf/message/serialization'
 
 module Protobuf
   class Message
@@ -11,8 +11,8 @@ module Protobuf
     # Includes & Extends
     #
 
-    include ::Protobuf::Message::Encoding
     extend ::Protobuf::Message::Fields
+    include ::Protobuf::Message::Serialization
 
     ##
     # Constructor
