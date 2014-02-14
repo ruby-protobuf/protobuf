@@ -1,3 +1,5 @@
+require 'set'
+
 module Protobuf
   class Message
     module DSL
@@ -28,7 +30,7 @@ module Protobuf
         # Define an extension range.
         #
         def extensions(range)
-          extension_fields.add_range(range)
+          extension_ranges << range
         end
 
         ##
@@ -36,86 +38,85 @@ module Protobuf
         #
 
         def all_fields
-          @all_fields ||= begin
-                            all_fields_array = []
-                            max_fields = fields.size > extension_fields.size ? fields.size : extension_fields.size
-                            max_fields.times do |field_number|
-                              all_fields_array << (fields[field_number] || extension_fields[field_number])
-                            end
-                            all_fields_array.compact!
-                            all_fields_array
-                          end
+          @all_fields ||= ::Set.new(field_store.values).to_a
         end
 
         def extension_fields
-          @extension_fields ||= ::Protobuf::Field::ExtensionFields.new
+          @extension_fields ||= all_fields.select(&:extension?)
         end
 
-        def extension_field_name_to_tag
-          @extension_fields_by_name ||= {}
+        def extension_ranges
+          @extension_ranges ||= []
         end
 
         def extension_tag?(tag)
-          extension_fields.include_tag?(tag)
+          tag.respond_to?(:to_i) && get_extension_field(tag).present?
+        end
+
+        def field_store
+          @field_store ||= {}
         end
 
         def fields
-          @fields ||= []
+          @fields ||= all_fields.reject(&:extension?)
         end
 
-        def field_name_to_tag
-          @field_name_to_tag ||= {}
+        def field_tag?(tag, allow_extension = false)
+          tag.respond_to?(:to_i) && get_field(tag, allow_extension).present?
         end
 
-        def get_ext_field_by_name(name)
-          tag = extension_field_name_to_tag[name.to_sym]
-          extension_fields[tag] unless tag.nil?
+        def get_extension_field(name_or_tag)
+          name_or_tag = name_or_tag.to_sym if name_or_tag.respond_to?(:to_sym)
+          field = field_store[name_or_tag]
+          field if field.try(:extension?) { false }
         end
 
-        def get_ext_field_by_tag(tag)
-          extension_fields[tag]
-        end
+        def get_field(name_or_tag, allow_extension = false)
+          name_or_tag = name_or_tag.to_sym if name_or_tag.respond_to?(:to_sym)
+          field = field_store[name_or_tag]
 
-        def get_field_by_name(name)
-          name = name.to_sym if name.respond_to?(:to_sym)
-          tag = field_name_to_tag[name]
-          fields[tag] unless tag.nil?
-        end
-
-        def get_field_by_tag(tag)
-          fields[tag]
-        rescue TypeError
-          tag = tag.try(:to_s) || 'nil'
-          raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
-        end
-
-        private
-
-        # Define a field. Don't use this method directly.
-        def define_field(rule, type, fname, tag, options)
-          field_array = options[:extension] ? extension_fields : fields
-          field_name_hash = options[:extension] ? extension_field_name_to_tag : field_name_to_tag
-
-          previous_tag_field = get_field_by_tag(tag) || get_ext_field_by_tag(tag)
-          if previous_tag_field
-            raise TagCollisionError, %!Field number #{tag} has already been used in "#{name}" by field "#{fname}".!
+          if field && (allow_extension || ! field.extension?)
+            field
+          else
+            nil
           end
+        end
 
-          previous_name_field = get_field_by_name(fname) || get_ext_field_by_name(fname)
-          if previous_name_field
-            raise DuplicateFieldNameError, %!Field name #{fname} has already been used in "#{name}".!
-          end
+        def define_field(rule, type, field_name, tag, options)
+          raise_if_tag_collision(tag, field_name)
+          raise_if_name_collision(field_name)
 
-          field_definition = ::Protobuf::Field.build(self, rule, type, fname, tag, options)
-          field_name_hash[fname] = tag
-          field_array[tag] = field_definition
+          field = ::Protobuf::Field.build(self, rule, type, field_name, tag, options)
+          field_store[field_name] = field
+          field_store[tag] = field
 
           class_eval(<<-RAW_GETTER, __FILE__, __LINE__ + 1)
-            define_method("#{fname}!") do
-              @values[:#{fname}]
+            define_method("#{field_name}!") do
+              @values[:#{field_name}]
             end
           RAW_GETTER
         end
+
+        def raise_if_tag_collision(tag, field_name)
+          if get_field(tag, true)
+            raise TagCollisionError, %!Field number #{tag} has already been used in "#{name}" by field "#{field_name}".!
+          end
+        end
+
+        def raise_if_name_collision(field_name)
+          if get_field(field_name, true)
+            raise DuplicateFieldNameError, %!Field name #{field_name} has already been used in "#{name}".!
+          end
+        end
+
+        ##
+        # Instance aliases
+        #
+
+        alias_method :get_ext_field_by_name, :get_extension_field
+        alias_method :get_ext_field_by_tag,  :get_extension_field
+        alias_method :get_field_by_name, :get_field
+        alias_method :get_field_by_tag,  :get_field
 
       end
     end
