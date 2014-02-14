@@ -11,11 +11,10 @@ module Protobuf
         end
 
         def call(env)
-          @env = env
+          @env = app.call(env)
 
-          env = app.call(env)
-          env.encoded_response = encode_response_data(env.response)
-
+          env.response = response
+          env.encoded_response = encoded_response
           env
         end
 
@@ -27,11 +26,10 @@ module Protobuf
 
         # Encode the response wrapper to return to the client
         #
-        def encode_response_data(response)
+        def encoded_response
           log_debug { sign_message("Encoding response: #{response.inspect}") }
 
-          response = wrap_response(response)
-          env.encoded_response = Socketrpc::Response.encode(response)
+          env.encoded_response = wrapped_response.encode
         rescue => exception
           log_exception(exception)
 
@@ -40,14 +38,48 @@ module Protobuf
           raise PbError.new(exception.message)
         end
 
+        # Prod the object to see if we can produce a proto object as a response
+        # candidate. Validate the candidate protos.
+        def response
+          @response ||= begin
+                          candidate = env.response
+                          case
+                          when candidate.is_a?(Message) then
+                            validate!(candidate)
+                          when candidate.respond_to?(:to_proto) then
+                            validate!(candidate.to_proto)
+                          when candidate.respond_to?(:to_hash) then
+                            env.response_type.new(candidate.to_hash)
+                          when candidate.is_a?(PbError) then
+                            candidate
+                          else
+                            validate!(candidate)
+                          end
+                        end
+        end
+
+        # Ensure that the response candidate we've been given is of the type
+        # we expect so that deserialization on the client side works.
+        #
+        def validate!(candidate)
+          actual = candidate.class
+          expected = env.response_type
+
+          if expected != actual
+            raise BadResponseProto.new("Expected response to be of type #{expected.name} but was #{actual.name}")
+          end
+
+          candidate
+        end
+
         # The middleware stack returns either an error or response proto. Package
         # it up so that it's in the correct spot in the response wrapper
         #
-        def wrap_response(response)
+        def wrapped_response
           if response.is_a?(Protobuf::Rpc::PbError)
-            { :error => response.message, :error_reason => response.error_type }
+            Socketrpc::Response.new(:error => response.message, :error_reason => response.error_type)
           else
-            { :response_proto => response.encode }
+            Socketrpc::Response.new(:response_proto => response.encode)
           end
         end
       end

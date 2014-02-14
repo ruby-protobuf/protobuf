@@ -1,20 +1,16 @@
 require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::ResponseEncoder do
-  let(:app) { Proc.new { |env| env } }
+  let(:app) { Proc.new { |env| env.response = response; env } }
   let(:env) {
     Protobuf::Rpc::Env.new(
-      'response' => response_proto,
+      'response_type' => Test::Resource,
       'log_signature' => 'log_signature'
     )
   }
-  let(:encoded_response) { response.encode }
-  let(:response) {
-    Protobuf::Socketrpc::Response.new(
-      :response_proto => response_proto
-    )
-  }
-  let(:response_proto) { Test::Resource.new(:name => 'required') }
+  let(:encoded_response) { response_wrapper.encode }
+  let(:response) { Test::Resource.new(:name => 'required') }
+  let(:response_wrapper) { Protobuf::Socketrpc::Response.new(:response_proto => response) }
 
   subject { described_class.new(app) }
 
@@ -25,29 +21,51 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
     end
 
     it "calls the stack" do
-      app.should_receive(:call).with(env).and_return(env)
-      subject.call(env)
+      stack_env = subject.call(env)
+      stack_env.response.should eq response
+    end
+
+    context "when response is responds to :to_hash" do
+      let(:app) { proc { |env| env.response = hashable; env } }
+      let(:hashable) { double('hashable', :to_hash => response.to_hash) }
+
+      it "sets Env#response" do
+        stack_env = subject.call(env)
+        stack_env.response.should eq response
+      end
+    end
+
+    context "when response is responds to :to_proto" do
+      let(:app) { proc { |env| env.response = protoable; env } }
+      let(:protoable) { double('protoable', :to_proto => response) }
+
+      it "sets Env#response" do
+        stack_env = subject.call(env)
+        stack_env.response.should eq response
+      end
+    end
+
+    context "when response is not a valid response type" do
+      let(:app) { proc { |env| env.response = "I'm not a valid response"; env } }
+
+      it "raises a bad response proto exception" do
+        expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::BadResponseProto)
+      end
     end
 
     context "when response is a Protobuf error" do
-      let(:encoded_response) { response.encode }
-      let(:env) {
-        Protobuf::Rpc::Env.new(
-          'response' => error,
-          'log_signature' => 'log_signature'
-        )
-      }
+      let(:app) { proc { |env| env.response = error; env } }
       let(:error) { Protobuf::Rpc::RpcError.new }
-      let(:response) { error.to_response }
+      let(:response_wrapper) { error.to_response }
 
-      it "encodes the response" do
+      it "wraps and encodes the response" do
         stack_env = subject.call(env)
         stack_env.encoded_response.should eq encoded_response
       end
     end
 
     context "when encoding fails" do
-      before { Protobuf::Socketrpc::Response.stub(:encode).and_raise(RuntimeError) }
+      before { Protobuf::Socketrpc::Response.any_instance.stub(:encode).and_raise(RuntimeError) }
 
       it "raises a bad request data exception" do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::PbError)
