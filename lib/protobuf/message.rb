@@ -1,8 +1,8 @@
 require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/exceptions'
-require 'protobuf/message/dsl/fields'
 require 'protobuf/message/encoding'
+require 'protobuf/message/fields'
 
 module Protobuf
   class Message
@@ -11,16 +11,18 @@ module Protobuf
     # Includes & Extends
     #
 
-    extend ::Protobuf::Message::DSL::Fields
     include ::Protobuf::Message::Encoding
+    extend ::Protobuf::Message::Fields
 
     ##
     # Constructor
     #
-    def initialize(values = {})
+    def initialize(fields = {})
       @values = {}
-      values = values.to_hash
-      values.each { |name, val| self[name] = val unless val.nil? }
+
+      fields.to_hash.each_pair do |name, value|
+        self[name] = value unless value.nil?
+      end
     end
 
     ##
@@ -47,10 +49,8 @@ module Protobuf
       copy_to(super, :dup)
     end
 
-    # Iterate over a field collection.
-    #   message.each_field do |field_object, value|
-    #     # do something
-    #   end
+    # Iterate over every field, invoking the given block
+    #
     def each_field
       self.class.all_fields.each do |field|
         value = __send__(field.name)
