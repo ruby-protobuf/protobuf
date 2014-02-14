@@ -222,10 +222,10 @@ module Protobuf
     # Deprecations
     #
 
-    deprecate_method :enum_by_value,   :enum_for_tag
-    deprecate_method :name_by_value,   :name_for_tag
-    deprecate_method :get_name_by_tag, :name_for_tag
-    deprecate_method :value_by_name,   :enum_for_name
+    deprecate_class_method :enum_by_value,   :enum_for_tag
+    deprecate_class_method :name_by_value,   :name_for_tag
+    deprecate_class_method :get_name_by_tag, :name_for_tag
+    deprecate_class_method :value_by_name,   :enum_for_name
 
   end
 end
