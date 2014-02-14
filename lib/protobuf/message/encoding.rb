@@ -72,7 +72,7 @@ module Protobuf
       end
 
       def set_field_bytes(tag, bytes)
-        field = (get_field_by_tag(tag) || get_ext_field_by_tag(tag))
+        field = self.class.get_field(tag, true)
         field.set(self, bytes) if field
       end
 

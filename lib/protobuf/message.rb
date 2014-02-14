@@ -27,10 +27,6 @@ module Protobuf
     # Public Instance Methods
     #
 
-    def all_fields
-      self.class.all_fields
-    end
-
     def clear!
       @values.delete_if do |_, value|
         if value.is_a?(::Protobuf::Field::FieldArray)
@@ -56,14 +52,14 @@ module Protobuf
     #     # do something
     #   end
     def each_field
-      all_fields.each do |field|
+      self.class.all_fields.each do |field|
         value = __send__(field.name)
         yield(field, value)
       end
     end
 
     def each_field_for_serialization
-      all_fields.each do |field|
+      self.class.all_fields.each do |field|
         next unless field_must_be_serialized?(field)
 
         value = @values[field.name]
@@ -76,31 +72,6 @@ module Protobuf
       end
     end
 
-    # Returns extension fields. See Message#fields method.
-    def extension_fields
-      self.class.extension_fields
-    end
-
-    def fields
-      self.class.fields
-    end
-
-    def get_ext_field_by_name(name)
-      self.class.get_ext_field_by_name(name)
-    end
-
-    def get_ext_field_by_tag(tag)
-      self.class.get_ext_field_by_tag(tag)
-    end
-
-    def get_field_by_name(name)
-      self.class.get_field_by_name(name)
-    end
-
-    def get_field_by_tag(tag)
-      self.class.get_field_by_tag(tag)
-    end
-
     def has_field?(name)
       @values.has_key?(name)
     end
@@ -110,12 +81,12 @@ module Protobuf
     end
 
     def respond_to_has?(key)
-      self.respond_to?(key) && self.has_field?(key)
+      respond_to?(key) && has_field?(key)
     end
 
     def respond_to_has_and_present?(key)
-      self.respond_to_has?(key) &&
-        (self.__send__(key).present? || [true, false].include?(self.__send__(key)))
+      respond_to_has?(key) &&
+        (__send__(key).present? || [true, false].include?(__send__(key)))
     end
 
     # Return a hash-representation of the given fields for this message type.
@@ -148,13 +119,13 @@ module Protobuf
     end
 
     def [](name)
-      if field = get_field_by_name(name) || get_ext_field_by_name(name)
+      if field = self.class.get_field(name, true)
         __send__(field.name)
       end
     end
 
     def []=(name, value)
-      if field = get_field_by_name(name) || get_ext_field_by_name(name)
+      if field = self.class.get_field(name, true)
         __send__(field.setter_method_name, value)
       end
     end
