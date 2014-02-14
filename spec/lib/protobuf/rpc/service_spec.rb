@@ -154,25 +154,6 @@ describe Protobuf::Rpc::Service do
           specify { subject.response.name.should eq 'Custom response' }
         end
       end
-
-      context 'when calling rpc_failed in the method' do
-        let(:env) {
-          Protobuf::Rpc::Env.new(
-            'method_name' => :find_with_rpc_failed,
-            'request' => request
-          )
-        }
-
-        subject { NewTestService.new(env) }
-
-        it 'invokes the rpc_failed callback with the error' do
-          error = nil
-          subject.on_rpc_failed(lambda { |err| error = err })
-          subject.find_with_rpc_failed
-          error.should eq 'This is a failed endpoint'
-          subject.response.name.should eq 'Name will still be set'
-        end
-      end
     end
   end
 end

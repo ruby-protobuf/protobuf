@@ -28,7 +28,6 @@ module Protobuf
         @method_name = env.method_name
         @request = env.request
         @client_host = env.caller
-        @_rpc_failed_callback = lambda { |message| __send__(:default_rpc_failed_callback, message) }
       end
 
       ##
@@ -132,12 +131,6 @@ module Protobuf
         lambda { run_filters(method_name) }
       end
 
-      # Register a failure callback for use when rpc_failed is invoked.
-      #
-      def on_rpc_failed(callable)
-        @_rpc_failed_callback = callable
-      end
-
       # Response object for this rpc cycle. Not assignable.
       #
       def response
@@ -157,14 +150,6 @@ module Protobuf
       end
 
     private
-
-      # Receive the failure message from the service. This method is registered
-      # as the callable to the service when an `rpc_failed` call is invoked.
-      #
-      def default_rpc_failed_callback(message)
-        message = message.message if message.respond_to?(:message)
-        raise RpcFailed.new(message)
-      end
 
       def request_type
         @_request_type ||= rpcs[@method_name].request_type
@@ -186,7 +171,8 @@ module Protobuf
       # Automatically fail a service method.
       #
       def rpc_failed(message)
-        @_rpc_failed_callback.call(message)
+        message = message.message if message.respond_to?(:message)
+        raise RpcFailed.new(message)
       end
     end
 
