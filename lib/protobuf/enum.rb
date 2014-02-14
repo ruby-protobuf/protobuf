@@ -1,9 +1,26 @@
-require 'protobuf/enum_value'
+require 'delegate'
 require 'protobuf/optionable'
 require 'protobuf/deprecator'
 
+##
+# Adding extension to Numeric until
+# we can get people to stop calling #value
+# on Enum instances.
+#
+class Numeric
+  unless method_defined?(:value)
+    def value
+      $stderr.puts <<-DEPRECATION
+[DEPRECATED] Enum#value is deprecated and will be removed in the next release.
+              Use Enum#to_i instead.
+DEPRECATION
+      self
+    end
+  end
+end
+
 module Protobuf
-  class Enum
+  class Enum < SimpleDelegator
 
     ##
     # Deprecations
@@ -18,7 +35,7 @@ module Protobuf
       self.get_option(:allow_alias)
     end
 
-    # Public: Get all integer tag values defined by this enum.
+    # Public: Get all integer tags defined by this enum.
     #
     # Examples
     #
@@ -37,8 +54,8 @@ module Protobuf
       @all_tags ||= self.enums.map(&:to_i).uniq
     end
 
-    # Internal: DSL method to define a protobuf EnumValue. The given name will
-    # become a constant for this Enum which points to an EnumValue object.
+    # Internal: DSL method to create a new Enum. The given name will
+    # become a constant for this Enum pointing to the new instance.
     #
     # Examples
     #
@@ -52,20 +69,20 @@ module Protobuf
     #
     # Returns nothing.
     #
-    def self.define(name, value)
-      enum = ::Protobuf::EnumValue.new(self, name, value)
+    def self.define(name, tag)
+      enum = self.new(self, name, tag)
       @enums ||= []
       @enums << enum
       const_set(name, enum)
     end
 
-    # Public: The internal values hash.
+    # Public: All defined enums.
     #
     def self.enums
       @enums
     end
 
-    # Public: Get an array of EnumValue objects with the given tag.
+    # Public: Get an array of Enum objects with the given tag.
     #
     # tag - An object that responds to to_i.
     #
@@ -81,7 +98,7 @@ module Protobuf
     #   StateMachine.enums_for_tag(1) #=> [ #<StateMachine::ON=1>, #<StateMachine::STARTED=1> ]
     #   StateMachine.enums_for_tag(2) #=> [ #<StateMachine::OFF=2> ]
     #
-    # Returns an array with zero or more EnumValue objects or nil.
+    # Returns an array with zero or more Enum objects or nil.
     #
     def self.enums_for_tag(tag)
       self.enums.select { |enum|
@@ -89,7 +106,7 @@ module Protobuf
       }
     end
 
-    # Public: Get the EnumValue associated with the given name.
+    # Public: Get the Enum associated with the given name.
     #
     # name - A string-like object. Case-sensitive.
     #
@@ -105,8 +122,7 @@ module Protobuf
     #   StateMachine.enum_for_name(:on)  # => nil
     #   StateMachine.enum_for_name(:FOO) # => nil
     #
-    # Returns the EnumValue object with the given name. `nil` will be returned
-    # if the given name does not have a correlating value.
+    # Returns the Enum object with the given name or nil.
     #
     def self.enum_for_name(name)
       self.const_get(name)
@@ -114,20 +130,20 @@ module Protobuf
       nil
     end
 
-    # Public: Get the EnumValue object corresponding to the given tag.
+    # Public: Get the Enum object corresponding to the given tag.
     #
     # tag - An object that responds to to_i.
     #
-    # Returns an EnumValue object or nil. If the tag corresponds to multiple
-    #   EnumValue objects an array of EnumValue objects will be returned.
+    # Returns an Enum object or nil. If the tag corresponds to multiple
+    #   Enums, the first enum defined will be returned.
     #
     def self.enum_for_tag(tag)
       self.enums_for_tag(tag).first
     end
 
-    # Public: Get an EnumValue by a variety of type-checking mechanisms.
+    # Public: Get an Enum by a variety of type-checking mechanisms.
     #
-    # value - An EnumValue, Numeric, String, or Symbol object.
+    # candidate - An Enum, Numeric, String, or Symbol object.
     #
     # Example
     #
@@ -143,15 +159,15 @@ module Protobuf
     #   StateMachine.fetch("STARTED")         # => #<StateMachine::STARTED=1>
     #   StateMachine.fetch(1)                 # => [ #<StateMachine::ON=1>, #<StateMachine::STARTED=1> ]
     #
-    # Returns an EnumValue object or nil.
+    # Returns an Enum object or nil.
     #
     def self.fetch(candidate)
       case candidate
-      when ::Protobuf::EnumValue then
+      when self then
         candidate
-      when Numeric then
+      when ::Numeric then
         enum_for_tag(candidate.to_i)
-      when String, Symbol then
+      when ::String, ::Symbol then
         enum_for_name(candidate)
       else
         nil
@@ -185,16 +201,15 @@ module Protobuf
     #   StateMachine.name_for_tag(1) # => :STARTED
     #   StateMachine.name_for_tag(2) # => :OFF
     #
-    # Returns the symbol name of the enum constant given it's associated value.
-    #   If the given value has multiple names associated (due to allow_alias)
-    #   the first defined name will be returned. `nil` will be returned when
-    #   the given value does not have a correlating name.
+    # Returns the symbol name of the enum constant given it's associated tag or nil.
+    #   If the given tag has multiple names associated (due to allow_alias)
+    #   the first defined name will be returned.
     #
     def self.name_for_tag(tag)
       self.enum_for_tag(tag).try(:name)
     end
 
-    # Public: Check if the given tag value is defined by this Enum.
+    # Public: Check if the given tag is defined by this Enum.
     #
     # number - An object that responds to to_i.
     #
@@ -204,7 +219,7 @@ module Protobuf
       tag.respond_to?(:to_i) && self.all_tags.include?(tag.to_i)
     end
 
-    # Public: [DEPRECATED] Return a hash of EnumValue objects keyed
+    # Public: [DEPRECATED] Return a hash of Enum objects keyed
     # by their :name.
     #
     def self.values
@@ -219,7 +234,7 @@ module Protobuf
     end
 
     ##
-    # Deprecations
+    # Class Deprecations
     #
 
     deprecate_method :enum_by_value,   :enum_for_tag
@@ -227,6 +242,78 @@ module Protobuf
     deprecate_method :get_name_by_tag, :name_for_tag
     deprecate_method :value_by_name,   :enum_for_name
 
+
+    ##
+    # Attributes
+    #
+
+    attr_reader :parent_class, :name, :tag
+
+    ##
+    # Instance Methods
+    #
+
+    def initialize(parent_class, name, tag)
+      @parent_class = parent_class
+      @name = name
+      @tag = tag
+      super(@tag)
+    end
+
+    # Overriding the class so ActiveRecord/Arel visitor will visit the enum as a Fixnum
+    #
+    def class
+      Fixnum
+    end
+
+    def inspect
+      "\#<Protobuf::Enum(#{parent_class})::#{name}=#{tag}>"
+    end
+
+    def to_i
+      tag
+    end
+
+    def to_int
+      tag.to_int
+    end
+
+    def to_s(format = :tag)
+      case format
+      when :tag then
+        self.to_i.to_s
+      when :name then
+        name.to_s
+      else
+        self.to_i.to_s
+      end
+    end
+
+    # Re-implement `try` in order to fix the problem where
+    # the underlying fixnum doesn't respond to all methods (e.g. name or tag).
+    # If we respond to the first argument, `__send__` the args. Otherwise,
+    # delegate the `try` call to the underlying vlaue fixnum.
+    #
+    def try(*args, &block)
+      case
+      when args.empty? && block_given?
+        yield self
+      when respond_to?(args.first)
+        __send__(*args, &block)
+      else
+        @tag.try(*args, &block)
+      end
+    end
+
+    def value
+      parent_class.warn_deprecated(:value, :to_i)
+      to_i
+    end
+
+    ##
+    # Instance Aliases
+    #
+    alias_method :to_hash_value, :to_i
   end
 end
 
