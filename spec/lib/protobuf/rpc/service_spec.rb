@@ -120,18 +120,19 @@ describe Protobuf::Rpc::Service do
         end
       end
 
-
-      let(:request) do
-        Test::ResourceFindRequest.new(:name => 'resource')
-      end
-
-      let(:response) do
-        Test::Resource.new
-      end
+      let(:request) { Test::ResourceFindRequest.new(:name => 'resource') }
+      let(:response) { Test::Resource.new }
 
       context 'when calling the rpc method' do
         context 'when response is implied' do
-          subject { NewTestService.new(:find_with_implied_response, request.encode) }
+          let(:env) {
+            Protobuf::Rpc::Env.new(
+              'method_name' => :find_with_implied_response,
+              'request' => request
+            )
+          }
+
+          subject { NewTestService.new(env) }
 
           before { subject.find_with_implied_response }
           its(:response) { should be_a(Test::Resource) }
@@ -139,7 +140,14 @@ describe Protobuf::Rpc::Service do
         end
 
         context 'when using respond_with paradigm' do
-          subject { NewTestService.new(:find_with_respond_with, request.encode) }
+          let(:env) {
+            Protobuf::Rpc::Env.new(
+              'method_name' => :find_with_respond_with,
+              'request' => request
+            )
+          }
+
+          subject { NewTestService.new(env) }
 
           before { subject.find_with_respond_with }
           its(:response) { should be_a(Test::Resource) }
@@ -148,7 +156,14 @@ describe Protobuf::Rpc::Service do
       end
 
       context 'when calling rpc_failed in the method' do
-        subject { NewTestService.new(:find_with_rpc_failed, request.encode) }
+        let(:env) {
+          Protobuf::Rpc::Env.new(
+            'method_name' => :find_with_rpc_failed,
+            'request' => request
+          )
+        }
+
+        subject { NewTestService.new(env) }
 
         it 'invokes the rpc_failed callback with the error' do
           error = nil
@@ -159,7 +174,5 @@ describe Protobuf::Rpc::Service do
         end
       end
     end
-
   end
-
 end

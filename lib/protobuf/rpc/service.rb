@@ -11,17 +11,29 @@ module Protobuf
     RpcMethod = Struct.new("RpcMethod", :method, :request_type, :response_type)
 
     class Service
-      include ::Protobuf::Rpc::ServiceFilters
       include ::Protobuf::Logger::LogMethods
-
+      include ::Protobuf::Rpc::ServiceFilters
 
       DEFAULT_HOST = '127.0.0.1'.freeze
       DEFAULT_PORT = 9399
 
+      attr_reader :client_host, :env, :method_name, :request
+
+      ##
+      # Constructor!
+      #
+      # Initialize a service with the rpc endpoint name and the bytes
+      # for the request.
+      def initialize(env)
+        @env = env.dup # Dup the env so it doesn't change out from under us
+        @method_name = env.method_name
+        @request = env.request
+        @client_host = env.caller
+      end
+
       ##
       # Class Methods
       #
-
       # Create a new client for the given service.
       # See Client#initialize and ClientConnection::DEFAULT_OPTIONS
       # for all available options.
@@ -52,6 +64,18 @@ module Protobuf
       #
       def self.host=(new_host)
         @_host = new_host
+      end
+
+      # An array of defined service classes that contain implementation
+      # code
+      def self.implemented_services
+        classes = (self.subclasses || []).select do |subclass|
+          subclass.rpcs.any? do |(name, _)|
+            subclass.method_defined? name
+          end
+        end
+
+        classes.map(&:name)
       end
 
       # Shorthand call to configure, passing a string formatted as hostname:port
@@ -96,30 +120,16 @@ module Protobuf
         rpcs.key?(name)
       end
 
-      # An array of defined service classes that contain implementation
-      # code
-      def self.implemented_services
-        classes = (self.subclasses || []).select do |subclass|
-          subclass.rpcs.any? do |(name, _)|
-            subclass.method_defined? name
-          end
-        end
-
-        classes.map(&:name)
-      end
-
       ##
       # Instance Methods
       #
-
-      attr_reader :response, :method_name, :client_host
-
-      # Initialize a service with the rpc endpoint name and the bytes
-      # for the request.
-      def initialize(method_name, request_bytes, client_host = nil)
-        @method_name = method_name
-        @client_host = client_host
-        @_request_bytes = request_bytes
+      # Get a callable object that will be used by the dispatcher
+      # to invoke the specified rpc method. Facilitates callback dispatch.
+      # The returned lambda is expected to be called at a later time (which
+      # is why we wrap the method call).
+      #
+      def callable_rpc_method(method_name)
+        lambda { run_filters(method_name) }
       end
 
       # Register a failure callback for use when rpc_failed is invoked.
@@ -134,18 +144,6 @@ module Protobuf
         @_response ||= response_type.new
       end
 
-      # Request object for this rpc cycle. Not assignable.
-      #
-      def request
-        @_request ||= if @_request_bytes.present?
-            request_type.decode(@_request_bytes)
-          else
-            request_type.new
-          end
-      rescue => e
-        raise BadRequestProto, "Unable to parse request: #{e.message}"
-      end
-
       # Convenience method to get back to class method.
       #
       def rpc_method?(name)
@@ -156,15 +154,6 @@ module Protobuf
       #
       def rpcs
         self.class.rpcs
-      end
-
-      # Get a callable object that will be used by the dispatcher
-      # to invoke the specified rpc method. Facilitates callback dispatch.
-      # The returned lambda is expected to be called at a later time (which
-      # is why we wrap the method call).
-      #
-      def callable_rpc_method(method_name)
-        lambda { run_filters(method_name) }
       end
 
       private
@@ -191,7 +180,6 @@ module Protobuf
       def rpc_failed(message)
         @_rpc_failed_callback.call(message)
       end
-
     end
 
     if ActiveSupport::VERSION::MAJOR > 2

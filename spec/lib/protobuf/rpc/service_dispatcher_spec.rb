@@ -2,115 +2,110 @@ require 'spec_helper'
 require 'protobuf/rpc/service_dispatcher'
 
 describe Protobuf::Rpc::ServiceDispatcher do
-  let(:service_name) { 'Test::ResourceService' }
-  let(:method_name) { 'find' }
-  let(:request) { Test::ResourceFindRequest.new(:name => 'resource') }
-  let(:request_bytes) { request.to_s }
-  let(:response) { Test::Resource.new }
-  let(:wrapper) do
-    Protobuf::Socketrpc::Request.new({ :service_name => service_name,
-                                       :method_name => method_name,
-                                       :request_proto => request_bytes })
+  let(:app) { Proc.new { |env| env } }
+  let(:caller) { 'caller.test.co' }
+  let(:env) {
+    Protobuf::Rpc::Env.new(
+      'caller' => caller,
+      'encoded_request' => encoded_request,
+      'log_signature' => 'log_signature',
+      'method_name' => method_name,
+      'request' => request,
+      'request_type' => request_type,
+      'response_type' => response_type,
+      'rpc_method' => rpc_method,
+      'rpc_service' => service_class,
+      'service_name' => service_name,
+    )
+  }
+  let(:encoded_request) { request_wrapper.encode }
+  let(:method_name) { :find }
+  let(:request) { request_type.new(:name => 'required') }
+  let(:request_type) { rpc_method.request_type }
+  let(:request_wrapper) {
+    Protobuf::Socketrpc::Request.new(
+      :caller => caller,
+      :service_name => service_name,
+      :method_name => method_name.to_s,
+      :request_proto => request
+    )
+  }
+  let(:response) { response_type.new(:name => 'required') }
+  let(:response_type) { rpc_method.response_type }
+  let(:rpc_method) { service_class.rpcs[method_name] }
+  let(:rpc_service) { service_class.new(env) }
+  let(:service_class) { Test::ResourceService }
+  let(:service_name) { service_class.to_s }
 
-  end
+  subject { described_class.new(app) }
 
-  subject { described_class.new(wrapper) }
+  before { subject.stub(:rpc_service).and_return(rpc_service) }
 
-  context 'creating a new dispatcher' do
-    its(:service) { should be_instance_of service_name.constantize }
-    its(:callable_method) { should respond_to(:call)}
-    its(:outer_request) { should eq wrapper }
-    its(:error) { should be_nil }
+  describe '#call' do
+    before { rpc_service.stub(:callable_rpc_method).and_return(lambda {}) }
 
-    context 'when service name is not a valid constant' do
-      let(:service_name) { 'FlibbityGibbit' }
-      its(:success?) { should be_false }
-      its(:error) { should be_instance_of(Protobuf::Rpc::ServiceNotFound) }
-    end
-
-    context 'when method is not defined by the service' do
-      let(:method_name) { 'holly_hooby_whaty' }
-      its(:success?) { should be_false }
-      its(:error) { should be_instance_of(Protobuf::Rpc::MethodNotFound) }
-    end
-
-    context 'when method is defined but is not an rpc method' do
-      before do
-        class Test::Resource
-          def non_rpc_method; end
-        end
-      end
-
-      let(:method_name) { 'non_rpc_method' }
-      its(:success?) { should be_false }
-      its(:error) { should be_instance_of(Protobuf::Rpc::MethodNotFound) }
-    end
-  end
-
-  describe '#invoke!' do
     context 'regular invocation' do
-      before { subject.callable_method.should_receive(:call) }
-      before { subject.service.stub(:response).and_return(response) }
-      before { subject.invoke! }
-      its(:response) { should be_instance_of Test::Resource }
-      its(:success?) { should be_true }
+      before { rpc_service.stub(:response).and_return(response) }
+
+      it "sets Env#response" do
+        stack_env = subject.call(env)
+        stack_env.response.should eq response
+      end
     end
 
     context 'when service responds with' do
       context 'a hash object' do
-        before { subject.callable_method.should_receive(:call) }
-        before { subject.service.stub(:response).and_return({ :name => 'returned' }) }
-        before { subject.invoke! }
-        its(:success?) { should be_true }
-        its(:response) { should eq Test::Resource.new(:name => 'returned') }
+        before { rpc_service.stub(:response).and_return(response.to_hash) }
+
+        it "sets Env#response" do
+          stack_env = subject.call(env)
+          stack_env.response.should eq response
+        end
       end
 
       context 'an object that responds to to_hash but is not a hash' do
-        let(:hashable) do
-          double('hashable', :to_hash => { :name => 'hashable' })
+        let(:hashable) {
+          double('hashable', :to_hash => response.to_hash)
+        }
+
+        before { rpc_service.stub(:response).and_return(hashable) }
+
+        it "sets Env#response" do
+          stack_env = subject.call(env)
+          stack_env.response.should eq response
         end
-        before { subject.callable_method.should_receive(:call) }
-        before { subject.service.stub(:response).and_return(hashable) }
-        before { subject.invoke! }
-        its(:success?) { should be_true }
-        its(:response) { should eq Test::Resource.new(:name => 'hashable') }
       end
 
       context 'an object that responds to to_proto' do
-        let(:protoable) do
-          double('protoable', :to_proto => Test::Resource.new(:name => 'protoable'))
+        let(:protoable) {
+          double('protoable', :to_proto => response)
+        }
+
+        before { rpc_service.stub(:response).and_return(protoable) }
+
+        it "sets Env#response" do
+          stack_env = subject.call(env)
+          stack_env.response.should eq response
         end
-        before { subject.callable_method.should_receive(:call) }
-        before { subject.service.stub(:response).and_return(protoable) }
-        before { subject.invoke! }
-        its(:success?) { should be_true }
-        its(:response) { should eq Test::Resource.new(:name => 'protoable') }
       end
 
       context 'a type not identified by the rpc definition' do
-        before { subject.callable_method.should_receive(:call) }
-        before { subject.service.stub(:response).and_return("I'm not a valid response") }
-        before { subject.invoke! }
-        its(:error) { should be_instance_of(Protobuf::Rpc::BadResponseProto) }
+        before { rpc_service.stub(:response).and_return("I'm not a valid response") }
+
+        it "raises a bad response proto exception" do
+          expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::BadResponseProto)
+        end
       end
     end
 
     context 'when service invokes rpc failed callback' do
-      before(:all) do
-        class Test::ResourceService
-          rpc :find_with_rpc_failed, Test::ResourceFindRequest, Test::Resource
-          def find_with_rpc_failed
-            rpc_failed('Find failed')
-          end
-        end
+      let(:method_name) { :find_with_rpc_failed }
+
+      before { rpc_service.stub(:callable_rpc_method).and_return(lambda { rpc_service.__send__(method_name) }) }
+
+      it "sets Env#response to an error" do
+        expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::RpcFailed)
       end
-
-      let(:method_name) { 'find_with_rpc_failed' }
-      before { subject.service.find_with_rpc_failed }
-
-      its(:success?) { should be_false }
-      its(:error) { should be_instance_of(Protobuf::Rpc::RpcFailed) }
     end
   end
-
 end

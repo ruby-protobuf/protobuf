@@ -13,12 +13,15 @@ module Protobuf
         def call(env)
           @env = env
 
-          request_wrapper = decode_request_data(env.encoded_request)
-
-          env.request = request_wrapper
+          env.service_name = service_name
+          env.method_name = method_name
+          env.request = request
           env.caller = request_wrapper.caller
-          env.service_name = request_wrapper.service_name
-          env.method_name = request_wrapper.method_name
+
+          env.rpc_service = service
+          env.rpc_method = rpc_method
+          env.request_type = rpc_method.request_type
+          env.response_type = rpc_method.response_type
 
           app.call(env)
         end
@@ -29,19 +32,50 @@ module Protobuf
 
       private
 
+        def method_name
+          @method_name ||= begin
+            method_name = request_wrapper.method_name.underscore.to_sym
+
+            unless service.rpc_method?(method_name)
+              raise MethodNotFound.new("#{service.name}##{method_name} is not a defined RPC method.")
+            end
+
+            method_name
+          end
+        end
+
+        def request
+          @request ||= begin
+            data = request_wrapper.request_proto
+            rpc_method.request_type.decode(data)
+          end
+        rescue => exception
+          raise BadRequestData.new("Unable to decode request: #{exception.message}")
+        end
+
         # Decode the incoming request object into our expected request object
         #
-        def decode_request_data(data)
-          log_debug { sign_message("Decoding request: #{data}") }
-
-          Socketrpc::Request.decode(data)
+        def request_wrapper
+          @request_wrapper ||= begin
+            log_debug { sign_message("Decoding request: #{env.encoded_request}") }
+            Socketrpc::Request.decode(env.encoded_request)
+          end
         rescue => exception
-          log_exception(exception)
-
-          # Rescue decoding exceptions, re-wrap them as bad request data errors,
-          # and re-raise so we can safely short-curcuit the rest of the
-          # middleware call.
           raise BadRequestData.new("Unable to decode request: #{exception.message}")
+        end
+
+        def rpc_method
+          @rpc_method ||= service.rpcs[method_name]
+        end
+
+        def service
+          @service ||= service_name.constantize
+        rescue NameError
+          raise ServiceNotFound.new("Service class #{service_name} is not defined.")
+        end
+
+        def service_name
+          @service_name ||= request_wrapper.service_name
         end
       end
     end
