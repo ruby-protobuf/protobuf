@@ -5,7 +5,6 @@ require 'protobuf/rpc/service_filters'
 
 module Protobuf
   module Rpc
-
     # Object to encapsulate the request/response types for a given service method
     #
     RpcMethod = Struct.new("RpcMethod", :method, :request_type, :response_type)
@@ -29,6 +28,7 @@ module Protobuf
         @method_name = env.method_name
         @request = env.request
         @client_host = env.caller
+        @_rpc_failed_callback = lambda { |message| __send__(:default_rpc_failed_callback, message) }
       end
 
       ##
@@ -135,7 +135,7 @@ module Protobuf
       # Register a failure callback for use when rpc_failed is invoked.
       #
       def on_rpc_failed(callable)
-        @_rpc_failed_callback ||= callable
+        @_rpc_failed_callback = callable
       end
 
       # Response object for this rpc cycle. Not assignable.
@@ -156,10 +156,14 @@ module Protobuf
         self.class.rpcs
       end
 
-      private
+    private
 
-      def response_type
-        @_response_type ||= rpcs[@method_name].response_type
+      # Receive the failure message from the service. This method is registered
+      # as the callable to the service when an `rpc_failed` call is invoked.
+      #
+      def default_rpc_failed_callback(message)
+        message = message.message if message.respond_to?(:message)
+        raise RpcFailed.new(message)
       end
 
       def request_type
@@ -174,6 +178,10 @@ module Protobuf
         @_response = candidate
       end
       alias_method :return_from_whence_you_came, :respond_with
+
+      def response_type
+        @_response_type ||= rpcs[@method_name].response_type
+      end
 
       # Automatically fail a service method.
       #
