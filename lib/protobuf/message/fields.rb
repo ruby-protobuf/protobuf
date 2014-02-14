@@ -1,6 +1,16 @@
+require 'protobuf/deprecator'
+
 module Protobuf
   class Message
     module Fields
+
+      def self.extended(other)
+        other.extend(::Protobuf::Deprecator)
+        other.deprecate_class_method(:get_ext_field_by_name, :get_extension_field)
+        other.deprecate_class_method(:get_ext_field_by_tag, :get_extension_field)
+        other.deprecate_class_method(:get_field_by_name, :get_field)
+        other.deprecate_class_method(:get_field_by_tag, :get_field)
+      end
 
       ##
       # Field Definition Methods
@@ -105,15 +115,6 @@ module Protobuf
           raise DuplicateFieldNameError, %!Field name #{field_name} has already been used in "#{name}".!
         end
       end
-
-      ##
-      # Instance aliases
-      #
-
-      alias_method :get_ext_field_by_name, :get_extension_field
-      alias_method :get_ext_field_by_tag,  :get_extension_field
-      alias_method :get_field_by_name, :get_field
-      alias_method :get_field_by_tag,  :get_field
 
     end
   end
