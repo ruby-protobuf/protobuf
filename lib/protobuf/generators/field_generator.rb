@@ -94,7 +94,7 @@ module Protobuf
                            type_name = modulize(descriptor.type_name)
                          else
                            type_name = descriptor.type.name.to_s.downcase.sub(/type_/, '')
-                           type_name = "::Protobuf::Field::#{modulize(type_name)}Field"
+                           type_name = ":#{type_name}"
                          end
                        end
       end
