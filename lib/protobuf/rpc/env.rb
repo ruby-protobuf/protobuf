@@ -40,7 +40,11 @@ module Protobuf
                     :log_signature,
                     :method_name,
                     :request,
+                    :request_type,
                     :response,
+                    :response_type,
+                    :rpc_method,
+                    :rpc_service,
                     :service_name,
                     :worker_id
 

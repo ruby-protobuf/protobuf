@@ -17,5 +17,10 @@ module Test
       response.name = 'Request should have timed out'
     end
 
+    # request -> Test::ResourceFindRequest
+    # response -> Test::Resource
+    def find_with_rpc_failed
+      rpc_failed('Find failed')
+    end
   end
 end

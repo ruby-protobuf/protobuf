@@ -9,16 +9,22 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
       'log_signature' => 'log_signature'
     )
   }
-  let(:encoded_request) { request.encode }
-  let(:method_name) { 'bar' }
-  let(:request) {
+  let(:encoded_request) { request_wrapper.encode }
+  let(:method_name) { :find }
+  let(:request) { request_type.new(:name => 'required') }
+  let(:request_type) { rpc_method.request_type }
+  let(:request_wrapper) {
     Protobuf::Socketrpc::Request.new(
       :caller => caller,
       :service_name => service_name,
-      :method_name => method_name
+      :method_name => method_name.to_s,
+      :request_proto => request
     )
   }
-  let(:service_name) { 'Foo' }
+  let(:response_type) { rpc_method.response_type }
+  let(:rpc_method) { rpc_service.rpcs[method_name] }
+  let(:rpc_service) { Test::ResourceService }
+  let(:service_name) { rpc_service.to_s }
 
   subject { described_class.new(app) }
 
@@ -45,7 +51,27 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
 
     it "sets Env#method_name" do
       stack_env = subject.call(env)
-      stack_env.method_name.should eq method_name
+      stack_env.method_name.should eq method_name.to_sym
+    end
+
+    it "sets Env#request_type" do
+      stack_env = subject.call(env)
+      stack_env.request_type.should eq request_type
+    end
+
+    it "sets Env#response_type" do
+      stack_env = subject.call(env)
+      stack_env.response_type.should eq response_type
+    end
+
+    it "sets Env#rpc_method" do
+      stack_env = subject.call(env)
+      stack_env.rpc_method.should eq rpc_method
+    end
+
+    it "sets Env#rpc_service" do
+      stack_env = subject.call(env)
+      stack_env.rpc_service.should eq rpc_service
     end
 
     context "when decoding fails" do
@@ -53,6 +79,36 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
 
       it "raises a bad request data exception" do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::BadRequestData)
+      end
+    end
+
+    context "when the RPC service is not defined" do
+      let(:request_wrapper) {
+        Protobuf::Socketrpc::Request.new(
+          :caller => caller,
+          :service_name => 'Foo',
+          :method_name => method_name.to_s,
+          :request_proto => request
+        )
+      }
+
+      it "raises a bad request data exception" do
+        expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::ServiceNotFound)
+      end
+    end
+
+    context "when RPC method is not defined" do
+      let(:request_wrapper) {
+        Protobuf::Socketrpc::Request.new(
+          :caller => caller,
+          :service_name => service_name,
+          :method_name => 'foo',
+          :request_proto => request
+        )
+      }
+
+      it "raises a bad request data exception" do
+        expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::MethodNotFound)
       end
     end
   end

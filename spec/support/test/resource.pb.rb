@@ -103,6 +103,7 @@ module Test
   #
   class ResourceService < ::Protobuf::Rpc::Service
     rpc :find, ::Test::ResourceFindRequest, ::Test::Resource
+    rpc :find_with_rpc_failed, ::Test::ResourceFindRequest, ::Test::Resource
     rpc :find_with_sleep, ::Test::ResourceSleepRequest, ::Test::Resource
   end
 
