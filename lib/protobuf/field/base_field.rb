@@ -76,7 +76,7 @@ module Protobuf
           stream = StringIO.new(bytes)
 
           until stream.eof?
-            array << decode(::Protobuf::Decoder.__send__(method, stream))
+            array << decode(::Protobuf::Message::Decoder.__send__(method, stream))
           end
         else
           value = decode(bytes)

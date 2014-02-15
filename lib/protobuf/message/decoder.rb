@@ -13,6 +13,27 @@ module Protobuf
         end
       end
 
+      # Read 32-bit string value from +stream+.
+      def self.read_fixed32(stream)
+        stream.read(4)
+      end
+
+      # Read 64-bit string value from +stream+.
+      def self.read_fixed64(stream)
+        stream.read(8)
+      end
+
+      # Read varint integer value from +stream+.
+      def self.read_varint(stream)
+        value = index = 0
+        begin
+          byte = stream.readbyte
+          value |= (byte & 0x7f) << (7 * index)
+          index += 1
+        end while (byte & 0x80).nonzero?
+        value
+      end
+
       private
 
       def self.read_field(stream)
@@ -44,27 +65,6 @@ module Protobuf
         wire_type = bits & 0x07
         tag = bits >> 3
         [tag, wire_type]
-      end
-
-      # Read varint integer value from +stream+.
-      def self.read_varint(stream)
-        value = index = 0
-        begin
-          byte = stream.readbyte
-          value |= (byte & 0x7f) << (7 * index)
-          index += 1
-        end while (byte & 0x80).nonzero?
-        value
-      end
-
-      # Read 32-bit string value from +stream+.
-      def self.read_fixed32(stream)
-        stream.read(4)
-      end
-
-      # Read 64-bit string value from +stream+.
-      def self.read_fixed64(stream)
-        stream.read(8)
       end
 
       # Read length-delimited string value from +stream+.
