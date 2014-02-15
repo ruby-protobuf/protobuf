@@ -17,15 +17,16 @@ RSpec::Core::RakeTask.new(:spec)
 desc 'Run specs'
 namespace :compile do
 
-  desc 'Compile spec protos in spec/supprt/'
+  desc 'Compile spec protos in spec/supprt/ directory'
   task :spec do |task, args|
     proto_path = ::File.expand_path('../spec/support/', __FILE__)
     cmd = %Q{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
+
     puts cmd
-    exec cmd
+    exec(cmd)
   end
 
-  desc "Compile spec protos in spec/supprt/"
+  desc 'Compile rpc protos in protos/ directory'
   task :rpc do |task, args|
     proto_path = ::File.expand_path('../proto', __FILE__)
     output_dir = ::File.expand_path('../tmp/rpc', __FILE__)
@@ -34,7 +35,7 @@ namespace :compile do
     cmd = %Q{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{output_dir} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
 
     puts cmd
-    puts %x(#{cmd})
+    system(cmd)
 
     files = {
       'tmp/rpc/dynamic_discovery.pb.rb'               => 'lib/protobuf/rpc',
