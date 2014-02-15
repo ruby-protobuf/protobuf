@@ -27,7 +27,7 @@ describe ::Protobuf::Generators::FieldGenerator do
   describe '#compile' do
     subject { described_class.new(field).to_s }
 
-    it { should eq "optional ::Protobuf::Field::StringField, :foo_bar, 3\n" }
+    it { should eq "optional :string, :foo_bar, 3\n" }
 
     context 'when the type is another message' do
       let(:type_enum) { :TYPE_MESSAGE }
@@ -39,7 +39,7 @@ describe ::Protobuf::Generators::FieldGenerator do
     context 'when a default value is used' do
       let(:type_enum) { :TYPE_INT32 }
       let(:default_value) { '42' }
-      it { should eq "optional ::Protobuf::Field::Int32Field, :foo_bar, 3, :default => 42\n" }
+      it { should eq "optional :int32, :foo_bar, 3, :default => 42\n" }
 
       context 'when type is an enum' do
         let(:type_enum) { :TYPE_ENUM }
@@ -53,7 +53,7 @@ describe ::Protobuf::Generators::FieldGenerator do
         let(:type_enum) { :TYPE_STRING }
         let(:default_value) { "a default \"string\"" }
 
-        it { should eq %Q{optional ::Protobuf::Field::StringField, :foo_bar, 3, :default => "a default \"string\""\n} }
+        it { should eq %Q{optional :string, :foo_bar, 3, :default => "a default \"string\""\n} }
       end
 
       context 'when float or double field type' do
@@ -79,19 +79,19 @@ describe ::Protobuf::Generators::FieldGenerator do
     context 'when the field is an extension' do
       let(:extendee) { 'foo.bar.Baz' }
 
-      it { should eq "optional ::Protobuf::Field::StringField, :foo_bar, 3, :extension => true\n" }
+      it { should eq "optional :string, :foo_bar, 3, :extension => true\n" }
     end
 
     context 'when field is packed' do
       let(:field_options) { { :packed => true } }
 
-      it { should eq "optional ::Protobuf::Field::StringField, :foo_bar, 3, :packed => true\n" }
+      it { should eq "optional :string, :foo_bar, 3, :packed => true\n" }
     end
 
     context 'when field is deprecated' do
       let(:field_options) { { :deprecated => true } }
 
-      it { should eq "optional ::Protobuf::Field::StringField, :foo_bar, 3, :deprecated => true\n" }
+      it { should eq "optional :string, :foo_bar, 3, :deprecated => true\n" }
     end
   end
 

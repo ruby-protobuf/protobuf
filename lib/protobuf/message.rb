@@ -1,142 +1,33 @@
-require 'stringio'
-require 'set'
 require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/exceptions'
-require 'protobuf/message/decoder'
+require 'protobuf/message/fields'
+require 'protobuf/message/serialization'
 
 module Protobuf
   class Message
 
     ##
-    # Class Methods
+    # Includes & Extends
     #
-    def self.all_fields
-      @all_fields ||= begin
-                        all_fields_array = []
-                        max_fields = fields.size > extension_fields.size ? fields.size : extension_fields.size
-                        max_fields.times do |field_number|
-                          all_fields_array << (fields[field_number] || extension_fields[field_number])
-                        end
-                        all_fields_array.compact!
-                        all_fields_array
-                      end
-    end
 
-    def self.decode(bytes)
-      self.new.decode(bytes)
-    end
-
-    # Define a field. Don't use this method directly.
-    def self.define_field(rule, type, fname, tag, options)
-      field_array = options[:extension] ? extension_fields : fields
-      field_name_hash = options[:extension] ? extension_field_name_to_tag : field_name_to_tag
-
-      previous_tag_field = get_field_by_tag(tag) || get_ext_field_by_tag(tag)
-      if previous_tag_field
-        raise TagCollisionError, %!Field number #{tag} has already been used in "#{self.name}" by field "#{fname}".!
-      end
-
-      previous_name_field = get_field_by_name(fname) || get_ext_field_by_name(fname)
-      if previous_name_field
-        raise DuplicateFieldNameError, %!Field name #{fname} has already been used in "#{self.name}".!
-      end
-
-      field_definition = ::Protobuf::Field.build(self, rule, type, fname, tag, options)
-      field_name_hash[fname] = tag
-      field_array[tag] = field_definition
-
-      define_method("#{fname}!") do
-        @values[fname]
-      end
-    end
-
-    # Create a new object with the given values and return the encoded bytes.
-    def self.encode(values = {})
-      self.new(values).encode
-    end
-
-    # Reserve field numbers for extensions. Don't use this method directly.
-    def self.extensions(range)
-      extension_fields.add_range(range)
-    end
-
-    def self.extension_field_name_to_tag
-      @extension_fields_by_name ||= {}
-    end
-
-    # An extension field object.
-    def self.extension_fields
-      @extension_fields ||= ::Protobuf::Field::ExtensionFields.new
-    end
-
-    def self.extension_tag?(tag)
-      extension_fields.include_tag?(tag)
-    end
-
-    # A collection of field object.
-    def self.fields
-      @fields ||= []
-    end
-
-    def self.field_name_to_tag
-      @field_name_to_tag ||= {}
-    end
-
-    def self.get_ext_field_by_name(name)
-      tag = extension_field_name_to_tag[name.to_sym]
-      extension_fields[tag] unless tag.nil?
-    end
-
-    def self.get_ext_field_by_tag(tag)
-      extension_fields[tag]
-    end
-
-    # Find a field object by +name+.
-    def self.get_field_by_name(name)
-      name = name.to_sym if name.respond_to?(:to_sym)
-      tag = field_name_to_tag[name]
-      fields[tag] unless tag.nil?
-    end
-
-    # Find a field object by +tag+ number.
-    def self.get_field_by_tag(tag)
-      fields[tag]
-    rescue TypeError
-      tag = tag.nil? ? 'nil' : tag.to_s
-      raise FieldNotDefinedError.new("Tag '#{tag}' does not reference a message field for '#{self.name}'")
-    end
-
-    # Define a optional field. Don't use this method directly.
-    def self.optional(type, name, tag, options = {})
-      define_field(:optional, type, name, tag, options)
-    end
-
-    # Define a repeated field. Don't use this method directly.
-    def self.repeated(type, name, tag, options = {})
-      define_field(:repeated, type, name, tag, options)
-    end
-
-    # Define a required field. Don't use this method directly.
-    def self.required(type, name, tag, options = {})
-      define_field(:required, type, name, tag, options)
-    end
+    extend ::Protobuf::Message::Fields
+    include ::Protobuf::Message::Serialization
 
     ##
     # Constructor
     #
-    def initialize(values = {})
+    def initialize(fields = {})
       @values = {}
-      values = values.to_hash
-      values.each { |name, val| self[name] = val unless val.nil? }
+
+      fields.to_hash.each_pair do |name, value|
+        self[name] = value unless value.nil?
+      end
     end
 
     ##
     # Public Instance Methods
     #
-    def all_fields
-      self.class.all_fields
-    end
 
     def clear!
       @values.delete_if do |_, value|
@@ -154,93 +45,31 @@ module Protobuf
       copy_to(super, :clone)
     end
 
-    # Decode the given string bytes into this object.
-    def decode(string)
-      decode_from(::StringIO.new(string))
-    end
-
-    # Decode the given stream into this object.
-    def decode_from(stream)
-      Decoder.decode(stream, self)
-    end
-
     def dup
       copy_to(super, :dup)
     end
 
-    # Iterate over a field collection.
-    #   message.each_field do |field_object, value|
-    #     # do something
-    #   end
+    # Iterate over every field, invoking the given block
+    #
     def each_field
-      all_fields.each do |field|
+      self.class.all_fields.each do |field|
         value = __send__(field.name)
         yield(field, value)
       end
     end
 
     def each_field_for_serialization
-      all_fields.each do |field|
-        next unless __field_must_be_serialized__?(field)
+      self.class.all_fields.each do |field|
+        next unless field_must_be_serialized?(field)
 
         value = @values[field.name]
 
         if value.nil?
-          # Only way you can get here is if you are required and nil
-          raise ::Protobuf::SerializationError, "#{field.name} is required on #{field.message_class}"
+          raise ::Protobuf::SerializationError, "Required field #{self.name}##{field.name} does not have a value."
         else
           yield(field, value)
         end
       end
-    end
-
-    def encode
-      stream = ""
-
-      each_field_for_serialization do |field, value|
-        if field.repeated?
-          if field.packed?
-            key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
-            packed_value = value.map { |val| field.encode(val) }.join
-            stream << ::Protobuf::Field::VarintField.encode(key)
-            stream << ::Protobuf::Field::VarintField.encode(packed_value.size)
-            stream << packed_value
-          else
-            value.each { |val| write_pair(stream, field, val) }
-          end
-        else
-          write_pair(stream, field, value)
-        end
-      end
-
-      return stream
-    end
-
-    # Returns extension fields. See Message#fields method.
-    def extension_fields
-      self.class.extension_fields
-    end
-
-    def fields
-      self.class.fields
-    end
-
-    def get_ext_field_by_name(name) # :nodoc:
-      self.class.get_ext_field_by_name(name)
-    end
-
-    def get_ext_field_by_tag(tag) # :nodoc:
-      self.class.get_ext_field_by_tag(tag)
-    end
-
-    # Returns field object or +nil+.
-    def get_field_by_name(name)
-      self.class.get_field_by_name(name)
-    end
-
-    # Returns field object or +nil+.
-    def get_field_by_tag(tag)
-      self.class.get_field_by_tag(tag)
     end
 
     def has_field?(name)
@@ -252,17 +81,12 @@ module Protobuf
     end
 
     def respond_to_has?(key)
-      self.respond_to?(key) && self.has_field?(key)
+      respond_to?(key) && has_field?(key)
     end
 
     def respond_to_has_and_present?(key)
-      self.respond_to_has?(key) &&
-        (self.__send__(key).present? || [true, false].include?(self.__send__(key)))
-    end
-
-    def set_field(tag, bytes)
-      field = (get_field_by_tag(tag) || get_ext_field_by_tag(tag))
-      field.set(self, bytes) if field
+      respond_to_has?(key) &&
+        (__send__(key).present? || [true, false].include?(__send__(key)))
     end
 
     # Return a hash-representation of the given fields for this message type.
@@ -295,13 +119,13 @@ module Protobuf
     end
 
     def [](name)
-      if field = get_field_by_name(name) || get_ext_field_by_name(name)
+      if field = self.class.get_field(name, true)
         __send__(field.name)
       end
     end
 
     def []=(name, value)
-      if field = get_field_by_name(name) || get_ext_field_by_name(name)
+      if field = self.class.get_field(name, true)
         __send__(field.setter_method_name, value)
       end
     end
@@ -309,14 +133,6 @@ module Protobuf
     ##
     # Instance Aliases
     #
-    alias_method :parse_from_string, :decode
-    alias_method :deserialize, :decode
-    alias_method :parse_from, :decode_from
-    alias_method :deserialize_from, :decode_from
-    alias_method :to_s, :encode
-    alias_method :bytes, :encode
-    alias_method :serialize, :encode
-    alias_method :serialize_to_string, :encode
     alias_method :to_hash_value, :to_hash
     alias_method :to_proto_hash, :to_hash
     alias_method :responds_to_has?, :respond_to_has?
@@ -351,17 +167,6 @@ module Protobuf
         end
       end
       object
-    end
-
-    def __field_must_be_serialized__?(field)
-      field.required? || !@values[field.name].nil?
-    end
-
-    # Encode key and value, and write to +stream+.
-    def write_pair(stream, field, value)
-      key = (field.tag << 3) | field.wire_type
-      stream << ::Protobuf::Field::VarintField.encode(key)
-      stream << field.encode(value)
     end
 
   end

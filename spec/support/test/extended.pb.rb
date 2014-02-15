@@ -15,7 +15,7 @@ module Test
   # Extended Message Fields
   #
   class ::Test::Resource < ::Protobuf::Message
-    optional ::Protobuf::Field::Int64Field, :deleted_at, 300, :extension => true
+    optional :int64, :deleted_at, 300, :extension => true
   end
 
 end

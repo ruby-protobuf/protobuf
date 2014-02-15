@@ -4,9 +4,8 @@
 require 'protobuf/message'
 
 module Google
-
   module Protobuf
-  
+
     ##
     # Message Classes
     #
@@ -14,7 +13,9 @@ module Google
     class FileDescriptorProto < ::Protobuf::Message; end
     class DescriptorProto < ::Protobuf::Message
       class ExtensionRange < ::Protobuf::Message; end
+
     end
+
     class FieldDescriptorProto < ::Protobuf::Message
       class Type < ::Protobuf::Enum
         define :TYPE_DOUBLE, 1
@@ -36,14 +37,15 @@ module Google
         define :TYPE_SINT32, 17
         define :TYPE_SINT64, 18
       end
-      
+
       class Label < ::Protobuf::Enum
         define :LABEL_OPTIONAL, 1
         define :LABEL_REQUIRED, 2
         define :LABEL_REPEATED, 3
       end
-      
+
     end
+
     class EnumDescriptorProto < ::Protobuf::Message; end
     class EnumValueDescriptorProto < ::Protobuf::Message; end
     class ServiceDescriptorProto < ::Protobuf::Message; end
@@ -54,8 +56,9 @@ module Google
         define :CODE_SIZE, 2
         define :LITE_RUNTIME, 3
       end
-      
+
     end
+
     class MessageOptions < ::Protobuf::Message; end
     class FieldOptions < ::Protobuf::Message
       class CType < ::Protobuf::Enum
@@ -63,32 +66,38 @@ module Google
         define :CORD, 1
         define :STRING_PIECE, 2
       end
-      
+
     end
+
     class EnumOptions < ::Protobuf::Message; end
     class EnumValueOptions < ::Protobuf::Message; end
     class ServiceOptions < ::Protobuf::Message; end
     class MethodOptions < ::Protobuf::Message; end
     class UninterpretedOption < ::Protobuf::Message
       class NamePart < ::Protobuf::Message; end
+
     end
+
     class SourceCodeInfo < ::Protobuf::Message
       class Location < ::Protobuf::Message; end
+
     end
-    
+
+
+
     ##
     # Message Fields
     #
     class FileDescriptorSet
       repeated ::Google::Protobuf::FileDescriptorProto, :file, 1
     end
-    
+
     class FileDescriptorProto
-      optional ::Protobuf::Field::StringField, :name, 1
-      optional ::Protobuf::Field::StringField, :package, 2
-      repeated ::Protobuf::Field::StringField, :dependency, 3
-      repeated ::Protobuf::Field::Int32Field, :public_dependency, 10
-      repeated ::Protobuf::Field::Int32Field, :weak_dependency, 11
+      optional :string, :name, 1
+      optional :string, :package, 2
+      repeated :string, :dependency, 3
+      repeated :int32, :public_dependency, 10
+      repeated :int32, :weak_dependency, 11
       repeated ::Google::Protobuf::DescriptorProto, :message_type, 4
       repeated ::Google::Protobuf::EnumDescriptorProto, :enum_type, 5
       repeated ::Google::Protobuf::ServiceDescriptorProto, :service, 6
@@ -96,14 +105,14 @@ module Google
       optional ::Google::Protobuf::FileOptions, :options, 8
       optional ::Google::Protobuf::SourceCodeInfo, :source_code_info, 9
     end
-    
+
     class DescriptorProto
       class ExtensionRange
-        optional ::Protobuf::Field::Int32Field, :start, 1
-        optional ::Protobuf::Field::Int32Field, :end, 2
+        optional :int32, :start, 1
+        optional :int32, :end, 2
       end
-      
-      optional ::Protobuf::Field::StringField, :name, 1
+
+      optional :string, :name, 1
       repeated ::Google::Protobuf::FieldDescriptorProto, :field, 2
       repeated ::Google::Protobuf::FieldDescriptorProto, :extension, 6
       repeated ::Google::Protobuf::DescriptorProto, :nested_type, 3
@@ -111,138 +120,130 @@ module Google
       repeated ::Google::Protobuf::DescriptorProto::ExtensionRange, :extension_range, 5
       optional ::Google::Protobuf::MessageOptions, :options, 7
     end
-    
+
     class FieldDescriptorProto
-      optional ::Protobuf::Field::StringField, :name, 1
-      optional ::Protobuf::Field::Int32Field, :number, 3
+      optional :string, :name, 1
+      optional :int32, :number, 3
       optional ::Google::Protobuf::FieldDescriptorProto::Label, :label, 4
       optional ::Google::Protobuf::FieldDescriptorProto::Type, :type, 5
-      optional ::Protobuf::Field::StringField, :type_name, 6
-      optional ::Protobuf::Field::StringField, :extendee, 2
-      optional ::Protobuf::Field::StringField, :default_value, 7
+      optional :string, :type_name, 6
+      optional :string, :extendee, 2
+      optional :string, :default_value, 7
       optional ::Google::Protobuf::FieldOptions, :options, 8
     end
-    
+
     class EnumDescriptorProto
-      optional ::Protobuf::Field::StringField, :name, 1
+      optional :string, :name, 1
       repeated ::Google::Protobuf::EnumValueDescriptorProto, :value, 2
       optional ::Google::Protobuf::EnumOptions, :options, 3
     end
-    
+
     class EnumValueDescriptorProto
-      optional ::Protobuf::Field::StringField, :name, 1
-      optional ::Protobuf::Field::Int32Field, :number, 2
+      optional :string, :name, 1
+      optional :int32, :number, 2
       optional ::Google::Protobuf::EnumValueOptions, :options, 3
     end
-    
+
     class ServiceDescriptorProto
-      optional ::Protobuf::Field::StringField, :name, 1
+      optional :string, :name, 1
       repeated ::Google::Protobuf::MethodDescriptorProto, :method, 2
       optional ::Google::Protobuf::ServiceOptions, :options, 3
     end
-    
+
     class MethodDescriptorProto
-      optional ::Protobuf::Field::StringField, :name, 1
-      optional ::Protobuf::Field::StringField, :input_type, 2
-      optional ::Protobuf::Field::StringField, :output_type, 3
+      optional :string, :name, 1
+      optional :string, :input_type, 2
+      optional :string, :output_type, 3
       optional ::Google::Protobuf::MethodOptions, :options, 4
     end
-    
+
     class FileOptions
-      optional ::Protobuf::Field::StringField, :java_package, 1
-      optional ::Protobuf::Field::StringField, :java_outer_classname, 8
-      optional ::Protobuf::Field::BoolField, :java_multiple_files, 10, :default => false
-      optional ::Protobuf::Field::BoolField, :java_generate_equals_and_hash, 20, :default => false
+      optional :string, :java_package, 1
+      optional :string, :java_outer_classname, 8
+      optional :bool, :java_multiple_files, 10, :default => false
+      optional :bool, :java_generate_equals_and_hash, 20, :default => false
       optional ::Google::Protobuf::FileOptions::OptimizeMode, :optimize_for, 9, :default => ::Google::Protobuf::FileOptions::OptimizeMode::SPEED
-      optional ::Protobuf::Field::StringField, :go_package, 11
-      optional ::Protobuf::Field::BoolField, :cc_generic_services, 16, :default => false
-      optional ::Protobuf::Field::BoolField, :java_generic_services, 17, :default => false
-      optional ::Protobuf::Field::BoolField, :py_generic_services, 18, :default => false
+      optional :string, :go_package, 11
+      optional :bool, :cc_generic_services, 16, :default => false
+      optional :bool, :java_generic_services, 17, :default => false
+      optional :bool, :py_generic_services, 18, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
-      
       # Extension Fields
       extensions 1000...536870912
     end
-    
+
     class MessageOptions
-      optional ::Protobuf::Field::BoolField, :message_set_wire_format, 1, :default => false
-      optional ::Protobuf::Field::BoolField, :no_standard_descriptor_accessor, 2, :default => false
+      optional :bool, :message_set_wire_format, 1, :default => false
+      optional :bool, :no_standard_descriptor_accessor, 2, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
-      
       # Extension Fields
       extensions 1000...536870912
     end
-    
+
     class FieldOptions
       optional ::Google::Protobuf::FieldOptions::CType, :ctype, 1, :default => ::Google::Protobuf::FieldOptions::CType::STRING
-      optional ::Protobuf::Field::BoolField, :packed, 2
-      optional ::Protobuf::Field::BoolField, :lazy, 5, :default => false
-      optional ::Protobuf::Field::BoolField, :deprecated, 3, :default => false
-      optional ::Protobuf::Field::StringField, :experimental_map_key, 9
-      optional ::Protobuf::Field::BoolField, :weak, 10, :default => false
+      optional :bool, :packed, 2
+      optional :bool, :lazy, 5, :default => false
+      optional :bool, :deprecated, 3, :default => false
+      optional :string, :experimental_map_key, 9
+      optional :bool, :weak, 10, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
-      
       # Extension Fields
       extensions 1000...536870912
     end
-    
+
     class EnumOptions
-      optional ::Protobuf::Field::BoolField, :allow_alias, 2, :default => true
+      optional :bool, :allow_alias, 2, :default => true
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
-      
       # Extension Fields
       extensions 1000...536870912
     end
-    
+
     class EnumValueOptions
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
-      
       # Extension Fields
       extensions 1000...536870912
     end
-    
+
     class ServiceOptions
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
-      
       # Extension Fields
       extensions 1000...536870912
     end
-    
+
     class MethodOptions
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
-      
       # Extension Fields
       extensions 1000...536870912
     end
-    
+
     class UninterpretedOption
       class NamePart
-        required ::Protobuf::Field::StringField, :name_part, 1
-        required ::Protobuf::Field::BoolField, :is_extension, 2
+        required :string, :name_part, 1
+        required :bool, :is_extension, 2
       end
-      
+
       repeated ::Google::Protobuf::UninterpretedOption::NamePart, :name, 2
-      optional ::Protobuf::Field::StringField, :identifier_value, 3
-      optional ::Protobuf::Field::Uint64Field, :positive_int_value, 4
-      optional ::Protobuf::Field::Int64Field, :negative_int_value, 5
-      optional ::Protobuf::Field::DoubleField, :double_value, 6
-      optional ::Protobuf::Field::BytesField, :string_value, 7
-      optional ::Protobuf::Field::StringField, :aggregate_value, 8
+      optional :string, :identifier_value, 3
+      optional :uint64, :positive_int_value, 4
+      optional :int64, :negative_int_value, 5
+      optional :double, :double_value, 6
+      optional :bytes, :string_value, 7
+      optional :string, :aggregate_value, 8
     end
-    
+
     class SourceCodeInfo
       class Location
-        repeated ::Protobuf::Field::Int32Field, :path, 1, :packed => true
-        repeated ::Protobuf::Field::Int32Field, :span, 2, :packed => true
-        optional ::Protobuf::Field::StringField, :leading_comments, 3
-        optional ::Protobuf::Field::StringField, :trailing_comments, 4
+        repeated :int32, :path, 1, :packed => true
+        repeated :int32, :span, 2, :packed => true
+        optional :string, :leading_comments, 3
+        optional :string, :trailing_comments, 4
       end
-      
+
       repeated ::Google::Protobuf::SourceCodeInfo::Location, :location, 1
     end
-    
-    
+
   end
-  
+
 end
 

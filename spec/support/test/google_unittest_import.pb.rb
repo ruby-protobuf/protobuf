@@ -26,11 +26,11 @@ module GoogleUnittestImport
   # Message Fields
   #
   class PublicImportMessage
-    optional ::Protobuf::Field::Int32Field, :e, 1
+    optional :int32, :e, 1
   end
 
   class ImportMessage
-    optional ::Protobuf::Field::Int32Field, :d, 1
+    optional :int32, :d, 1
   end
 
 end

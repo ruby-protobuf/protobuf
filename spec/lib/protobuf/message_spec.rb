@@ -10,13 +10,13 @@ describe Protobuf::Message do
     end
   end
 
-  describe '.define_field' do
+  describe 'defining a new field' do
     context 'when defining a field with a tag that has already been used' do
       it 'raises a TagCollisionError' do
         expect {
           Class.new(Protobuf::Message) do
-            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 1, {}
-            define_field :optional, ::Protobuf::Field::Int32Field, :bar, 1, {}
+            optional ::Protobuf::Field::Int32Field, :foo, 1
+            optional ::Protobuf::Field::Int32Field, :bar, 1
           end
         }.to raise_error(Protobuf::TagCollisionError, /Field number 1 has already been used/)
       end
@@ -27,8 +27,8 @@ describe Protobuf::Message do
         expect {
           Class.new(Protobuf::Message) do
             extensions 100...110
-            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 100, {}
-            define_field :optional, ::Protobuf::Field::Int32Field, :bar, 100, :extension => true
+            optional ::Protobuf::Field::Int32Field, :foo, 100
+            optional ::Protobuf::Field::Int32Field, :bar, 100, :extension => true
           end
         }.to raise_error(Protobuf::TagCollisionError, /Field number 100 has already been used/)
       end
@@ -38,8 +38,8 @@ describe Protobuf::Message do
       it 'raises a DuplicateFieldNameError' do
         expect {
           Class.new(Protobuf::Message) do
-            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 1, {}
-            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 2, {}
+            optional ::Protobuf::Field::Int32Field, :foo, 1
+            optional ::Protobuf::Field::Int32Field, :foo, 2
           end
         }.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
       end
@@ -50,8 +50,8 @@ describe Protobuf::Message do
         expect {
           Class.new(Protobuf::Message) do
             extensions 100...110
-            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 1, {}
-            define_field :optional, ::Protobuf::Field::Int32Field, :foo, 100, :extension => true
+            optional ::Protobuf::Field::Int32Field, :foo, 1
+            optional ::Protobuf::Field::Int32Field, :foo, 100, :extension => true
           end
         }.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
       end
@@ -289,34 +289,9 @@ describe Protobuf::Message do
     its(:to_json) { should eq '{"name":"Test Name","active":false}' }
   end
 
-  describe '#get_field_by_name' do
-    subject do
-      ::Test::Resource.new({ :name => 'Test Name', :date_created => Time.now.to_i })
-    end
-
-    context 'when name is a valid field' do
-      let(:valid_field) { subject.get_field_by_name(:name) }
-      specify { valid_field.should be_a ::Protobuf::Field::StringField }
-      specify { valid_field.name.should eq :name }
-    end
-
-    context 'when name is not a valid field' do
-      specify do
-        subject.get_field_by_name(1).should be_nil
-      end
-
-      specify do
-        subject.get_field_by_name(:nothere).should be_nil
-      end
-
-      specify do
-        subject.get_field_by_name(nil).should be_nil
-      end
-    end
-  end
-
   describe "#define_setter" do
     subject { ::Test::Resource.new }
+
     it "allows string fields to be set to nil" do
       expect { subject.name = nil }.to_not raise_error
     end
@@ -326,40 +301,57 @@ describe Protobuf::Message do
     end
   end
 
-  describe '#get_ext_field_by_name' do
-    pending 'Need to get a proto compiled with extensions first'
+  describe '.get_extension_field' do
+    it 'fetches an extension field by its tag' do
+      field = ::Test::Resource.get_extension_field(100)
+      expect(field).to be_a(::Protobuf::Field::BoolField)
+      expect(field.tag).to eq(100)
+      expect(field.name).to eq(:ext_is_searchable)
+      expect(field).to be_extension
+    end
+
+    it 'fetches an extension field by its symbolized name' do
+      expect(::Test::Resource.get_extension_field(:ext_is_searchable)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_extension_field('ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
+    end
+
+    it 'returns nil when attempting to get a non-extension field' do
+      expect(::Test::Resource.get_extension_field(1)).to be_nil
+    end
+
+    it 'returns nil when field is not found' do
+      ::Test::Resource.get_extension_field(-1).should be_nil
+      ::Test::Resource.get_extension_field(nil).should be_nil
+    end
   end
 
-  describe '#get_field_by_tag' do
-    subject do
-      ::Test::Resource.new({ :name => 'Test Name', :date_created => Time.now.to_i })
+  describe '.get_field' do
+    it 'fetches a non-extension field by its tag' do
+      field = ::Test::Resource.get_field(1)
+      expect(field).to be_a(::Protobuf::Field::StringField)
+      expect(field.tag).to eq(1)
+      expect(field.name).to eq(:name)
+      expect(field).not_to be_extension
     end
 
-    context 'when tag references a valid field' do
-      let(:valid_field) { subject.get_field_by_tag(1) }
-      specify { valid_field.should be_a ::Protobuf::Field::StringField }
-      specify { valid_field.name.should eq :name }
+    it 'fetches a non-extension field by its symbolized name' do
+      expect(::Test::Resource.get_field(:name)).to be_a(::Protobuf::Field::StringField)
+      expect(::Test::Resource.get_field('name')).to be_a(::Protobuf::Field::StringField)
     end
 
-    context 'when tag does not reference a field' do
-      it 'returns nil' do
-        pending 'need to implement a range-limiting array sub-class for field access'
-        subject.get_field_by_tag(-1).should be_nil
-      end
+    it 'fetches an extension field when forced' do
+      expect(::Test::Resource.get_field(100, true)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_field(:ext_is_searchable, true)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_field('ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
     end
 
-    context 'when tag is not numeric' do
-      specify do
-        expect {
-          subject.get_field_by_tag("not a number")
-        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*not a number.*#{subject.class.name}/)
-      end
+    it 'returns nil when attempting to get an extension field' do
+      expect(::Test::Resource.get_field(100)).to be_nil
+    end
 
-      specify do
-        expect {
-          subject.get_field_by_tag(nil)
-        }.to raise_error(::Protobuf::FieldNotDefinedError, /.*nil.*#{subject.class.name}/)
-      end
+    it 'returns nil when field is not defined' do
+      ::Test::Resource.get_field(-1).should be_nil
+      ::Test::Resource.get_field(nil).should be_nil
     end
   end
 

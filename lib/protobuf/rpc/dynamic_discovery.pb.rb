@@ -4,11 +4,9 @@
 require 'protobuf/message'
 
 module Protobuf
-
   module Rpc
-  
     module DynamicDiscovery
-    
+
       ##
       # Enum Classes
       #
@@ -16,34 +14,34 @@ module Protobuf
         define :HEARTBEAT, 0
         define :FLATLINE, 1
       end
-      
-      
+
+
       ##
       # Message Classes
       #
       class Server < ::Protobuf::Message; end
       class Beacon < ::Protobuf::Message; end
-      
+
+
       ##
       # Message Fields
       #
       class Server
-        optional ::Protobuf::Field::StringField, :uuid, 1
-        optional ::Protobuf::Field::StringField, :address, 2
-        optional ::Protobuf::Field::StringField, :port, 3
-        optional ::Protobuf::Field::Int32Field, :ttl, 4
-        repeated ::Protobuf::Field::StringField, :services, 5
+        optional :string, :uuid, 1
+        optional :string, :address, 2
+        optional :string, :port, 3
+        optional :int32, :ttl, 4
+        repeated :string, :services, 5
       end
-      
+
       class Beacon
         optional ::Protobuf::Rpc::DynamicDiscovery::BeaconType, :beacon_type, 1
         optional ::Protobuf::Rpc::DynamicDiscovery::Server, :server, 2
       end
-      
-      
+
     end
-    
+
   end
-  
+
 end
 
