@@ -1,6 +1,6 @@
 require 'stringio'
 require 'protobuf/message/decoder'
-require 'protobuf/message/encoder'
+require 'protobuf/encoder'
 
 module Protobuf
   class Message
@@ -51,7 +51,7 @@ module Protobuf
       # Encode this message to the given stream.
       #
       def encode_to(stream)
-        ::Protobuf::Message::Encoder.encode(stream, self)
+        ::Protobuf::Encoder.encode(self, stream)
       end
 
       ##
