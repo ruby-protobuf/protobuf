@@ -1,5 +1,5 @@
 require 'stringio'
-require 'protobuf/message/decoder'
+require 'protobuf/decoder'
 require 'protobuf/encoder'
 
 module Protobuf
@@ -34,7 +34,7 @@ module Protobuf
       # Decode the given stream into this message.
       #
       def decode_from(stream)
-        ::Protobuf::Message::Decoder.decode_each_field(stream) do |tag, bytes|
+        ::Protobuf::Decoder.decode_each_field(stream) do |tag, bytes|
           set_field_bytes(tag, bytes)
         end
 
