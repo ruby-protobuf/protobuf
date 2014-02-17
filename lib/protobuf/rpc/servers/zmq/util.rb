@@ -4,6 +4,7 @@ module Protobuf
   module Rpc
     module Zmq
 
+      ADDRESS_MATCH = /\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/.freeze
       WORKER_READY_MESSAGE = "\1"
 
       module Util
@@ -33,7 +34,9 @@ module Protobuf
         end
 
         def resolve_ip(hostname)
-          ::Resolv.getaddress(hostname)
+          ::Resolv.getaddresses(hostname).detect do |address|
+            address =~ ADDRESS_MATCH
+          end
         end
       end
     end
