@@ -20,4 +20,6 @@ module Protobuf
   Rpc.middleware.use(Rpc::Middleware::RequestDecoder)
   Rpc.middleware.use(Rpc::Middleware::Logger)
   Rpc.middleware.use(Rpc::Middleware::ResponseEncoder)
+
+  ActiveSupport.run_load_hooks(:protobuf_rpc_middleware, Rpc)
 end

@@ -163,8 +163,6 @@ module Protobuf
 
     end
 
-    if ActiveSupport::VERSION::MAJOR > 2
-      ActiveSupport.run_load_hooks(:protobuf_rpc_client, Client)
-    end
+    ActiveSupport.run_load_hooks(:protobuf_rpc_client, Client)
   end
 end
