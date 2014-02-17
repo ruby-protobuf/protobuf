@@ -4,9 +4,8 @@
 require 'protobuf/message'
 
 module Protobuf
-
   module Socketrpc
-  
+
     ##
     # Enum Classes
     #
@@ -22,33 +21,33 @@ module Protobuf
       define :UNKNOWN_HOST, 8
       define :IO_ERROR, 9
     end
-    
-    
+
+
     ##
     # Message Classes
     #
     class Request < ::Protobuf::Message; end
     class Response < ::Protobuf::Message; end
-    
+
+
     ##
     # Message Fields
     #
     class Request
-      required ::Protobuf::Field::StringField, :service_name, 1
-      required ::Protobuf::Field::StringField, :method_name, 2
-      optional ::Protobuf::Field::BytesField, :request_proto, 3
-      optional ::Protobuf::Field::StringField, :caller, 4
+      required :string, :service_name, 1
+      required :string, :method_name, 2
+      optional :bytes, :request_proto, 3
+      optional :string, :caller, 4
     end
-    
+
     class Response
-      optional ::Protobuf::Field::BytesField, :response_proto, 1
-      optional ::Protobuf::Field::StringField, :error, 2
-      optional ::Protobuf::Field::BoolField, :callback, 3, :default => false
+      optional :bytes, :response_proto, 1
+      optional :string, :error, 2
+      optional :bool, :callback, 3, :default => false
       optional ::Protobuf::Socketrpc::ErrorReason, :error_reason, 4
     end
-    
-    
+
   end
-  
+
 end
 

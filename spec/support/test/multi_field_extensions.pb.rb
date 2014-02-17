@@ -40,14 +40,14 @@ module Test
 
   class PayloadA
     class Foo
-      optional ::Protobuf::Field::StringField, :foo_a, 1
+      optional :string, :foo_a, 1
     end
 
   end
 
   class PayloadB
     class Foo
-      optional ::Protobuf::Field::StringField, :foo_b, 1
+      optional :string, :foo_b, 1
     end
 
   end
