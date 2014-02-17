@@ -18,7 +18,7 @@ module Protobuf
 
     def encode
       message.each_field_for_serialization do |field, value|
-        encode_field(field, value, stream)
+        encode_field(field, value)
       end
 
       stream
@@ -26,15 +26,15 @@ module Protobuf
 
     private
 
-    def encode_field(field, value, stream)
+    def encode_field(field, value)
       if field.repeated?
-        encode_repeated_field(field, value, stream)
+        encode_repeated_field(field, value)
       else
         write_pair(stream, field, value)
       end
     end
 
-    def encode_packed_field(field, value, stream)
+    def encode_packed_field(field, value)
       key = (field.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED
       packed_value = value.map { |val| field.encode(val) }.join
       stream << ::Protobuf::Field::VarintField.encode(key)
@@ -42,9 +42,9 @@ module Protobuf
       stream << packed_value
     end
 
-    def encode_repeated_field(field, value, stream)
+    def encode_repeated_field(field, value)
       if field.packed?
-        encode_packed_field(field, value, stream)
+        encode_packed_field(field, value)
       else
         value.each { |val| write_pair(stream, field, val) }
       end
