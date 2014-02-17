@@ -35,7 +35,7 @@ ENV.delete("PB_IGNORE_DEPRECATIONS")
       require 'rake'
       load ::File.expand_path('../../Rakefile', __FILE__)
       $stdout.puts 'Compiling test protos (use NO_COMPILE_TEST_PROTOS=1 to skip)'
-      ::Rake::Task['spec:compile_test_protos']
+      ::Rake::Task['compile:spec']
     end
   end
 end
