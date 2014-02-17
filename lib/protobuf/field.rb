@@ -19,7 +19,6 @@ require 'protobuf/field/sfixed32_field'
 require 'protobuf/field/sfixed64_field'
 require 'protobuf/field/fixed32_field'
 require 'protobuf/field/fixed64_field'
-require 'protobuf/field/extension_fields'
 
 module Protobuf
   module Field

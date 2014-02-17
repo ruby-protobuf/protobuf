@@ -16,7 +16,8 @@ module Protobuf
       ##
       # Attributes
       #
-      attr_reader :message_class, :rule, :type, :name, :tag, :default, :default_value, :setter_method_name, :getter_method_name
+      attr_reader :default, :default_value, :getter_method_name, :message_class,
+                  :name, :rule, :setter_method_name, :tag, :type
 
       ##
       # Class Methods
@@ -35,7 +36,7 @@ module Protobuf
         set_rule_predicates
 
         @getter_method_name = name
-        @setter_method_name = "#{name}=".to_sym
+        @setter_method_name = "#{name}="
         @default   = options.delete(:default)
         @extension = options.delete(:extension)
         @packed    = repeated? && options.delete(:packed)
@@ -75,7 +76,7 @@ module Protobuf
           stream = StringIO.new(bytes)
 
           until stream.eof?
-            array << decode(::Protobuf::Decoder.__send__(method, stream))
+            array << decode(::Protobuf::Message::Decoder.__send__(method, stream))
           end
         else
           value = decode(bytes)

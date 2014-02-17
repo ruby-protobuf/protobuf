@@ -1,21 +1,20 @@
 if defined?(RSpec)
-  shared_examples_for :packable_field do |klass|
+  shared_examples_for :packable_field do |field_klass|
 
     before(:all) do
       unless defined?(PackableFieldTest)
         class PackableFieldTest < ::Protobuf::Message; end
       end
 
-      field_klass = klass
-      field_name = "#{klass.name.split('::').last.underscore}_packed_field".to_sym
+      field_name = "#{field_klass.name.split('::').last.underscore}_packed_field".to_sym
       tag_num = PackableFieldTest.fields.size + 1
       PackableFieldTest.repeated(field_klass, field_name, tag_num, :packed => true)
     end
 
-    let(:field_name) { "#{klass.name.split('::').last.underscore}_packed_field" }
+    let(:field_name) { "#{field_klass.name.split('::').last.underscore}_packed_field".to_sym }
     let(:message_instance) { PackableFieldTest.new(field_name => [100, 200, 300]) }
 
-    subject { message_instance.fields.last }
+    subject { PackableFieldTest.get_field(field_name) }
 
     it { should be_packed }
 
