@@ -42,10 +42,14 @@ module Protobuf
     }.freeze
 
     def self.build(message_class, rule, type, name, tag, options = {})
-      field_type(type).new(message_class, rule, type, name, tag, options)
+      field_class(type).new(message_class, rule, field_type(type), name, tag, options)
     end
 
-    def self.field_type(type)
+    # Returns the field class for primitives,
+    # EnumField for types that inherit from Protobuf::Enum,
+    # and MessageField for types that inherit from Protobuf::Message.
+    #
+    def self.field_class(type)
       if PRIMITIVE_FIELD_MAP.key?(type)
         PRIMITIVE_FIELD_MAP[type]
       elsif type < ::Protobuf::Enum
@@ -57,6 +61,13 @@ module Protobuf
       else
         raise ArgumentError, "Invalid field type #{type}"
       end
+    end
+
+    # Returns the mapped type for primitives,
+    # otherwise the given type is returned.
+    #
+    def self.field_type(type)
+      PRIMITIVE_FIELD_MAP.fetch(type) { type }
     end
 
   end
