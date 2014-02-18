@@ -127,10 +127,12 @@ describe Protobuf::Rpc::Service do
         context 'when response is implied' do
           let(:env) {
             Protobuf::Rpc::Env.new(
-              'method_name' => :find_with_implied_response,
-              'request' => request
+              'request' => request,
+              'response_type' => response_type
             )
           }
+          let(:response_type) { service.rpcs[:find_with_implied_response].response_type }
+          let(:service) { NewTestService }
 
           subject { NewTestService.new(env) }
 

@@ -16,7 +16,7 @@ module Protobuf
       DEFAULT_HOST = '127.0.0.1'.freeze
       DEFAULT_PORT = 9399
 
-      attr_reader :client_host, :env, :method_name, :request
+      attr_reader :client_host, :env, :request
 
       ##
       # Constructor!
@@ -25,7 +25,6 @@ module Protobuf
       # for the request.
       def initialize(env)
         @env = env.dup # Dup the env so it doesn't change out from under us
-        @method_name = env.method_name
         @request = env.request
         @client_host = env.caller
       end
@@ -152,7 +151,7 @@ module Protobuf
     private
 
       def request_type
-        @_request_type ||= rpcs[@method_name].request_type
+        @_request_type ||= env.request_type
       end
 
       # Sugar to make an rpc method feel like a controller method.
@@ -165,7 +164,7 @@ module Protobuf
       alias_method :return_from_whence_you_came, :respond_with
 
       def response_type
-        @_response_type ||= rpcs[@method_name].response_type
+        @_response_type ||= env.response_type
       end
 
       # Automatically fail a service method.
