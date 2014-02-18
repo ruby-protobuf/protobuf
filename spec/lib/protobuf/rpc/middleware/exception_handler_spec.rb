@@ -43,7 +43,7 @@ describe Protobuf::Rpc::Middleware::ExceptionHandler do
 
       context "when exception is not a Protobuf error" do
         let(:encoded_error) { error.encode }
-        let(:error) { Protobuf::Rpc::PbError.new('Boom!') }
+        let(:error) { Protobuf::Rpc::RpcFailed.new('Boom!') }
 
         before { app.stub(:call).and_raise(RuntimeError, 'Boom!') }
 

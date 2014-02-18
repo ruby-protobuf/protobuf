@@ -27,7 +27,7 @@ module Protobuf
         # Wrap exceptions in a generic Protobuf errors unless they already are
         #
         def wrap_exception(exception)
-          exception = PbError.new(exception.message) unless exception.is_a?(PbError)
+          exception = RpcFailed.new(exception.message) unless exception.is_a?(PbError)
           exception
         end
       end
