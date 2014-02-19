@@ -23,14 +23,6 @@ module Protobuf
         0
       end
 
-      def self.decode(bytes)
-        value = 0
-        bytes.each_with_index do |byte, index|
-          value |= byte << (7 * index)
-        end
-        value
-      end
-
       def self.encode(value)
         bytes = []
         until value < 128
