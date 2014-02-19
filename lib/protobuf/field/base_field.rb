@@ -139,6 +139,11 @@ module Protobuf
         "#{rule} #{type_class} #{name} = #{tag} #{default ? "[default=#{default.inspect}]" : ''}"
       end
 
+      def type
+        $stderr.puts("[DEPRECATED] #{self.class.name}#type usage is deprecated.\nPlease use #type_class instead.")
+        type_class
+      end
+
       def warn_if_deprecated
         if ::Protobuf.print_deprecation_warnings? && deprecated?
           $stderr.puts("[WARNING] #{message_class.name}##{name} field usage is deprecated.")
