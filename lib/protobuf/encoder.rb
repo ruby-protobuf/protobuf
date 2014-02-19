@@ -30,7 +30,7 @@ module Protobuf
       if field.repeated?
         encode_repeated_field(field, value)
       else
-        write_pair(stream, field, value)
+        write_pair(field, value)
       end
     end
 
@@ -46,12 +46,12 @@ module Protobuf
       if field.packed?
         encode_packed_field(field, value)
       else
-        value.each { |val| write_pair(stream, field, val) }
+        value.each { |val| write_pair(field, val) }
       end
     end
 
     # Encode key and value, and write to +stream+.
-    def write_pair(stream, field, value)
+    def write_pair(field, value)
       key = (field.tag << 3) | field.wire_type
       stream << ::Protobuf::Field::VarintField.encode(key)
       stream << field.encode(value)
