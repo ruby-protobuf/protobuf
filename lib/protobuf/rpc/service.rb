@@ -16,7 +16,7 @@ module Protobuf
       DEFAULT_HOST = '127.0.0.1'.freeze
       DEFAULT_PORT = 9399
 
-      attr_reader :client_host, :env, :request
+      attr_reader :env, :request
 
       ##
       # Constructor!
@@ -26,7 +26,6 @@ module Protobuf
       def initialize(env)
         @env = env.dup # Dup the env so it doesn't change out from under us
         @request = env.request
-        @client_host = env.caller
       end
 
       ##
