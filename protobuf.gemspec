@@ -8,8 +8,8 @@ require "protobuf/version"
   s.date          = ::Time.now.strftime('%Y-%m-%d')
   s.license       = 'WTFPL'
 
-  s.authors       = ['BJ Neilsen', 'Brandon Dewitt', 'Devin Christensen']
-  s.email         = ['bj.neilsen+protobuf@gmail.com', 'brandonsdewitt+protobuf@gmail.com', 'quixoten@gmail.com']
+  s.authors       = ['BJ Neilsen', 'Brandon Dewitt', 'Devin Christensen', 'Adam Hutchison']
+  s.email         = ['bj.neilsen+protobuf@gmail.com', 'brandonsdewitt+protobuf@gmail.com', 'quixoten@gmail.com', 'liveh2o@gmail.com']
   s.homepage      = 'https://github.com/localshred/protobuf'
   s.summary       = "Google Protocol Buffers serialization and RPC implementation for Ruby."
   s.description   = s.summary
