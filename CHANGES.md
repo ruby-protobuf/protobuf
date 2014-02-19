@@ -1,16 +1,72 @@
-Unreleased (3.x)
+# Unstable
+
+3.0.0.rc1
 ---------
 
-- Add support for enum aliases. [#134, @localshred]
-- Clean up the Enum class API with several methods deprecated. See #134 for more comprehensive
-documentation about which methods are going and away and which are being renamed. [#134, @localshred]
-- Remove previously deprecated `bin/rprotoc` executable. [13fbdb9]
-- Remove previously deprecated `Service#rpc` method. [f391294]
+A lot has changed leading up to the release of 3.0. For all the relevant changes,
+see the closed [pull requests and issues list in github](https://github.com/localshred/protobuf/issues?milestone=1&state=closed).
+Below is a high-level list of fixes, deprecations, breaking changes, and new APIs.
 
---------
+The server/dispatcher stack has been converted to the Middleware pattern!
+Exception handling (#162, #164), Request decoding (#160, #166), Response encoding (#161, #167),
+Logging and stats (#163), and Method dispatch (#159) have all been extracted into their
+own Middlewares to greatly simplify testing and further development of the server
+stack, furthering our preparations for removing the socket implementations (zmq, socket)
+into their own gems in version 4.0. Major props to @liveh2o for [tackling this beast](https://github.com/localshred/protobuf/tree/master/lib/protobuf/rpc/middleware).
 
-Stable
---------
+#### Bug Fixes
+
+- Resolve DNS names (e.g. localhost) when using ZMQ server. [#46, reported by @reddshack]
+- Switched to hash based value storage for messages to fix large field tag memory issues. [#118, #165]
+- Add `Protobuf::Deprecator` module to alias deprecated methods. [#165]
+- `Enum.fetch` used to return an enum of any type if that is the value passed in. [#168]
+
+#### Deprecations
+
+__!! These deprecated methods will be removed in v3.1. !!__
+
+- Deprecated `BaseField#type` in favor of `#type_class`.
+- Deprecated `Message.get_ext_field_by_name` in favor of `.get_extension_field` or `.get_field(name_or_tag, true)`.
+- Deprecated `Message.get_ext_field_by_tag,` in favor of `.get_extension_field` or `.get_field(name_or_tag, true)`.
+- Deprecated `Message.get_field_by_name,` in favor of `.get_field`.
+- Deprecated `Message.get_field_by_tag,` in favor of `.get_field`.
+- Deprecated `Enum.enum_by_value` in favor of `.enum_for_tag`.
+- Deprecated `Enum.name_by_value` in favor of `.name_for_tag`.
+- Deprecated `Enum.get_name_by_tag` in favor of `.name_for_tag`.
+- Deprecated `Enum.value_by_name` in favor of `.enum_for_name`.
+- Deprecated `Enum.values` in favor of `.enums`. Beware that `.enums` returns an array where `.values` returns a hash.
+   Use `.all_tags` if you just need all the valid tag numbers. In other words, don't do this anymore: `MyEnum.values.values.map(&:to_i).uniq`.
+
+#### Breaking Changes
+
+- Cleaned up the `Enum` class, deprecating/renaming most methods. tl;dr, just use `MyEnum.fetch`.
+   See #134 for more comprehensive documentation about which methods are going and away and which are being renamed. [#134]
+- Pulled `EnumValue` into `Enum`. The `EnumValue` class no longer exists. Use `Enum` for type-checking instead. [#168].
+- Removed previously deprecated `bin/rprotoc` executable. Use `protoc --ruby_out=...` instead. [13fbdb9]
+- Removed previously deprecated `Service#rpc` method. Use `Service#method_name` instead. [f391294]
+- Removed `lib/protobuf/message/message.rb`. Use `lib/protobuf/message.rb` instead.
+- Removed field getters from Message instances (e.g. `Message#get_field_by_name`).
+   Use class-level getters instead (see Deprecations section).
+- Moved `lib/protobuf/message/decoder.rb` to `lib/protobuf/decoder.rb`. The module is still named `Protobuf::Decoder`.
+- Removed `Protobuf::Field::ExtensionFields` class.
+- Removed instance-level `max` and `min` methods from all relevant Field classes (e.g. Int32Field, Uint64Field, etc).
+   Use class-level methods of the same names instead. [#176, 992eb051]
+- `PbError#to_response` no longer receives an argument, instead returning a new `Socketrpc::Response` object. [#147, @liveh2o]
+- The Server module has been stripped of almost all methods, now simply invokes the Middleware stack for each request. [#159, @liveh2o]
+
+#### New APIs
+
+- Added support for [enum `allow_alias` option](https://developers.google.com/protocol-buffers/docs/proto#enum). [#134]
+- `Enum.all_tags` returns an array of unique tags. Use it to replace `Enum.values.values.map(&:to_i)` (`Enum.values` is deprecated).
+- `Enum.enums` returns an array of all defined enums for that class (including any aliased Enums).
+- Reinstated support for symbol primitive field types in generated Message code. [#170]
+- `Message.get_field` accepts a second boolean parameter (default false) to return an extension field if found. [#169]
+- Mirror existing `Decoder#decode_from(stream)` with `Encoder#encode_to(stream)`. [#169]
+- `Server` now invokes the [middleware stack](https://github.com/localshred/protobuf/tree/master/lib/protobuf/rpc/middleware) for request handling. [#159, @liveh2o]
+- Added `protobuf:compile` and `protobuf:clean` rake tasks. Simply `load 'protobuf/tasks/compile.rake'` in your Rakefile (see `compile.rake` for arguments and usage). [#142, #143]
+
+
+# Stable (2.x)
 
 2.8.12
 ---------
@@ -28,14 +84,14 @@ Stable
 2.8.10
 ---------
 
-- Allow passing a file extension to compile/clean rake tasks. [#143, @localshred]
+- Allow passing a file extension to compile/clean rake tasks. [#143]
 
 2.8.9
 ---------
 
 - Deprecated Protobuf::Lifecycle module in favor of using ActiveSupport::Notifications. [#139, @devin-c]
-- Modify `$LOAD_PATH` inside descriptors.rb to make it easier for other libraries to write their own compiler plugins using our pre-compiled descriptors. [#141, @localshred]
-- Add protobuf:clean and protobuf:compile rake tasks for use in external libraries to compile source definitions to a destination. [#142, @localshred]
+- Modify `$LOAD_PATH` inside descriptors.rb to make it easier for other libraries to write their own compiler plugins using our pre-compiled descriptors. [#141]
+- Add protobuf:clean and protobuf:compile rake tasks for use in external libraries to compile source definitions to a destination. [#142]
 
 2.8.8
 ---------
