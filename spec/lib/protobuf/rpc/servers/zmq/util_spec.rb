@@ -42,4 +42,14 @@ describe ::Protobuf::Rpc::Zmq::Util do
       subject.log_signature.should include('server', 'UtilTest')
     end
   end
+
+  describe '.resolve_ip' do
+    it 'resolves ips' do
+      expect(subject.resolve_ip('127.0.0.1')).to eq('127.0.0.1')
+    end
+
+    it 'resolves non ips' do
+      expect(subject.resolve_ip('localhost')).to eq('127.0.0.1')
+    end
+  end
 end
