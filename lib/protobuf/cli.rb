@@ -57,7 +57,7 @@ module Protobuf
 
     desc 'version', 'Print ruby and protoc versions and exit.'
     def version
-      say("Ruby Protobuf v#{::Protobuf::VERSION}, protoc v#{::Protobuf::PROTOC_VERSION}")
+      say("Ruby Protobuf v#{::Protobuf::VERSION}")
     end
 
     no_tasks do

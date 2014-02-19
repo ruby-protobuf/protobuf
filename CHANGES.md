@@ -52,6 +52,7 @@ __!! These deprecated methods will be removed in v3.1. !!__
    Use class-level methods of the same names instead. [#176, 992eb051]
 - `PbError#to_response` no longer receives an argument, instead returning a new `Socketrpc::Response` object. [#147, @liveh2o]
 - The Server module has been stripped of almost all methods, now simply invokes the Middleware stack for each request. [#159, @liveh2o]
+- Removed `Protobuf::PROTOC_VERSION` constant now that the compiler supports any protoc version.
 
 #### New APIs
 
