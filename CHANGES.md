@@ -48,6 +48,7 @@ __!! NOTE: These deprecated methods will be removed in v3.1. !!__
 
 #### Breaking Changes
 
+- Require Active Support 3.2+. [#177]
 - All files/classes relating to the EventMachine client and server are gone. Use `PB_CLIENT_TYPE` and `PB_SERVER_TYPE` of `socket` instead. [#116]
 - Cleaned up the `Enum` class, deprecating/renaming most methods. tl;dr, just use `MyEnum.fetch`.
    See #134 for more comprehensive documentation about which methods are going and away and which are being renamed. [#134]
