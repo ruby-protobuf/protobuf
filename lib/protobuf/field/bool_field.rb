@@ -3,9 +3,19 @@ require 'protobuf/field/varint_field'
 module Protobuf
   module Field
     class BoolField < VarintField
+
+      ##
+      # Class Methods
+      #
+
       def self.default
         false
       end
+
+
+      ##
+      # Public Instance Methods
+      # #
 
       def acceptable?(val)
         [true, false].include?(val)
@@ -14,6 +24,16 @@ module Protobuf
       def decode(value)
         value == 1
       end
+
+      def encode(value)
+        [value ? 1 : 0].pack('C')
+      end
+
+      private
+
+      ##
+      # Private Instance Methods
+      #
 
       def define_getter
         super
@@ -27,9 +47,7 @@ module Protobuf
         end
       end
 
-      def encode(value)
-        [value ? 1 : 0].pack('C')
-      end
     end
   end
 end
+

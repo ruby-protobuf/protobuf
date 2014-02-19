@@ -3,10 +3,21 @@ require 'protobuf/field/base_field'
 module Protobuf
   module Field
     class FloatField < BaseField
-      def self.default; 0.0; end
 
-      def wire_type
-        WireType::FIXED32
+      ##
+      # Class Methods
+      #
+
+      def self.default
+        0.0
+      end
+
+      ##
+      # Public Instance Methods
+      #
+
+      def acceptable?(val)
+        val.respond_to?(:to_f)
       end
 
       def decode(bytes)
@@ -17,9 +28,11 @@ module Protobuf
         [value].pack('e')
       end
 
-      def acceptable?(val)
-        val.respond_to?(:to_f)
+      def wire_type
+        WireType::FIXED32
       end
+
     end
   end
 end
+

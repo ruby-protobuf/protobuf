@@ -150,6 +150,7 @@ module Protobuf
       ##
       # Private Instance Methods
       #
+
       def define_accessor
         if repeated?
           define_array_getter

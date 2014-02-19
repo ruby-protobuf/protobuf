@@ -3,11 +3,24 @@ require 'protobuf/wire_type'
 module Protobuf
   module Field
     class BytesField < BaseField
+
+      ##
+      # Constants
+      #
+
       BYTES_ENCODING = "ASCII-8BIT".freeze
+
+      ##
+      # Class Methods
+      #
 
       def self.default
         ''
       end
+
+      ##
+      # Public Instance Methods
+      #
 
       def acceptable?(val)
         if val.nil? || val.is_a?(::Protobuf::Message) || val.instance_of?(String)
@@ -22,6 +35,25 @@ module Protobuf
         bytes_to_decode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
         bytes_to_decode
       end
+
+      def encode(value)
+        value_to_encode = value.dup
+        value_to_encode = value.encode if value.is_a?(::Protobuf::Message)
+        value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+
+        string_size = ::Protobuf::Field::VarintField.encode(value_to_encode.size)
+        string_size << value_to_encode
+      end
+
+      def wire_type
+        ::Protobuf::WireType::LENGTH_DELIMITED
+      end
+
+      private
+
+      ##
+      # Private Instance Methods
+      #
 
       def define_setter
         field = self
@@ -46,18 +78,7 @@ module Protobuf
         end
       end
 
-      def encode(value)
-        value_to_encode = value.dup
-        value_to_encode = value.encode if value.is_a?(::Protobuf::Message)
-        value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
-
-        string_size = ::Protobuf::Field::VarintField.encode(value_to_encode.size)
-        string_size << value_to_encode
-      end
-
-      def wire_type
-        ::Protobuf::WireType::LENGTH_DELIMITED
-      end
     end
   end
 end
+

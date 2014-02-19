@@ -36,6 +36,10 @@ module Protobuf
 
       private
 
+      ##
+      # Private Instance Methods
+      #
+
       def define_setter
         field = self
         message_class.class_eval do
@@ -56,6 +60,8 @@ module Protobuf
           end
         end
       end
+
     end
   end
 end
+

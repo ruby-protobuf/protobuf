@@ -3,6 +3,11 @@ require 'protobuf/field/varint_field'
 module Protobuf
   module Field
     class EnumField < VarintField
+
+      ##
+      # Public Instance Methods
+      #
+
       def acceptable?(val)
         ! type_class.fetch(val).nil?
       end
@@ -17,6 +22,9 @@ module Protobuf
 
       private
 
+      ##
+      # Private Instance Methods
+      #
 
       def define_setter
         field = self
@@ -46,3 +54,4 @@ module Protobuf
     end
   end
 end
+
