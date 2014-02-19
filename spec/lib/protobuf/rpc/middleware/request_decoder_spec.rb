@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::RequestDecoder do
   let(:app) { Proc.new { |env| env } }
-  let(:caller) { 'caller.test.co' }
+  let(:client_host) { 'client_host.test.co' }
   let(:env) {
     Protobuf::Rpc::Env.new(
       'encoded_request' => encoded_request,
@@ -15,7 +15,7 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
   let(:request_type) { rpc_method.request_type }
   let(:request_wrapper) {
     Protobuf::Socketrpc::Request.new(
-      :caller => caller,
+      :caller => client_host,
       :service_name => service_name,
       :method_name => method_name.to_s,
       :request_proto => request
@@ -39,9 +39,9 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
       subject.call(env)
     end
 
-    it "sets Env#caller" do
+    it "sets Env#client_host" do
       stack_env = subject.call(env)
-      stack_env.caller.should eq caller
+      stack_env.client_host.should eq client_host
     end
 
     it "sets Env#service_name" do
@@ -85,7 +85,7 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
     context "when the RPC service is not defined" do
       let(:request_wrapper) {
         Protobuf::Socketrpc::Request.new(
-          :caller => caller,
+          :caller => client_host,
           :service_name => 'Foo',
           :method_name => method_name.to_s,
           :request_proto => request
@@ -100,7 +100,7 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
     context "when RPC method is not defined" do
       let(:request_wrapper) {
         Protobuf::Socketrpc::Request.new(
-          :caller => caller,
+          :caller => client_host,
           :service_name => service_name,
           :method_name => 'foo',
           :request_proto => request

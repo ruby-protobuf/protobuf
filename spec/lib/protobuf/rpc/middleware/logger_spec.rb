@@ -4,7 +4,7 @@ describe Protobuf::Rpc::Middleware::Logger do
   let(:app) { Proc.new { |env| env } }
   let(:env) {
     Protobuf::Rpc::Env.new(
-      'caller' => 'caller.test.co',
+      'client_host' => 'client_host.test.co',
       'encoded_request' => request_wrapper.encode,
       'encoded_response' => response_wrapper.encode,
       'method_name' => method_name,
