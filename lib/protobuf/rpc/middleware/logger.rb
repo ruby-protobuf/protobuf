@@ -58,7 +58,7 @@ module Protobuf
 
             [
               "[SRV]",
-              env.caller,
+              env.client_host,
               env.worker_id,
               rpc,
               sizes,

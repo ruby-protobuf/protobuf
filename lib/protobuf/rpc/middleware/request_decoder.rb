@@ -16,7 +16,7 @@ module Protobuf
           env.service_name = service_name
           env.method_name = method_name
           env.request = request
-          env.caller = request_wrapper.caller
+          env.client_host = request_wrapper.caller
 
           env.rpc_service = service
           env.rpc_method = rpc_method

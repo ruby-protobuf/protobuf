@@ -34,7 +34,7 @@ module Protobuf
 
       # TODO: Add extra info about the environment (i.e. variables) and other
       # information that might be useful
-      hash_accessor :caller,
+      hash_accessor :client_host,
                     :encoded_request,
                     :encoded_response,
                     :log_signature,
