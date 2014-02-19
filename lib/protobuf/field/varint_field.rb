@@ -3,6 +3,11 @@ require 'protobuf/field/base_field'
 module Protobuf
   module Field
     class VarintField < BaseField
+
+      ##
+      # Constants
+      #
+
       INT32_MAX  =  2**31 - 1
       INT32_MIN  = -2**31
       INT64_MAX  =  2**63 - 1
@@ -13,16 +18,9 @@ module Protobuf
       ##
       # Class Methods
       #
+
       def self.default
         0
-      end
-
-      def self.decode(bytes)
-        value = 0
-        bytes.each_with_index do |byte, index|
-          value |= byte << (7 * index)
-        end
-        value
       end
 
       def self.encode(value)
@@ -37,8 +35,11 @@ module Protobuf
       ##
       # Public Instance Methods
       #
+
       def acceptable?(val)
-        (val > min || val < max) rescue false
+        (val > self.class.min || val < self.class.max)
+      rescue
+        false
       end
 
       def decode(value)
@@ -64,3 +65,4 @@ module Protobuf
     end
   end
 end
+

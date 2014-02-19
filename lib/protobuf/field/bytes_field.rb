@@ -3,11 +3,24 @@ require 'protobuf/wire_type'
 module Protobuf
   module Field
     class BytesField < BaseField
+
+      ##
+      # Constants
+      #
+
       BYTES_ENCODING = "ASCII-8BIT".freeze
+
+      ##
+      # Class Methods
+      #
 
       def self.default
         ''
       end
+
+      ##
+      # Public Instance Methods
+      #
 
       def acceptable?(val)
         if val.nil? || val.is_a?(::Protobuf::Message) || val.instance_of?(String)
@@ -23,29 +36,6 @@ module Protobuf
         bytes_to_decode
       end
 
-      def define_setter
-        field = self
-        @message_class.class_eval do
-          define_method(field.setter_method_name) do |val|
-            begin
-              field.warn_if_deprecated
-
-              if val.nil?
-                @values.delete(field.name)
-              elsif field.acceptable?(val)
-                @values[field.name] = val.dup
-              else
-                raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type}"
-              end
-            rescue NoMethodError => ex
-              ::Protobuf::Logger.error { ex.message }
-              ::Protobuf::Logger.error { ex.backtrace.join("\n") }
-              raise TypeError, "Got NoMethodError attempting to set #{val} for field #{field.name} of type #{field.type}: #{ex.message}"
-            end
-          end
-        end
-      end
-
       def encode(value)
         value_to_encode = value.dup
         value_to_encode = value.encode if value.is_a?(::Protobuf::Message)
@@ -58,6 +48,37 @@ module Protobuf
       def wire_type
         ::Protobuf::WireType::LENGTH_DELIMITED
       end
+
+      private
+
+      ##
+      # Private Instance Methods
+      #
+
+      def define_setter
+        field = self
+        message_class.class_eval do
+          define_method(field.setter_method_name) do |val|
+            begin
+              field.warn_if_deprecated
+
+              if val.nil?
+                @values.delete(field.name)
+              elsif field.acceptable?(val)
+                @values[field.name] = val.dup
+              else
+                raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+              end
+            rescue NoMethodError => ex
+              ::Protobuf::Logger.error { ex.message }
+              ::Protobuf::Logger.error { ex.backtrace.join("\n") }
+              raise TypeError, "Got NoMethodError attempting to set #{val} for field #{field.name} of type #{field.type_class}: #{ex.message}"
+            end
+          end
+        end
+      end
+
     end
   end
 end
+

@@ -9,14 +9,15 @@ module Protobuf
       #
 
       def acceptable?(val)
-        unless val.instance_of?(type) || val.respond_to?(:to_hash)
-          raise TypeError, "Expected value of type '#{self.type}' for field #{self.name}, but got '#{val.class}'"
+        unless val.instance_of?(type_class) || val.respond_to?(:to_hash)
+          raise TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
         end
+
         true
       end
 
       def decode(bytes)
-        type.decode(bytes)
+        type_class.decode(bytes)
       end
 
       def encode(value)
@@ -35,25 +36,32 @@ module Protobuf
 
       private
 
+      ##
+      # Private Instance Methods
+      #
+
       def define_setter
         field = self
-        @message_class.class_eval do
+        message_class.class_eval do
           define_method("#{field.name}=") do |val|
             case
             when val.nil? then
               @values.delete(field.name)
-            when val.is_a?(field.type) then
+            when val.is_a?(field.type_class) then
               @values[field.name] = val
             when val.respond_to?(:to_proto) then
               @values[field.name] = val.to_proto
             when val.respond_to?(:to_hash) then
-              @values[field.name] = field.type.new(val.to_hash)
+              @values[field.name] = field.type_class.new(val.to_hash)
             else
+              # FIXME I deleted this lambda from somehwere I don't remember where...
               RAISE_TYPE.call(field, val)
             end
           end
         end
       end
+
     end
   end
 end
+

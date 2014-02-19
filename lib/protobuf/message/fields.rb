@@ -18,20 +18,20 @@ module Protobuf
 
       # Define an optional field.
       #
-      def optional(type, name, tag, options = {})
-        define_field(:optional, type, name, tag, options)
+      def optional(type_class, name, tag, options = {})
+        define_field(:optional, type_class, name, tag, options)
       end
 
       # Define a repeated field.
       #
-      def repeated(type, name, tag, options = {})
-        define_field(:repeated, type, name, tag, options)
+      def repeated(type_class, name, tag, options = {})
+        define_field(:repeated, type_class, name, tag, options)
       end
 
       # Define a required field.
       #
-      def required(type, name, tag, options = {})
-        define_field(:required, type, name, tag, options)
+      def required(type_class, name, tag, options = {})
+        define_field(:required, type_class, name, tag, options)
       end
 
       # Define an extension range.
@@ -89,11 +89,11 @@ module Protobuf
         end
       end
 
-      def define_field(rule, type, field_name, tag, options)
+      def define_field(rule, type_class, field_name, tag, options)
         raise_if_tag_collision(tag, field_name)
         raise_if_name_collision(field_name)
 
-        field = ::Protobuf::Field.build(self, rule, type, field_name, tag, options)
+        field = ::Protobuf::Field.build(self, rule, type_class, field_name, tag, options)
         field_store[field_name] = field
         field_store[tag] = field
 
