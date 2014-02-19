@@ -42,7 +42,7 @@ module Protobuf
       end
 
       def to_s
-        "[#{@field.name}]"
+        "[#{field.name}]"
       end
 
       private
@@ -52,25 +52,25 @@ module Protobuf
       #
       def normalize(value)
         value = value.to_proto if value.respond_to?(:to_proto)
-        raise TypeError, "Unacceptable value #{value} for field #{@field.name} of type #{@field.type}" unless @field.acceptable?(value)
+        raise TypeError, "Unacceptable value #{value} for field #{field.name} of type #{field.type_class}" unless field.acceptable?(value)
 
-        if @field.is_a?(::Protobuf::Field::EnumField)
-          @field.type.fetch(value)
-        elsif @field.is_a?(::Protobuf::Field::MessageField) && value.respond_to?(:to_hash)
-          @field.type.new(value.to_hash)
+        if field.is_a?(::Protobuf::Field::EnumField)
+          field.type_class.fetch(value)
+        elsif field.is_a?(::Protobuf::Field::MessageField) && value.respond_to?(:to_hash)
+          field.type_class.new(value.to_hash)
         else
           value
         end
       end
 
       def raise_type_error(val)
-        error_text = <<-TYPE_ERROR
-          Expected repeated value of type '#{@field.type}'
-          Got '#{val.class}' for repeated protobuf field #{@field.name}
+        raise TypeError, <<-TYPE_ERROR
+          Expected repeated value of type '#{field.type_class}'
+          Got '#{val.class}' for repeated protobuf field #{field.name}
         TYPE_ERROR
-
-        raise TypeError, error_text
       end
+
     end
   end
 end
+

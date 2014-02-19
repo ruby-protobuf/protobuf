@@ -4,9 +4,11 @@ require 'protobuf/field/field_array'
 module Protobuf
   module Field
     class BaseField
+
       ##
       # Constants
       #
+
       PACKED_TYPES = [
         ::Protobuf::WireType::VARINT,
         ::Protobuf::WireType::FIXED32,
@@ -16,12 +18,16 @@ module Protobuf
       ##
       # Attributes
       #
-      attr_reader :default, :default_value, :getter_method_name, :message_class,
-                  :name, :rule, :setter_method_name, :tag, :type
+
+      attr_reader :default, :default_value, :deprecated, :extension,
+                  :getter_method_name, :message_class, :name, :optional,
+                  :packed, :repeated, :required, :rule, :setter_method_name,
+                  :tag, :type_class
 
       ##
       # Class Methods
       #
+
       def self.default
         nil
       end
@@ -29,9 +35,10 @@ module Protobuf
       ##
       # Constructor
       #
-      def initialize(message_class, rule, type, name, tag, options)
-        @message_class, @rule, @type, @name, @tag = \
-          message_class, rule, type, name, tag
+
+      def initialize(message_class, rule, type_class, name, tag, options)
+        @message_class, @rule, @type_class, @name, @tag = \
+          message_class, rule, type_class, name, tag
 
         set_rule_predicates
 
@@ -51,6 +58,7 @@ module Protobuf
       ##
       # Public Instance Methods
       #
+
       def acceptable?(value)
         true
       end
@@ -99,41 +107,41 @@ module Protobuf
       end
 
       def extension?
-        !! @extension
+        !! extension
       end
 
       # Is this a repeated field?
       def repeated?
-        !! @repeated
+        !! repeated
       end
 
       # Is this a required field?
       def required?
-        !! @required
+        !! required
       end
 
       # Is this a optional field?
       def optional?
-        !! @optional
+        !! optional
       end
 
       # Is this a deprecated field?
       def deprecated?
-        !! @deprecated
+        !! deprecated
       end
 
       # Is this a packed repeated field?
       def packed?
-        !! @packed
+        !! packed
       end
 
       def to_s
-        "#{@rule} #{@type} #{@name} = #{@tag} #{@default ? "[default=#{@default.inspect}]" : ''}"
+        "#{rule} #{type_class} #{name} = #{tag} #{default ? "[default=#{default.inspect}]" : ''}"
       end
 
       def warn_if_deprecated
         if ::Protobuf.print_deprecation_warnings? && deprecated?
-          $stderr.puts("[WARNING] #{@message_class.name}##{@name} field usage is deprecated.")
+          $stderr.puts("[WARNING] #{message_class.name}##{name} field usage is deprecated.")
         end
       end
 
@@ -154,7 +162,7 @@ module Protobuf
 
       def define_array_getter
         field = self
-        @message_class.class_eval do
+        message_class.class_eval do
           define_method(field.getter_method_name) do
             field.warn_if_deprecated
             @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
@@ -164,7 +172,7 @@ module Protobuf
 
       def define_array_setter
         field = self
-        @message_class.class_eval do
+        message_class.class_eval do
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
 
@@ -172,12 +180,10 @@ module Protobuf
               val = val.dup
               val.compact!
             else
-              error_text = <<-TYPE_ERROR
-                Expected repeated value of type '#{field.type}'
+              raise TypeError, <<-TYPE_ERROR
+                Expected repeated value of type '#{field.type_class}'
                 Got '#{val.class}' for repeated protobuf field #{field.name}
               TYPE_ERROR
-
-              raise TypeError, error_text
             end
 
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
@@ -192,7 +198,7 @@ module Protobuf
 
       def define_getter
         field = self
-        @message_class.class_eval do
+        message_class.class_eval do
           define_method(field.getter_method_name) do
             field.warn_if_deprecated
             @values.fetch(field.name, field.default_value)
@@ -202,7 +208,7 @@ module Protobuf
 
       def define_setter
         field = self
-        @message_class.class_eval do
+        message_class.class_eval do
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
 
@@ -211,7 +217,7 @@ module Protobuf
             elsif field.acceptable?(val)
               @values[field.name] = val
             else
-              raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type}"
+              raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
           end
         end
@@ -226,7 +232,7 @@ module Protobuf
       end
 
       def set_rule_predicates
-        case @rule
+        case rule
         when :repeated then
           @required = @optional = false
           @repeated = true
@@ -240,23 +246,24 @@ module Protobuf
       end
 
       def typed_default_value
-        if @default.nil?
+        if default.nil?
           self.class.default
         else
-          @default
+          default
         end
       end
 
       def validate_packed_field
         if packed? && ! ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
-          raise "Can't use packed encoding for `#{@type}' type"
+          raise "Can't use packed encoding for '#{type_class}' type"
         end
       end
 
       def warn_excess_options(options)
-        warn "WARNING: Invalid options: #{options.inspect} (in #{@message_class.name.split('::').last}.#{@name})"
+        warn "WARNING: Invalid options: #{options.inspect} (in #{message_class.name}##{name})"
       end
 
     end
   end
 end
+

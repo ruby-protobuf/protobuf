@@ -25,7 +25,7 @@ module Protobuf
 
       def define_setter
         field = self
-        @message_class.class_eval do
+        message_class.class_eval do
           define_method(field.setter_method_name) do |val|
             begin
               field.warn_if_deprecated
@@ -35,12 +35,12 @@ module Protobuf
               elsif field.acceptable?(val)
                 @values[field.name] = val.dup
               else
-                raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type}"
+                raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
               end
             rescue NoMethodError => ex
               ::Protobuf::Logger.error { ex.message }
               ::Protobuf::Logger.error { ex.backtrace.join("\n") }
-              raise TypeError, "Got NoMethodError attempting to set #{val} for field #{field.name} of type #{field.type}: #{ex.message}"
+              raise TypeError, "Got NoMethodError attempting to set #{val} for field #{field.name} of type #{field.type_class}: #{ex.message}"
             end
           end
         end
