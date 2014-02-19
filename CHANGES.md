@@ -7,6 +7,16 @@ A lot has changed leading up to the release of 3.0. For all the relevant changes
 see the closed [pull requests and issues list in github](https://github.com/localshred/protobuf/issues?milestone=1&state=closed).
 Below is a high-level list of fixes, deprecations, breaking changes, and new APIs.
 
+### EventMachine is dead, Long live EventMachine
+
+The EventMachine client and server have been removed from this gem. They code was far
+too error prone and flawed to feasibly support going forward. It's recommended
+to switch to the socket implementation (using `PB_CLIENT_TYPE` and `PB_SERVER_TYPE` of `socket`)
+for a painless switchover. The ZMQ implementation is much more performant but
+does have a dependency on libzmq.
+
+### Server Middlewares
+
 The server/dispatcher stack has been converted to the Middleware pattern!
 Exception handling (#162, #164), Request decoding (#160, #166), Response encoding (#161, #167),
 Logging and stats (#163), and Method dispatch (#159) have all been extracted into their
@@ -22,7 +32,7 @@ into their own gems in version 4.0. Major props to @liveh2o for [tackling this b
 
 #### Deprecations
 
-__!! These deprecated methods will be removed in v3.1. !!__
+__!! NOTE: These deprecated methods will be removed in v3.1. !!__
 
 - Deprecated `BaseField#type` in favor of `#type_class`.
 - Deprecated `Message.get_ext_field_by_name` in favor of `.get_extension_field` or `.get_field(name_or_tag, true)`.
@@ -38,6 +48,7 @@ __!! These deprecated methods will be removed in v3.1. !!__
 
 #### Breaking Changes
 
+- All files/classes relating to the EventMachine client and server are gone. Use `PB_CLIENT_TYPE` and `PB_SERVER_TYPE` of `socket` instead. [#116]
 - Cleaned up the `Enum` class, deprecating/renaming most methods. tl;dr, just use `MyEnum.fetch`.
    See #134 for more comprehensive documentation about which methods are going and away and which are being renamed. [#134]
 - Pulled `EnumValue` into `Enum`. The `EnumValue` class no longer exists. Use `Enum` for type-checking instead. [#168].
