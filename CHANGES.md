@@ -54,6 +54,8 @@ __!! NOTE: These deprecated methods will be removed in v3.1. !!__
 - Pulled `EnumValue` into `Enum`. The `EnumValue` class no longer exists. Use `Enum` for type-checking instead. [#168].
 - Removed previously deprecated `bin/rprotoc` executable. Use `protoc --ruby_out=...` instead. [13fbdb9]
 - Removed previously deprecated `Service#rpc` method. Use `Service#env#method_name` instead. [f391294]
+- Changed the `Service#initialize` to take an `Env` object instead of separate request, method, and client parameters. [6c61bf72]
+- Removed attribute readers for `Service#method_name` and `Service#client_host`. Use `Service#env` to get them instead.
 - Removed `lib/protobuf/message/message.rb`. Use `lib/protobuf/message.rb` instead.
 - Removed field getters from Message instances (e.g. `Message#get_field_by_name`).
    Use class-level getters instead (see Deprecations section).
