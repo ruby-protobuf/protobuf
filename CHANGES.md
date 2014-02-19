@@ -18,7 +18,6 @@ into their own gems in version 4.0. Major props to @liveh2o for [tackling this b
 
 - Resolve DNS names (e.g. localhost) when using ZMQ server. [#46, reported by @reddshack]
 - Switched to hash based value storage for messages to fix large field tag memory issues. [#118, #165]
-- Add `Protobuf::Deprecator` module to alias deprecated methods. [#165]
 - `Enum.fetch` used to return an enum of any type if that is the value passed in. [#168]
 
 #### Deprecations
@@ -43,7 +42,7 @@ __!! These deprecated methods will be removed in v3.1. !!__
    See #134 for more comprehensive documentation about which methods are going and away and which are being renamed. [#134]
 - Pulled `EnumValue` into `Enum`. The `EnumValue` class no longer exists. Use `Enum` for type-checking instead. [#168].
 - Removed previously deprecated `bin/rprotoc` executable. Use `protoc --ruby_out=...` instead. [13fbdb9]
-- Removed previously deprecated `Service#rpc` method. Use `Service#method_name` instead. [f391294]
+- Removed previously deprecated `Service#rpc` method. Use `Service#env#method_name` instead. [f391294]
 - Removed `lib/protobuf/message/message.rb`. Use `lib/protobuf/message.rb` instead.
 - Removed field getters from Message instances (e.g. `Message#get_field_by_name`).
    Use class-level getters instead (see Deprecations section).
@@ -64,6 +63,7 @@ __!! These deprecated methods will be removed in v3.1. !!__
 - Mirror existing `Decoder#decode_from(stream)` with `Encoder#encode_to(stream)`. [#169]
 - `Server` now invokes the [middleware stack](https://github.com/localshred/protobuf/tree/master/lib/protobuf/rpc/middleware) for request handling. [#159, @liveh2o]
 - Added `protobuf:compile` and `protobuf:clean` rake tasks. Simply `load 'protobuf/tasks/compile.rake'` in your Rakefile (see `compile.rake` for arguments and usage). [#142, #143]
+- Add `Protobuf::Deprecator` module to alias deprecated methods. [#165]
 
 
 # Stable (2.x)
