@@ -54,8 +54,7 @@ module Protobuf
             when val.respond_to?(:to_hash) then
               @values[field.name] = field.type_class.new(val.to_hash)
             else
-              # FIXME I deleted this lambda from somehwere I don't remember where...
-              RAISE_TYPE.call(field, val)
+              raise TypeError, "Expected value of type '#{field.type_class}' for field #{field.name}, but got '#{val.class}'"
             end
           end
         end
