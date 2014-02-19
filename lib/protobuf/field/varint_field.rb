@@ -45,7 +45,9 @@ module Protobuf
       #
 
       def acceptable?(val)
-        (val > min || val < max) rescue false
+        (val > self.class.min || val < self.class.max)
+      rescue
+        false
       end
 
       def decode(value)

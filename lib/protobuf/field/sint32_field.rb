@@ -3,8 +3,6 @@ require 'protobuf/field/signed_integer_field'
 module Protobuf
   module Field
     class Sint32Field < SignedIntegerField
-      def max; INT32_MAX; end
-      def min; INT32_MIN; end
 
       ##
       # Class Methods

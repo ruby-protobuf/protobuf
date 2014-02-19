@@ -3,8 +3,6 @@ require 'protobuf/field/integer_field'
 module Protobuf
   module Field
     class Int32Field < IntegerField
-      def max; INT32_MAX; end
-      def min; INT32_MIN; end
 
       ##
       # Class Methods

@@ -3,8 +3,6 @@ require 'protobuf/field/varint_field'
 module Protobuf
   module Field
     class Uint32Field < VarintField
-      def max; UINT32_MAX; end
-      def min; 0; end
 
       ##
       # Class Methods
