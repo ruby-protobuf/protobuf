@@ -101,7 +101,7 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          5.times do
+          15.times do
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
@@ -112,7 +112,7 @@ module Protobuf
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
 
-            sleep(1.0/20.0) # not sure why sleeping at all, but should be way less than 1 second
+            sleep(1.0/50.0) # not sure why sleeping at all, but should be way less than 1 second
           end
 
           raise "Host not found for service #{service}"
