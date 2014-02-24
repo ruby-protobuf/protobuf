@@ -86,16 +86,16 @@ module Protobuf
         end
 
         def process_frontend
-          frames = read_from_frontend
+          address, _, message, *frames = read_from_frontend
 
-          if frames == [::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE]
+          if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
             if @idle_workers.any?
-              write_to_frontend([::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
+              write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
-              write_to_frontend([::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
+              write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
             end
           else
-            write_to_backend([@idle_workers.shift, ""] + frames)
+            write_to_backend([@idle_workers.shift, ""] + [address, "", message ] + frames)
           end
         end
 
