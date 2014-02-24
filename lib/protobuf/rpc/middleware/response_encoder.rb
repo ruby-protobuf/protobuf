@@ -18,10 +18,6 @@ module Protobuf
           env
         end
 
-        def log_signature
-          env.signature || super
-        end
-
       private
 
         # Encode the response wrapper to return to the client

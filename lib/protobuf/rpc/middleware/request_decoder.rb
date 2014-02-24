@@ -26,10 +26,6 @@ module Protobuf
           app.call(env)
         end
 
-        def log_signature
-          env.signature || super
-        end
-
       private
 
         def method_name
