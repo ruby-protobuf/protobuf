@@ -2,7 +2,7 @@ module Protobuf
   module Rpc
     module Middleware
       class ResponseEncoder
-        include ::Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         attr_reader :app, :env
 
@@ -13,13 +13,12 @@ module Protobuf
         def call(env)
           @env = app.call(env)
 
-          env.response = response
-          env.encoded_response = encoded_response
-          env
-        end
+          ::ActiveSupport::Notifications.instrument("encode_response.protobuf") do
+            env.response = response
+            env.encoded_response = encoded_response
+          end
 
-        def log_signature
-          env.signature || super
+          env
         end
 
       private
@@ -27,7 +26,7 @@ module Protobuf
         # Encode the response wrapper to return to the client
         #
         def encoded_response
-          log_debug { sign_message("Encoding response: #{response.inspect}") }
+          logger.debug { "Encoding response: #{response.inspect}" }
 
           env.encoded_response = wrapped_response.encode
         rescue => exception

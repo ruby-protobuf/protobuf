@@ -1,3 +1,5 @@
+$testing = true
+
 require 'simplecov'
 SimpleCov.start
 
@@ -20,7 +22,9 @@ require 'google/protobuf/compiler/plugin.pb'
 # Including a way to turn on debug logger for spec runs
 if ENV.key?('DEBUG')
   debug_log = ::File.expand_path('../debug_specs.log', File.dirname(__FILE__) )
-  ::Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
+  ::Protobuf::Logging.initialize_logger(debug_log, ::Logger::DEBUG)
+else
+  ::Protobuf::Logging.initialize_logger(STDOUT, ::Logger::ERROR)
 end
 
 # Get rid of the deprecation env var if present (messes with specs).
@@ -29,6 +33,12 @@ ENV.delete("PB_IGNORE_DEPRECATIONS")
 ::RSpec.configure do |c|
   c.include(::Sander6::CustomMatchers)
   c.mock_with :rspec
+
+  c.around do |example|
+    old_logger = ::Protobuf.logger
+    example.run
+    ::Protobuf.logger = old_logger
+  end
 
   c.before(:suite) do
     unless ENV['NO_COMPILE_TEST_PROTOS']

@@ -88,10 +88,10 @@ describe ::Protobuf::CLI do
       let(:test_args) { [ '--log=mylog.log', '--level=0' ] }
 
       it 'sends the log file and level options to the runner' do
-        ::Protobuf::Logger.should_receive(:configure) do |options|
-          options[:file].should eq 'mylog.log'
-          options[:level].should eq 0
-        end
+        logger_mock = ::Logger.new('/dev/null')
+        logger_mock.should_receive(:level=).with(::Logger::DEBUG)
+        ::Logger.should_receive(:new).with('mylog.log').and_return(logger_mock)
+
         described_class.start(args)
       end
     end

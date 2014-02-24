@@ -37,12 +37,6 @@ describe ::Protobuf::Rpc::Zmq::Util do
     end
   end
 
-  describe '#log_signature' do
-    it 'returns the signature for the log' do
-      subject.log_signature.should include('server', 'UtilTest')
-    end
-  end
-
   describe '.resolve_ip' do
     it 'resolves ips' do
       expect(subject.resolve_ip('127.0.0.1')).to eq('127.0.0.1')

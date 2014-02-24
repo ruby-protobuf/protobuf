@@ -1,9 +1,7 @@
-require 'protobuf/logger'
-
 module Protobuf
   module Rpc
     class ServiceDispatcher
-      include ::Protobuf::Logger::LogMethods
+      include ::Protobuf::Logging
 
       attr_reader :env
 
@@ -14,7 +12,10 @@ module Protobuf
       def call(env)
         @env = env
 
-        env.response = dispatch_rpc_request
+        ::ActiveSupport::Notifications.instrument("dispatch_request.protobuf") do
+          env.response = dispatch_rpc_request
+        end
+
         env
       end
 

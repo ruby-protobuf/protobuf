@@ -11,7 +11,7 @@ module Protobuf
   module Rpc
     class ServiceDirectory
       include ::Singleton
-      include ::Protobuf::Logger::LogMethods
+      include ::Protobuf::Logging
 
       DEFAULT_ADDRESS = "0.0.0.0"
       DEFAULT_PORT = 53000
@@ -116,7 +116,7 @@ module Protobuf
       def start
         unless running?
           init_socket
-          log_info { sign_message("listening to udp://#{self.class.address}:#{self.class.port}") }
+          logger.info { "listening to udp://#{self.class.address}:#{self.class.port}" }
           @thread = Thread.new { self.send(:run) }
         end
 
@@ -124,7 +124,7 @@ module Protobuf
       end
 
       def stop
-        log_info { sign_message("Stopping directory") }
+        logger.info { "Stopping directory" }
 
         @thread.try(:kill).try(:join)
         @socket.try(:close)
@@ -151,7 +151,7 @@ module Protobuf
         end
 
         trigger(action, listing)
-        log_debug { sign_message("#{action} server: #{server.inspect}") }
+        logger.debug { "#{action} server: #{server.inspect}" }
       end
 
       def init_socket
@@ -177,7 +177,7 @@ module Protobuf
             remove_listing(uuid)
           end
         else
-          log_info { sign_message("Ignoring incomplete beacon: #{beacon.inspect}") }
+          logger.info { "Ignoring incomplete beacon: #{beacon.inspect}" }
         end
       end
 
@@ -193,7 +193,7 @@ module Protobuf
       end
 
       def remove_expired_listings
-        log_debug { sign_message("Removing expired listings") }
+        logger.debug { "Removing expired listings" }
         @listings_by_uuid.each do |uuid, listing|
           remove_listing(uuid) if listing.expired?
         end
@@ -202,7 +202,7 @@ module Protobuf
       def remove_listing(uuid)
         listing = @listings_by_uuid[uuid] or return
 
-        log_debug { sign_message("Removing listing: #{listing.inspect}") }
+        logger.debug { "Removing listing: #{listing.inspect}" }
 
         @listings_by_service.each do |service, listings|
           listings.delete(listing)
@@ -233,7 +233,7 @@ module Protobuf
           end
         end
       rescue => e
-        log_debug { sign_message("ERROR: (#{e.class}) #{e.message}\n#{e.backtrace.join("\n")}") }
+        logger.debug { "ERROR: (#{e.class}) #{e.message}\n#{e.backtrace.join("\n")}" }
         retry
       end
 
