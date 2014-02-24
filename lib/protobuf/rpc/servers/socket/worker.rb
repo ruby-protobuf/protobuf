@@ -1,12 +1,11 @@
 require 'protobuf/rpc/server'
-require 'protobuf/logger'
 
 module Protobuf
   module Rpc
     module Socket
       class Worker
         include ::Protobuf::Rpc::Server
-        include ::Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         def initialize(sock, &complete_cb)
           @socket = sock
@@ -41,10 +40,6 @@ module Protobuf
           @socket.flush
 
           @complete_cb.call(@socket)
-        end
-
-        def log_signature
-          @_log_signature ||= "server-#{self.class}-#{object_id}"
         end
 
         def socket_writable?

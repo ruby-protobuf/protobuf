@@ -1,6 +1,5 @@
 require 'thor'
 require 'protobuf/version'
-require 'protobuf/logger'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq_runner'
 
@@ -21,7 +20,7 @@ module Protobuf
     option :threshold,                  :type => :numeric, :default => 100, :aliases => %w(-t), :desc => 'Multi-threaded Socket Server cleanup threshold.'
     option :threads,                    :type => :numeric, :default => 5, :aliases => %w(-r), :desc => 'Number of worker threads to run. Only applicable in --zmq mode.'
 
-    option :log,                        :type => :string, :aliases => %w(-l), :desc => 'Log file or device. Default is STDOUT.'
+    option :log,                        :type => :string,  :default => STDOUT, :aliases => %w(-l), :desc => 'Log file or device. Default is STDOUT.'
     option :level,                      :type => :numeric, :default => ::Logger::INFO, :aliases => %w(-v), :desc => 'Log level to use, 0-5 (see http://www.ruby-doc.org/stdlib/libdoc/logger/rdoc/)'
 
     option :socket,                     :type => :boolean, :aliases => %w(-s), :desc => 'Socket Mode for server and client connections.'
@@ -86,12 +85,14 @@ module Protobuf
       # Setup the protobuf logger.
       def configure_logger
         debug_say('Configuring logger')
-        ::Protobuf::Logger.configure({ :file => options.log || STDOUT,
-                                     :level => options.debug? ? ::Logger::DEBUG : options.level })
+        ::Protobuf::Logging.initialize_logger(
+          options.log,
+          options.debug? ? ::Logger::DEBUG : options.level
+        )
 
         # Debug output the server options to the log file.
-        ::Protobuf::Logger.debug { 'Debugging options:' }
-        ::Protobuf::Logger.debug { options.inspect }
+        ::Protobuf.logger.debug { 'Debugging options:' }
+        ::Protobuf.logger.debug { options.inspect }
       end
 
       # Re-write the $0 var to have a nice process name in ps.
@@ -185,15 +186,15 @@ module Protobuf
       end
 
       def say_and_exit(message, exception = nil)
-        message = set_color(message, :red) if ::Protobuf::Logger.file == STDOUT
+        message = set_color(message, :red) if options.log == STDOUT
 
-        ::Protobuf::Logger.error { message }
+        ::Protobuf.logger.error { message }
         if exception
           $stderr.puts "[#{exception.class.name}] #{exception.message}"
           $stderr.puts exception.backtrace.join("\n")
 
-          ::Protobuf::Logger.error { "[#{exception.class.name}] #{exception.message}" }
-          ::Protobuf::Logger.debug { exception.backtrace.join("\n") }
+          ::Protobuf.logger.error { "[#{exception.class.name}] #{exception.message}" }
+          ::Protobuf.logger.debug { exception.backtrace.join("\n") }
         end
 
         exit(1)
@@ -212,10 +213,10 @@ module Protobuf
       end
 
       def shutdown_server
-        ::Protobuf::Logger.info { 'RPC Server shutting down...' }
+        ::Protobuf.logger.info { 'RPC Server shutting down...' }
         @runner.try(:stop)
         ::Protobuf::Rpc::ServiceDirectory.instance.stop
-        ::Protobuf::Logger.info { 'Shutdown complete' }
+        ::Protobuf.logger.info { 'Shutdown complete' }
       end
 
       # Start the runner and log the relevant options.
@@ -223,7 +224,7 @@ module Protobuf
         debug_say('Running server')
 
         @runner.run do
-          ::Protobuf::Logger.info {
+          ::Protobuf.logger.info {
             "pid #{::Process.pid} -- #{@runner_mode} RPC Server listening at #{options.host}:#{options.port}"
           }
 

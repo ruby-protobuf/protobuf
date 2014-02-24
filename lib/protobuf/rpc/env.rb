@@ -37,7 +37,6 @@ module Protobuf
       hash_accessor :client_host,
                     :encoded_request,
                     :encoded_response,
-                    :log_signature,
                     :method_name,
                     :request,
                     :request_type,
