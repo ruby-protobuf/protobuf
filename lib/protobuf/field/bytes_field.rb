@@ -23,11 +23,7 @@ module Protobuf
       #
 
       def acceptable?(val)
-        if val.nil? || val.is_a?(::Protobuf::Message) || val.instance_of?(String)
-          return true
-        else
-          raise TypeError, "Cannot set field : #{name} to value : #{val}"
-        end
+        val.nil? || val.is_a?(String) || val.is_a?(Symbol) || val.is_a?(::Protobuf::Message)
       end
 
       def decode(bytes)
@@ -61,6 +57,7 @@ module Protobuf
           define_method(field.setter_method_name) do |val|
             begin
               field.warn_if_deprecated
+              val = "#{val}" if val.is_a?(Symbol)
 
               if val.nil?
                 @values.delete(field.name)
