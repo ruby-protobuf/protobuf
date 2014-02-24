@@ -187,17 +187,11 @@ module Protobuf
           define_method(field.setter_method_name) do |val|
             field.warn_if_deprecated
 
-            if val.is_a?(Array)
-              val = val.dup
-              val.compact!
-            else
-              raise TypeError, <<-TYPE_ERROR
-                Expected repeated value of type '#{field.type_class}'
-                Got '#{val.class}' for repeated protobuf field #{field.name}
-              TYPE_ERROR
-            end
+            val = [ val ] unless val.is_a?(Array)
+            val = val.dup
+            val.compact!
 
-            if val.nil? || (val.respond_to?(:empty?) && val.empty?)
+            if val.respond_to?(:empty?) && val.empty?
               @values.delete(field.name)
             else
               @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
