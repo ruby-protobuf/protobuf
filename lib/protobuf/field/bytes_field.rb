@@ -61,6 +61,7 @@ module Protobuf
           define_method(field.setter_method_name) do |val|
             begin
               field.warn_if_deprecated
+              val = "#{val}" if val.is_a?(Symbol)
 
               if val.nil?
                 @values.delete(field.name)
