@@ -115,6 +115,11 @@ module Protobuf
         !! repeated
       end
 
+      # Is this a repeated message field?
+      def repeated_message?
+        repeated? && message?
+      end
+
       # Is this a required field?
       def required?
         !! required
