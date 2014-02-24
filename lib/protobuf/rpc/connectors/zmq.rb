@@ -64,14 +64,28 @@ module Protobuf
         # service. The LINGER is set to 0 so we can close immediately in
         # the event of a timeout
         def create_socket
-          server_uri = lookup_server_uri
+          socket = nil
 
-          socket = zmq_context.socket(::ZMQ::REQ)
-          socket.setsockopt(::ZMQ::LINGER, 0)
+          begin
+            server_uri = lookup_server_uri
 
-          log_debug { sign_message("Establishing connection: #{server_uri}") }
-          zmq_error_check(socket.connect(server_uri), :socket_connect)
-          log_debug { sign_message("Connection established to #{server_uri}") }
+            socket = zmq_context.socket(::ZMQ::REQ)
+            socket.setsockopt(::ZMQ::LINGER, 0)
+
+            log_debug { sign_message("Establishing connection: #{server_uri}") }
+            zmq_error_check(socket.connect(server_uri), :socket_connect)
+            log_debug { sign_message("Connection established to #{server_uri}") }
+
+            if first_alive_load_balance?
+              check_available_response = ""
+              zmq_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
+              zmq_error_check(socket.recv_string(check_available_response), :socket_recv_string)
+
+              if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
+                zmq_error_check(socket.close, :socket_close)
+              end
+            end
+          end while socket.try(:socket).nil?
 
           socket
         end
@@ -87,7 +101,7 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          5.times do
+          50.times do
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
@@ -98,7 +112,7 @@ module Protobuf
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
 
-            sleep 1
+            sleep(1.0/10.0) # not sure why sleeping at all, but should be way less than 1 second
           end
 
           raise "Host not found for service #{service}"

@@ -10,15 +10,16 @@ module Protobuf
   module Rpc
     module Connectors
       DEFAULT_OPTIONS = {
-        :service        => nil,           # Fully-qualified Service class
-        :method         => nil,           # Service method to invoke
-        :host           => '127.0.0.1',   # The hostname or address of the service (usually overridden or pre-configured)
-        :port           => '9399',        # The port of the service (usually overridden or pre-configured)
-        :request        => nil,           # The request object sent by the client
-        :request_type   => nil,           # The request type expected by the client
-        :response_type  => nil,           # The response type expected by the client
-        :timeout        => 300,           # The default timeout for the request, also handled by client.rb
-        :client_host    => nil            # The hostname or address of this client
+        :service                 => nil,         # Fully-qualified Service class
+        :method                  => nil,         # Service method to invoke
+        :host                    => '127.0.0.1', # The hostname or address of the service (usually overridden)
+        :port                    => '9399',      # The port of the service (usually overridden or pre-configured)
+        :request                 => nil,         # The request object sent by the client
+        :request_type            => nil,         # The request type expected by the client
+        :response_type           => nil,         # The response type expected by the client
+        :timeout                 => 300,         # The default timeout for the request, also handled by client.rb
+        :client_host             => nil,         # The hostname or address of this client
+        :first_alive_load_balance => false,       # Do we want to use check_avail frames before request
       }
 
       class Base
@@ -29,6 +30,11 @@ module Protobuf
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
+        end
+
+        def first_alive_load_balance?
+          ENV.has_key?("PB_FIRST_ALIVE_LOAD_BALANCE") ||
+            options[:first_alive_load_balance]
         end
 
         def send_request

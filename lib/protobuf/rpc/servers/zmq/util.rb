@@ -6,6 +6,9 @@ module Protobuf
 
       ADDRESS_MATCH = /\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/.freeze
       WORKER_READY_MESSAGE = "\1"
+      CHECK_AVAILABLE_MESSAGE = "\3"
+      NO_WORKERS_AVAILABLE = "\4"
+      WORKERS_AVAILABLE = "\5"
 
       module Util
         include ::Protobuf::Logger::LogMethods
