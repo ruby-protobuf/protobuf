@@ -1,4 +1,3 @@
-require 'logger'
 require 'socket'
 require 'pp'
 require 'stringio'
@@ -8,6 +7,9 @@ require 'active_support/core_ext/object/try'
 require 'active_support/notifications'
 require 'active_support/inflector'
 require 'active_support/json'
+
+require 'protobuf/logging'
+require 'protobuf/log_subscriber'
 
 module Protobuf
 
@@ -62,6 +64,14 @@ module Protobuf
 
   def self.gc_pause_server_request=(value)
     @_gc_pause_server_request = !!value
+  end
+
+  def self.logger
+    ::Protobuf::Logging.logger
+  end
+
+  def self.logger=(log)
+    ::Protobuf::Logging.logger = log
   end
 
   # Print Deprecation Warnings

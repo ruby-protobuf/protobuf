@@ -3,7 +3,7 @@ require 'ostruct'
 module Protobuf
   module Rpc
     class ZmqRunner
-      include ::Protobuf::Logger::LogMethods
+      include ::Protobuf::Logging
 
       def initialize(options)
         @options = case
@@ -38,12 +38,12 @@ module Protobuf
       def register_signals
         trap(:TTIN) do
           @server.add_worker
-          log_info { "Increased worker size to: #{@server.total_workers}" }
+          logger.info { "Increased worker size to: #{@server.total_workers}" }
         end
 
         trap(:TTOU) do
-          log_info { "Current worker size: #{@server.workers.size}" }
-          log_info { "Current worker size: #{@server.busy_worker_count}" }
+          logger.info { "Current worker size: #{@server.workers.size}" }
+          logger.info { "Current worker size: #{@server.busy_worker_count}" }
         end
       end
     end

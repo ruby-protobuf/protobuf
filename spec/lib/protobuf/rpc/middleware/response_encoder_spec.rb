@@ -4,8 +4,7 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
   let(:app) { Proc.new { |env| env.response = response; env } }
   let(:env) {
     Protobuf::Rpc::Env.new(
-      'response_type' => Test::Resource,
-      'log_signature' => 'log_signature'
+      'response_type' => Test::Resource
     )
   }
   let(:encoded_response) { response_wrapper.encode }

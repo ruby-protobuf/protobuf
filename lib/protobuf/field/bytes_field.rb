@@ -70,8 +70,7 @@ module Protobuf
                 raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
               end
             rescue NoMethodError => ex
-              ::Protobuf::Logger.error { ex.message }
-              ::Protobuf::Logger.error { ex.backtrace.join("\n") }
+              ::Protobuf.logger.log_exception(ex)
               raise TypeError, "Got NoMethodError attempting to set #{val} for field #{field.name} of type #{field.type_class}: #{ex.message}"
             end
           end

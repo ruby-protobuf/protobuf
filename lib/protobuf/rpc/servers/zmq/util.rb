@@ -8,7 +8,7 @@ module Protobuf
       WORKER_READY_MESSAGE = "\1"
 
       module Util
-        include ::Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         def self.included(base)
           base.extend(::Protobuf::Rpc::Zmq::Util)
@@ -22,15 +22,6 @@ module Protobuf
             #{caller(1).join($/)}
             ERROR
           end
-        end
-
-        def log_signature
-          unless @_log_signature
-            name = (self.class == Class ? self.name : self.class.name)
-            @_log_signature = "[server-#{name}-#{object_id}]"
-          end
-
-          @_log_signature
         end
 
         def resolve_ip(hostname)
