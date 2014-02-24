@@ -76,7 +76,7 @@ module Protobuf
             zmq_error_check(socket.connect(server_uri), :socket_connect)
             log_debug { sign_message("Connection established to #{server_uri}") }
 
-            if check_workers_available?
+            if first_alive_load_balance?
               check_available_response = ""
               zmq_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
               zmq_error_check(socket.recv_string(check_available_response), :socket_recv_string)
@@ -101,7 +101,7 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          15.times do
+          50.times do
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
@@ -112,7 +112,7 @@ module Protobuf
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
 
-            sleep(1.0/50.0) # not sure why sleeping at all, but should be way less than 1 second
+            sleep(1.0/10.0) # not sure why sleeping at all, but should be way less than 1 second
           end
 
           raise "Host not found for service #{service}"

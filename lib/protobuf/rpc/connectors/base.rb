@@ -19,7 +19,7 @@ module Protobuf
         :response_type           => nil,         # The response type expected by the client
         :timeout                 => 300,         # The default timeout for the request, also handled by client.rb
         :client_host             => nil,         # The hostname or address of this client
-        :check_workers_available => false,       # Do we want to use check_avail frames before request
+        :first_alive_load_balance => false,       # Do we want to use check_avail frames before request
       }
 
       class Base
@@ -32,9 +32,9 @@ module Protobuf
           @options = DEFAULT_OPTIONS.merge(options)
         end
 
-        def check_workers_available?
-          ENV.has_key?("PB_CHECK_WORKERS_AVAILABLE") &&
-            ENV['PB_CHECK_WORKERS_AVAILABLE'] != "false"
+        def first_alive_load_balance?
+          ENV.has_key?("PB_FIRST_ALIVE_LOAD_BALANCE") ||
+            options[:first_alive_load_balance]
         end
 
         def send_request
