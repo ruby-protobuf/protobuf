@@ -9,6 +9,8 @@ require 'active_support/notifications'
 require 'active_support/inflector'
 require 'active_support/json'
 
+require 'protobuf/log_subscriber'
+
 module Protobuf
 
   # See Protobuf#connector_type documentation.

@@ -23,16 +23,15 @@ module Protobuf
       def handle_request(request_data)
         # Create an env object that holds different parts of the environment and
         # is available to all of the middlewares
-        env = Env.new('encoded_request' => request_data, 'log_signature' => log_signature)
+        env = Env.new('encoded_request' => request_data)
 
         # Invoke the middleware stack, the last of which is the service dispatcher
-        env = Rpc.middleware.call(env)
+        ::ActiveSupport::Notifications.instrument("handle_request.protobuf") do |payload|
+          env = Rpc.middleware.call(env)
+          payload.merge!(env)
+        end
 
         env.encoded_response
-      end
-
-      def log_signature
-        @_log_signature ||= "[server-#{self.class.name}]"
       end
     end
   end
