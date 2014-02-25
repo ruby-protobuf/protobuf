@@ -1,5 +1,16 @@
 # Unstable
 
+3.0.0.rc2
+---------
+
+Please read the [rc1 section below](#300rc1) for the greater changeset.
+
+- Add support for assigning a symbol to a string or bytes field. [#181, @abrandoned]
+- Add `first_alive_load_balance` option to rpc server. Pass `PB_FIRST_ALIVE_LOAD_BALANCE`
+   as an env variable to the client process to ensure the client asks the server
+   if it is alive (able to server requests to clients). [#183, @abrandoned]
+
+
 3.0.0.rc1
 ---------
 
