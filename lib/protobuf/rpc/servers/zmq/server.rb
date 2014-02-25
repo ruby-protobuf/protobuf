@@ -303,7 +303,7 @@ module Protobuf
             rescue => e
               message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
               $stderr.puts(message)
-              logger.error { message }
+              log_exception(e)
             end
           end
         end

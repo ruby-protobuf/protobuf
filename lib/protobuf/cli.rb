@@ -193,8 +193,7 @@ module Protobuf
           $stderr.puts "[#{exception.class.name}] #{exception.message}"
           $stderr.puts exception.backtrace.join("\n")
 
-          ::Protobuf.logger.error { "[#{exception.class.name}] #{exception.message}" }
-          ::Protobuf.logger.debug { exception.backtrace.join("\n") }
+          ::Protobuf.log_exception(exception)
         end
 
         exit(1)
