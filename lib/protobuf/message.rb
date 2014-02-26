@@ -1,4 +1,3 @@
-require 'protobuf'
 require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/exceptions'
