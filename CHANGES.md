@@ -1,20 +1,9 @@
-# Unstable
+# Stable (3.x)
 
-3.0.0.rc2
+3.0.0
 ---------
 
-Please read the [rc1 section below](#300rc1) for the greater changeset.
-
-- Add support for assigning a symbol to a string or bytes field. [#181, @abrandoned]
-- Add `first_alive_load_balance` option to rpc server. Pass `PB_FIRST_ALIVE_LOAD_BALANCE`
-   as an env variable to the client process to ensure the client asks the server
-   if it is alive (able to server requests to clients). [#183, @abrandoned]
-
-
-3.0.0.rc1
----------
-
-A lot has changed leading up to the release of 3.0. For all the relevant changes,
+A lot has changed since the last stable v2.8.12. For all the relevant changes,
 see the closed [pull requests and issues list in github](https://github.com/localshred/protobuf/issues?milestone=1&state=closed).
 Below is a high-level list of fixes, deprecations, breaking changes, and new APIs.
 
@@ -90,9 +79,10 @@ __!! NOTE: These deprecated methods will be removed in v3.1. !!__
 - `Server` now invokes the [middleware stack](https://github.com/localshred/protobuf/tree/master/lib/protobuf/rpc/middleware) for request handling. [#159, @liveh2o]
 - Added `protobuf:compile` and `protobuf:clean` rake tasks. Simply `load 'protobuf/tasks/compile.rake'` in your Rakefile (see `compile.rake` for arguments and usage). [#142, #143]
 - Add `Protobuf::Deprecator` module to alias deprecated methods. [#165]
-
-
-# Stable (2.x)
+- Add support for assigning a symbol to a string or bytes field. [#181, @abrandoned]
+- Add `first_alive_load_balance` option to rpc server. Pass `PB_FIRST_ALIVE_LOAD_BALANCE`
+   as an env variable to the client process to ensure the client asks the server
+   if it is alive (able to server requests to clients). [#183, @abrandoned]
 
 2.8.12
 ---------
