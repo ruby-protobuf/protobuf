@@ -65,7 +65,7 @@ module Protobuf
         value = @values[field.name]
 
         if value.nil?
-          raise ::Protobuf::SerializationError, "Required field #{self.name}##{field.name} does not have a value."
+          raise ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value."
         else
           yield(field, value)
         end
