@@ -27,6 +27,10 @@ message Resource {
   repeated StatusType repeated_enum = 4;
 }
 
+message ResourceWithRequiredField {
+  required string foo_is_required = 1;
+}
+
 message Searchable {
   enum SearchType {
     FLAT = 1;

@@ -23,6 +23,7 @@ module Test
   class ResourceFindRequest < ::Protobuf::Message; end
   class ResourceSleepRequest < ::Protobuf::Message; end
   class Resource < ::Protobuf::Message; end
+  class ResourceWithRequiredField < ::Protobuf::Message; end
   class Searchable < ::Protobuf::Message
     class SearchType < ::Protobuf::Enum
       define :FLAT, 1
@@ -69,6 +70,10 @@ module Test
     optional ::Test::Searchable::SearchType, :ext_search_type, 102, :default => ::Test::Searchable::SearchType::FLAT, :extension => true
     optional :bool, :ext_nested_in_level_one, 105, :extension => true
     optional :bool, :ext_dup_field, 106, :extension => true
+  end
+
+  class ResourceWithRequiredField
+    required :string, :foo_is_required, 1
   end
 
   class MessageParent
