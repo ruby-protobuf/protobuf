@@ -1,5 +1,3 @@
-$testing = true
-
 require 'benchmark'
 require 'protobuf/socket'
 require 'support/all'
@@ -18,7 +16,7 @@ if ENV["DEBUG"]
   debug_log = File.expand_path('../debug_bench.log', File.dirname(__FILE__) )
   ::Protobuf::Logging.initialize_logger(debug_log, ::Logger::DEBUG)
 else
-  ::Protobuf::Logging.initialize_logger(STDOUT, ::Logger::ERROR)
+  ::Protobuf::Logging.initialize_logger('/dev/null', ::Logger::ERROR)
 end
 
 namespace :benchmark do

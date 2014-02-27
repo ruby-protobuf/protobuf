@@ -1,5 +1,3 @@
-$testing = true
-
 require 'simplecov'
 SimpleCov.start
 
@@ -24,7 +22,7 @@ if ENV.key?('DEBUG')
   debug_log = ::File.expand_path('../debug_specs.log', File.dirname(__FILE__) )
   ::Protobuf::Logging.initialize_logger(debug_log, ::Logger::DEBUG)
 else
-  ::Protobuf::Logging.initialize_logger(STDOUT, ::Logger::ERROR)
+  ::Protobuf::Logging.initialize_logger('/dev/null', ::Logger::ERROR)
 end
 
 # Get rid of the deprecation env var if present (messes with specs).

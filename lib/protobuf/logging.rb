@@ -10,7 +10,7 @@ module Protobuf
       @logger.level = level
       @logger
     ensure
-      oldlogger && oldlogger.close unless $testing
+      oldlogger && oldlogger.close
     end
 
     def self.logger
