@@ -49,7 +49,7 @@ describe Protobuf::Rpc::Middleware::Logger do
     it "outputs the received message" do
       logger = double('Logger')
       logger.should_receive(:info) do |&block|
-        block.call.should eq "[TID-456] Received Test::ResourceService#find from client_host.test.co"
+        block.call.should eq "[TID-456] Received Test::ResourceService#find (41 Bytes) from client_host.test.co"
       end
 
       subject.stub(:logger) { logger }
