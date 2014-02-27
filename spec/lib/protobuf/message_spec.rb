@@ -128,7 +128,7 @@ describe Protobuf::Message do
     end
 
     context "when there's no value for a required field" do
-      let(:message) { ::Test::Resource.new }
+      let(:message) { ::Test::ResourceWithRequiredField.new }
 
       it "raises a 'message not initialized' error" do
         expect {

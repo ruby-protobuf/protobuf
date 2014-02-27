@@ -1,5 +1,10 @@
 # Stable (3.x)
 
+3.0.1
+---------
+
+- Fix NoMethodError that can occur when serializing a message with a missing required field. [#187, @abrandoned]
+
 3.0.0
 ---------
 
