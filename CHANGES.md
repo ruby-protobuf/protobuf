@@ -1,5 +1,11 @@
 # Stable (3.x)
 
+3.0.2
+---------
+
+- Queue requests at the broker when concurrent requests hit the ZMQ server, distribute to
+    worker threads on each turn of the read poll loop. [#189, @abrandoned, @liveh2o]
+
 3.0.1
 ---------
 
