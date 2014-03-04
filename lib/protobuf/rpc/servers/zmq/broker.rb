@@ -1,13 +1,18 @@
+require 'thread'
+
 module Protobuf
   module Rpc
     module Zmq
       class Broker
         include ::Protobuf::Rpc::Zmq::Util
 
+        attr_reader :local_queue
+
         def initialize(server)
           @server = server
 
           init_zmq_context
+          init_local_queue
           init_backend_socket
           init_frontend_socket
           init_poller
@@ -20,6 +25,10 @@ module Protobuf
           @idle_workers = []
 
           loop do
+            unless local_queue.empty?
+              process_local_queue
+            end
+
             rc = @poller.poll(500)
 
             # The server was shutdown and no requests are pending
@@ -57,6 +66,10 @@ module Protobuf
           zmq_error_check(@frontend_socket.bind(@server.frontend_uri))
         end
 
+        def init_local_queue
+          @local_queue = ::Queue.new
+        end
+
         def init_poller
           @poller = ZMQ::Poller.new
           @poller.register_readable(@frontend_socket)
@@ -89,14 +102,26 @@ module Protobuf
           address, _, message, *frames = read_from_frontend
 
           if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
-            if @idle_workers.any?
+            if @idle_workers.any? || local_queue.empty?
               write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
               write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
             end
           else
-            write_to_backend([@idle_workers.shift, ""] + [address, "", message ] + frames)
+            if @idle_workers.any?
+              write_to_backend([@idle_workers.shift, ""] + [address, "", message ] + frames)
+            else
+              local_queue.push([address, "", message ] + frames)
+            end
           end
+        end
+
+        def process_local_queue
+          return if local_queue.empty?
+          return if @idle_workers.empty?
+
+          write_to_backend([@idle_workers.shift, ""] + local_queue.pop)
+          process_local_queue
         end
 
         def read_from_backend
