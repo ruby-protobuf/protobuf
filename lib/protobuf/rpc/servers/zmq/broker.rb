@@ -25,6 +25,10 @@ module Protobuf
           @idle_workers = []
 
           loop do
+            unless local_queue.empty?
+              process_local_queue
+            end
+
             rc = @poller.poll(500)
 
             # The server was shutdown and no requests are pending
@@ -34,10 +38,6 @@ module Protobuf
             break if rc == -1
 
             @poller.readables.each do |readable|
-              unless local_queue.empty?
-                process_local_queue
-              end
-
               case readable
               when @frontend_socket
                 process_frontend
