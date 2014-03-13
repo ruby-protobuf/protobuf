@@ -15,8 +15,17 @@ module Protobuf
     include ::Protobuf::Message::Serialization
 
     ##
+    # Class Methods
+    #
+
+    def self.to_json
+      name
+    end
+
+    ##
     # Constructor
     #
+
     def initialize(fields = {})
       @values = {}
 
