@@ -1,5 +1,10 @@
 # Stable (3.x)
 
+3.0.3
+---------
+
+- Fix recursive memory/cpu growth issue when calling class-level `Message.to_json`. [#190]
+
 3.0.2
 ---------
 
