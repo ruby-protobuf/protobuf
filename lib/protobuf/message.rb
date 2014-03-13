@@ -122,6 +122,11 @@ module Protobuf
       define_field(:required, type, name, tag, options)
     end
 
+    # Backported fix to prevent recursive to_json issues.
+    def self.to_json
+      name
+    end
+
     ##
     # Constructor
     #

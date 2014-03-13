@@ -289,6 +289,16 @@ describe Protobuf::Message do
     its(:to_json) { should eq '{"name":"Test Name","active":false}' }
   end
 
+  describe '.to_json' do
+    it 'returns the class name of the message for use in json encoding' do
+      expect {
+        ::Timeout.timeout(0.1) do
+          expect(::Test::Resource.to_json).to eq("Test::Resource")
+        end
+      }.not_to raise_error
+    end
+  end
+
   describe '#get_field_by_name' do
     subject do
       ::Test::Resource.new({ :name => 'Test Name', :date_created => Time.now.to_i })
