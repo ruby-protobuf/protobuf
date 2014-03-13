@@ -110,6 +110,7 @@ module Test
     rpc :find, ::Test::ResourceFindRequest, ::Test::Resource
     rpc :find_with_rpc_failed, ::Test::ResourceFindRequest, ::Test::Resource
     rpc :find_with_sleep, ::Test::ResourceSleepRequest, ::Test::Resource
+    rpc :find_not_implemented, ::Test::ResourceFindRequest, ::Test::Resource
   end
 
 end

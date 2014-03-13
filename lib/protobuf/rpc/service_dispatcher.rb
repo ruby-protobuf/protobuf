@@ -28,8 +28,12 @@ module Protobuf
       def dispatch_rpc_request
         rpc_service.callable_rpc_method(method_name).call
         rpc_service.response
-      rescue NoMethodError
-        raise MethodNotFound.new("#{service_name}##{method_name} is not implemented.")
+      rescue NoMethodError => e
+        if e.message =~ /#{method_name}/
+          raise MethodNotFound.new("#{service_name}##{method_name} is not implemented.")
+        end
+
+        raise
       end
 
       def method_name
