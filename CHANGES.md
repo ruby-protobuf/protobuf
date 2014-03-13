@@ -100,6 +100,11 @@ __!! NOTE: These deprecated methods will be removed in v3.1. !!__
    as an env variable to the client process to ensure the client asks the server
    if it is alive (able to server requests to clients). [#183, @abrandoned]
 
+2.8.13
+---------
+
+- Backport #190 to 2.8 stable series. [#192]
+
 2.8.12
 ---------
 
