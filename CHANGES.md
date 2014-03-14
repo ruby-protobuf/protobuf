@@ -1,5 +1,12 @@
 # Stable (3.x)
 
+3.0.4
+--------
+
+- Raise specific MethodNotFound when service class doesn't respond to (publicly implement)
+    the rpc method called from the client. Stop rescuing all NoMethodError's thrown
+    by service implementations. [#193, @liveh2o]
+
 3.0.3
 ---------
 
