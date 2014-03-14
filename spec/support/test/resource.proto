@@ -90,4 +90,5 @@ service ResourceService {
   rpc Find (ResourceFindRequest) returns (Resource);
   rpc FindWithRpcFailed (ResourceFindRequest) returns (Resource);
   rpc FindWithSleep (ResourceSleepRequest) returns (Resource);
+  rpc FindNotImplemented (ResourceFindRequest) returns (Resource);
 }
