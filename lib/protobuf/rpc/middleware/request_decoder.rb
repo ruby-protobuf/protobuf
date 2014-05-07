@@ -13,15 +13,15 @@ module Protobuf
         def call(env)
           @env = env
 
-          ::ActiveSupport::Notifications.instrument("decode_request.protobuf") do
-            env.service_name = service_name
-            env.method_name = method_name
-            env.request = request
-            env.client_host = request_wrapper.caller
+          ::ActiveSupport::Notifications.instrument("decode_request.protobuf") do |payload|
+            env.service_name = payload['service_name'] = service_name
+            env.method_name  = payload['method_name'] = method_name
+            env.request      = request
+            env.client_host  = payload['client_host'] = request_wrapper.caller
 
-            env.rpc_service = service
-            env.rpc_method = rpc_method
-            env.request_type = rpc_method.request_type
+            env.rpc_service   = service
+            env.rpc_method    = rpc_method
+            env.request_type  = rpc_method.request_type
             env.response_type = rpc_method.response_type
           end
 

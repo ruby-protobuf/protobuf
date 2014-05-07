@@ -1,5 +1,5 @@
+require 'active_support'
 require 'active_support/subscriber'
-require 'active_support/number_helper'
 
 module Protobuf
   module Rpc
@@ -7,11 +7,23 @@ module Protobuf
       include ::Protobuf::Logging
       include ::ActiveSupport::NumberHelper
 
-      TIMING_FORMAT    = '%s: %.1fms'.freeze
+      RECEIVED_FORMAT  = '[%s] Received %s#%s from %s'.freeze
       COMPLETED_FORMAT = '[%s] Completed in %.1fms (%s) (%s)'.freeze
+      TIMING_FORMAT    = '%s: %.1fms'.freeze
 
       def decode_request(event)
         add_timing('Decode', event)
+
+        unless event.payload[:exception]
+          logger.info do
+            RECEIVED_FORMAT % [
+              thread_id,
+              event.payload['service_name'],
+              event.payload['method_name'],
+              event.payload['client_host']
+            ]
+          end
+        end
       end
 
       def dispatch_request(event)
@@ -23,7 +35,6 @@ module Protobuf
       end
 
       def handle_request(event)
-        puts "#{event.payload.inspect}"
         logger.info do
           COMPLETED_FORMAT % [
             thread_id,
