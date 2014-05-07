@@ -1,11 +1,13 @@
-require 'active_support'
-require 'active_support/subscriber'
+begin
+  require 'active_support/subscriber'
+rescue LoadError
+  require 'backports/active_support/subscriber'
+end
 
 module Protobuf
   module Rpc
     class LogSubscriber < ::ActiveSupport::Subscriber
       include ::Protobuf::Logging
-      include ::ActiveSupport::NumberHelper
 
       RECEIVED_FORMAT  = '[%s] Received %s#%s from %s'.freeze
       COMPLETED_FORMAT = '[%s] Completed in %.1fms (%s) (%s)'.freeze
@@ -39,7 +41,7 @@ module Protobuf
           COMPLETED_FORMAT % [
             thread_id,
             event.duration,
-            number_to_human_size(event.payload['encoded_response'].size),
+            "#{event.payload['encoded_response'].size} Bytes",
             event.children.map { |child| child.payload['timing'] }.compact.join(' | ')
           ]
         end
