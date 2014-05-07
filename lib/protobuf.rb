@@ -9,6 +9,7 @@ require 'active_support/inflector'
 require 'active_support/json'
 
 require 'protobuf/logging'
+require 'protobuf/version'
 
 module Protobuf
 

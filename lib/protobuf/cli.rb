@@ -1,5 +1,6 @@
 require 'thor'
-require 'protobuf/version'
+
+require 'protobuf'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq_runner'
 
