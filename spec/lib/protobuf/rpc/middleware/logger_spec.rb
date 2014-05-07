@@ -45,5 +45,16 @@ describe Protobuf::Rpc::Middleware::Logger do
     it "returns the env" do
       subject.call(env).should eq env
     end
+
+    it "outputs the received message" do
+      logger = double('Logger')
+      logger.should_receive(:info) do |&block|
+        block.call.should eq "[TID-456] Received Test::ResourceService#find (41 Bytes) from client_host.test.co"
+      end
+
+      subject.stub(:logger) { logger }
+      subject.stub(:thread_id) { 'TID-456' }
+      subject.call(env)
+    end
   end
 end

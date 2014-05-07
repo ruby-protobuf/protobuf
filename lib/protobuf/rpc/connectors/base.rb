@@ -1,5 +1,4 @@
 require 'timeout'
-require 'protobuf/logger'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'
 require 'protobuf/rpc/error'
@@ -23,7 +22,7 @@ module Protobuf
       }
 
       class Base
-        include Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         attr_reader :options
         attr_accessor :success_cb, :failure_cb, :complete_cb

@@ -14,7 +14,9 @@ end
 if ENV["DEBUG"]
   puts 'debugging'
   debug_log = File.expand_path('../debug_bench.log', File.dirname(__FILE__) )
-  Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
+  ::Protobuf::Logging.initialize_logger(debug_log, ::Logger::DEBUG)
+else
+  ::Protobuf::Logging.initialize_logger('/dev/null', ::Logger::ERROR)
 end
 
 namespace :benchmark do

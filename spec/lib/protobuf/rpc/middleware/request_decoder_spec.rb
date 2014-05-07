@@ -5,8 +5,7 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
   let(:client_host) { 'client_host.test.co' }
   let(:env) {
     Protobuf::Rpc::Env.new(
-      'encoded_request' => encoded_request,
-      'log_signature' => 'log_signature'
+      'encoded_request' => encoded_request
     )
   }
   let(:encoded_request) { request_wrapper.encode }
@@ -39,9 +38,14 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
       subject.call(env)
     end
 
+    it "returns the same env" do
+      stack_env = subject.call(env)
+      stack_env.should be(env)
+    end
+
     it "sets Env#client_host" do
       stack_env = subject.call(env)
-      stack_env.client_host.should eq client_host
+      env.client_host.should eq client_host
     end
 
     it "sets Env#service_name" do
