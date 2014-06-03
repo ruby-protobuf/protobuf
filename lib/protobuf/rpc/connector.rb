@@ -9,6 +9,8 @@ module Protobuf
         case ::Protobuf.connector_type
         when :zmq then
           ::Protobuf::Rpc::Connectors::Zmq
+        when :http then
+          ::Protobuf::Rpc::Connectors::Http
         else
           ::Protobuf::Rpc::Connectors::Socket
         end
