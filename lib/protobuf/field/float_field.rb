@@ -32,6 +32,27 @@ module Protobuf
         WireType::FIXED32
       end
 
+      ##
+      # Private Instance Methods
+      #
+
+      def define_setter
+        field = self
+        message_class.class_eval do
+          define_method(field.setter_method_name) do |val|
+            field.warn_if_deprecated
+
+            if val.nil? || (val.respond_to?(:empty?) && val.empty?)
+              @values.delete(field.name)
+            elsif field.acceptable?(val)
+              @values[field.name] = Float(val)
+            else
+              raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+            end
+          end
+        end
+      end
+
     end
   end
 end
