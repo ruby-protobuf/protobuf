@@ -3,6 +3,7 @@ require 'protobuf/version'
 require 'protobuf/logger'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq_runner'
+require 'protobuf/rpc/servers/http_runner'
 
 module Protobuf
   class CLI < ::Thor
@@ -26,6 +27,7 @@ module Protobuf
 
     option :socket,                     :type => :boolean, :aliases => %w(-s), :desc => 'Socket Mode for server and client connections.'
     option :zmq,                        :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
+    option :http,                       :type => :boolean, :aliases => %w(), :desc => 'HTTP Server Mode for server and client connections.'
 
     option :beacon_interval,            :type => :numeric, :desc => 'Broadcast beacons every N seconds. (default: 5)'
     option :beacon_port,                :type => :numeric, :desc => 'Broadcast beacons to this port (default: value of ServiceDirectory.port)'
@@ -109,12 +111,16 @@ module Protobuf
           @runner_mode = :socket
         elsif options.zmq?
           @runner_mode = :zmq
+        elsif options.http?
+          @runner_mode = :http
         else
           case server_type = ENV["PB_SERVER_TYPE"]
           when nil, /socket/i
             @runner_mode = :socket
           when /zmq/i
             @runner_mode = :zmq
+          when /http/i
+            @runner_mode = :http
           else
             say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
             @runner_mode = :socket
@@ -148,6 +154,8 @@ module Protobuf
                     create_zmq_runner
                   when :socket
                     create_socket_runner
+                  when :http
+                    create_http_runner
                   else
                     say_and_exit("Unknown runner mode: #{@runner_mode}")
                   end
@@ -209,6 +217,12 @@ module Protobuf
         require 'protobuf/zmq'
 
         @runner = ::Protobuf::Rpc::ZmqRunner.new(runner_options)
+      end
+
+      def create_http_runner
+        require 'protobuf/http'
+
+        @runner = ::Protobuf::Rpc::HttpRunner.new(runner_options)
       end
 
       def shutdown_server
