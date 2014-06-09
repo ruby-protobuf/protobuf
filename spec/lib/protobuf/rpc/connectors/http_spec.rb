@@ -12,12 +12,13 @@ describe ::Protobuf::Rpc::Connectors::Http do
   let(:client_double) do
     Faraday.new do |builder|
       builder.adapter :test do |stub|
-        stub.post("/Foo%3A%3AUserService/find") {[ 200, {}, "\n\n\n\x03foo\x12\x03bar" ]}
-        stub.post("/Foo%3A%3AUserService/foo1") {[ 404, {
+        stub.post("/Foo/UserService/find") {[ 200, {}, "\n\n\n\x03foo\x12\x03bar" ]}
+        stub.post("/Foo/UserService/foo1") {[ 404, {
           'x-protobuf-error' => "Foo::UserService#foo1 is not a defined RPC method.",
           'x-protobuf-error-reason' => Protobuf::Socketrpc::ErrorReason::METHOD_NOT_FOUND.to_s
         }, "" ]}
-        stub.post("/Foo%3A%3AUserService/foo2") {[ 500, {}, "" ]}
+        stub.post("/Foo/UserService/foo2") {[ 500, {}, "" ]}
+        stub.post("/base/Foo/UserService/foo3") {[ 200, {}, "\n\n\n\x03foo\x12\x03bar" ]}
       end
     end
   end
@@ -47,6 +48,14 @@ describe ::Protobuf::Rpc::Connectors::Http do
       subject.send(:setup_connection)
       subject.send(:send_data)
       subject.instance_variable_get(:@response_data).should eq "\n\x00\x12\x1DBad response from the server. \x07"
+    end
+
+    it "prepends base path option correctly" do
+      subject.stub(:options) { { :base => "/base" }}
+      subject.stub(:request_bytes) { "\n\x10Foo::UserService\x12\x04foo3\x1A\r\n\vfoo@bar.com\"\rabcdefghijklm" }
+      subject.send(:setup_connection)
+      subject.send(:send_data)
+      subject.instance_variable_get(:@response_data).should eq "\n\f\n\n\n\x03foo\x12\x03bar"
     end
   end
 end

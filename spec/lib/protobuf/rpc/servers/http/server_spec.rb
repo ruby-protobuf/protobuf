@@ -1,9 +1,6 @@
 require 'spec_helper'
 require 'protobuf/rpc/servers/http/server'
 
-# require 'rack/mock'
-require 'rack/test'
-
 # A simple service:
 require 'protobuf/message'
 require 'protobuf/rpc/service'
@@ -25,10 +22,6 @@ end
 
 describe Protobuf::Rpc::Http::Server do
   subject { described_class.new }
-
-  before do
-    load 'protobuf/http.rb'
-  end
 
   describe '#call' do
     client = nil
@@ -67,13 +60,20 @@ describe Protobuf::Rpc::Http::Server do
       response = client.post "/ReverseModule%3A%3AReverseService/reverse", :input => ""
       response.status.should eq 500
       response.headers['content-type'].should eq "application/x-protobuf"
-      # response.headers['x-protobuf-error'].should eq "Service class Bar::ReverseService is not defined."
       response.headers['x-protobuf-error-reason'].should eq Protobuf::Socketrpc::ErrorReason::RPC_FAILED.to_s
       response.body.should eq ""
     end
 
+    it 'should return RPC_ERROR for invalid input' do
+      response = client.post "/ReverseModule%3A%3AReverseService/reverse", :input => "\\n\\x03foo"
+      response.status.should eq 500
+      response.headers['content-type'].should eq "application/x-protobuf"
+      response.headers['x-protobuf-error-reason'].should eq Protobuf::Socketrpc::ErrorReason::RPC_ERROR.to_s
+      response.body.should eq ""
+    end
+
     it 'should return INVALID_REQUEST_PROTO for invalid URL' do
-      response = client.post "/foo/bar/baz", :input => ReverseModule::ReverseRequest.new(:input => "hello world").encode()
+      response = client.post "/foo", :input => ReverseModule::ReverseRequest.new(:input => "hello world").encode()
       response.status.should eq 400
       response.headers['content-type'].should eq "application/x-protobuf"
       # response.headers['x-protobuf-error'].should eq "Service class Bar::ReverseService is not defined."
