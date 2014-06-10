@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require "protobuf/socket"
+require_relative "../lib/example/reverse-client.rb"

@@ -40,6 +40,10 @@ module Protobuf
           'http://' + options[:host] + ':' + options[:port].to_s
         end
 
+        def base
+          options[:base] or ''
+        end
+
         def client
           @_client ||= Faraday.new(:url => host)
         end
@@ -48,8 +52,8 @@ module Protobuf
           rpc_request = ::Protobuf::Socketrpc::Request.decode(@request_data)
 
           http_response = client.post do |http_request|
-            path = '/' + CGI.escape(rpc_request[:service_name]) + '/' + CGI.escape(rpc_request[:method_name])
-            http_request.url path
+            path_components = [''] + rpc_request[:service_name].split('::') + [rpc_request[:method_name]]
+            http_request.url base + path_components.map{ |x| CGI::escape(x) }.join('/')
             http_request.headers['Content-Type'] = 'application/x-protobuf'
             http_request.headers['X-Protobuf-Caller'] = rpc_request[:caller] || ''
             http_request.body = rpc_request[:request_proto]
