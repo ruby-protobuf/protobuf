@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require "protobuf/zmq"
+require_relative "../lib/example/reverse-client.rb"
