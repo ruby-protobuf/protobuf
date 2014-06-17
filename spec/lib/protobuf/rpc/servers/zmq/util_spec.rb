@@ -18,7 +18,7 @@ describe ::Protobuf::Rpc::Zmq::Util do
     end
 
     it 'retrieves the error string from ZeroMQ' do
-      ZMQ::Util.stub(:error_string).and_return('an error from zmq')
+      allow(ZMQ::Util).to receive(:error_string).and_return('an error from zmq')
       expect {
         subject.zmq_error_check(-1, :test)
       }.to raise_error(RuntimeError, /an error from zmq/i)
@@ -39,7 +39,7 @@ describe ::Protobuf::Rpc::Zmq::Util do
 
   describe '#log_signature' do
     it 'returns the signature for the log' do
-      subject.log_signature.should include('server', 'UtilTest')
+      expect(subject.log_signature).to include('server', 'UtilTest')
     end
   end
 

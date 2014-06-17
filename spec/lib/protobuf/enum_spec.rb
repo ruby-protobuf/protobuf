@@ -22,7 +22,7 @@ describe Protobuf::Enum do
 
     describe '.aliases_allowed?' do
       it 'is false when the option is not set' do
-        expect(Test::EnumTestType.aliases_allowed?).to be_false
+        expect(Test::EnumTestType.aliases_allowed?).to be_falsey
       end
     end
 
@@ -155,15 +155,15 @@ describe Protobuf::Enum do
 
     describe '.valid_tag?' do
       context 'when tag is defined' do
-        specify { expect(Test::EnumTestType.valid_tag?(tag)).to be_true }
+        specify { expect(Test::EnumTestType.valid_tag?(tag)).to be_truthy }
       end
 
       context 'when tag is not defined' do
-        specify { expect(Test::EnumTestType.valid_tag?(300)).to be_false }
+        specify { expect(Test::EnumTestType.valid_tag?(300)).to be_falsey }
       end
 
       context 'is true for aliased enums' do
-        specify { expect(EnumAliasTest.valid_tag?(1)).to be_true }
+        specify { expect(EnumAliasTest.valid_tag?(1)).to be_truthy }
       end
     end
 
@@ -201,31 +201,31 @@ describe Protobuf::Enum do
   end
 
 	subject { Test::EnumTestType::ONE }
-  its(:class) { should eq(Fixnum) }
-  its(:parent_class) { should eq(Test::EnumTestType) }
-	its(:name) { should eq(:ONE) }
-	its(:tag) { should eq(1) }
-	its(:value) { should eq(1) }
-	its(:to_hash_value) { should eq(1) }
-	its(:to_s) { should eq("1") }
-	its(:inspect) { should eq('#<Protobuf::Enum(Test::EnumTestType)::ONE=1>') }
-  specify { subject.to_s(:tag).should eq("1") }
-  specify { subject.to_s(:name).should eq("ONE") }
+  specify { expect(subject.class).to eq(Fixnum) }
+  specify { expect(subject.parent_class).to eq(Test::EnumTestType) }
+	specify { expect(subject.name).to eq(:ONE) }
+	specify { expect(subject.tag).to eq(1) }
+	specify { expect(subject.value).to eq(1) }
+	specify { expect(subject.to_hash_value).to eq(1) }
+	specify { expect(subject.to_s).to eq("1") }
+	specify { expect(subject.inspect).to eq('#<Protobuf::Enum(Test::EnumTestType)::ONE=1>') }
+  specify { expect(subject.to_s(:tag)).to eq("1") }
+  specify { expect(subject.to_s(:name)).to eq("ONE") }
 
   it "can be used as the index to an array" do
     array = [0, 1, 2, 3]
-    array[::Test::EnumTestType::ONE].should eq(1)
+    expect(array[::Test::EnumTestType::ONE]).to eq(1)
   end
 
   describe '#try' do
-    specify { subject.try(:parent_class).should eq(subject.parent_class) }
-    specify { subject.try(:class).should eq(subject.class) }
-    specify { subject.try(:name).should eq(subject.name) }
-    specify { subject.try(:tag).should eq(subject.tag) }
-    specify { subject.try(:value).should eq(subject.value) }
-    specify { subject.try(:to_i).should eq(subject.to_i) }
-    specify { subject.try(:to_int).should eq(subject.to_int) }
-    specify { subject.try { |yielded| yielded.should eq(subject) } }
+    specify { expect(subject.try(:parent_class)).to eq(subject.parent_class) }
+    specify { expect(subject.try(:class)).to eq(subject.class) }
+    specify { expect(subject.try(:name)).to eq(subject.name) }
+    specify { expect(subject.try(:tag)).to eq(subject.tag) }
+    specify { expect(subject.try(:value)).to eq(subject.value) }
+    specify { expect(subject.try(:to_i)).to eq(subject.to_i) }
+    specify { expect(subject.try(:to_int)).to eq(subject.to_int) }
+    specify { subject.try { |yielded| expect(yielded).to eq(subject) } }
   end
 
   context 'when coercing from enum' do

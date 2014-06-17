@@ -23,13 +23,13 @@ describe ::Protobuf do
     before { described_class.instance_variable_set(:@_connector_type, nil) }
 
     it 'defaults to socket' do
-      described_class.connector_type.should eq :socket
+      expect(described_class.connector_type).to eq :socket
     end
 
     it 'accepts socket or zmq' do
       [:socket, :zmq].each do |type|
         described_class.connector_type = type
-        described_class.connector_type.should eq type
+        expect(described_class.connector_type).to eq type
       end
     end
 
@@ -46,12 +46,12 @@ describe ::Protobuf do
     before { described_class.instance_variable_set(:@_gc_pause_server_request, nil) }
 
     it 'defaults to a false value' do
-      described_class.gc_pause_server_request?.should be_false
+      expect(described_class.gc_pause_server_request?).to be_falsey
     end
 
     it 'is settable' do
       described_class.gc_pause_server_request = true
-      described_class.gc_pause_server_request?.should be_true
+      expect(described_class.gc_pause_server_request?).to be_truthy
     end
   end
 
@@ -59,18 +59,18 @@ describe ::Protobuf do
     before { described_class.instance_variable_set(:@_print_deprecation_warnings, nil) }
 
     it 'defaults to a true value' do
-      described_class.print_deprecation_warnings?.should be_true
+      expect(described_class.print_deprecation_warnings?).to be_truthy
     end
 
     it 'is settable' do
       described_class.print_deprecation_warnings = false
-      described_class.print_deprecation_warnings?.should be_false
+      expect(described_class.print_deprecation_warnings?).to be_falsey
     end
 
     context 'when ENV["PB_IGNORE_DEPRECATIONS"] present' do
       it 'defaults to a false value' do
         ENV['PB_IGNORE_DEPRECATIONS'] = '1'
-        described_class.print_deprecation_warnings?.should be_false
+        expect(described_class.print_deprecation_warnings?).to be_falsey
       end
     end
   end

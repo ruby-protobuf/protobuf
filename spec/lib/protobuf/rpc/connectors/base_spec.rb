@@ -21,28 +21,28 @@ describe Protobuf::Rpc::Connectors::Base do
 
   describe '.new' do
     it 'assigns passed options and initializes success/failure callbacks' do
-      subject.options.should eq(Protobuf::Rpc::Connectors::DEFAULT_OPTIONS.merge(options))
-      subject.success_cb.should be_nil
-      subject.failure_cb.should be_nil
+      expect(subject.options).to eq(Protobuf::Rpc::Connectors::DEFAULT_OPTIONS.merge(options))
+      expect(subject.success_cb).to be_nil
+      expect(subject.failure_cb).to be_nil
     end
   end
 
   describe '#success_cb' do
     it 'allows setting the success callback and calling it' do
-      subject.success_cb.should be_nil
+      expect(subject.success_cb).to be_nil
       cb = proc {|res| raise res }
       subject.success_cb = cb
-      subject.success_cb.should eq(cb)
+      expect(subject.success_cb).to eq(cb)
       expect { subject.success_cb.call('an error from cb') }.to raise_error 'an error from cb'
     end
   end
 
   describe '#failure_cb' do
     it 'allows setting the failure callback and calling it' do
-      subject.failure_cb.should be_nil
+      expect(subject.failure_cb).to be_nil
       cb = proc {|res| raise res }
       subject.failure_cb = cb
-      subject.failure_cb.should eq(cb)
+      expect(subject.failure_cb).to eq(cb)
       expect { subject.failure_cb.call('an error from cb') }.to raise_error 'an error from cb'
     end
   end

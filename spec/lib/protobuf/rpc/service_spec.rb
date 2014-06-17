@@ -11,73 +11,73 @@ describe Protobuf::Rpc::Service do
     end
 
     describe '.host' do
-      its(:host) { should eq described_class::DEFAULT_HOST }
+      specify { expect(subject.host).to eq described_class::DEFAULT_HOST }
     end
 
     describe '.host=' do
       before { subject.host = 'mynewhost.com' }
-      its(:host) { should eq 'mynewhost.com' }
+      specify { expect(subject.host).to eq 'mynewhost.com' }
     end
 
     describe '.port' do
-      its(:port) { should eq described_class::DEFAULT_PORT }
+      specify { expect(subject.port).to eq described_class::DEFAULT_PORT }
     end
 
     describe '.port=' do
       before { subject.port = 12345 }
-      its(:port) { should eq 12345 }
+      specify { expect(subject.port).to eq 12345 }
     end
 
     describe '.configure' do
       context 'when providing a host' do
         before { subject.configure(:host => 'mynewhost.com') }
-        its(:host) { should eq 'mynewhost.com' }
+        specify { expect(subject.host).to eq 'mynewhost.com' }
       end
 
       context 'when providing a port' do
         before { subject.configure(:port => 12345) }
-        its(:port) { should eq 12345 }
+        specify { expect(subject.port).to eq 12345 }
       end
     end
 
     describe '.located_at' do
       context 'when given location is empty' do
         before { subject.located_at(nil) }
-        its(:host) { should eq described_class::DEFAULT_HOST }
-        its(:port) { should eq described_class::DEFAULT_PORT }
+        specify { expect(subject.host).to eq described_class::DEFAULT_HOST }
+        specify { expect(subject.port).to eq described_class::DEFAULT_PORT }
       end
 
       context 'when given location is invalid' do
         before { subject.located_at('i like pie') }
-        its(:host) { should eq described_class::DEFAULT_HOST }
-        its(:port) { should eq described_class::DEFAULT_PORT }
+        specify { expect(subject.host).to eq described_class::DEFAULT_HOST }
+        specify { expect(subject.port).to eq described_class::DEFAULT_PORT }
       end
 
       context 'when given location contains a host and port' do
         before { subject.located_at('mynewdomain.com:12345') }
-        its(:host) { should eq 'mynewdomain.com' }
-        its(:port) { should eq 12345 }
+        specify { expect(subject.host).to eq 'mynewdomain.com' }
+        specify { expect(subject.port).to eq 12345 }
       end
     end
 
     describe '.client' do
       it 'initializes a client object for this service' do
         client = double('client')
-        ::Protobuf::Rpc::Client.should_receive(:new)
-                                .with(hash_including({ :service => subject,
-                                                       :host => subject.host,
-                                                       :port => subject.port }))
-                                .and_return(client)
-        subject.client.should eq client
+        expect(::Protobuf::Rpc::Client).to receive(:new)
+                                            .with(hash_including({ :service => subject,
+                                                                   :host => subject.host,
+                                                                   :port => subject.port }))
+                                            .and_return(client)
+        expect(subject.client).to eq client
       end
     end
 
     describe '.rpc' do
       before { Test::ResourceService.rpc(:update, Test::ResourceFindRequest, Test::Resource) }
       subject { Test::ResourceService.rpcs[:update] }
-      its(:method) { should eq :update }
-      its(:request_type) { should eq Test::ResourceFindRequest }
-      its(:response_type) { should eq Test::Resource }
+      specify { expect(subject.method).to eq :update }
+      specify { expect(subject.request_type).to eq Test::ResourceFindRequest }
+      specify { expect(subject.response_type).to eq Test::Resource }
     end
 
     describe '.rpc_method?' do
@@ -85,13 +85,13 @@ describe Protobuf::Rpc::Service do
 
       context 'when given name is a pre-defined rpc method' do
         it 'returns true' do
-          subject.rpc_method?(:delete).should be_true
+          expect(subject.rpc_method?(:delete)).to be_truthy
         end
       end
 
       context 'when given name is not a pre-defined rpc method' do
         it 'returns false' do
-          subject.rpc_method?(:zoobaboo).should be_false
+          expect(subject.rpc_method?(:zoobaboo)).to be_falsey
         end
       end
     end
@@ -137,8 +137,8 @@ describe Protobuf::Rpc::Service do
           subject { NewTestService.new(env) }
 
           before { subject.find_with_implied_response }
-          its(:response) { should be_a(Test::Resource) }
-          specify { subject.response.name.should eq 'Implicit response' }
+          specify { expect(subject.response).to be_a(Test::Resource) }
+          specify { expect(subject.response.name).to eq 'Implicit response' }
         end
 
         context 'when using respond_with paradigm' do
@@ -152,8 +152,8 @@ describe Protobuf::Rpc::Service do
           subject { NewTestService.new(env) }
 
           before { subject.find_with_respond_with }
-          its(:response) { should be_a(Test::Resource) }
-          specify { subject.response.name.should eq 'Custom response' }
+          specify { expect(subject.response).to be_a(Test::Resource) }
+          specify { expect(subject.response.name).to eq 'Custom response' }
         end
       end
     end

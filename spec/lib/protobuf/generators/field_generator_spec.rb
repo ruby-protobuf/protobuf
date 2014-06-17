@@ -27,33 +27,33 @@ describe ::Protobuf::Generators::FieldGenerator do
   describe '#compile' do
     subject { described_class.new(field).to_s }
 
-    it { should eq "optional :string, :foo_bar, 3\n" }
+    specify { expect(subject).to eq "optional :string, :foo_bar, 3\n" }
 
     context 'when the type is another message' do
       let(:type_enum) { :TYPE_MESSAGE }
       let(:type_name) { '.foo.bar.Baz' }
 
-      it { should eq "optional ::Foo::Bar::Baz, :foo_bar, 3\n" }
+      specify { expect(subject).to eq "optional ::Foo::Bar::Baz, :foo_bar, 3\n" }
     end
 
     context 'when a default value is used' do
       let(:type_enum) { :TYPE_INT32 }
       let(:default_value) { '42' }
-      it { should eq "optional :int32, :foo_bar, 3, :default => 42\n" }
+      specify { expect(subject).to eq "optional :int32, :foo_bar, 3, :default => 42\n" }
 
       context 'when type is an enum' do
         let(:type_enum) { :TYPE_ENUM }
         let(:type_name) { '.foo.bar.Baz' }
         let(:default_value) { 'QUUX' }
 
-        it { should eq "optional ::Foo::Bar::Baz, :foo_bar, 3, :default => ::Foo::Bar::Baz::QUUX\n" }
+        specify { expect(subject).to eq "optional ::Foo::Bar::Baz, :foo_bar, 3, :default => ::Foo::Bar::Baz::QUUX\n" }
       end
 
       context 'when the type is a string' do
         let(:type_enum) { :TYPE_STRING }
         let(:default_value) { "a default \"string\"" }
 
-        it { should eq %Q{optional :string, :foo_bar, 3, :default => "a default \"string\""\n} }
+        specify { expect(subject).to eq %Q{optional :string, :foo_bar, 3, :default => "a default \"string\""\n} }
       end
 
       context 'when float or double field type' do
@@ -61,17 +61,17 @@ describe ::Protobuf::Generators::FieldGenerator do
 
         context 'when the default value is "nan"' do
           let(:default_value) { 'nan' }
-          it { should match(/::Float::NAN/) }
+          specify { expect(subject).to match(/::Float::NAN/) }
         end
 
         context 'when the default value is "inf"' do
           let(:default_value) { 'inf' }
-          it { should match(/::Float::INFINITY/) }
+          specify { expect(subject).to match(/::Float::INFINITY/) }
         end
 
         context 'when the default value is "-inf"' do
           let(:default_value) { '-inf' }
-          it { should match(/-::Float::INFINITY/) }
+          specify { expect(subject).to match(/-::Float::INFINITY/) }
         end
       end
     end
@@ -79,19 +79,19 @@ describe ::Protobuf::Generators::FieldGenerator do
     context 'when the field is an extension' do
       let(:extendee) { 'foo.bar.Baz' }
 
-      it { should eq "optional :string, :foo_bar, 3, :extension => true\n" }
+      specify { expect(subject).to eq "optional :string, :foo_bar, 3, :extension => true\n" }
     end
 
     context 'when field is packed' do
       let(:field_options) { { :packed => true } }
 
-      it { should eq "optional :string, :foo_bar, 3, :packed => true\n" }
+      specify { expect(subject).to eq "optional :string, :foo_bar, 3, :packed => true\n" }
     end
 
     context 'when field is deprecated' do
       let(:field_options) { { :deprecated => true } }
 
-      it { should eq "optional :string, :foo_bar, 3, :deprecated => true\n" }
+      specify { expect(subject).to eq "optional :string, :foo_bar, 3, :deprecated => true\n" }
     end
   end
 

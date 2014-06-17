@@ -27,8 +27,8 @@ describe 'Functional ZMQ Client' do
 
       client.find(:name => 'Test Name', :active => true) do |c|
         c.on_success do |succ|
-          succ.name.should eq("Test Name")
-          succ.status.should eq(::Test::StatusType::ENABLED)
+          expect(succ.name).to eq("Test Name")
+          expect(succ.status).to eq(::Test::StatusType::ENABLED)
         end
 
         c.on_failure do |err|
@@ -46,8 +46,8 @@ describe 'Functional ZMQ Client' do
 
           client.find(:name => 'Test Name', :active => true) do |c|
             c.on_success do |succ|
-              succ.name.should eq("Test Name")
-              succ.status.should eq(::Test::StatusType::ENABLED)
+              expect(succ.name).to eq("Test Name")
+              expect(succ.status).to eq(::Test::StatusType::ENABLED)
             end
 
             c.on_failure do |err|
@@ -69,7 +69,7 @@ describe 'Functional ZMQ Client' do
         c.on_success { raise "shouldn't pass" }
         c.on_failure {|e| error = e }
       end
-      error.message.should match(/name.*required/)
+      expect(error.message).to match(/name.*required/)
     end
   end
 
@@ -83,7 +83,7 @@ describe 'Functional ZMQ Client' do
         c.on_success { raise "shouldn't pass" }
         c.on_failure {|e| error = e}
       end
-      error.message.should match(/expected request.*ResourceFindRequest.*Resource instead/i)
+      expect(error.message).to match(/expected request.*ResourceFindRequest.*Resource instead/i)
     end
   end
 
@@ -96,7 +96,7 @@ describe 'Functional ZMQ Client' do
         c.on_success { raise "shouldn't pass" }
         c.on_failure { |e| error = e }
       end
-      error.message.should match(/The server repeatedly failed to respond/)
+      expect(error.message).to match(/The server repeatedly failed to respond/)
     end
   end
 

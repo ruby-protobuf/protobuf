@@ -27,13 +27,13 @@ describe ::Protobuf::CodeGenerator do
     end
 
     before do
-      ::Protobuf::Generators::FileGenerator.should_receive(:new).with(input_file1).and_return(file_generator1)
-      ::Protobuf::Generators::FileGenerator.should_receive(:new).with(input_file2).and_return(file_generator2)
+      expect(::Protobuf::Generators::FileGenerator).to receive(:new).with(input_file1).and_return(file_generator1)
+      expect(::Protobuf::Generators::FileGenerator).to receive(:new).with(input_file2).and_return(file_generator2)
     end
 
     it 'returns the serialized CodeGeneratorResponse which contains the generated file contents' do
       generator = described_class.new(request_bytes)
-      generator.response_bytes.should eq expected_response_bytes
+      expect(generator.response_bytes).to eq expected_response_bytes
     end
   end
 
@@ -51,7 +51,7 @@ describe ::Protobuf::CodeGenerator do
 
     describe '.warn' do
       it 'prints a warning to stderr' do
-        STDERR.should_receive(:puts).with("[WARN] a warning")
+        expect(STDERR).to receive(:puts).with("[WARN] a warning")
         described_class.warn("a warning")
       end
     end

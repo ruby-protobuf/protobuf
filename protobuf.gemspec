@@ -27,7 +27,7 @@ require "protobuf/version"
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'pry-nav'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'rspec', '>= 3.0'
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'timecop'

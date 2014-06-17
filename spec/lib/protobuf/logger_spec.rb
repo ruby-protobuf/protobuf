@@ -20,22 +20,22 @@ describe Protobuf::Logger do
 
     it 'doesn\'t create a logger if the file was not set' do
       subject.file = nil
-      subject.instance.should be_nil
+      expect(subject.instance).to be_nil
     end
 
     it 'doesn\'t create a logger if the level was not set' do
       subject.level = nil
-      subject.instance.should be_nil
+      expect(subject.instance).to be_nil
     end
 
     it 'gets a new instance of the logger when file and level are set' do
-      subject.file.should_not be_nil
-      subject.level.should_not be_nil
-      subject.instance.should_not be_nil
+      expect(subject.file).to_not be_nil
+      expect(subject.level).to_not be_nil
+      expect(subject.instance).to_not be_nil
     end
 
     it 'keeps the same object from multiple calls to instance' do
-      subject.instance === subject.instance
+      expect(subject.instance).to equal(subject.instance)
     end
 
   end
@@ -43,13 +43,13 @@ describe Protobuf::Logger do
   describe '.configure' do
     before(:each) { subject.reset_device! }
     it 'sets the file and level in one call' do
-      subject.file.should_not be
-      subject.level.should_not be
-      subject.instance.should_not be
+      expect(subject.file).to_not be
+      expect(subject.level).to_not be
+      expect(subject.instance).to_not be
       subject.configure :file => 'myfile.log', :level => ::Logger::WARN
-      subject.file.should == 'myfile.log'
-      subject.level.should == ::Logger::WARN
-      subject.instance.level.should == ::Logger::WARN
+      expect(subject.file).to eq('myfile.log')
+      expect(subject.level).to eq(::Logger::WARN)
+      expect(subject.instance.level).to eq(::Logger::WARN)
     end
 
   end
@@ -57,13 +57,13 @@ describe Protobuf::Logger do
   describe '.reset_device!' do
 
     it 'resets the logger instance, file, and level' do
-      subject.instance.should be
-      subject.file.should be
-      subject.level.should be
+      expect(subject.instance).to be
+      expect(subject.file).to be
+      expect(subject.level).to be
       subject.reset_device!
-      subject.instance.should_not be
-      subject.file.should_not be
-      subject.level.should_not be
+      expect(subject.instance).to_not be
+      expect(subject.file).to_not be
+      expect(subject.level).to_not be
     end
 
   end
@@ -72,7 +72,7 @@ describe Protobuf::Logger do
 
     it 'doesn\'t raise errors when log instance is nil' do
       subject.reset_device!
-      subject.instance.should be_nil
+      expect(subject.instance).to be_nil
       expect {
         subject.debug 'No errors here'
         subject.info 'No errors here'
@@ -85,8 +85,8 @@ describe Protobuf::Logger do
     end
 
     it 'logs correctly when instance is valid' do
-      subject.instance.should_not be_nil
-      subject.instance.should_receive(:info).with('Should log great')
+      expect(subject.instance).to_not be_nil
+      expect(subject.instance).to receive(:info).with('Should log great')
       subject.info 'Should log great'
     end
 
@@ -114,20 +114,20 @@ describe Protobuf::Logger do
 
       context '#log_exception' do
         it 'logs the exception message as an error and backtrace as debug' do
-          subject.should_receive(:log_error).twice
-          subject.should_receive(:log_debug)
+          expect(subject).to receive(:log_error).twice
+          expect(subject).to receive(:log_debug)
           subject.log_exception(RuntimeError.new('this is an exception'))
         end
       end
 
-      its(:log_signature) { should eq "[MyTestClass]" }
+      specify { expect(subject.log_signature).to eq "[MyTestClass]" }
       describe '#sign_message' do
-        specify { subject.sign_message("this is a test").should eq "[MyTestClass] this is a test" }
-        specify { subject.class.sign_message("this is a test").should eq "[MyTestClass] this is a test" }
+        specify { expect(subject.sign_message("this is a test")).to eq "[MyTestClass] this is a test" }
+        specify { expect(subject.class.sign_message("this is a test")).to eq "[MyTestClass] this is a test" }
       end
 
       it 'passes all embedded log calls to Logger instance' do
-        Protobuf::Logger.instance.should_receive(:debug).with('[MyTestClass] log this')
+        expect(Protobuf::Logger.instance).to receive(:debug).with('[MyTestClass] log this')
         subject.log_debug('log this')
       end
 

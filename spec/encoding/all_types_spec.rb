@@ -86,6 +86,6 @@ describe ::Protobuf do
       file.read
     end
 
-    data.should eq message.serialize_to_string
+    expect(data).to eq(message.serialize_to_string)
   end
 end

@@ -15,9 +15,9 @@ describe ::Protobuf::Generators::ExtensionGenerator do
   let(:message_type) { 'FooBar' }
 
   before do
-    ::Protobuf::Generators::FieldGenerator.should_receive(:new).with(field_descriptors[0], 1).and_return(field_descriptors[0])
-    ::Protobuf::Generators::FieldGenerator.should_receive(:new).with(field_descriptors[1], 1).and_return(field_descriptors[1])
-    ::Protobuf::Generators::FieldGenerator.should_receive(:new).with(field_descriptors[2], 1).and_return(field_descriptors[2])
+    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[0], 1).and_return(field_descriptors[0])
+    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[1], 1).and_return(field_descriptors[1])
+    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[2], 1).and_return(field_descriptors[2])
   end
 
   subject { described_class.new(message_type, field_descriptors, 0) }
@@ -35,7 +35,7 @@ end
 
     it 'compiles the a class with the extension fields' do
       subject.compile
-      subject.to_s.should eq(compiled)
+      expect(subject.to_s).to eq(compiled)
     end
   end
 

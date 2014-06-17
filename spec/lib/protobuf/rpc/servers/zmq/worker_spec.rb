@@ -1,16 +1,16 @@
 require 'spec_helper'
 
 describe ::Protobuf::Rpc::Zmq::Worker do
-  before(:each) do 
+  before(:each) do
     load 'protobuf/zmq.rb'
 
     fake_socket = double
-    fake_socket.should_receive(:connect).and_return(0)
-    fake_socket.should_receive(:send_string).and_return(0)
+    expect(fake_socket).to receive(:connect).and_return(0)
+    expect(fake_socket).to receive(:send_string).and_return(0)
 
     fake_context = double
-    fake_context.should_receive(:socket).and_return( fake_socket )
-    ::ZMQ::Context.should_receive(:new).and_return( fake_context )
+    expect(fake_context).to receive(:socket).and_return(fake_socket)
+    expect(::ZMQ::Context).to receive(:new).and_return(fake_context)
   end
 
   subject do

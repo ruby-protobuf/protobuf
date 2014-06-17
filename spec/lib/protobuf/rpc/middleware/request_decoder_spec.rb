@@ -31,51 +31,51 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
   describe "#call" do
     it "decodes the request" do
       stack_env = subject.call(env)
-      stack_env.request.should eq request
+      expect(stack_env.request).to eq request
     end
 
     it "calls the stack" do
-      app.should_receive(:call).with(env)
+      expect(app).to receive(:call).with(env)
       subject.call(env)
     end
 
     it "sets Env#client_host" do
       stack_env = subject.call(env)
-      stack_env.client_host.should eq client_host
+      expect(stack_env.client_host).to eq client_host
     end
 
     it "sets Env#service_name" do
       stack_env = subject.call(env)
-      stack_env.service_name.should eq service_name
+      expect(stack_env.service_name).to eq service_name
     end
 
     it "sets Env#method_name" do
       stack_env = subject.call(env)
-      stack_env.method_name.should eq method_name.to_sym
+      expect(stack_env.method_name).to eq method_name.to_sym
     end
 
     it "sets Env#request_type" do
       stack_env = subject.call(env)
-      stack_env.request_type.should eq request_type
+      expect(stack_env.request_type).to eq request_type
     end
 
     it "sets Env#response_type" do
       stack_env = subject.call(env)
-      stack_env.response_type.should eq response_type
+      expect(stack_env.response_type).to eq response_type
     end
 
     it "sets Env#rpc_method" do
       stack_env = subject.call(env)
-      stack_env.rpc_method.should eq rpc_method
+      expect(stack_env.rpc_method).to eq rpc_method
     end
 
     it "sets Env#rpc_service" do
       stack_env = subject.call(env)
-      stack_env.rpc_service.should eq rpc_service
+      expect(stack_env.rpc_service).to eq rpc_service
     end
 
     context "when decoding fails" do
-      before { Protobuf::Socketrpc::Request.stub(:decode).and_raise(RuntimeError) }
+      before { allow(Protobuf::Socketrpc::Request).to receive(:decode).and_raise(RuntimeError) }
 
       it "raises a bad request data exception" do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::BadRequestData)

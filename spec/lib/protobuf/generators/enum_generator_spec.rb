@@ -33,7 +33,7 @@ end
 
     it 'compiles the enum and it\'s field values' do
       subject.compile
-      subject.to_s.should eq(compiled)
+      expect(subject.to_s).to eq(compiled)
     end
 
     context 'when allow_alias option is set' do
@@ -53,14 +53,14 @@ end
 
       it 'sets the allow_alias option' do
         subject.compile
-        subject.to_s.should eq(compiled)
+        expect(subject.to_s).to eq(compiled)
       end
     end
   end
 
   describe '#build_value' do
     it 'returns a string identifying the given enum value' do
-      subject.build_value(enum.value.first).should eq("define :FOO, 1")
+      expect(subject.build_value(enum.value.first)).to eq("define :FOO, 1")
     end
   end
 

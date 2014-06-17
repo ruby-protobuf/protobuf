@@ -8,19 +8,19 @@ describe Protobuf::Rpc::Middleware::ExceptionHandler do
 
   describe "#call" do
     it "calls the stack" do
-      app.should_receive(:call).with(env)
+      expect(app).to receive(:call).with(env)
       subject.call(env)
     end
 
     it "returns the env" do
-      subject.call(env).should eq env
+      expect(subject.call(env)).to eq env
     end
 
     context "when exceptions occur" do
       let(:encoded_error) { error.encode }
       let(:error) { Protobuf::Rpc::MethodNotFound.new('Boom!') }
 
-      before { app.stub(:call).and_raise(error, 'Boom!') }
+      before { allow(app).to receive(:call).and_raise(error, 'Boom!') }
 
       it "rescues exceptions" do
         expect { subject.call(env) }.not_to raise_exception
@@ -32,12 +32,12 @@ describe Protobuf::Rpc::Middleware::ExceptionHandler do
 
           # Can't compare the error instances because the response has been
           # raised and thus has a backtrace while the error does not.
-          stack_env.response.class.should eq error.class
+          expect(stack_env.response.class).to eq error.class
         end
 
         it "encodes the response" do
           stack_env = subject.call(env)
-          stack_env.encoded_response.should eq encoded_error
+          expect(stack_env.encoded_response).to eq encoded_error
         end
       end
 
@@ -45,16 +45,16 @@ describe Protobuf::Rpc::Middleware::ExceptionHandler do
         let(:encoded_error) { error.encode }
         let(:error) { Protobuf::Rpc::RpcFailed.new('Boom!') }
 
-        before { app.stub(:call).and_raise(RuntimeError, 'Boom!') }
+        before { allow(app).to receive(:call).and_raise(RuntimeError, 'Boom!') }
 
         it "wraps the exception in a generic Protobuf error" do
           stack_env = subject.call(env)
-          stack_env.response.should eq error
+          expect(stack_env.response).to eq error
         end
 
         it "encodes the wrapped exception" do
           stack_env = subject.call(env)
-          stack_env.encoded_response.should eq encoded_error
+          expect(stack_env.encoded_response).to eq encoded_error
         end
       end
     end

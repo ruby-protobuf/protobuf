@@ -56,10 +56,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
   end
 
   def expect_event_trigger(event)
-    ::ActiveSupport::Notifications
-      .should_receive(:instrument)
-      .with(event, hash_including(:listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing)))
-      .once
+    expect(::ActiveSupport::Notifications).to receive(:instrument)
+                                                .with(event, hash_including(:listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing)))
+                                                .once
   end
 
   def send_beacon(type, server)
@@ -74,29 +73,29 @@ describe ::Protobuf::Rpc::ServiceDirectory do
   end
 
   it "should be a singleton" do
-    subject.should be_a_kind_of(Singleton)
+    expect(subject).to be_a_kind_of(Singleton)
   end
 
   it "should be configured to listen to address 127.0.0.1" do
-    described_class.address.should eq '127.0.0.1'
+    expect(described_class.address).to eq '127.0.0.1'
   end
 
   it "should be configured to listen to port 33333" do
-    described_class.port.should eq 33333
+    expect(described_class.port).to eq 33333
   end
 
   it "should defer .start to the instance#start" do
-    described_class.instance.should_receive(:start)
+    expect(described_class.instance).to receive(:start)
     described_class.start
   end
 
   it "should yeild itself to blocks passed to .start" do
-    described_class.instance.stub(:start)
+    allow(described_class.instance).to receive(:start)
     expect { |b| described_class.start(&b) }.to yield_with_args(described_class)
   end
 
   it "should defer .stop to the instance#stop" do
-    described_class.instance.should_receive(:stop)
+    expect(described_class.instance).to receive(:stop)
     described_class.stop
   end
 
@@ -106,20 +105,20 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     describe "#lookup" do
       it "should return nil" do
         send_beacon(:heartbeat, echo_server)
-        subject.lookup("EchoService").should be_nil
+        expect(subject.lookup("EchoService")).to be_nil
       end
     end
 
     describe "#restart" do
       it "should start the service" do
         subject.restart
-        subject.should be_running
+        expect(subject).to be_running
       end
     end
 
     describe "#running" do
       it "should be false" do
-        subject.should_not be_running
+        expect(subject).to_not be_running
       end
     end
 
@@ -134,7 +133,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     before { subject.start }
     after { subject.stop }
 
-    it { should be_running }
+    specify { expect(subject).to be_running }
 
     it "should trigger added events" do
       expect_event_trigger("directory.listing.added")
@@ -159,13 +158,13 @@ describe ::Protobuf::Rpc::ServiceDirectory do
           send_beacon(:heartbeat, hello_server)
           send_beacon(:heartbeat, combo_server)
 
-          subject.all_listings_for("HelloService").size.should eq(2)
+          expect(subject.all_listings_for("HelloService").size).to eq(2)
         end
       end
 
       context "when no listings are present" do
         it "returns and empty array" do
-          subject.all_listings_for("HelloService").size.should eq(0)
+          expect(subject.all_listings_for("HelloService").size).to eq(0)
         end
       end
     end
@@ -185,7 +184,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
     describe "#lookup" do
       it "should provide listings by service" do
         send_beacon(:heartbeat, hello_server)
-        subject.lookup("HelloService").to_hash.should eq hello_server.to_hash
+        expect(subject.lookup("HelloService").to_hash).to eq hello_server.to_hash
       end
 
       it "should return random listings" do
@@ -193,14 +192,14 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         send_beacon(:heartbeat, combo_server)
 
         uuids = 100.times.map { subject.lookup("HelloService").uuid }
-        uuids.count("hello").should be_within(25).of(50)
-        uuids.count("combo").should be_within(25).of(50)
+        expect(uuids.count("hello")).to be_within(25).of(50)
+        expect(uuids.count("combo")).to be_within(25).of(50)
       end
 
       it "should not return expired listings" do
         send_beacon(:heartbeat, hello_server_with_short_ttl)
         sleep 1
-        subject.lookup("HelloService").should be_nil
+        expect(subject.lookup("HelloService")).to be_nil
       end
 
       it "should not return flatlined servers" do
@@ -209,7 +208,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         send_beacon(:flatline, echo_server)
 
         uuids = 100.times.map { subject.lookup("EchoService").uuid }
-        uuids.count("combo").should eq 100
+        expect(uuids.count("combo")).to eq 100
       end
 
       it "should return up-to-date listings" do
@@ -217,13 +216,13 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         echo_server.port = "7777"
         send_beacon(:heartbeat, echo_server)
 
-        subject.lookup("EchoService").port.should eq "7777"
+        expect(subject.lookup("EchoService").port).to eq "7777"
       end
 
       context 'when given service identifier is a class name' do
         it 'returns the listing corresponding to the class name' do
           send_beacon(:heartbeat, echo_server)
-          subject.lookup(EchoService).uuid.should eq echo_server.uuid
+          expect(subject.lookup(EchoService).uuid).to eq echo_server.uuid
         end
       end
     end
@@ -233,13 +232,13 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         send_beacon(:heartbeat, echo_server)
         send_beacon(:heartbeat, combo_server)
         subject.restart
-        subject.lookup("EchoService").should be_nil
+        expect(subject.lookup("EchoService")).to be_nil
       end
     end
 
     describe "#running" do
       it "should be true" do
-        subject.should be_running
+        expect(subject).to be_running
       end
     end
 
@@ -248,12 +247,12 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         send_beacon(:heartbeat, echo_server)
         send_beacon(:heartbeat, combo_server)
         subject.stop
-        subject.lookup("EchoService").should be_nil
+        expect(subject.lookup("EchoService")).to be_nil
       end
 
       it "should stop the server" do
         subject.stop
-        subject.should_not be_running
+        expect(subject).to_not be_running
       end
     end
   end

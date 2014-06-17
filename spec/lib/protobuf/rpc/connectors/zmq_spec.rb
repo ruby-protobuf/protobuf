@@ -12,20 +12,11 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
     :port => "9400"
   }}
 
-  let(:socket_double) do
-    sm = double(::ZMQ::Socket)
-    sm.stub(:connect).and_return(0)
-    sm
-  end
-
-  let(:zmq_context_double) do
-    zc = double(::ZMQ::Context)
-    zc.stub(:socket).and_return(socket_double)
-    zc
-  end
+  let(:socket_double) { double(::ZMQ::Socket, :connect => 0) }
+  let(:zmq_context_double) { double(::ZMQ::Context, :socket => socket_double) }
 
   before do
-    ::ZMQ::Context.stub(:new).and_return(zmq_context_double)
+    allow(::ZMQ::Context).to receive(:new).and_return(zmq_context_double)
   end
 
   before(:all) do
@@ -42,19 +33,17 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
     let(:listings) { [listing] }
     let(:running?) { true }
 
-    before do
-      subject.stub(:service_directory) { service_directory }
-    end
+    before { allow(subject).to receive(:service_directory).and_return(service_directory) }
 
     context "when the service directory is running" do
       it "searches the service directory" do
-        service_directory.stub(:all_listings_for).and_return(listings)
-        subject.send(:lookup_server_uri).should eq "tcp://127.0.0.2:9399"
+        allow(service_directory).to receive(:all_listings_for).and_return(listings)
+        expect(subject.send(:lookup_server_uri)).to eq "tcp://127.0.0.2:9399"
       end
 
       it "defaults to the options" do
-        service_directory.stub(:all_listings_for).and_return([])
-        subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
+        allow(service_directory).to receive(:all_listings_for).and_return([])
+        expect(subject.send(:lookup_server_uri)).to eq "tcp://127.0.0.1:9400"
       end
     end
 
@@ -62,21 +51,21 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       let(:running?) { false }
 
       it "defaults to the options" do
-        service_directory.stub(:all_listings_for).and_return([])
-        subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
+        allow(service_directory).to receive(:all_listings_for).and_return([])
+        expect(subject.send(:lookup_server_uri)).to eq "tcp://127.0.0.1:9400"
       end
     end
 
     it "checks if the server is alive" do
-      service_directory.stub(:all_listings_for).and_return([])
-      subject.should_receive(:host_alive?).with("127.0.0.1") { true }
-      subject.send(:lookup_server_uri).should eq "tcp://127.0.0.1:9400"
+      allow(service_directory).to receive(:all_listings_for).and_return([])
+      expect(subject).to receive(:host_alive?).with("127.0.0.1") { true }
+      expect(subject.send(:lookup_server_uri)).to eq "tcp://127.0.0.1:9400"
     end
 
     context "when no host is alive" do
       it "raises an error" do
-        service_directory.stub(:all_listings_for).and_return(listings)
-        subject.stub(:host_alive?).and_return(false)
+        allow(service_directory).to receive(:all_listings_for).and_return(listings)
+        allow(subject).to receive(:host_alive?).and_return(false)
         expect { subject.send(:lookup_server_uri) }.to raise_error
       end
     end
@@ -90,11 +79,11 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       end
 
       it "returns true" do
-        subject.send(:host_alive?, "yip.yip").should be_true
+        expect(subject.send(:host_alive?, "yip.yip")).to be_truthy
       end
 
       it "does not attempt a connection" do
-        TCPSocket.should_not_receive(:new)
+        expect(TCPSocket).not_to receive(:new)
         subject.send(:host_alive?, "blargh.com")
       end
     end
@@ -105,20 +94,20 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       end
 
       it "returns true when the connection succeeds" do
-        TCPSocket.should_receive(:new).with("huzzah.com", 3307) { double(:close => nil) }
-        subject.send(:host_alive?, "huzzah.com").should be_true
+        expect(TCPSocket).to receive(:new).with("huzzah.com", 3307).and_return(double(:close => nil))
+        expect(subject.send(:host_alive?, "huzzah.com")).to be_truthy
       end
 
       it "returns false when the connection fails" do
-        TCPSocket.should_receive(:new).with("hayoob.com", 3307).and_raise(Errno::ECONNREFUSED)
-        subject.send(:host_alive?, "hayoob.com").should be_false
+        expect(TCPSocket).to receive(:new).with("hayoob.com", 3307).and_raise(Errno::ECONNREFUSED)
+        expect(subject.send(:host_alive?, "hayoob.com")).to be_falsey
       end
 
       it "closes the socket" do
         socket = double("TCPSocket")
-        socket.should_receive(:close)
-        TCPSocket.should_receive(:new).with("absorbalof.com", 3307) { socket }
-        subject.send(:host_alive?, "absorbalof.com").should be_true
+        expect(socket).to receive(:close)
+        expect(TCPSocket).to receive(:new).with("absorbalof.com", 3307).and_return(socket)
+        expect(subject.send(:host_alive?, "absorbalof.com")).to be_truthy
       end
     end
   end

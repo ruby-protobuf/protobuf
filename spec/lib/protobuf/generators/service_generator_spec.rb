@@ -29,13 +29,13 @@ end
 
     it 'compiles the service and it\'s rpc methods' do
       subject.compile
-      subject.to_s.should eq(compiled)
+      expect(subject.to_s).to eq(compiled)
     end
   end
 
   describe '#build_method' do
     it 'returns a string identifying the given method descriptor' do
-      subject.build_method(service.method.first).should eq("rpc :search, FooRequest, FooResponse")
+      expect(subject.build_method(service.method.first)).to eq("rpc :search, FooRequest, FooResponse")
     end
   end
 

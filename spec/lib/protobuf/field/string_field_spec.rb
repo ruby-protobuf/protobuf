@@ -27,18 +27,18 @@ describe ::Protobuf::Field::StringField do
       source_string = "foo"
       proto = ::Test::Resource.new(:name => source_string)
       proto.encode
-      proto.name.should eq source_string
+      expect(proto.name).to eq source_string
       proto.encode
-      proto.name.should eq source_string
+      expect(proto.name).to eq source_string
     end
 
     it 'does not alter unicode string values after encoding multiple times' do
       source_string = "¢"
       proto = ::Test::Resource.new(:name => source_string)
       proto.encode
-      proto.name.should eq source_string
+      expect(proto.name).to eq source_string
       proto.encode
-      proto.name.should eq source_string
+      expect(proto.name).to eq source_string
     end
   end
 

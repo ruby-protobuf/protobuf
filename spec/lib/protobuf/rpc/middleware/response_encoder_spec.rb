@@ -17,12 +17,12 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
   describe "#call" do
     it "encodes the response" do
       stack_env = subject.call(env)
-      stack_env.encoded_response.should eq encoded_response
+      expect(stack_env.encoded_response).to eq encoded_response
     end
 
     it "calls the stack" do
       stack_env = subject.call(env)
-      stack_env.response.should eq response
+      expect(stack_env.response).to eq response
     end
 
     context "when response is responds to :to_hash" do
@@ -31,7 +31,7 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
 
       it "sets Env#response" do
         stack_env = subject.call(env)
-        stack_env.response.should eq response
+        expect(stack_env.response).to eq response
       end
     end
 
@@ -41,7 +41,7 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
 
       it "sets Env#response" do
         stack_env = subject.call(env)
-        stack_env.response.should eq response
+        expect(stack_env.response).to eq response
       end
     end
 
@@ -60,12 +60,12 @@ describe Protobuf::Rpc::Middleware::ResponseEncoder do
 
       it "wraps and encodes the response" do
         stack_env = subject.call(env)
-        stack_env.encoded_response.should eq encoded_response
+        expect(stack_env.encoded_response).to eq encoded_response
       end
     end
 
     context "when encoding fails" do
-      before { Protobuf::Socketrpc::Response.any_instance.stub(:encode).and_raise(RuntimeError) }
+      before { allow_any_instance_of(Protobuf::Socketrpc::Response).to receive(:encode).and_raise(RuntimeError) }
 
       it "raises a bad request data exception" do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::PbError)

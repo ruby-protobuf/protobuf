@@ -38,12 +38,12 @@ describe Protobuf::Rpc::Middleware::Logger do
 
   describe "#call" do
     it "calls the stack" do
-      app.should_receive(:call).with(env)
+      expect(app).to receive(:call).with(env).and_return(env)
       subject.call(env)
     end
 
     it "returns the env" do
-      subject.call(env).should eq env
+      expect(subject.call(env)).to eq env
     end
   end
 end

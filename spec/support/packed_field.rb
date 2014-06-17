@@ -16,7 +16,7 @@ if defined?(RSpec)
 
     subject { PackableFieldTest.get_field(field_name) }
 
-    it { should be_packed }
+    specify { expect(subject).to be_packed }
 
   end
 end

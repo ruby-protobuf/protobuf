@@ -6,7 +6,7 @@ describe Protobuf::Message do
     let(:message) { ::Test::Resource.new(:name => "Jim") }
 
     it 'creates a new message object decoded from the given bytes' do
-      ::Test::Resource.decode(message.encode).should eq message
+      expect(::Test::Resource.decode(message.encode)).to eq message
     end
   end
 
@@ -62,41 +62,41 @@ describe Protobuf::Message do
     let(:values) { { :name => "Jim" } }
 
     it 'creates a new message object with the given values and returns the encoded bytes' do
-      ::Test::Resource.encode(values).should eq ::Test::Resource.new(values).encode
+      expect(::Test::Resource.encode(values)).to eq ::Test::Resource.new(values).encode
     end
   end
 
   describe '#initialize' do
     it "initializes the enum getter to 0" do
       test_enum = Test::EnumTestMessage.new
-      test_enum.non_default_enum.should eq(0)
+      expect(test_enum.non_default_enum).to eq(0)
     end
 
     it "exposes the enum getter raw value through ! method" do
       test_enum = Test::EnumTestMessage.new
-      test_enum.non_default_enum!.should be_nil
+      expect(test_enum.non_default_enum!).to be_nil
     end
 
     it "exposes the enum getter raw value through ! method (when set)" do
       test_enum = Test::EnumTestMessage.new
       test_enum.non_default_enum = 1
-      test_enum.non_default_enum!.should eq(1)
+      expect(test_enum.non_default_enum!).to eq(1)
     end
 
     it "does not try to set attributes which have nil values" do
-      Test::EnumTestMessage.any_instance.should_not_receive("non_default_enum=")
+      expect_any_instance_of(Test::EnumTestMessage).not_to receive("non_default_enum=")
       Test::EnumTestMessage.new(:non_default_enum => nil)
     end
 
     it "takes a hash as an initialization argument" do
       test_enum = Test::EnumTestMessage.new(:non_default_enum => 2)
-      test_enum.non_default_enum.should eq(2)
+      expect(test_enum.non_default_enum).to eq(2)
     end
 
     it "initializes with an object that responds to #to_hash" do
       hashie_object = OpenStruct.new(:to_hash => { :non_default_enum => 2 })
       test_enum = Test::EnumTestMessage.new(hashie_object)
-      test_enum.non_default_enum.should eq(2)
+      expect(test_enum.non_default_enum).to eq(2)
     end
   end
 
@@ -114,7 +114,7 @@ describe Protobuf::Message do
 
         message = ::Test::Resource.new(:name => name)
         new_message = ::Test::Resource.decode(message.encode)
-        (new_message.name == name).should be_true
+        expect(new_message.name == name).to be_truthy
       end
 
       it "trims binary when binary is input for string fields" do
@@ -123,7 +123,7 @@ describe Protobuf::Message do
 
         message = ::Test::Resource.new(:name => name)
         new_message = ::Test::Resource.decode(message.encode)
-        (new_message.name == "my name").should be_true
+        expect(new_message.name == "my name").to be_truthy
       end
     end
 
@@ -149,19 +149,19 @@ describe Protobuf::Message do
 
       it "sets the value to nil when empty array is passed" do
         message.repeated_enum = []
-        message.instance_variable_get("@values")[:repeated_enum].should be_nil
+        expect(message.instance_variable_get("@values")[:repeated_enum]).to be_nil
       end
 
       it "does not compact the edit original array" do
         a = [nil].freeze
         message.repeated_enum = a
-        message.repeated_enum.should eq([])
-        a.should eq([nil].freeze)
+        expect(message.repeated_enum).to eq([])
+        expect(a).to eq([nil].freeze)
       end
 
       it "compacts the set array" do
         message.repeated_enum = [nil]
-        message.repeated_enum.should eq([])
+        expect(message.repeated_enum).to eq([])
       end
 
       it "raises TypeError when a non-array replaces it" do
@@ -179,16 +179,16 @@ describe Protobuf::Message do
 
     it "sets the predicate to true when the boolean value is true" do
       subject.active = true
-      subject.active?.should be_true
+      expect(subject.active?).to be_truthy
     end
 
     it "sets the predicate to false when the boolean value is false" do
       subject.active = false
-      subject.active?.should be_false
+      expect(subject.active?).to be_falsey
     end
 
     it "does not put predicate methods on non-boolean fields" do
-      Test::ResourceFindRequest.new(:name => "resource").should_not respond_to(:name?)
+      expect(Test::ResourceFindRequest.new(:name => "resource")).to_not respond_to(:name?)
     end
   end
 
@@ -196,11 +196,11 @@ describe Protobuf::Message do
     subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
 
     it "is false when the message does not have the field" do
-      subject.respond_to_and_has?(:other_field).should be_false
+      expect(subject.respond_to_and_has?(:other_field)).to be_falsey
     end
 
     it "is true when the message has the field" do
-      subject.respond_to_and_has?(:non_default_enum).should be_true
+      expect(subject.respond_to_and_has?(:non_default_enum)).to be_truthy
     end
   end
 
@@ -208,38 +208,38 @@ describe Protobuf::Message do
     subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
 
     it "is false when the message does not have the field" do
-      subject.respond_to_and_has_and_present?(:other_field).should be_false
+      expect(subject.respond_to_and_has_and_present?(:other_field)).to be_falsey
     end
 
     it "is false when the field is repeated and a value is not present" do
-      subject.respond_to_and_has_and_present?(:repeated_enums).should be_false
+      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be_falsey
     end
 
     it "is false when the field is repeated and the value is empty array" do
       subject.repeated_enums = []
-      subject.respond_to_and_has_and_present?(:repeated_enums).should be_false
+      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be_falsey
     end
 
     it "is true when the field is repeated and a value is present" do
       subject.repeated_enums = [2]
-      subject.respond_to_and_has_and_present?(:repeated_enums).should be_true
+      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be_truthy
     end
 
     it "is true when the message has the field" do
-      subject.respond_to_and_has_and_present?(:non_default_enum).should be_true
+      expect(subject.respond_to_and_has_and_present?(:non_default_enum)).to be_truthy
     end
 
     context "#API" do
       subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
 
-      it { should respond_to(:respond_to_and_has_and_present?) }
-      it { should respond_to(:responds_to_and_has_and_present?) }
-      it { should respond_to(:responds_to_has?) }
-      it { should respond_to(:respond_to_has?) }
-      it { should respond_to(:respond_to_has_present?) }
-      it { should respond_to(:responds_to_has_present?) }
-      it { should respond_to(:respond_to_and_has_present?) }
-      it { should respond_to(:responds_to_and_has_present?) }
+      specify { expect(subject).to respond_to(:respond_to_and_has_and_present?) }
+      specify { expect(subject).to respond_to(:responds_to_and_has_and_present?) }
+      specify { expect(subject).to respond_to(:responds_to_has?) }
+      specify { expect(subject).to respond_to(:respond_to_has?) }
+      specify { expect(subject).to respond_to(:respond_to_has_present?) }
+      specify { expect(subject).to respond_to(:responds_to_has_present?) }
+      specify { expect(subject).to respond_to(:respond_to_and_has_present?) }
+      specify { expect(subject).to respond_to(:responds_to_and_has_present?) }
     end
 
   end
@@ -248,24 +248,24 @@ describe Protobuf::Message do
     context 'generating values for an ENUM field' do
       it 'converts the enum to its tag representation' do
         hash = Test::EnumTestMessage.new(:non_default_enum => :TWO).to_hash
-        hash.should eq({ :non_default_enum => 2 })
+        expect(hash).to eq({ :non_default_enum => 2 })
       end
 
       it 'does not populate default values' do
         hash = Test::EnumTestMessage.new.to_hash
-        hash.should eq(Hash.new)
+        expect(hash).to eq(Hash.new)
       end
 
       it 'converts repeated enum fields to an array of the tags' do
         hash = Test::EnumTestMessage.new(:repeated_enums => [ :ONE, :TWO, :TWO, :ONE ]).to_hash
-        hash.should eq({ :repeated_enums => [ 1, 2, 2, 1 ] })
+        expect(hash).to eq({ :repeated_enums => [ 1, 2, 2, 1 ] })
       end
     end
 
     context 'generating values for a Message field' do
       it 'recursively hashes field messages' do
         hash = Test::Nested.new({ :resource => { :name => 'Nested' } }).to_hash
-        hash.should eq({ :resource => { :name => 'Nested' } })
+        expect(hash).to eq({ :resource => { :name => 'Nested' } })
       end
 
       it 'recursively hashes a repeated set of messages' do
@@ -274,7 +274,7 @@ describe Protobuf::Message do
           Test::Resource.new(:name => 'Resource 2')
         ])
 
-        proto.to_hash.should eq({ :multiple_resources => [ { :name => 'Resource 1' },
+        expect(proto.to_hash).to eq({ :multiple_resources => [ { :name => 'Resource 1' },
                                                            { :name => 'Resource 2' } ] })
 
       end
@@ -286,7 +286,7 @@ describe Protobuf::Message do
       ::Test::ResourceFindRequest.new({ :name => 'Test Name', :active => false })
     end
 
-    its(:to_json) { should eq '{"name":"Test Name","active":false}' }
+    specify { expect(subject.to_json).to eq '{"name":"Test Name","active":false}' }
   end
 
   describe '.to_json' do
@@ -330,8 +330,8 @@ describe Protobuf::Message do
     end
 
     it 'returns nil when field is not found' do
-      ::Test::Resource.get_extension_field(-1).should be_nil
-      ::Test::Resource.get_extension_field(nil).should be_nil
+      expect(::Test::Resource.get_extension_field(-1)).to be_nil
+      expect(::Test::Resource.get_extension_field(nil)).to be_nil
     end
   end
 
@@ -360,8 +360,8 @@ describe Protobuf::Message do
     end
 
     it 'returns nil when field is not defined' do
-      ::Test::Resource.get_field(-1).should be_nil
-      ::Test::Resource.get_field(nil).should be_nil
+      expect(::Test::Resource.get_field(-1)).to be_nil
+      expect(::Test::Resource.get_field(nil)).to be_nil
     end
   end
 

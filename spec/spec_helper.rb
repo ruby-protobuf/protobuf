@@ -6,6 +6,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup :default, :development, :test
 require 'pry'
+# require 'rspec/its'
 
 $: << ::File.expand_path('../..', __FILE__)
 $: << ::File.expand_path('../support', __FILE__)
