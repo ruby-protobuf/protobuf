@@ -1,0 +1,12 @@
+// definitions/example/reverse.proto
+package example;
+
+message ReverseRequest {
+  required string input = 1;
+}
+message ReverseResponse {
+  required string reversed = 1;
+}
+service ReverseService {
+  rpc Reverse (ReverseRequest) returns (ReverseResponse);
+}

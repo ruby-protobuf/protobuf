@@ -16,6 +16,29 @@ The [wiki][] contains in-depth guides on the various ways to use this gem
 including [compiling definitions][], [object APIs][], [services][], [clients][], and even
 an [API roadmap][].
 
+## Examples
+
+In two different terminals run the follow pairs of commands:
+
+Socket:
+
+    bundle exec bin/rpc_server start --socket ./examples/lib/example/reverse-service.rb
+    bundle exec examples/bin/reverse-client-socket '!skrow tekcos'
+
+ZeroMQ:
+
+    bundle exec bin/rpc_server start --zmq ./examples/lib/example/reverse-service.rb
+    bundle exec examples/bin/reverse-client-zmq '!skrow qmorez'
+
+HTTP:
+
+    bundle exec bin/rpc_server start --http ./examples/lib/example/reverse-service.rb
+    bundle exec examples/bin/reverse-client-http '!skrow ptth'
+
+Alternatively, start the server as a Rack app using a `rackup` and a standard `config.ru`:
+
+    bundle exec rackup examples/config.ru -p 9399
+
 ## Changelog
 
 See recent changes in the [release notes][] or the [changelog][].
