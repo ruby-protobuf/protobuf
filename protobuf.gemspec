@@ -24,6 +24,8 @@ require "protobuf/version"
   s.add_dependency 'multi_json'
   s.add_dependency 'thor'
 
+  s.add_development_dependency 'rack'
+  s.add_development_dependency 'faraday'
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'pry-nav'
   s.add_development_dependency 'rake'

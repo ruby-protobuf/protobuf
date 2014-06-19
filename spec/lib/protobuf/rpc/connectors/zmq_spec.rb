@@ -3,6 +3,10 @@ require 'protobuf/zmq'
 
 describe ::Protobuf::Rpc::Connectors::Zmq do
   subject { described_class.new(options) }
+  
+  it_behaves_like "a Protobuf Connector"
+
+  specify{ described_class.include?(Protobuf::Rpc::Connectors::Common).should be_truthy }
 
   let(:options) {{
     :service => "Test::Service",
