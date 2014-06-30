@@ -63,6 +63,10 @@ module Protobuf
         true
       end
 
+      def coerce!(value)
+        value
+      end
+
       def enum?
         false
       end
@@ -226,7 +230,7 @@ module Protobuf
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
               @values.delete(field.name)
             elsif field.acceptable?(val)
-              @values[field.name] = val
+              @values[field.name] = field.coerce!(val)
             else
               raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
