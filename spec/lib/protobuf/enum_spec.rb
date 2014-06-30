@@ -236,4 +236,31 @@ describe Protobuf::Enum do
   context 'when coercing from integer' do
     specify { expect(0).to eq(Test::StatusType::PENDING) }
   end
+
+  context 'negative enum values' do
+    before(:all) do
+      EnumNegativeValueTest = ::Class.new(::Protobuf::Enum) do
+        define :POSITIVE, 1
+        define :ZERO, 0
+        define :NEGATIVE, -1
+      end
+
+      NegativeEnumMessageTest = ::Class.new(::Protobuf::Message) do
+        optional EnumNegativeValueTest, :negative_enum_test, 1
+      end
+    end
+
+    it 'should encode a negative enum value' do
+      expect {
+        NegativeEnumMessageTest.encode(:negative_enum_test => -1)
+      }.not_to raise_exception
+    end
+
+    it 'should decode a negative enum value' do
+      expect {
+        encoded = NegativeEnumMessageTest.encode(:negative_enum_test => -1)
+        NegativeEnumMessageTest.decode(encoded)
+      }.not_to raise_exception
+    end
+  end
 end
