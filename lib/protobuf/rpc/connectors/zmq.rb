@@ -110,7 +110,7 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          5.times do
+          10.times do
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
@@ -120,6 +120,8 @@ module Protobuf
             host = options[:host]
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
+
+            sleep(1.0/60.0)
           end
 
           raise "Host not found for service #{service}"
@@ -129,6 +131,8 @@ module Protobuf
           return true unless ping_port_enabled?
 
           socket = TCPSocket.new(host, ping_port.to_i)
+          linger = [1,0].pack('ii')
+          socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER, linger)
 
           true
         rescue
