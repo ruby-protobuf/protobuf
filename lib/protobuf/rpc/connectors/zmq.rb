@@ -18,7 +18,6 @@ module Protobuf
         # Class Constants
         #
         CLIENT_RETRIES = (ENV['PB_CLIENT_RETRIES'] || 3)
-        LINGER = [0,0].pack('ii')
 
         ##
         # Class Methods
