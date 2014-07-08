@@ -5,8 +5,8 @@ module Protobuf
   module Rpc
     module Connectors
       class Zmq < Base
-
         RequestTimeout = Class.new(RuntimeError)
+        ZmqRecoverableError = Class.new(RuntimeError)
 
         ##
         # Included Modules
@@ -78,15 +78,19 @@ module Protobuf
               log_debug { sign_message("Connection established to #{server_uri}") }
 
               if first_alive_load_balance?
-                check_available_response = ""
-                socket.setsockopt(::ZMQ::RCVTIMEO, 100)
-                socket.setsockopt(::ZMQ::SNDTIMEO, 100)
+                begin
+                  check_available_response = ""
+                  socket.setsockopt(::ZMQ::RCVTIMEO, 50)
+                  socket.setsockopt(::ZMQ::SNDTIMEO, 50)
 
-                zmq_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
-                zmq_error_check(socket.recv_string(check_available_response), :socket_recv_string)
+                  zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
+                  zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
 
-                if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
-                  zmq_error_check(socket.close, :socket_close)
+                  if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
+                    zmq_recoverable_error_check(socket.close, :socket_close)
+                  end
+                rescue ZmqRecoverableError
+                  socket = nil # couldn't make a connection and need to try again
                 end
               end
             end
@@ -200,6 +204,16 @@ module Protobuf
 
             #{caller(1).join($/)}
             ERROR
+          end
+        end
+
+        def zmq_recoverable_error_check(return_code, source)
+          unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
+            raise ZmqRecoverableError, <<-ERROR
+              Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+
+              #{caller(1).join($/)}
+              ERROR
           end
         end
       end
