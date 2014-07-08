@@ -5,20 +5,18 @@ module Protobuf
   module Rpc
     module Connectors
       class Zmq < Base
-
         RequestTimeout = Class.new(RuntimeError)
+        ZmqRecoverableError = Class.new(RuntimeError)
 
         ##
         # Included Modules
         #
-
         include Protobuf::Rpc::Connectors::Common
         include Protobuf::Logger::LogMethods
 
         ##
         # Class Constants
         #
-
         CLIENT_RETRIES = (ENV['PB_CLIENT_RETRIES'] || 3)
 
         ##
@@ -68,21 +66,27 @@ module Protobuf
 
           begin
             server_uri = lookup_server_uri
-
             socket = zmq_context.socket(::ZMQ::REQ)
-            socket.setsockopt(::ZMQ::LINGER, 0)
 
-            log_debug { sign_message("Establishing connection: #{server_uri}") }
-            zmq_error_check(socket.connect(server_uri), :socket_connect)
-            log_debug { sign_message("Connection established to #{server_uri}") }
+            if socket # Make sure the context builds the socket
+              socket.setsockopt(::ZMQ::LINGER, 0)
 
-            if first_alive_load_balance?
-              check_available_response = ""
-              zmq_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
-              zmq_error_check(socket.recv_string(check_available_response), :socket_recv_string)
+              log_debug { sign_message("Establishing connection: #{server_uri}") }
+              zmq_error_check(socket.connect(server_uri), :socket_connect)
+              log_debug { sign_message("Connection established to #{server_uri}") }
 
-              if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
-                zmq_error_check(socket.close, :socket_close)
+              if first_alive_load_balance?
+                begin
+                  check_available_response = ""
+                  zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
+                  zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
+
+                  if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
+                    zmq_recoverable_error_check(socket.close, :socket_close)
+                  end
+                rescue ZmqRecoverableError
+                  socket = nil # couldn't make a connection and need to try again
+                end
               end
             end
           end while socket.try(:socket).nil?
@@ -101,7 +105,7 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          50.times do
+          5.times do
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
@@ -111,8 +115,6 @@ module Protobuf
             host = options[:host]
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
-
-            sleep(1.0/10.0) # not sure why sleeping at all, but should be way less than 1 second
           end
 
           raise "Host not found for service #{service}"
@@ -120,7 +122,6 @@ module Protobuf
 
         def host_alive?(host)
           return true unless ping_port_enabled?
-
           socket = TCPSocket.new(host, ping_port.to_i)
 
           true
@@ -197,6 +198,16 @@ module Protobuf
 
             #{caller(1).join($/)}
             ERROR
+          end
+        end
+
+        def zmq_recoverable_error_check(return_code, source)
+          unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
+            raise ZmqRecoverableError, <<-ERROR
+              Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+
+              #{caller(1).join($/)}
+              ERROR
           end
         end
       end

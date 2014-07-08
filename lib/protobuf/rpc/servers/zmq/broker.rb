@@ -102,7 +102,7 @@ module Protobuf
           address, _, message, *frames = read_from_frontend
 
           if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
-            if @idle_workers.any? || local_queue.empty?
+            if @idle_workers.any? || local_queue.size < 5 # Should make queue a SizedQueue and allow users to configure queue size
               write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
               write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
