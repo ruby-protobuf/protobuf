@@ -79,9 +79,6 @@ module Protobuf
               if first_alive_load_balance?
                 begin
                   check_available_response = ""
-                  socket.setsockopt(::ZMQ::RCVTIMEO, 10)
-                  socket.setsockopt(::ZMQ::SNDTIMEO, 10)
-
                   zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
                   zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
 
