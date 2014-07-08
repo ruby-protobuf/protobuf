@@ -11,15 +11,14 @@ module Protobuf
         ##
         # Included Modules
         #
-
         include Protobuf::Rpc::Connectors::Common
         include Protobuf::Logger::LogMethods
 
         ##
         # Class Constants
         #
-
         CLIENT_RETRIES = (ENV['PB_CLIENT_RETRIES'] || 3)
+        LINGER = [0,0].pack('ii')
 
         ##
         # Class Methods
@@ -80,8 +79,8 @@ module Protobuf
               if first_alive_load_balance?
                 begin
                   check_available_response = ""
-                  socket.setsockopt(::ZMQ::RCVTIMEO, 50)
-                  socket.setsockopt(::ZMQ::SNDTIMEO, 50)
+                  socket.setsockopt(::ZMQ::RCVTIMEO, 10)
+                  socket.setsockopt(::ZMQ::SNDTIMEO, 10)
 
                   zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
                   zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
@@ -110,7 +109,7 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          10.times do
+          5.times do
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
@@ -120,8 +119,6 @@ module Protobuf
             host = options[:host]
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
-
-            sleep(1.0/60.0)
           end
 
           raise "Host not found for service #{service}"
@@ -130,9 +127,13 @@ module Protobuf
         def host_alive?(host)
           return true unless ping_port_enabled?
 
-          socket = TCPSocket.new(host, ping_port.to_i)
-          linger = [1,0].pack('ii')
-          socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER, linger)
+          socket = Socket.new(:INET, :STREAM)
+          socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_LINGER, LINGER)
+          socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
+          socket.setsockopt(:SOCKET, :SNDBUF, 1)
+          socket.setsockopt(:SOCKET, :REUSEADDR, true)
+          address = Socket.sockaddr_in(ping_port.to_i, host)
+          socket.connect(address)
 
           true
         rescue
