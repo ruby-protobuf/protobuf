@@ -16,6 +16,12 @@ module Protobuf
         super(value.to_i)
       end
 
+      def decode(value)
+        if acceptable?(value)
+          value
+        end
+      end
+
       def enum?
         true
       end

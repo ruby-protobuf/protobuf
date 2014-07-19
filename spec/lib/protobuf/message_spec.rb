@@ -8,6 +8,65 @@ describe Protobuf::Message do
     it 'creates a new message object decoded from the given bytes' do
       expect(::Test::Resource.decode(message.encode)).to eq message
     end
+
+    context 'with a new enum value' do
+      let(:older_message) do
+        Class.new(Protobuf::Message) do
+          enum_class = Class.new(::Protobuf::Enum) do
+            define :YAY, 1
+          end
+
+          optional enum_class, :enum_field, 1
+          repeated enum_class, :enum_list, 2
+        end
+      end
+
+      let(:newer_message) do
+        Class.new(Protobuf::Message) do
+          enum_class = Class.new(::Protobuf::Enum) do
+            define :YAY, 1
+            define :HOORAY, 2
+          end
+
+          optional enum_class, :enum_field, 1
+          repeated enum_class, :enum_list, 2
+        end
+      end
+
+      context 'with a singular field' do
+        it 'treats the field as if it was unset when decoding' do
+          newer = newer_message.new(:enum_field => :HOORAY).serialize
+
+          expect(older_message.decode(newer).enum_field!).to be_nil
+        end
+
+        it 'rejects an unknown value when using the constructor' do
+          expect { older_message.new(:enum_field => :HOORAY) }.to raise_error
+        end
+
+        it 'rejects an unknown value when the setter' do
+          older = older_message.new
+          expect { older.enum_field = :HOORAY }.to raise_error
+        end
+      end
+
+      context 'with a repeated field' do
+        it 'treats the field as if it was unset when decoding' do
+          newer = newer_message.new(:enum_list => [ :HOORAY ]).serialize
+
+          expect(older_message.decode(newer).enum_list).to eq([])
+        end
+
+        it 'rejects an unknown value when using the constructor' do
+          expect { older_message.new(:enum_list => [ :HOORAY ]) }.to raise_error
+        end
+
+        it 'rejects an unknown value when the setter' do
+          older = older_message.new
+          expect { older.enum_field = [ :HOORAY ] }.to raise_error
+        end
+      end
+    end
   end
 
   describe 'defining a new field' do
