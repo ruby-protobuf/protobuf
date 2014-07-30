@@ -3,7 +3,7 @@ module Protobuf
   class InvalidWireType < Error; end
   class NotInitializedError < Error; end
   class TagCollisionError < Error; end
-  class SerializationError < StandardError; end
-  class FieldNotDefinedError < StandardError; end
-  class DuplicateFieldNameError < StandardError; end
+  class SerializationError < Error; end
+  class FieldNotDefinedError < Error; end
+  class DuplicateFieldNameError < Error; end
 end
