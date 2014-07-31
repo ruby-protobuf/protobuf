@@ -53,8 +53,7 @@ module Protobuf
         if default.is_a?(Symbol)
           type_class.const_get(default)
         else
-          tag = self.class.default
-          type_class.new(self.class.default, type_class.name_for_tag(tag), tag)
+          type_class.enums.first
         end
       end
 
