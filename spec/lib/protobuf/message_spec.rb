@@ -131,6 +131,11 @@ describe Protobuf::Message do
       expect(test_enum.non_default_enum).to eq(0)
     end
 
+    it "initializes the enum getter with a name" do
+      test_enum = Test::EnumTestMessage.new
+      expect { test_enum.non_default_enum.name }.to_not raise_error
+    end
+
     it "exposes the enum getter raw value through ! method" do
       test_enum = Test::EnumTestMessage.new
       expect(test_enum.non_default_enum!).to be_nil
