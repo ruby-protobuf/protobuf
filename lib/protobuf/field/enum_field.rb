@@ -53,7 +53,7 @@ module Protobuf
         if default.is_a?(Symbol)
           type_class.const_get(default)
         else
-          type_class.enums.first
+          type_class.fetch(default) || type_class.enums.first
         end
       end
 
