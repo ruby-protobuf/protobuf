@@ -157,6 +157,55 @@ describe Protobuf::Message do
       test_enum = Test::EnumTestMessage.new(hashie_object)
       expect(test_enum.non_default_enum).to eq(2)
     end
+
+    context 'ignoring unknown fields' do
+      before { ::Protobuf.ignore_unknown_fields = true }
+
+      context 'with valid fields' do
+        let(:values) { { :name => "Jim" } }
+
+        it "does not raise an error" do
+          expect { ::Test::Resource.new(values) }.to_not raise_error
+        end
+      end
+
+      context 'with non-existent field' do
+        let(:values) { { :name => "Jim", :othername => "invalid" } }
+
+        it "does not raise an error" do
+          expect { ::Test::Resource.new(values) }.to_not raise_error
+        end
+      end
+    end
+
+    context 'not ignoring unknown fields' do
+      before { ::Protobuf.ignore_unknown_fields = false }
+      after { ::Protobuf.ignore_unknown_fields = true }
+
+      context 'with valid fields' do
+        let(:values) { { :name => "Jim" } }
+
+        it "does not raise an error" do
+          expect { ::Test::Resource.new(values) }.to_not raise_error
+        end
+      end
+
+      context 'with non-existent field' do
+        let(:values) { { :name => "Jim", :othername => "invalid" } }
+
+        it "raises an error and mentions the erroneous field" do
+          expect { ::Test::Resource.new(values) }.to raise_error(::Protobuf::FieldNotDefinedError, /othername/)
+        end
+
+        context 'with a nil value' do
+          let(:values) { { :name => "Jim", :othername => nil } }
+
+          it "raises an error and mentions the erroneous field" do
+            expect { ::Test::Resource.new(values) }.to raise_error(::Protobuf::FieldNotDefinedError, /othername/)
+          end
+        end
+      end
+    end
   end
 
   describe '#encode' do

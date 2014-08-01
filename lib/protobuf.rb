@@ -83,6 +83,19 @@ module Protobuf
     @_print_deprecation_warnings = !!value
   end
 
+  # Permit unknown field on Message initialization
+  #
+  # Default: true
+  #
+  # Simple boolean to define whether we want to permit unknown fields
+  # on Message intialization; otherwise a ::Protobuf::FieldNotDefinedError is thrown.
+  def self.ignore_unknown_fields?
+    !defined?(@_ignore_unknown_fields) || @_ignore_unknown_fields
+  end
+
+  def self.ignore_unknown_fields=(value)
+    @_ignore_unknown_fields = !!value
+  end
 end
 
 unless ENV.key?('PB_NO_NETWORKING')
