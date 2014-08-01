@@ -75,4 +75,24 @@ describe ::Protobuf do
     end
   end
 
+  describe '.ignore_unknown_fields?' do
+    before do
+      if described_class.instance_variable_defined?(:@_ignore_unknown_fields)
+        described_class.send(:remove_instance_variable, :@_ignore_unknown_fields)
+      end
+    end
+
+    it 'defaults to a true value' do
+      expect(described_class.ignore_unknown_fields?).to be true
+    end
+
+    it 'is settable' do
+      expect {
+        described_class.ignore_unknown_fields = false
+      }.to change {
+        described_class.ignore_unknown_fields?
+      }.from(true).to(false)
+    end
+  end
+
 end

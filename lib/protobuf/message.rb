@@ -30,7 +30,7 @@ module Protobuf
       @values = {}
 
       fields.to_hash.each_pair do |name, value|
-        self[name] = value unless value.nil?
+        self[name] = value
       end
     end
 
@@ -135,7 +135,11 @@ module Protobuf
 
     def []=(name, value)
       if field = self.class.get_field(name, true)
-        __send__(field.setter_method_name, value)
+        __send__(field.setter_method_name, value) unless value.nil?
+      else
+        unless ::Protobuf.ignore_unknown_fields?
+          raise ::Protobuf::FieldNotDefinedError, name
+        end
       end
     end
 
