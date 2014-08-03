@@ -28,7 +28,6 @@ end
 ENV.delete("PB_IGNORE_DEPRECATIONS")
 
 ::RSpec.configure do |c|
-  c.include(::Sander6::CustomMatchers)
   c.mock_with :rspec
 
   c.before(:suite) do
