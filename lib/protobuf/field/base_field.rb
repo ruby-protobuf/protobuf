@@ -19,7 +19,7 @@ module Protobuf
       # Attributes
       #
 
-      attr_reader :default, :default_value, :deprecated, :extension,
+      attr_reader :default, :deprecated, :extension,
                   :getter_method_name, :message_class, :name,
                   :packed, :rule, :setter_method_name,
                   :tag, :type_class
@@ -47,7 +47,6 @@ module Protobuf
         @packed    = repeated? && options.delete(:packed)
         @deprecated = options.delete(:deprecated)
 
-        set_default_value
         warn_excess_options(options) unless options.empty?
         validate_packed_field if packed?
         define_accessor
@@ -71,6 +70,14 @@ module Protobuf
 
       def message?
         false
+      end
+
+      def default_value
+        @default_value ||= case
+                           when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
+                           when required? then nil
+                           when optional? then typed_default_value
+                           end
       end
 
       # Decode +bytes+ and pass to +message_instance+.
@@ -234,14 +241,6 @@ module Protobuf
             end
           end
         end
-      end
-
-      def set_default_value
-        @default_value = case
-                         when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
-                         when required? then nil
-                         when optional? then typed_default_value
-                         end
       end
 
       def typed_default_value
