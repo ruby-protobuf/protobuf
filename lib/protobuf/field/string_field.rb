@@ -8,7 +8,7 @@ module Protobuf
       # Constants
       #
 
-      ENCODING = 'UTF-8'.freeze
+      ENCODING = Encoding::UTF_8
 
       ##
       # Public Instance Methods
