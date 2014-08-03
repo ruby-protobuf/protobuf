@@ -21,8 +21,8 @@ describe Protobuf::Enum do
     end
 
     describe '.aliases_allowed?' do
-      it 'is false when the option is not set' do
-        expect(Test::EnumTestType.aliases_allowed?).to be_falsey
+      it 'is nil when the option is not set' do
+        expect(Test::EnumTestType.aliases_allowed?).to be nil
       end
     end
 
@@ -155,15 +155,15 @@ describe Protobuf::Enum do
 
     describe '.valid_tag?' do
       context 'when tag is defined' do
-        specify { expect(Test::EnumTestType.valid_tag?(tag)).to be_truthy }
+        specify { expect(Test::EnumTestType.valid_tag?(tag)).to be true }
       end
 
       context 'when tag is not defined' do
-        specify { expect(Test::EnumTestType.valid_tag?(300)).to be_falsey }
+        specify { expect(Test::EnumTestType.valid_tag?(300)).to be false }
       end
 
       context 'is true for aliased enums' do
-        specify { expect(EnumAliasTest.valid_tag?(1)).to be_truthy }
+        specify { expect(EnumAliasTest.valid_tag?(1)).to be true }
       end
     end
 

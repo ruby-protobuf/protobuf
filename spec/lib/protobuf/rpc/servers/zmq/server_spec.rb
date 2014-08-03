@@ -22,12 +22,12 @@ describe Protobuf::Rpc::Zmq::Server do
   describe '.running?' do
     it 'returns true if running' do
       subject.instance_variable_set(:@running, true)
-      expect(subject.running?).to be_truthy
+      expect(subject.running?).to be true
     end
 
     it 'returns false if not running' do
       subject.instance_variable_set(:@running, false)
-      expect(subject.running?).to be_falsey
+      expect(subject.running?).to be false
     end
   end
 
@@ -35,7 +35,7 @@ describe Protobuf::Rpc::Zmq::Server do
     it 'sets running to false' do
       subject.instance_variable_set(:@workers, [])
       subject.stop
-      expect(subject.instance_variable_get(:@running)).to be_falsey
+      expect(subject.instance_variable_get(:@running)).to be false
     end
   end
 end

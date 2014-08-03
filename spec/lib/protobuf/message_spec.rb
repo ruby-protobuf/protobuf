@@ -222,7 +222,7 @@ describe Protobuf::Message do
 
         message = ::Test::Resource.new(:name => name)
         new_message = ::Test::Resource.decode(message.encode)
-        expect(new_message.name == name).to be_truthy
+        expect(new_message.name == name).to be true
       end
 
       it "trims binary when binary is input for string fields" do
@@ -231,7 +231,7 @@ describe Protobuf::Message do
 
         message = ::Test::Resource.new(:name => name)
         new_message = ::Test::Resource.decode(message.encode)
-        expect(new_message.name == "my name").to be_truthy
+        expect(new_message.name == "my name").to be true
       end
     end
 
@@ -287,12 +287,12 @@ describe Protobuf::Message do
 
     it "sets the predicate to true when the boolean value is true" do
       subject.active = true
-      expect(subject.active?).to be_truthy
+      expect(subject.active?).to be true
     end
 
     it "sets the predicate to false when the boolean value is false" do
       subject.active = false
-      expect(subject.active?).to be_falsey
+      expect(subject.active?).to be false
     end
 
     it "does not put predicate methods on non-boolean fields" do
@@ -304,11 +304,11 @@ describe Protobuf::Message do
     subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
 
     it "is false when the message does not have the field" do
-      expect(subject.respond_to_and_has?(:other_field)).to be_falsey
+      expect(subject.respond_to_and_has?(:other_field)).to be false
     end
 
     it "is true when the message has the field" do
-      expect(subject.respond_to_and_has?(:non_default_enum)).to be_truthy
+      expect(subject.respond_to_and_has?(:non_default_enum)).to be true
     end
   end
 
@@ -316,25 +316,25 @@ describe Protobuf::Message do
     subject { Test::EnumTestMessage.new(:non_default_enum => 2) }
 
     it "is false when the message does not have the field" do
-      expect(subject.respond_to_and_has_and_present?(:other_field)).to be_falsey
+      expect(subject.respond_to_and_has_and_present?(:other_field)).to be false
     end
 
     it "is false when the field is repeated and a value is not present" do
-      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be_falsey
+      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be false
     end
 
     it "is false when the field is repeated and the value is empty array" do
       subject.repeated_enums = []
-      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be_falsey
+      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be false
     end
 
     it "is true when the field is repeated and a value is present" do
       subject.repeated_enums = [2]
-      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be_truthy
+      expect(subject.respond_to_and_has_and_present?(:repeated_enums)).to be true
     end
 
     it "is true when the message has the field" do
-      expect(subject.respond_to_and_has_and_present?(:non_default_enum)).to be_truthy
+      expect(subject.respond_to_and_has_and_present?(:non_default_enum)).to be true
     end
 
     context "#API" do

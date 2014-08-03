@@ -79,7 +79,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       end
 
       it "returns true" do
-        expect(subject.send(:host_alive?, "yip.yip")).to be_truthy
+        expect(subject.send(:host_alive?, "yip.yip")).to be true
       end
 
       it "does not attempt a connection" do
@@ -95,19 +95,19 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
 
       it "returns true when the connection succeeds" do
         expect(TCPSocket).to receive(:new).with("huzzah.com", 3307).and_return(double(:close => nil))
-        expect(subject.send(:host_alive?, "huzzah.com")).to be_truthy
+        expect(subject.send(:host_alive?, "huzzah.com")).to be true
       end
 
       it "returns false when the connection fails" do
         expect(TCPSocket).to receive(:new).with("hayoob.com", 3307).and_raise(Errno::ECONNREFUSED)
-        expect(subject.send(:host_alive?, "hayoob.com")).to be_falsey
+        expect(subject.send(:host_alive?, "hayoob.com")).to be false
       end
 
       it "closes the socket" do
         socket = double("TCPSocket")
         expect(socket).to receive(:close)
         expect(TCPSocket).to receive(:new).with("absorbalof.com", 3307).and_return(socket)
-        expect(subject.send(:host_alive?, "absorbalof.com")).to be_truthy
+        expect(subject.send(:host_alive?, "absorbalof.com")).to be true
       end
     end
   end

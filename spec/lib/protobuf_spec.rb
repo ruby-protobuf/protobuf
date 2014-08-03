@@ -46,12 +46,12 @@ describe ::Protobuf do
     before { described_class.instance_variable_set(:@_gc_pause_server_request, nil) }
 
     it 'defaults to a false value' do
-      expect(described_class.gc_pause_server_request?).to be_falsey
+      expect(described_class.gc_pause_server_request?).to be false
     end
 
     it 'is settable' do
       described_class.gc_pause_server_request = true
-      expect(described_class.gc_pause_server_request?).to be_truthy
+      expect(described_class.gc_pause_server_request?).to be true
     end
   end
 
@@ -59,18 +59,18 @@ describe ::Protobuf do
     before { described_class.instance_variable_set(:@_print_deprecation_warnings, nil) }
 
     it 'defaults to a true value' do
-      expect(described_class.print_deprecation_warnings?).to be_truthy
+      expect(described_class.print_deprecation_warnings?).to be true
     end
 
     it 'is settable' do
       described_class.print_deprecation_warnings = false
-      expect(described_class.print_deprecation_warnings?).to be_falsey
+      expect(described_class.print_deprecation_warnings?).to be false
     end
 
     context 'when ENV["PB_IGNORE_DEPRECATIONS"] present' do
       it 'defaults to a false value' do
         ENV['PB_IGNORE_DEPRECATIONS'] = '1'
-        expect(described_class.print_deprecation_warnings?).to be_falsey
+        expect(described_class.print_deprecation_warnings?).to be false
       end
     end
   end

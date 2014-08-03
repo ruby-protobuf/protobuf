@@ -85,13 +85,13 @@ describe Protobuf::Rpc::Service do
 
       context 'when given name is a pre-defined rpc method' do
         it 'returns true' do
-          expect(subject.rpc_method?(:delete)).to be_truthy
+          expect(subject.rpc_method?(:delete)).to be true
         end
       end
 
       context 'when given name is not a pre-defined rpc method' do
         it 'returns false' do
-          expect(subject.rpc_method?(:zoobaboo)).to be_falsey
+          expect(subject.rpc_method?(:zoobaboo)).to be false
         end
       end
     end
