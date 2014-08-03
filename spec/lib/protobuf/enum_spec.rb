@@ -230,7 +230,7 @@ describe Protobuf::Enum do
 
   context 'when coercing from enum' do
     subject { Test::StatusType::PENDING }
-    it { should eq(0) }
+    it { is_expected.to eq(0) }
   end
 
   context 'when coercing from integer' do

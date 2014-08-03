@@ -104,13 +104,13 @@ describe Protobuf::Logger do
 
       subject { MyTestClass.new }
 
-      it { should respond_to(:log_debug) }
-      it { should respond_to(:log_info) }
-      it { should respond_to(:log_warn) }
-      it { should respond_to(:log_error) }
-      it { should respond_to(:log_fatal) }
-      it { should respond_to(:log_add) }
-      it { should respond_to(:log_log) }
+      it { is_expected.to respond_to(:log_debug) }
+      it { is_expected.to respond_to(:log_info) }
+      it { is_expected.to respond_to(:log_warn) }
+      it { is_expected.to respond_to(:log_error) }
+      it { is_expected.to respond_to(:log_fatal) }
+      it { is_expected.to respond_to(:log_add) }
+      it { is_expected.to respond_to(:log_log) }
 
       context '#log_exception' do
         it 'logs the exception message as an error and backtrace as debug' do

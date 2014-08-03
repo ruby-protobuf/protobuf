@@ -283,7 +283,7 @@ describe Protobuf::Message do
   describe "boolean predicate methods" do
     subject { Test::ResourceFindRequest.new(:name => "resource") }
 
-    it { should respond_to(:active?) }
+    it { is_expected.to respond_to(:active?) }
 
     it "sets the predicate to true when the boolean value is true" do
       subject.active = true

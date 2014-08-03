@@ -9,13 +9,13 @@ describe ::Protobuf do
     subject { ::Protobuf.client_host }
 
     context 'when client_host is not pre-configured' do
-      it { should eq `hostname`.chomp }
+      it { is_expected.to eq `hostname`.chomp }
     end
 
     context 'when client_host is pre-configured' do
       let(:hostname) { 'override.myhost.com' }
       before { ::Protobuf.client_host = hostname }
-      it { should eq hostname }
+      it { is_expected.to eq hostname }
     end
   end
 
