@@ -20,8 +20,8 @@ module Protobuf
       #
 
       attr_reader :default, :default_value, :deprecated, :extension,
-                  :getter_method_name, :message_class, :name, :optional,
-                  :packed, :repeated, :required, :rule, :setter_method_name,
+                  :getter_method_name, :message_class, :name,
+                  :packed, :rule, :setter_method_name,
                   :tag, :type_class
 
       ##
@@ -39,8 +39,6 @@ module Protobuf
       def initialize(message_class, rule, type_class, name, tag, options)
         @message_class, @rule, @type_class, @name, @tag = \
           message_class, rule, type_class, name, tag
-
-        set_rule_predicates
 
         @getter_method_name = name
         @setter_method_name = "#{name}="
@@ -116,7 +114,7 @@ module Protobuf
 
       # Is this a repeated field?
       def repeated?
-        !! repeated
+        rule == :repeated
       end
 
       # Is this a repeated message field?
@@ -126,12 +124,12 @@ module Protobuf
 
       # Is this a required field?
       def required?
-        !! required
+        rule == :required
       end
 
-      # Is this a optional field?
+      # Is this an optional field?
       def optional?
-        !! optional
+        rule == :optional
       end
 
       # Is this a deprecated field?
@@ -244,20 +242,6 @@ module Protobuf
                          when required? then nil
                          when optional? then typed_default_value
                          end
-      end
-
-      def set_rule_predicates
-        case rule
-        when :repeated then
-          @required = @optional = false
-          @repeated = true
-        when :required then
-          @repeated = @optional = false
-          @required = true
-        when :optional then
-          @repeated = @required = false
-          @optional = true
-        end
       end
 
       def typed_default_value
