@@ -21,7 +21,6 @@ require "protobuf/version"
 
   s.add_dependency 'activesupport', '>= 3.2'
   s.add_dependency 'middleware'
-  s.add_dependency 'multi_json'
   s.add_dependency 'thor'
 
   s.add_development_dependency 'ffi-rzmq'
