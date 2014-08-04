@@ -5,6 +5,14 @@ module Protobuf
     class EnumField < VarintField
 
       ##
+      # Class Methods
+      #
+
+      def self.default
+        raise NoMethodError, "#{self}.#{__method__} must be called on an instance"
+      end
+
+      ##
       # Public Instance Methods
       #
 
@@ -53,7 +61,7 @@ module Protobuf
         if default.is_a?(Symbol)
           type_class.const_get(default)
         else
-          self.class.default
+          type_class.fetch(default) || type_class.enums.first
         end
       end
 
