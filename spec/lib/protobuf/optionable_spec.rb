@@ -20,7 +20,7 @@ describe 'Optionable' do
 
     it 'defaults the value to true' do
       OptionableSetOptionTest.set_option(:baz_enabled)
-      expect(OptionableSetOptionTest.get_option(:baz_enabled)).to be_truthy
+      expect(OptionableSetOptionTest.get_option(:baz_enabled)).to be true
     end
   end
 

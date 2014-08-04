@@ -15,15 +15,15 @@ describe Protobuf::Rpc::Connectors::Common do
   subject { @subject ||= common_class.new(subject_options) }
 
   context "API" do
-    specify { expect(subject.respond_to?(:any_callbacks?)).to be_truthy }
-    specify { expect(subject.respond_to?(:request_caller)).to be_truthy }
-    specify { expect(subject.respond_to?(:data_callback)).to be_truthy }
-    specify { expect(subject.respond_to?(:error)).to be_truthy }
-    specify { expect(subject.respond_to?(:fail)).to be_truthy }
-    specify { expect(subject.respond_to?(:complete)).to be_truthy }
-    specify { expect(subject.respond_to?(:parse_response)).to be_truthy }
-    specify { expect(subject.respond_to?(:verify_options!)).to be_truthy }
-    specify { expect(subject.respond_to?(:verify_callbacks)).to be_truthy }
+    specify { expect(subject.respond_to?(:any_callbacks?)).to be true }
+    specify { expect(subject.respond_to?(:request_caller)).to be true }
+    specify { expect(subject.respond_to?(:data_callback)).to be true }
+    specify { expect(subject.respond_to?(:error)).to be true }
+    specify { expect(subject.respond_to?(:fail)).to be true }
+    specify { expect(subject.respond_to?(:complete)).to be true }
+    specify { expect(subject.respond_to?(:parse_response)).to be true }
+    specify { expect(subject.respond_to?(:verify_options!)).to be true }
+    specify { expect(subject.respond_to?(:verify_callbacks)).to be true }
   end
 
   describe "#any_callbacks?" do
@@ -31,7 +31,7 @@ describe Protobuf::Rpc::Connectors::Common do
     [:@complete_cb, :@success_cb, :@failure_cb].each do |cb|
       it "returns true if #{cb} is provided" do
         subject.instance_variable_set(cb, "something")
-        expect(subject.any_callbacks?).to be_truthy
+        expect(subject.any_callbacks?).to be true
       end
     end
 
@@ -40,7 +40,7 @@ describe Protobuf::Rpc::Connectors::Common do
       subject.instance_variable_set(:@success_cb, nil)
       subject.instance_variable_set(:@failure_cb, nil)
 
-      expect(subject.any_callbacks?).to be_falsey
+      expect(subject.any_callbacks?).to be false
     end
 
   end
@@ -60,7 +60,7 @@ describe Protobuf::Rpc::Connectors::Common do
   describe "#data_callback" do
     it "changes state to use the data callback" do
       subject.data_callback("data")
-      expect(subject.instance_variable_get(:@used_data_callback)).to be_truthy
+      expect(subject.instance_variable_get(:@used_data_callback)).to be true
     end
 
     it "sets the data var when using the data_callback" do

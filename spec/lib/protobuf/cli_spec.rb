@@ -128,7 +128,7 @@ describe ::Protobuf::CLI do
 
           it 'sets the deprecation warning flag to true' do
             described_class.start(args)
-            expect(::Protobuf.print_deprecation_warnings?).to be_truthy
+            expect(::Protobuf.print_deprecation_warnings?).to be true
           end
         end
 
@@ -138,7 +138,7 @@ describe ::Protobuf::CLI do
 
           it 'sets the deprecation warning flag to false ' do
             described_class.start(args)
-            expect(::Protobuf.print_deprecation_warnings?).to be_falsey
+            expect(::Protobuf.print_deprecation_warnings?).to be false
           end
         end
       end
@@ -148,7 +148,7 @@ describe ::Protobuf::CLI do
 
         it 'sets the deprecation warning flag to true' do
           described_class.start(args)
-          expect(::Protobuf.print_deprecation_warnings?).to be_truthy
+          expect(::Protobuf.print_deprecation_warnings?).to be true
         end
       end
 
@@ -157,7 +157,7 @@ describe ::Protobuf::CLI do
 
         it 'sets the deprecation warning flag to false' do
           described_class.start(args)
-          expect(::Protobuf.print_deprecation_warnings?).to be_falsey
+          expect(::Protobuf.print_deprecation_warnings?).to be false
         end
       end
     end
@@ -200,7 +200,7 @@ describe ::Protobuf::CLI do
 
         it 'is activated by the --workers_only switch' do
           expect(runner).to receive(:new) do |options|
-            expect(options[:workers_only]).to be_truthy
+            expect(options[:workers_only]).to be true
           end.and_return(zmq_runner)
 
           described_class.start(args)
@@ -209,7 +209,7 @@ describe ::Protobuf::CLI do
         it 'is activated by PB_WORKERS_ONLY=1 ENV variable' do
           ENV['PB_WORKERS_ONLY'] = "1"
           expect(runner).to receive(:new) do |options|
-            expect(options[:workers_only]).to be_truthy
+            expect(options[:workers_only]).to be true
           end.and_return(zmq_runner)
 
           described_class.start(args)

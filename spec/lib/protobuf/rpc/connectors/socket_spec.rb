@@ -6,10 +6,10 @@ shared_examples "a Protobuf Connector" do
 
   context "API" do
     # Check the API
-    specify { expect(subject.respond_to?(:send_request, true)).to be_truthy }
-    specify { expect(subject.respond_to?(:post_init, true)).to be_truthy }
-    specify { expect(subject.respond_to?(:close_connection, true)).to be_truthy }
-    specify { expect(subject.respond_to?(:error?, true)).to be_truthy }
+    specify { expect(subject.respond_to?(:send_request, true)).to be true }
+    specify { expect(subject.respond_to?(:post_init, true)).to be true }
+    specify { expect(subject.respond_to?(:close_connection, true)).to be true }
+    specify { expect(subject.respond_to?(:error?, true)).to be true }
   end
 end
 
@@ -18,7 +18,7 @@ describe Protobuf::Rpc::Connectors::Socket do
 
   it_behaves_like "a Protobuf Connector"
 
-  specify { expect(described_class.include?(Protobuf::Rpc::Connectors::Common)).to be_truthy }
+  specify { expect(described_class.include?(Protobuf::Rpc::Connectors::Common)).to be true }
 
   context "#read_response" do
     let(:data) { "New data" }

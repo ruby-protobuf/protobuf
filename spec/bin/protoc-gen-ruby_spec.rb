@@ -11,7 +11,7 @@ describe 'protoc-gen-ruby' do
   it 'reads the serialized request bytes and outputs serialized response bytes' do
     ::IO.popen(binpath, 'w+') do |pipe|
       pipe.write(request_bytes)
-      pipe.read(expected_response_bytes.size).should eq expected_response_bytes
+      expect(pipe.read(expected_response_bytes.size)).to eq expected_response_bytes
     end
   end
 end
