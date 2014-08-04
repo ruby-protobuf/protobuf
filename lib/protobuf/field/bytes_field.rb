@@ -8,7 +8,7 @@ module Protobuf
       # Constants
       #
 
-      BYTES_ENCODING = "ASCII-8BIT".freeze
+      BYTES_ENCODING = Encoding::BINARY
 
       ##
       # Class Methods

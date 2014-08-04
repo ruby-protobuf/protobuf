@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'spec_helper'
 
 describe Protobuf::Message do
@@ -217,8 +219,8 @@ describe Protobuf::Message do
       end
 
       it "keeps utf-8 when utf-8 is input for string fields" do
-        name = "my name\xC3"
-        name.force_encoding("UTF-8")
+        name = 'my name💩'
+        name.force_encoding(Encoding::UTF_8)
 
         message = ::Test::Resource.new(:name => name)
         new_message = ::Test::Resource.decode(message.encode)
@@ -227,7 +229,7 @@ describe Protobuf::Message do
 
       it "trims binary when binary is input for string fields" do
         name = "my name\xC3"
-        name.force_encoding("ASCII-8BIT")
+        name.force_encoding(Encoding::BINARY)
 
         message = ::Test::Resource.new(:name => name)
         new_message = ::Test::Resource.decode(message.encode)
