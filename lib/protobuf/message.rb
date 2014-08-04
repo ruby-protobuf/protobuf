@@ -62,7 +62,7 @@ module Protobuf
     #
     def each_field
       self.class.all_fields.each do |field|
-        value = __send__(field.name)
+        value = __send__(field.getter)
         yield(field, value)
       end
     end
@@ -71,7 +71,7 @@ module Protobuf
       self.class.all_fields.each do |field|
         next unless field_must_be_serialized?(field)
 
-        value = @values[field.name]
+        value = @values[field.getter]
 
         if value.nil?
           raise ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value."
@@ -129,13 +129,13 @@ module Protobuf
 
     def [](name)
       if field = self.class.get_field(name, true)
-        __send__(field.name)
+        __send__(field.getter)
       end
     end
 
     def []=(name, value)
       if field = self.class.get_field(name, true)
-        __send__(field.setter_method_name, value) unless value.nil?
+        __send__(field.setter, value) unless value.nil?
       else
         unless ::Protobuf.ignore_unknown_fields?
           raise ::Protobuf::FieldNotDefinedError, name

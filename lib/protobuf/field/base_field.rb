@@ -19,10 +19,7 @@ module Protobuf
       # Attributes
       #
 
-      attr_reader :default, :deprecated, :extension,
-                  :getter_method_name, :message_class, :name,
-                  :packed, :rule, :setter_method_name,
-                  :tag, :type_class
+      attr_reader :message_class, :name, :options, :rule, :tag, :type_class
 
       ##
       # Class Methods
@@ -37,17 +34,13 @@ module Protobuf
       #
 
       def initialize(message_class, rule, type_class, name, tag, options)
-        @message_class, @rule, @type_class, @name, @tag = \
-          message_class, rule, type_class, name, tag
+        @message_class = message_class
+        @name          = name
+        @rule          = rule
+        @tag           = tag
+        @type_class    = type_class
+        @options       = options
 
-        @getter_method_name = name
-        @setter_method_name = "#{name}="
-        @default   = options.delete(:default)
-        @extension = options.delete(:extension)
-        @packed    = repeated? && options.delete(:packed)
-        @deprecated = options.delete(:deprecated)
-
-        warn_excess_options(options) unless options.empty?
         validate_packed_field if packed?
         define_accessor
       end
@@ -64,12 +57,12 @@ module Protobuf
         value
       end
 
-      def enum?
-        false
+      def decode(bytes)
+        raise NotImplementedError, "#{self.class.name}\#decode"
       end
 
-      def message?
-        false
+      def default
+        options[:default]
       end
 
       def default_value
@@ -80,10 +73,54 @@ module Protobuf
                            end
       end
 
+      def deprecated?
+        options.key?(:deprecated)
+      end
+
+      def encode(value)
+        raise NotImplementedError, "#{self.class.name}\#encode"
+      end
+
+      def extension?
+        options.key?(:extension)
+      end
+
+      def enum?
+        false
+      end
+
+      def getter
+        name
+      end
+
+      def message?
+        false
+      end
+
+      def optional?
+        rule == :optional
+      end
+
+      def packed?
+        repeated? && options.key?(:packed)
+      end
+
+      def repeated?
+        rule == :repeated
+      end
+
+      def repeated_message?
+        repeated? && message?
+      end
+
+      def required?
+        rule == :required
+      end
+
       # Decode +bytes+ and pass to +message_instance+.
       def set(message_instance, bytes)
         if packed?
-          array = message_instance.__send__(getter_method_name)
+          array = message_instance.__send__(getter)
           method = \
             case wire_type
             when ::Protobuf::WireType::FIXED32 then :read_fixed32
@@ -98,55 +135,15 @@ module Protobuf
         else
           value = decode(bytes)
           if repeated?
-            message_instance.__send__(getter_method_name) << value
+            message_instance.__send__(getter) << value
           else
-            message_instance.__send__(setter_method_name, value)
+            message_instance.__send__(setter, value)
           end
         end
       end
 
-      # Decode +bytes+ and return a field value.
-      def decode(bytes)
-        raise NotImplementedError, "#{self.class.name}\#decode"
-      end
-
-      # Encode +value+ and return a byte string.
-      def encode(value)
-        raise NotImplementedError, "#{self.class.name}\#encode"
-      end
-
-      def extension?
-        !! extension
-      end
-
-      # Is this a repeated field?
-      def repeated?
-        rule == :repeated
-      end
-
-      # Is this a repeated message field?
-      def repeated_message?
-        repeated? && message?
-      end
-
-      # Is this a required field?
-      def required?
-        rule == :required
-      end
-
-      # Is this an optional field?
-      def optional?
-        rule == :optional
-      end
-
-      # Is this a deprecated field?
-      def deprecated?
-        !! deprecated
-      end
-
-      # Is this a packed repeated field?
-      def packed?
-        !! packed
+      def setter
+        @setter ||= "#{name}="
       end
 
       def to_s
@@ -162,6 +159,10 @@ module Protobuf
         if ::Protobuf.print_deprecation_warnings? && deprecated?
           $stderr.puts("[WARNING] #{message_class.name}##{name} field usage is deprecated.")
         end
+      end
+
+      def wire_type
+        ::Protobuf::WireType::VARINT
       end
 
       private
@@ -183,7 +184,7 @@ module Protobuf
       def define_array_getter
         field = self
         message_class.class_eval do
-          define_method(field.getter_method_name) do
+          define_method(field.getter) do
             field.warn_if_deprecated
             @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
           end
@@ -193,7 +194,7 @@ module Protobuf
       def define_array_setter
         field = self
         message_class.class_eval do
-          define_method(field.setter_method_name) do |val|
+          define_method(field.setter) do |val|
             field.warn_if_deprecated
 
             if val.is_a?(Array)
@@ -219,7 +220,7 @@ module Protobuf
       def define_getter
         field = self
         message_class.class_eval do
-          define_method(field.getter_method_name) do
+          define_method(field.getter) do
             field.warn_if_deprecated
             @values.fetch(field.name, field.default_value)
           end
@@ -229,7 +230,7 @@ module Protobuf
       def define_setter
         field = self
         message_class.class_eval do
-          define_method(field.setter_method_name) do |val|
+          define_method(field.setter) do |val|
             field.warn_if_deprecated
 
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
@@ -255,10 +256,6 @@ module Protobuf
         if packed? && ! ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
           raise "Can't use packed encoding for '#{type_class}' type"
         end
-      end
-
-      def warn_excess_options(options)
-        warn "WARNING: Invalid options: #{options.inspect} (in #{message_class.name}##{name})"
       end
 
     end

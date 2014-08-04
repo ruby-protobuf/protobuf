@@ -40,7 +40,7 @@ module Protobuf
 
         field = self
         message_class.class_eval do
-          define_method("#{field.getter_method_name}?") do
+          define_method("#{field.getter}?") do
             field.warn_if_deprecated
             @values.fetch(field.name, field.default_value)
           end
