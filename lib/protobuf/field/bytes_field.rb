@@ -54,7 +54,7 @@ module Protobuf
       def define_setter
         field = self
         message_class.class_eval do
-          define_method(field.setter_method_name) do |val|
+          define_method(field.setter) do |val|
             begin
               field.warn_if_deprecated
               val = "#{val}" if val.is_a?(Symbol)
