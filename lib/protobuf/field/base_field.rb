@@ -19,9 +19,9 @@ module Protobuf
       # Attributes
       #
 
-      attr_reader :default, :default_value, :deprecated, :extension,
-                  :getter_method_name, :message_class, :name, :optional,
-                  :packed, :repeated, :required, :rule, :setter_method_name,
+      attr_reader :default, :deprecated, :extension,
+                  :getter_method_name, :message_class, :name,
+                  :packed, :rule, :setter_method_name,
                   :tag, :type_class
 
       ##
@@ -40,8 +40,6 @@ module Protobuf
         @message_class, @rule, @type_class, @name, @tag = \
           message_class, rule, type_class, name, tag
 
-        set_rule_predicates
-
         @getter_method_name = name
         @setter_method_name = "#{name}="
         @default   = options.delete(:default)
@@ -49,7 +47,6 @@ module Protobuf
         @packed    = repeated? && options.delete(:packed)
         @deprecated = options.delete(:deprecated)
 
-        set_default_value
         warn_excess_options(options) unless options.empty?
         validate_packed_field if packed?
         define_accessor
@@ -73,6 +70,14 @@ module Protobuf
 
       def message?
         false
+      end
+
+      def default_value
+        @default_value ||= case
+                           when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
+                           when required? then nil
+                           when optional? then typed_default_value
+                           end
       end
 
       # Decode +bytes+ and pass to +message_instance+.
@@ -116,7 +121,7 @@ module Protobuf
 
       # Is this a repeated field?
       def repeated?
-        !! repeated
+        rule == :repeated
       end
 
       # Is this a repeated message field?
@@ -126,12 +131,12 @@ module Protobuf
 
       # Is this a required field?
       def required?
-        !! required
+        rule == :required
       end
 
-      # Is this a optional field?
+      # Is this an optional field?
       def optional?
-        !! optional
+        rule == :optional
       end
 
       # Is this a deprecated field?
@@ -235,28 +240,6 @@ module Protobuf
               raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
           end
-        end
-      end
-
-      def set_default_value
-        @default_value = case
-                         when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
-                         when required? then nil
-                         when optional? then typed_default_value
-                         end
-      end
-
-      def set_rule_predicates
-        case rule
-        when :repeated then
-          @required = @optional = false
-          @repeated = true
-        when :required then
-          @repeated = @optional = false
-          @required = true
-        when :optional then
-          @repeated = @required = false
-          @optional = true
         end
       end
 
