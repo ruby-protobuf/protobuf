@@ -1,12 +1,12 @@
 require 'protobuf/rpc/server'
-require 'protobuf/logger'
+require 'protobuf/logging'
 
 module Protobuf
   module Rpc
     module Socket
       class Worker
         include ::Protobuf::Rpc::Server
-        include ::Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         def initialize(sock, &complete_cb)
           @socket = sock

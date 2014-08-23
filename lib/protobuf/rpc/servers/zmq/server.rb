@@ -100,7 +100,7 @@ module Protobuf
 
           @beacon_socket.send(heartbeat.encode, 0)
 
-          log_debug { sign_message("sent heartbeat to #{beacon_uri}") }
+          logger.debug { sign_message("sent heartbeat to #{beacon_uri}") }
         end
 
         def broadcast_heartbeat?
@@ -204,7 +204,7 @@ module Protobuf
 
           if missing_workers > 0
             missing_workers.times { start_worker }
-            log_debug { sign_message("#{total_workers} workers started") }
+            logger.debug { sign_message("#{total_workers} workers started") }
           end
         end
 
@@ -303,7 +303,7 @@ module Protobuf
             rescue => e
               message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
               $stderr.puts(message)
-              log_error { message }
+              logger.error { message }
             end
           end
         end

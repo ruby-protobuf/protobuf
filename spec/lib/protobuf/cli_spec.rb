@@ -19,6 +19,12 @@ describe ::Protobuf::CLI do
     runner
   }
 
+  around(:each) do |example|
+    logger = ::Protobuf::Logging.logger
+    example.run
+    ::Protobuf::Logging.logger = logger
+  end
+
   before(:each) do
     allow(::Protobuf::Rpc::SocketRunner).to receive(:new).and_return(sock_runner)
     allow(::Protobuf::Rpc::ZmqRunner).to receive(:new).and_return(zmq_runner)
@@ -88,9 +94,9 @@ describe ::Protobuf::CLI do
       let(:test_args) { [ '--log=mylog.log', '--level=0' ] }
 
       it 'sends the log file and level options to the runner' do
-        expect(::Protobuf::Logger).to receive(:configure) do |options|
-          expect(options[:file]).to eq 'mylog.log'
-          expect(options[:level]).to eq 0
+        expect(::Protobuf::Logging).to receive(:initialize_logger) do |file, level|
+          expect(file).to eq 'mylog.log'
+          expect(level).to eq 0
         end
         described_class.start(args)
       end

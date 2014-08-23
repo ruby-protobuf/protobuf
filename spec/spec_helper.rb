@@ -1,6 +1,3 @@
-require 'simplecov'
-SimpleCov.start
-
 require 'timeout'
 require 'rubygems'
 require 'bundler'
@@ -20,9 +17,13 @@ require 'google/protobuf/compiler/plugin.pb'
 
 # Including a way to turn on debug logger for spec runs
 if ENV.key?('DEBUG')
-  debug_log = ::File.expand_path('../debug_specs.log', File.dirname(__FILE__) )
-  ::Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
+  debug_log = ::File.expand_path('../../debug_specs.log', __FILE__ )
+  ::Protobuf::Logging.initialize_logger(debug_log, ::Logger::DEBUG)
+else
+  ::Protobuf::Logging.initialize_logger('/dev/null')
 end
+
+::Protobuf::Logging.close_old_logger = false
 
 # Get rid of the deprecation env var if present (messes with specs).
 ENV.delete("PB_IGNORE_DEPRECATIONS")

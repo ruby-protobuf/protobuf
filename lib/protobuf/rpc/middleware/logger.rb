@@ -42,7 +42,7 @@ module Protobuf
           attr_reader :env
 
           def flush(env)
-            Protobuf::Logger.info { to_s(env) }
+            ::Protobuf::Logging.logger.info { to_s(env) }
           end
 
           def start

@@ -12,7 +12,7 @@ module Protobuf
         # Included Modules
         #
         include Protobuf::Rpc::Connectors::Common
-        include Protobuf::Logger::LogMethods
+        include Protobuf::Logging
 
         ##
         # Class Constants
@@ -71,9 +71,9 @@ module Protobuf
             if socket # Make sure the context builds the socket
               socket.setsockopt(::ZMQ::LINGER, 0)
 
-              log_debug { sign_message("Establishing connection: #{server_uri}") }
+              logger.debug { sign_message("Establishing connection: #{server_uri}") }
               zmq_error_check(socket.connect(server_uri), :socket_connect)
-              log_debug { sign_message("Connection established to #{server_uri}") }
+              logger.debug { sign_message("Connection established to #{server_uri}") }
 
               if first_alive_load_balance?
                 begin
@@ -155,21 +155,21 @@ module Protobuf
           poller = ::ZMQ::Poller.new
           poller.register_readable(socket)
 
-          log_debug { sign_message("Sending Request (attempt #{attempt}, #{socket})") }
+          logger.debug { sign_message("Sending Request (attempt #{attempt}, #{socket})") }
           zmq_error_check(socket.send_string(@request_data), :socket_send_string)
-          log_debug { sign_message("Waiting #{timeout} seconds for response (attempt #{attempt}, #{socket})") }
+          logger.debug { sign_message("Waiting #{timeout} seconds for response (attempt #{attempt}, #{socket})") }
 
           if poller.poll(timeout * 1000) == 1
             zmq_error_check(socket.recv_string(@response_data = ""), :socket_recv_string)
-            log_debug { sign_message("Response received (attempt #{attempt}, #{socket})") }
+            logger.debug { sign_message("Response received (attempt #{attempt}, #{socket})") }
           else
-            log_debug { sign_message("Timed out waiting for response (attempt #{attempt}, #{socket})") }
+            logger.debug { sign_message("Timed out waiting for response (attempt #{attempt}, #{socket})") }
             raise RequestTimeout
           end
         ensure
-          log_debug { sign_message("Closing Socket")  }
+          logger.debug { sign_message("Closing Socket")  }
           zmq_error_check(socket.close, :socket_close) if socket
-          log_debug { sign_message("Socket closed")  }
+          logger.debug { sign_message("Socket closed")  }
         end
 
         # The service we're attempting to connect to

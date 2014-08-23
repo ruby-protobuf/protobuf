@@ -1,9 +1,11 @@
-require 'protobuf/wire_type'
 require 'protobuf/field/field_array'
+require 'protobuf/logging'
+require 'protobuf/wire_type'
 
 module Protobuf
   module Field
     class BaseField
+      include ::Protobuf::Logging
 
       ##
       # Constants

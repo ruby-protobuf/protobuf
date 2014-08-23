@@ -1,5 +1,5 @@
 require 'ostruct'
-require 'protobuf/logger'
+require 'protobuf/logging'
 require 'protobuf/rpc/server'
 require 'protobuf/rpc/servers/socket/server'
 require 'protobuf/rpc/servers/socket_runner'
@@ -33,7 +33,7 @@ module StubProtobufServerFactory
 end
 
 class StubServer
-  include Protobuf::Logger::LogMethods
+  include Protobuf::Logging
 
   attr_accessor :options
 
@@ -58,7 +58,7 @@ class StubServer
     else
       start_socket_server
     end
-    log_debug { sign_message("Server started #{@options.host}:#{@options.port}") }
+    logger.debug { sign_message("Server started #{@options.host}:#{@options.port}") }
   end
 
   def start_socket_server

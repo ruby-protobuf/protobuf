@@ -11,7 +11,7 @@ module Protobuf
       WORKERS_AVAILABLE = "\5"
 
       module Util
-        include ::Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         def self.included(base)
           base.extend(::Protobuf::Rpc::Zmq::Util)

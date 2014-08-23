@@ -1,5 +1,5 @@
 require 'protobuf'
-require 'protobuf/logger'
+require 'protobuf/logging'
 require 'protobuf/rpc/rpc.pb'
 require 'protobuf/rpc/buffer'
 require 'protobuf/rpc/env'

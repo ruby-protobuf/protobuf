@@ -1,6 +1,6 @@
 require 'forwardable'
 require 'protobuf'
-require 'protobuf/logger'
+require 'protobuf/logging'
 require 'protobuf/rpc/error'
 require 'protobuf/rpc/connector'
 
@@ -8,7 +8,7 @@ module Protobuf
   module Rpc
     class Client
       extend Forwardable
-      include Protobuf::Logger::LogMethods
+      include Protobuf::Logging
 
       def_delegators :@connector, :options, :complete_cb, :success_cb, :failure_cb
       attr_reader :connector
@@ -29,7 +29,7 @@ module Protobuf
       def initialize(options = {})
         raise "Invalid client configuration. Service must be defined." if options[:service].nil?
         @connector = Connector.connector_for_client.new(options)
-        log_debug { sign_message("Initialized with options: #{options.inspect}") }
+        logger.debug { sign_message("Initialized with options: #{options.inspect}") }
       end
 
       def log_signature
@@ -106,28 +106,28 @@ module Protobuf
       def method_missing(method_name, *params)
         service = options[:service]
         unless service.rpc_method?(method_name)
-          log_error { sign_message("#{service.name}##{method_name.to_s} not rpc method, passing to super") }
+          logger.error { sign_message("#{service.name}##{method_name.to_s} not rpc method, passing to super") }
           super(method_name, *params)
         else
-          log_debug { sign_message("#{service.name}##{method_name.to_s}") }
+          logger.debug { sign_message("#{service.name}##{method_name.to_s}") }
           rpc = service.rpcs[method_name.to_sym]
 
           options[:request_type] = rpc.request_type
-          log_debug { sign_message("Request Type: #{options[:request_type].name}") }
+          logger.debug { sign_message("Request Type: #{options[:request_type].name}") }
 
           options[:response_type] = rpc.response_type
-          log_debug { sign_message("Response Type: #{options[:response_type].name}") }
+          logger.debug { sign_message("Response Type: #{options[:response_type].name}") }
 
           options[:method] = method_name.to_s
           options[:request] = params[0].is_a?(Hash) ? options[:request_type].new(params[0]) : params[0]
-          log_debug { sign_message("Request Data: #{options[:request].inspect}") }
+          logger.debug { sign_message("Request Data: #{options[:request].inspect}") }
 
           # Call client to setup on_success and on_failure event callbacks
           if block_given?
-            log_debug { sign_message("client setup callback given, invoking") }
+            logger.debug { sign_message("client setup callback given, invoking") }
             yield(self)
           else
-            log_debug { sign_message("no block given for callbacks") }
+            logger.debug { sign_message("no block given for callbacks") }
           end
 
           send_request
