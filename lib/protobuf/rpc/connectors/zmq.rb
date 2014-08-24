@@ -123,6 +123,8 @@ module Protobuf
         def host_alive?(host)
           return true unless ping_port_enabled?
           socket = TCPSocket.new(host, ping_port.to_i)
+          socket.setsockopt(::Socket::IPPROTO_TCP, ::Socket::TCP_NODELAY, 1)
+          socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_LINGER, [1,0].pack('ii'))
 
           true
         rescue

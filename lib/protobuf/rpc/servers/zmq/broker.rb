@@ -67,7 +67,7 @@ module Protobuf
         end
 
         def init_local_queue
-          @local_queue = ::Queue.new
+          @local_queue = []
         end
 
         def init_poller
@@ -88,6 +88,10 @@ module Protobuf
           !!@server.try(:inproc?)
         end
 
+        def local_queue_max_size
+          @local_queue_max_size ||= [ENV["PB_LOCAL_QUEUE_MAX_SIZE"].to_i, 5].max
+        end
+
         def process_backend
           worker, ignore, *frames = read_from_backend
 
@@ -102,16 +106,16 @@ module Protobuf
           address, _, message, *frames = read_from_frontend
 
           if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
-            if @idle_workers.any? || local_queue.size < 5 # Should make queue a SizedQueue and allow users to configure queue size
+            if local_queue.size < local_queue_max_size
               write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
               write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
             end
           else
-            if @idle_workers.any?
-              write_to_backend([@idle_workers.shift, ""] + [address, "", message ] + frames)
-            else
+            if @idle_workers.empty?
               local_queue.push([address, "", message ] + frames)
+            else
+              write_to_backend([@idle_workers.shift, ""] + [address, "", message ] + frames)
             end
           end
         end
