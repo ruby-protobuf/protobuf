@@ -89,7 +89,7 @@ module Protobuf
         end
 
         def local_queue_max_size
-          @local_queue_max_size ||= [ENV["PB_LOCAL_QUEUE_MAX_SIZE"].to_i, 5].max
+          @local_queue_max_size ||= [ENV["PB_ZMQ_SERVER_QUEUE_MAX_SIZE"].to_i, 5].max
         end
 
         def process_backend
