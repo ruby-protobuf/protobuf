@@ -13,8 +13,8 @@ end
 # Including a way to turn on debug logger for spec runs
 if ENV["DEBUG"]
   puts 'debugging'
-  debug_log = File.expand_path('../debug_bench.log', File.dirname(__FILE__) )
-  Protobuf::Logger.configure(:file => debug_log, :level => ::Logger::DEBUG)
+  debug_log = File.expand_path('../../../debug_bench.log', __FILE__)
+  Protobuf::Logging.initialize_logger(debug_log, ::Logger::DEBUG)
 end
 
 namespace :benchmark do

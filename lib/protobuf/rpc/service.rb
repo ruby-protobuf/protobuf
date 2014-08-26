@@ -1,4 +1,4 @@
-require 'protobuf/logger'
+require 'protobuf/logging'
 require 'protobuf/rpc/client'
 require 'protobuf/rpc/error'
 require 'protobuf/rpc/service_filters'
@@ -10,7 +10,7 @@ module Protobuf
     RpcMethod = Struct.new("RpcMethod", :method, :request_type, :response_type)
 
     class Service
-      include ::Protobuf::Logger::LogMethods
+      include ::Protobuf::Logging
       include ::Protobuf::Rpc::ServiceFilters
 
       DEFAULT_HOST = '127.0.0.1'.freeze

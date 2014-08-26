@@ -1,6 +1,6 @@
 module Protobuf
   class Lifecycle
-    include ::Protobuf::Logger::LogMethods
+    include ::Protobuf::Logging
 
     def self.register(event_name, &blk)
       raise "Lifecycle register must have a block" unless block_given?

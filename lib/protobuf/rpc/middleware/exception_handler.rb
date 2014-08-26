@@ -2,7 +2,7 @@ module Protobuf
   module Rpc
     module Middleware
       class ExceptionHandler
-        include ::Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         attr_reader :app
 

@@ -2,7 +2,7 @@ module Protobuf
   module Rpc
     module Middleware
       class RequestDecoder
-        include ::Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         attr_reader :app, :env
 
@@ -27,7 +27,7 @@ module Protobuf
         end
 
         def log_signature
-          env.signature || super
+          env.log_signature || super
         end
 
       private
@@ -57,7 +57,7 @@ module Protobuf
         #
         def request_wrapper
           @request_wrapper ||= begin
-            log_debug { sign_message("Decoding request: #{env.encoded_request}") }
+            logger.debug { sign_message("Decoding request: #{env.encoded_request}") }
             Socketrpc::Request.decode(env.encoded_request)
           end
         rescue => exception

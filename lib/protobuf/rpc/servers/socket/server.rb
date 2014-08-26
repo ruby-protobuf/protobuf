@@ -5,7 +5,7 @@ module Protobuf
   module Rpc
     module Socket
       class Server
-        include ::Protobuf::Logger::LogMethods
+        include ::Protobuf::Logging
 
         AUTO_COLLECT_TIMEOUT = 5 # seconds
 
@@ -19,7 +19,7 @@ module Protobuf
         end
 
         def cleanup_threads
-          log_debug { sign_message("Thread cleanup - #{@threads.size} - start") }
+          logger.debug { sign_message("Thread cleanup - #{@threads.size} - start") }
 
           @threads = @threads.select do |t|
             if t[:thread].alive?
@@ -31,7 +31,7 @@ module Protobuf
             end
           end
 
-          log_debug { sign_message("Thread cleanup - #{@threads.size} - complete") }
+          logger.debug { sign_message("Thread cleanup - #{@threads.size} - complete") }
         end
 
         def log_signature
@@ -47,7 +47,7 @@ module Protobuf
         end
 
         def run
-          log_debug { sign_message("Run") }
+          logger.debug { sign_message("Run") }
           host = @options[:host]
           port = @options[:port]
           backlog = @options[:backlog]
@@ -63,7 +63,7 @@ module Protobuf
           @running = true
 
           while running?
-            log_debug { sign_message("Waiting for connections") }
+            logger.debug { sign_message("Waiting for connections") }
             ready_cnxns = IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT) rescue nil
 
             if ready_cnxns
@@ -73,13 +73,13 @@ module Protobuf
                 when !running? then
                   # no-op
                 when client == @server then
-                  log_debug { sign_message("Accepted new connection") }
+                  logger.debug { sign_message("Accepted new connection") }
                   client, sockaddr = @server.accept
                   @listen_fds << client
                 else
                   unless @working.include?(client)
                     @working << @listen_fds.delete(client)
-                    log_debug { sign_message("Working")  }
+                    logger.debug { sign_message("Working")  }
                     @threads << { :thread => new_worker(client), :socket => client }
 
                     cleanup_threads if cleanup?

@@ -1,9 +1,9 @@
-require 'protobuf/logger'
+require 'protobuf/logging'
 
 module Protobuf
   module Rpc
     class ServiceDispatcher
-      include ::Protobuf::Logger::LogMethods
+      include ::Protobuf::Logging
 
       attr_reader :env
 
