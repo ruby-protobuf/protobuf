@@ -17,6 +17,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
 
   before do
     allow(::ZMQ::Context).to receive(:new).and_return(zmq_context_double)
+    allow(socket_double).to receive(:setsockopt)
   end
 
   before(:all) do
@@ -94,7 +95,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       end
 
       it "returns true when the connection succeeds" do
-        expect(TCPSocket).to receive(:new).with("huzzah.com", 3307).and_return(double(:close => nil))
+        expect(TCPSocket).to receive(:new).with("huzzah.com", 3307).and_return(double(:close => nil, :setsockopt => nil))
         expect(subject.send(:host_alive?, "huzzah.com")).to be true
       end
 
@@ -104,7 +105,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       end
 
       it "closes the socket" do
-        socket = double("TCPSocket")
+        socket = double("TCPSocket", :setsockopt => nil)
         expect(socket).to receive(:close)
         expect(TCPSocket).to receive(:new).with("absorbalof.com", 3307).and_return(socket)
         expect(subject.send(:host_alive?, "absorbalof.com")).to be true
