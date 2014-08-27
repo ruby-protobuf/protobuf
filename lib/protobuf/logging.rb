@@ -1,3 +1,5 @@
+require 'logger'
+
 module Protobuf
   module Logging
     def self.initialize_logger(log_target=$stdout, log_level=::Logger::INFO)
