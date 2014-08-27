@@ -3,10 +3,8 @@ module Protobuf
     def self.initialize_logger(log_target=$stdout, log_level=::Logger::INFO)
       @counter ||= 0
       @counter = @counter + 1
-      old_logger = defined?(@logger) ? @logger : nil
       @logger = Logger.new(log_target)
       @logger.level = log_level
-      old_logger.close if old_logger and log_target != $stdout
       @logger
     end
 
