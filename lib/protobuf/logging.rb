@@ -6,16 +6,8 @@ module Protobuf
       old_logger = defined?(@logger) ? @logger : nil
       @logger = Logger.new(log_target)
       @logger.level = log_level
-      old_logger.close if old_logger and close_old_logger?
+      old_logger.close if old_logger and log_target != $stdout
       @logger
-    end
-
-    def self.close_old_logger=(boolean)
-      @close_old_logger = !!boolean
-    end
-
-    def self.close_old_logger?
-      defined?(@close_old_logger) ? @close_old_logger : true
     end
 
     def self.logger

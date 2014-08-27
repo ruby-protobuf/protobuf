@@ -23,8 +23,6 @@ else
   ::Protobuf::Logging.initialize_logger('/dev/null')
 end
 
-::Protobuf::Logging.close_old_logger = false
-
 # Get rid of the deprecation env var if present (messes with specs).
 ENV.delete("PB_IGNORE_DEPRECATIONS")
 
