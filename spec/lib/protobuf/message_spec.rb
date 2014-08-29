@@ -485,6 +485,12 @@ describe Protobuf::Message do
       expect(::Test::OneofTest.oneof_names).to eq([ :SingleIdentifier ])
     end
 
+    it 'indicates when a field is in a oneof group' do
+      username_field = ::Test::OneofTest.all_fields.detect { |field| puts field.name.class; field.name == :username }
+      expect(username_field.oneof?).to be_truthy
+      expect(username_field.oneof_name).to eq(:SingleIdentifier)
+    end
+
   end
 
 end

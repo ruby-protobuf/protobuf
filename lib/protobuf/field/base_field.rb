@@ -99,6 +99,14 @@ module Protobuf
         false
       end
 
+      def oneof?
+        options.key?(:oneof)
+      end
+
+      def oneof_name
+        options[:oneof]
+      end
+
       def optional?
         rule == :optional
       end
