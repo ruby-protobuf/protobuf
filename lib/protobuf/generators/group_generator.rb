@@ -40,7 +40,7 @@ module Protobuf
 
       def add_extension_fields(field_descriptors, oneof_descriptors)
         field_descriptors.each do |field_descriptor|
-          @groups[:extension_field] << FieldGenerator.new(field_descriptor, indent_level)
+          @groups[:extension_field] << FieldGenerator.new(field_descriptor, oneof_descriptors, indent_level)
         end
       end
 
@@ -61,7 +61,7 @@ module Protobuf
 
       def add_message_fields(field_descriptors, oneof_descriptors)
         field_descriptors.each do |field_descriptor|
-          @groups[:field] << FieldGenerator.new(field_descriptor, indent_level)
+          @groups[:field] << FieldGenerator.new(field_descriptor, oneof_descriptors, indent_level)
         end
       end
 

@@ -17,8 +17,19 @@ module Protobuf
       ##
       # Attributes
       #
-      attr_reader :field_options
+      attr_reader :field_options, :oneof_descriptors
 
+      ##
+      # Constructor
+      #
+      def initialize(descriptor, oneof_descriptors = [], indent_level = 0, options = {})
+        super(descriptor, indent_level, options)
+        @oneof_descriptors = oneof_descriptors
+      end
+
+      ##
+      # Public Instance Methods
+      #
       def applicable_options
         @applicable_options ||= field_options.map { |k, v| ":#{k} => #{v}" }
       end
