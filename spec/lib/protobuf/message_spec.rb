@@ -486,11 +486,26 @@ describe Protobuf::Message do
     end
 
     it 'indicates when a field is in a oneof group' do
-      username_field = ::Test::OneofTest.all_fields.detect { |field| puts field.name.class; field.name == :username }
+      username_field = ::Test::OneofTest.all_fields.detect { |field| field.name == :username }
       expect(username_field.oneof?).to be_truthy
       expect(username_field.oneof_name).to eq(:SingleIdentifier)
     end
 
+    it 'sets a field contained in a oneof group' do
+      message = ::Test::OneofTest.new
+      message.username = 'localshred'
+      expect(message.username).to eq('localshred')
+    end
+
+    it 'overrides previously set field in oneof group of fields when assigning new field' do
+      message = ::Test::OneofTest.new
+      message.username = 'localshred'
+      expect(message.username).to eq('localshred')
+
+      message.email = 'test@test.com'
+      expect(message.email).to eq('test@test.com')
+      expect(message.username!).to be_nil
+    end
   end
 
 end

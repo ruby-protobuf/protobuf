@@ -51,6 +51,7 @@ module Protobuf
               value = field.type_class.fetch(value)
               raise TypeError, "Invalid Enum value: #{orig_value.inspect} for #{field.name}" unless value
 
+              clear_oneof_group(field.oneof_name) if field.oneof?
               @values[field.name] = value
             end
           end

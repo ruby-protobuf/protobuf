@@ -8,9 +8,9 @@ module Protobuf
       # Public Instance Methods
       #
 
-      def acceptable?(val)
-        unless val.instance_of?(type_class) || val.respond_to?(:to_hash)
-          raise TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
+      def acceptable?(value)
+        unless value.instance_of?(type_class) || value.respond_to?(:to_hash)
+          raise TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{value.class}'"
         end
 
         true
@@ -43,18 +43,21 @@ module Protobuf
       def define_setter
         field = self
         message_class.class_eval do
-          define_method("#{field.name}=") do |val|
+          define_method("#{field.name}=") do |value|
             case
-            when val.nil? then
+            when value.nil? then
               @values.delete(field.name)
-            when val.is_a?(field.type_class) then
-              @values[field.name] = val
-            when val.respond_to?(:to_proto) then
-              @values[field.name] = val.to_proto
-            when val.respond_to?(:to_hash) then
-              @values[field.name] = field.type_class.new(val.to_hash)
+            when value.is_a?(field.type_class) then
+              clear_oneof_group(field.oneof_name) if field.oneof?
+              @values[field.name] = value
+            when value.respond_to?(:to_proto) then
+              clear_oneof_group(field.oneof_name) if field.oneof?
+              @values[field.name] = value.to_proto
+            when value.respond_to?(:to_hash) then
+              clear_oneof_group(field.oneof_name) if field.oneof?
+              @values[field.name] = field.type_class.new(value.to_hash)
             else
-              raise TypeError, "Expected value of type '#{field.type_class}' for field #{field.name}, but got '#{val.class}'"
+              raise TypeError, "Expected value of type '#{field.type_class}' for field #{field.name}, but got '#{value.class}'"
             end
           end
         end

@@ -62,6 +62,7 @@ module Protobuf
               if val.nil?
                 @values.delete(field.name)
               elsif field.acceptable?(val)
+                clear_oneof_group(field.oneof_name) if field.oneof?
                 @values[field.name] = val.dup
               else
                 raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
