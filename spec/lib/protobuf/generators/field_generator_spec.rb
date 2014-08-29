@@ -11,6 +11,7 @@ describe ::Protobuf::Generators::FieldGenerator do
   let(:type_name) { nil }
   let(:default_value) { nil }
   let(:extendee) { nil }
+  let(:oneof_index) { nil }
   let(:field_options) { {} }
 
   let(:field_fields) { { :label => label_enum,
@@ -20,6 +21,7 @@ describe ::Protobuf::Generators::FieldGenerator do
                          :type_name => type_name,
                          :default_value => default_value,
                          :extendee => extendee,
+                         :oneof_index => oneof_index,
                          :options => field_options } }
 
   let(:field) { ::Google::Protobuf::FieldDescriptorProto.new(field_fields) }
@@ -92,6 +94,17 @@ describe ::Protobuf::Generators::FieldGenerator do
       let(:field_options) { { :deprecated => true } }
 
       specify { expect(subject).to eq "optional :string, :foo_bar, 3, :deprecated => true\n" }
+    end
+
+    context 'when field is in a oneof group' do
+      let(:oneof_name) { :MyOneOfUnion }
+      let(:oneof_descriptors) { [ ::Google::Protobuf::FieldDescriptorProto.new(:name => oneof_name) ] }
+      let(:oneof_index) { 0 }
+      let(:field) { ::Google::Protobuf::FieldDescriptorProto.new(field_fields) }
+
+      subject { described_class.new(field, oneof_descriptors).to_s }
+
+      specify { expect(subject).to eq("optional :string, :foo_bar, 3, :oneof => :#{oneof_name}\n") }
     end
   end
 

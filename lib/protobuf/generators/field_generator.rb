@@ -34,6 +34,13 @@ module Protobuf
         @applicable_options ||= field_options.map { |k, v| ":#{k} => #{v}" }
       end
 
+      def compile
+        run_once(:compile) do
+          field_definition = [ "#{label} #{type_name}", name, number, applicable_options ]
+          puts field_definition.flatten.compact.join(', ')
+        end
+      end
+
       def default_value
         @default_value ||= begin
                              if defaulted?
@@ -63,11 +70,16 @@ module Protobuf
         descriptor.respond_to_has_and_present?(:extendee)
       end
 
-      def compile
-        run_once(:compile) do
-          field_definition = [ "#{label} #{type_name}", name, number, applicable_options ]
-          puts field_definition.flatten.compact.join(', ')
-        end
+      def field_options
+        @field_options ||= begin
+                             opts = {}
+                             opts[:default] = default_value if defaulted?
+                             opts[:packed] = 'true' if packed?
+                             opts[:deprecated] = 'true' if deprecated?
+                             opts[:extension] = 'true' if extension?
+                             opts[:oneof] = oneof_name if oneof?
+                             opts
+                           end
       end
 
       def label
@@ -82,15 +94,12 @@ module Protobuf
         @number ||= descriptor.number
       end
 
-      def field_options
-        @field_options ||= begin
-                             opts = {}
-                             opts[:default] = default_value if defaulted?
-                             opts[:packed] = 'true' if packed?
-                             opts[:deprecated] = 'true' if deprecated?
-                             opts[:extension] = 'true' if extension?
-                             opts
-                           end
+      def oneof?
+        ! descriptor.oneof_index!.nil?
+      end
+
+      def oneof_name
+        ":#{oneof_descriptors[descriptor.oneof_index].name}"
       end
 
       def packed?
