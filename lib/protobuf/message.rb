@@ -50,6 +50,16 @@ module Protobuf
       self
     end
 
+    def clear_oneof_group(oneof_name)
+      fields = self.class.oneof_fields.select do |field|
+        field.oneof_name == oneof_name
+      end
+
+      fields.each do |field|
+        @values.delete(field.name)
+      end
+    end
+
     def clone
       copy_to(super, :clone)
     end

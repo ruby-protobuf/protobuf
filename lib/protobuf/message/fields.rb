@@ -111,6 +111,10 @@ module Protobuf
         end
       end
 
+      def oneof_fields
+        all_fields.select(&:oneof?)
+      end
+
       def oneof_names
         @oneof_names ||= []
       end
