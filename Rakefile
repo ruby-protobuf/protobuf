@@ -14,40 +14,65 @@ task :default => :spec
 
 RSpec::Core::RakeTask.new(:spec)
 
+desc 'Run both the spec and descriptors compilation tasks'
+task :compile => [ 'compile:spec', 'compile:descriptors' ]
+
 desc 'Run specs'
 namespace :compile do
 
   desc 'Compile spec protos in spec/supprt/ directory'
   task :spec do |task, args|
-    proto_path = ::File.expand_path('../spec/support/', __FILE__)
-    cmd = %Q{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
+    source = ::File.expand_path('../spec/support/', __FILE__)
+    input_files = ::File.join(source, '**', '*.proto')
+    destination = source
 
-    puts cmd
-    exec(cmd)
+    command = []
+    command << "PB_NO_TAG_WARNINGS=1"
+    command << "protoc --plugin=./bin/protoc-gen-ruby"
+    command << "--ruby_out=#{destination}"
+    command << "-I #{source}"
+    command << Dir[input_files].join(' ')
+    command = command.join(' ')
+
+    puts command
+    system(command)
   end
 
   desc 'Compile rpc protos in protos/ directory'
-  task :rpc do |task, args|
-    proto_path = ::File.expand_path('../proto', __FILE__)
-    output_dir = ::File.expand_path('../tmp/rpc', __FILE__)
-    ::FileUtils.mkdir_p(output_dir)
+  task :descriptors do |task, args|
+    source      = ::File.expand_path('../proto', __FILE__)
+    input_files = ::File.join(source, '**', '*.proto')
+    destination = ::File.expand_path('../tmp/rpc', __FILE__)
+    ::FileUtils.mkdir_p(destination)
 
-    cmd = %Q{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{output_dir} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
+    command = []
+    command << "PB_NO_TAG_WARNINGS=1"
+    command << "protoc --plugin=./bin/protoc-gen-ruby"
+    command << "--ruby_out=#{destination}"
+    command << "-I #{source}"
+    command << Dir[input_files].join(' ')
+    command = command.join(' ')
 
-    puts cmd
-    system(cmd)
+    puts command
+    fork { exec(command) }
+    Process.waitpid
 
-    files = {
-      'tmp/rpc/dynamic_discovery.pb.rb'               => 'lib/protobuf/rpc',
-      'tmp/rpc/rpc.pb.rb'                             => 'lib/protobuf/rpc',
-      'tmp/rpc/google/protobuf/descriptor.pb.rb'      => 'lib/protobuf/descriptors/google/protobuf',
-      'tmp/rpc/google/protobuf/compiler/plugin.pb.rb' => 'lib/protobuf/descriptors/google/protobuf/compiler'
-    }
+    if $?.success?
+      files = {
+        'tmp/rpc/dynamic_discovery.pb.rb'               => 'lib/protobuf/rpc',
+        'tmp/rpc/rpc.pb.rb'                             => 'lib/protobuf/rpc',
+        'tmp/rpc/google/protobuf/descriptor.pb.rb'      => 'lib/protobuf/descriptors/google/protobuf',
+        'tmp/rpc/google/protobuf/compiler/plugin.pb.rb' => 'lib/protobuf/descriptors/google/protobuf/compiler'
+      }
 
-    files.each_pair do |source_file, destination_dir|
-      source_file = ::File.expand_path("../#{source_file}", __FILE__)
-      destination_dir = ::File.expand_path("../#{destination_dir}", __FILE__)
-      ::FileUtils::Verbose.cp(source_file, destination_dir)
+      files.each_pair do |source_file, destination_dir|
+        source_file     = ::File.expand_path("../#{source_file}", __FILE__)
+        destination_dir = ::File.expand_path("../#{destination_dir}", __FILE__)
+        ::FileUtils::Verbose.cp(source_file, destination_dir)
+      end
+    else
+      puts "Failed to compile protos"
+      exit 1
     end
   end
 
