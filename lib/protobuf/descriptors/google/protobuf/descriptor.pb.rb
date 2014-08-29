@@ -46,6 +46,7 @@ module Google
 
     end
 
+    class OneofDescriptorProto < ::Protobuf::Message; end
     class EnumDescriptorProto < ::Protobuf::Message; end
     class EnumValueDescriptorProto < ::Protobuf::Message; end
     class ServiceDescriptorProto < ::Protobuf::Message; end
@@ -118,6 +119,7 @@ module Google
       repeated ::Google::Protobuf::DescriptorProto, :nested_type, 3
       repeated ::Google::Protobuf::EnumDescriptorProto, :enum_type, 4
       repeated ::Google::Protobuf::DescriptorProto::ExtensionRange, :extension_range, 5
+      repeated ::Google::Protobuf::OneofDescriptorProto, :oneof_decl, 8
       optional ::Google::Protobuf::MessageOptions, :options, 7
     end
 
@@ -129,7 +131,12 @@ module Google
       optional :string, :type_name, 6
       optional :string, :extendee, 2
       optional :string, :default_value, 7
+      optional :int32, :oneof_index, 9
       optional ::Google::Protobuf::FieldOptions, :options, 8
+    end
+
+    class OneofDescriptorProto
+      optional :string, :name, 1
     end
 
     class EnumDescriptorProto
@@ -162,11 +169,13 @@ module Google
       optional :string, :java_outer_classname, 8
       optional :bool, :java_multiple_files, 10, :default => false
       optional :bool, :java_generate_equals_and_hash, 20, :default => false
+      optional :bool, :java_string_check_utf8, 27, :default => false
       optional ::Google::Protobuf::FileOptions::OptimizeMode, :optimize_for, 9, :default => ::Google::Protobuf::FileOptions::OptimizeMode::SPEED
       optional :string, :go_package, 11
       optional :bool, :cc_generic_services, 16, :default => false
       optional :bool, :java_generic_services, 17, :default => false
       optional :bool, :py_generic_services, 18, :default => false
+      optional :bool, :deprecated, 23, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
@@ -175,6 +184,7 @@ module Google
     class MessageOptions
       optional :bool, :message_set_wire_format, 1, :default => false
       optional :bool, :no_standard_descriptor_accessor, 2, :default => false
+      optional :bool, :deprecated, 3, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
@@ -193,25 +203,29 @@ module Google
     end
 
     class EnumOptions
-      optional :bool, :allow_alias, 2, :default => true
+      optional :bool, :allow_alias, 2
+      optional :bool, :deprecated, 3, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
     end
 
     class EnumValueOptions
+      optional :bool, :deprecated, 1, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
     end
 
     class ServiceOptions
+      optional :bool, :deprecated, 33, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
     end
 
     class MethodOptions
+      optional :bool, :deprecated, 33, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
