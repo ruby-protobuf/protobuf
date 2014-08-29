@@ -480,4 +480,11 @@ describe Protobuf::Message do
     end
   end
 
+  describe 'Oneof fields' do
+    it 'provides the list of oneof union group names defined on this message' do
+      expect(::Test::OneofTest.oneof_names).to eq([ :SingleIdentifier ])
+    end
+
+  end
+
 end

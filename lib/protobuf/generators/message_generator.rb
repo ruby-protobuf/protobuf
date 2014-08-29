@@ -42,6 +42,8 @@ module Protobuf
             print_class(descriptor.name, nil) do
               group = GroupGenerator.new(current_indent)
               group.add_messages(descriptor.nested_type, :extension_fields => @extension_fields, :namespace => type_namespace)
+
+              group.add_oneof_names(descriptor)
               group.add_message_fields(descriptor.field, descriptor.oneof_decl)
               self.class.validate_tags(fully_qualified_type_namespace, descriptor.field.map(&:number))
 
@@ -52,7 +54,7 @@ module Protobuf
 
               group.add_extension_fields(message_extension_fields, descriptor.oneof_decl)
 
-              group.order = [ :message, :field, :extension_range, :extension_field ]
+              group.order = [ :message, :oneof_descriptors, :field, :extension_range, :extension_field ]
               print group.to_s
             end
           end
