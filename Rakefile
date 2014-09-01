@@ -15,20 +15,22 @@ task :default => :spec
 RSpec::Core::RakeTask.new(:spec)
 
 desc 'Run both the spec and descriptors compilation tasks'
-task :compile => [ 'compile:spec', 'compile:descriptors' ]
+task :compile, [ :protoc_program_name ] => [ 'compile:spec', 'compile:descriptors' ]
 
 desc 'Run specs'
 namespace :compile do
 
   desc 'Compile spec protos in spec/supprt/ directory'
-  task :spec do |task, args|
-    source = ::File.expand_path('../spec/support/', __FILE__)
+  task :spec, [ :protoc_program_name ] do |task, args|
+    args.with_defaults(:protoc_program_name => 'protoc')
+
+    source      = ::File.expand_path('../spec/support/', __FILE__)
     input_files = ::File.join(source, '**', '*.proto')
     destination = source
 
     command = []
     command << "PB_NO_TAG_WARNINGS=1"
-    command << "protoc --plugin=./bin/protoc-gen-ruby"
+    command << "#{args[:protoc_program_name]} --plugin=./bin/protoc-gen-ruby"
     command << "--ruby_out=#{destination}"
     command << "-I #{source}"
     command << Dir[input_files].join(' ')
@@ -39,7 +41,9 @@ namespace :compile do
   end
 
   desc 'Compile rpc protos in protos/ directory'
-  task :descriptors do |task, args|
+  task :descriptors, [ :protoc_program_name ] do |task, args|
+    args.with_defaults(:protoc_program_name => 'protoc')
+
     source      = ::File.expand_path('../proto', __FILE__)
     input_files = ::File.join(source, '**', '*.proto')
     destination = ::File.expand_path('../tmp/rpc', __FILE__)
@@ -47,7 +51,7 @@ namespace :compile do
 
     command = []
     command << "PB_NO_TAG_WARNINGS=1"
-    command << "protoc --plugin=./bin/protoc-gen-ruby"
+    command << "#{args[:protoc_program_name]} --plugin=./bin/protoc-gen-ruby"
     command << "--ruby_out=#{destination}"
     command << "-I #{source}"
     command << Dir[input_files].join(' ')
