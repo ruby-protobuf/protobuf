@@ -1,0 +1,5 @@
+package test;
+
+message DeprecatedMessage {
+  option deprecated = true;
+}
