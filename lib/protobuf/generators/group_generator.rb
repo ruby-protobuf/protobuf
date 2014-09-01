@@ -3,6 +3,7 @@ require 'protobuf/generators/extension_generator'
 require 'protobuf/generators/field_generator'
 require 'protobuf/generators/message_generator'
 require 'protobuf/generators/oneof_generator'
+require 'protobuf/generators/option_method_generator'
 require 'protobuf/generators/service_generator'
 
 module Protobuf
@@ -75,6 +76,12 @@ module Protobuf
       def add_oneof_names(descriptor)
         unless descriptor.oneof_decl.empty?
           @groups[:oneof_descriptors] << OneofGenerator.new(descriptor, indent_level)
+        end
+      end
+
+      def add_option_method(method_name, option_field_name, options_descriptor)
+        unless options_descriptor.nil?
+          @groups[:options] << OptionMethodGenerator.new(method_name, option_field_name, options_descriptor, indent_level)
         end
       end
 
