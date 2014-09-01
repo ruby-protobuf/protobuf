@@ -508,4 +508,11 @@ describe Protobuf::Message do
     end
   end
 
+  describe 'deprecated messages' do
+    it 'specifies at a class level when a message has been deprecated' do
+      expect(::Test::DeprecatedMessage).to respond_to(:deprecated?)
+    end
+
+  end
+
 end

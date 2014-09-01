@@ -70,6 +70,11 @@ module Protobuf
         RAW_GETTER
       end
 
+      # To be overriden by inheriting messages
+      def deprecated?
+        false
+      end
+
       def extension_fields
         @extension_fields ||= all_fields.select(&:extension?)
       end
