@@ -7,5 +7,5 @@ message DeprecatedMessage {
 enum DeprecatedEnum {
   option deprecated = true;
 
-  FOO = 1 [deprecated = true];
+  A_DEPRECATED_VALUE = 1 [deprecated = true];
 }

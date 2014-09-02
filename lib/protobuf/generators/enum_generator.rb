@@ -38,13 +38,24 @@ module Protobuf
       end
 
       def build_value(enum_value_descriptor)
-        name = enum_value_descriptor.name
-        number = enum_value_descriptor.number
-        return "define :#{name}, #{number}"
+        value_definition = [
+          ":#{enum_value_descriptor.name}",
+          enum_value_descriptor.number
+        ]
+
+        options = {}
+        options[:deprecated] = true if deprecated_value?(enum_value_descriptor)
+        options.each { |k, v| value_definition << ":#{k} => #{v}" }
+
+        return "define " + value_definition.join(', ')
       end
 
       def deprecated?
         descriptor.options.try(:deprecated!) { false }
+      end
+
+      def deprecated_value?(enum_value_descriptor)
+        enum_value_descriptor.options.try(:deprecated!) { false }
       end
 
     end

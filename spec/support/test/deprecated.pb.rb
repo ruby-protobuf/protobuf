@@ -13,7 +13,7 @@ module Test
       true
     end
 
-    define :FOO, 1
+    define :A_DEPRECATED_VALUE, 1, :deprecated => true
   end
 
 
