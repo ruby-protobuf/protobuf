@@ -236,4 +236,11 @@ describe Protobuf::Enum do
   context 'when coercing from integer' do
     specify { expect(0).to eq(Test::StatusType::PENDING) }
   end
+
+  describe 'deprecated messages' do
+    it 'specifies at a class level when an enum has been deprecated' do
+      expect(::Test::DeprecatedEnum).to respond_to(:deprecated?)
+    end
+
+  end
 end

@@ -76,6 +76,12 @@ module Protobuf
       const_set(name, enum)
     end
 
+    # Public: Indicate the enum's deprecated status. Intended to be overidden.
+    #
+    def self.deprecated?
+      false
+    end
+
     # Public: All defined enums.
     #
     def self.enums
