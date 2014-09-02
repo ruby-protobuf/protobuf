@@ -273,6 +273,10 @@ module Protobuf
       Fixnum
     end
 
+    def deprecated?
+      options.key?(:deprecated)
+    end
+
     def inspect
       "\#<Protobuf::Enum(#{parent_class})::#{name}=#{tag}>"
     end

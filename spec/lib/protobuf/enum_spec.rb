@@ -250,5 +250,10 @@ describe Protobuf::Enum do
       expect(::Test::StatusType.deprecated?).to be_falsey
       expect(::Test::DeprecatedEnum.deprecated?).to be_truthy
     end
+
+    it 'specifies when an enum value has been deprecated' do
+      expect(::Test::StatusType::PENDING.deprecated?).to be_falsey
+      expect(::Test::DeprecatedEnum::A_DEPRECATED_VALUE.deprecated?).to be_truthy
+    end
   end
 end
