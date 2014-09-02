@@ -4,8 +4,14 @@ message DeprecatedMessage {
   option deprecated = true;
 }
 
+enum NonDeprecatedEnum {
+  A_DEPRECATED_VALUE = 1 [deprecated = true];
+  NOT_DEPRECATED_VALUE = 2;
+}
+
 enum DeprecatedEnum {
   option deprecated = true;
 
-  A_DEPRECATED_VALUE = 1 [deprecated = true];
+  EXPLICIT = 1 [deprecated = true];
+  IMPLICIT = 2;
 }

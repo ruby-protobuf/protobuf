@@ -55,7 +55,7 @@ module Protobuf
       end
 
       def deprecated_value?(enum_value_descriptor)
-        enum_value_descriptor.options.try(:deprecated!) { false }
+        deprecated? || enum_value_descriptor.options.try(:deprecated!) { false }
       end
 
     end

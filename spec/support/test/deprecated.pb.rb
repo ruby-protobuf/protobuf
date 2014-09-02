@@ -8,12 +8,18 @@ module Test
   ##
   # Enum Classes
   #
+  class NonDeprecatedEnum < ::Protobuf::Enum
+    define :A_DEPRECATED_VALUE, 1, :deprecated => true
+    define :NOT_DEPRECATED_VALUE, 2
+  end
+
   class DeprecatedEnum < ::Protobuf::Enum
     def self.deprecated?
       true
     end
 
-    define :A_DEPRECATED_VALUE, 1, :deprecated => true
+    define :EXPLICIT, 1, :deprecated => true
+    define :IMPLICIT, 2, :deprecated => true
   end
 
 
