@@ -242,6 +242,10 @@ describe Protobuf::Enum do
       expect(::Test::DeprecatedEnum).to respond_to(:deprecated?)
     end
 
+    it 'allows deprecation of enum values' do
+      expect(::Test::StatusType::PENDING).to respond_to(:deprecated?)
+    end
+
     it 'specifies at a class level when a message has been deprecated' do
       expect(::Test::StatusType.deprecated?).to be_falsey
       expect(::Test::DeprecatedEnum.deprecated?).to be_truthy

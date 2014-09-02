@@ -69,8 +69,8 @@ module Protobuf
     #
     # Returns nothing.
     #
-    def self.define(name, tag)
-      enum = self.new(self, name, tag)
+    def self.define(name, tag, options = {})
+      enum = self.new(self, name, tag, options)
       @enums ||= []
       @enums << enum
       const_set(name, enum)
@@ -253,16 +253,17 @@ module Protobuf
     # Attributes
     #
 
-    attr_reader :parent_class, :name, :tag
+    attr_reader :parent_class, :name, :options, :tag
 
     ##
     # Instance Methods
     #
 
-    def initialize(parent_class, name, tag)
+    def initialize(parent_class, name, tag, options = {})
       @parent_class = parent_class
       @name = name
       @tag = tag
+      @options = options
       super(@tag)
     end
 
