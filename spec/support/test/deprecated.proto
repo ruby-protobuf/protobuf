@@ -3,3 +3,9 @@ package test;
 message DeprecatedMessage {
   option deprecated = true;
 }
+
+enum DeprecatedEnum {
+  option deprecated = true;
+
+  FOO = 1 [deprecated = true];
+}

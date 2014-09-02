@@ -13,6 +13,13 @@ module Protobuf
           tags = []
 
           print_class(descriptor.name, :enum) do
+            if deprecated?
+              puts "def self.deprecated?"
+              indent { puts "true" }
+              puts "end"
+              puts
+            end
+
             if allow_alias?
               puts "set_option :allow_alias"
               puts
@@ -34,6 +41,10 @@ module Protobuf
         name = enum_value_descriptor.name
         number = enum_value_descriptor.number
         return "define :#{name}, #{number}"
+      end
+
+      def deprecated?
+        descriptor.options.try(:deprecated!) { false }
       end
 
     end
