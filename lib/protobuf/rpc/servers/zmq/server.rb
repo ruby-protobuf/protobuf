@@ -82,13 +82,13 @@ module Protobuf
           !brokerless? && options[:broadcast_beacons]
         end
 
-        def broadcast_flatline
+        def broadcast_flatline(this_many = 1)
           flatline = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE,
             :server => self.to_proto
           )
 
-          @beacon_socket.send(flatline.encode, 0)
+          this_many.times { @beacon_socket.send(flatline.encode, 0) }
         end
 
         def broadcast_heartbeat
@@ -188,9 +188,8 @@ module Protobuf
 
           yield if block_given? # runs on startup
           wait_for_shutdown_signal
-          20.times { broadcast_flatline } if broadcast_beacons?
-
-          brokerless? ? shutdown_workers : @broker.join
+          broadcast_flatline(20) if broadcast_beacons?
+          brokerless? ? shutdown_workers : @broker.join(10)
         ensure
           teardown
         end
@@ -200,7 +199,8 @@ module Protobuf
         end
 
         def shutdown_workers
-          @workers.each { |worker| worker.raise(::Interrupt).join }
+          job_queue << :shutdown
+          @workers.each { |worker| worker.join(5) }
         end
 
         def start_missing_workers

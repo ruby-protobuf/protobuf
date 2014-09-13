@@ -38,11 +38,16 @@ module Protobuf
             process_frontend if @poller.readables.include?(@frontend_socket)
           end
         ensure
+          shutdown_workers
           teardown
         end
 
         def running?
           @server.running? || job_queue.size > 0
+        end
+
+        def shutdown_workers
+          server.shutdown_workers
         end
 
         def workers
@@ -118,8 +123,6 @@ module Protobuf
         end
 
         def teardown
-          server.shutdown_workers
-
           @frontend_socket.try(:close)
           @backend_socket.try(:close)
           @zmq_context.try(:terminate) unless inproc?

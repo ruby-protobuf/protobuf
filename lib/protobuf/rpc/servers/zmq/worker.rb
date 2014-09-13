@@ -32,23 +32,22 @@ module Protobuf
 
           gc_pause do
             encoded_response = handle_request(data)
-            write_to_backend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
+            write_to_backend(["", client_address, "", encoded_response])
           end
         end
 
         def run
-          poller = ::ZMQ::Poller.new
-          poller.register_readable(@backend_socket)
-
           loop do
             job = job_queue.deq
+
+            break if job === :shutdown
 
             ::Thread.current[:busy] = true
             process_job(job)
             ::Thread.current[:busy] = false
           end
-        rescue ::Interrupt
-          # Graceful shutdown
+
+          job_queue << :shutdown # propogate :shutdown to other workers
         ensure
           teardown
         end
@@ -68,7 +67,7 @@ module Protobuf
         end
 
         def init_backend_socket
-          @backend_socket = @zmq_context.socket(ZMQ::REQ)
+          @backend_socket = @zmq_context.socket(ZMQ::DEALER)
           zmq_error_check(@backend_socket.connect(@server.backend_uri))
         end
 
