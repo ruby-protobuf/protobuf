@@ -104,9 +104,9 @@ module Protobuf
             end
           else
             if @idle_workers.empty?
-              local_queue.push([address, "", message ] + frames)
+              local_queue << [address, "", message ].concat(frames)
             else
-              write_to_backend([@idle_workers.shift, ""] + [address, "", message ] + frames)
+              write_to_backend([@idle_workers.shift, ""].concat([address, "", message ]).concat(frames))
             end
           end
         end
@@ -115,7 +115,7 @@ module Protobuf
           return if local_queue.empty?
           return if @idle_workers.empty?
 
-          write_to_backend([@idle_workers.shift, ""] + local_queue.pop)
+          write_to_backend([@idle_workers.shift, ""].concat(local_queue.shift))
           process_local_queue
         end
 
