@@ -19,12 +19,13 @@ module Protobuf
         }
 
         attr_accessor :options, :workers
-        attr_reader :zmq_context
+        attr_reader :zmq_context, :job_queue
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
           @workers = []
 
+          init_job_queue
           init_zmq_context
           init_beacon_socket if broadcast_beacons?
           init_shutdown_pipe
@@ -187,16 +188,19 @@ module Protobuf
 
           yield if block_given? # runs on startup
           wait_for_shutdown_signal
-          broadcast_flatline if broadcast_beacons?
-          Thread.pass until reap_dead_workers.empty?
-          @broker.join unless brokerless?
+          20.times { broadcast_flatline } if broadcast_beacons?
+
+          brokerless? ? shutdown_workers : @broker.join
         ensure
-          @running = false
           teardown
         end
 
         def running?
           !!@running
+        end
+
+        def shutdown_workers
+          @workers.each { |worker| worker.raise(::Interrupt).join }
         end
 
         def start_missing_workers
@@ -214,11 +218,12 @@ module Protobuf
         end
 
         def teardown
+          @running = false
           @shutdown_r.try(:close)
           @shutdown_w.try(:close)
           @beacon_socket.try(:close)
           @zmq_context.try(:terminate)
-          @last_reaping = @last_beacon = @timeout = nil
+          @last_reaping = @last_beacon = @timeout = @workers = @job_queue = nil
         end
 
         def total_workers
@@ -280,6 +285,10 @@ module Protobuf
 
           @beacon_socket.bind(frontend_ip, beacon_port)
           @beacon_socket.connect(beacon_ip, beacon_port)
+        end
+
+        def init_job_queue
+          @job_queue = Queue.new
         end
 
         def init_shutdown_pipe

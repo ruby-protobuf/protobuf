@@ -25,8 +25,9 @@ module Protobuf
         ##
         # Instance Methods
         #
-        def process_request
-          client_address, _, data = read_from_backend
+        def process_job(job)
+          client_address, _, data = *job
+
           return unless data
 
           gc_pause do
@@ -38,32 +39,22 @@ module Protobuf
         def run
           poller = ::ZMQ::Poller.new
           poller.register_readable(@backend_socket)
-          poller.register_readable(@shutdown_socket)
-
-          # Send request to broker telling it we are ready
-          write_to_backend([::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE])
 
           loop do
-            rc = poller.poll(500)
+            job = job_queue.deq
 
-            # The server was shutdown and no requests are pending
-            break if rc == 0 && !running?
-
-            # Something went wrong
-            break if rc == -1
-
-            if rc > 0
-              ::Thread.current[:busy] = true
-              process_request
-              ::Thread.current[:busy] = false
-            end
+            ::Thread.current[:busy] = true
+            process_job(job)
+            ::Thread.current[:busy] = false
           end
+        rescue ::Interrupt
+          # Graceful shutdown
         ensure
           teardown
         end
 
-        def running?
-          @server.running?
+        def job_queue
+          @server.job_queue
         end
 
         private
