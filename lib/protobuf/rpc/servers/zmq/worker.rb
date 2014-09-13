@@ -93,7 +93,7 @@ module Protobuf
 
         def teardown
           @backend_socket.try(:close)
-          @zmq_context.try(:terminate)
+          @zmq_context.try(:terminate) unless inproc?
         end
 
         def write_to_backend(frames)
