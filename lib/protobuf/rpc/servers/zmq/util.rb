@@ -9,6 +9,7 @@ module Protobuf
       CHECK_AVAILABLE_MESSAGE = "\3"
       NO_WORKERS_AVAILABLE = "\4"
       WORKERS_AVAILABLE = "\5"
+      EMPTY_STRING = ""
 
       module Util
         include ::Protobuf::Logging

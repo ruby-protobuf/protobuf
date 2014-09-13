@@ -1,3 +1,4 @@
+require 'thread_safe'
 require 'protobuf/rpc/connectors/base'
 require 'protobuf/rpc/service_directory'
 
@@ -28,6 +29,10 @@ module Protobuf
           }
 
           @zmq_contexts[Process.pid]
+        end
+
+        def self.ping_port_responses
+          @ping_port_responses ||= ::ThreadSafe::Cache.new
         end
 
         ##
@@ -105,7 +110,7 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          5.times do
+          15.times do
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
@@ -115,6 +120,8 @@ module Protobuf
             host = options[:host]
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
+
+            sleep (5.0/100.0)
           end
 
           raise "Host not found for service #{service}"
@@ -122,6 +129,22 @@ module Protobuf
 
         def host_alive?(host)
           return true unless ping_port_enabled?
+
+          if (last_response = self.class.ping_port_responses[host])
+            if (Time.now.to_i - last_response[:at]) <= 2
+              return last_response[:ping_port_open]
+            end
+          end
+
+          ping_port_open = ping_port_open?(host)
+          self.class.ping_port_responses[host] = {
+            :at => Time.now.to_i,
+            :ping_port_open => ping_port_open
+          }
+          ping_port_open
+        end
+
+        def ping_port_open?(host)
           socket = TCPSocket.new(host, ping_port.to_i)
           socket.setsockopt(::Socket::IPPROTO_TCP, ::Socket::TCP_NODELAY, 1)
           socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_LINGER, [1,0].pack('ii'))

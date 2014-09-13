@@ -22,6 +22,7 @@ require "protobuf/version"
   s.add_dependency 'activesupport', '>= 3.2'
   s.add_dependency 'middleware'
   s.add_dependency 'thor'
+  s.add_dependency 'thread_safe'
 
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'pry-nav'

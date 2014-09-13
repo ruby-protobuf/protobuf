@@ -25,26 +25,17 @@ module Protobuf
           @idle_workers = []
 
           loop do
-            unless local_queue.empty?
-              process_local_queue
-            end
-
+            process_local_queue
             rc = @poller.poll(500)
 
             # The server was shutdown and no requests are pending
             break if rc == 0 && !running?
-
             # Something went wrong
             break if rc == -1
 
-            @poller.readables.each do |readable|
-              case readable
-              when @frontend_socket
-                process_frontend
-              when @backend_socket
-                process_backend
-              end
-            end
+            process_backend if @poller.readables.include?(@backend_socket)
+            process_local_queue # Fair ordering so queued requests get in before new requests
+            process_frontend if @poller.readables.include?(@frontend_socket)
           end
         ensure
           teardown
@@ -107,15 +98,15 @@ module Protobuf
 
           if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
             if local_queue.size < local_queue_max_size
-              write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
+              write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
-              write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
+              write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
             end
           else
             if @idle_workers.empty?
-              local_queue.push([address, "", message ] + frames)
+              local_queue << [address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message ].concat(frames)
             else
-              write_to_backend([@idle_workers.shift, ""] + [address, "", message ] + frames)
+              write_to_backend([@idle_workers.shift, ::Protobuf::Rpc::Zmq::EMPTY_STRING].concat([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message ]).concat(frames))
             end
           end
         end
@@ -124,7 +115,7 @@ module Protobuf
           return if local_queue.empty?
           return if @idle_workers.empty?
 
-          write_to_backend([@idle_workers.shift, ""] + local_queue.pop)
+          write_to_backend([@idle_workers.shift, ::Protobuf::Rpc::Zmq::EMPTY_STRING].concat(local_queue.shift))
           process_local_queue
         end
 
@@ -143,7 +134,7 @@ module Protobuf
         def teardown
           @frontend_socket.try(:close)
           @backend_socket.try(:close)
-          @zmq_context.try(:terminate)
+          @zmq_context.try(:terminate) unless inproc?
         end
 
         def write_to_backend(frames)

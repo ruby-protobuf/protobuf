@@ -31,7 +31,7 @@ module Protobuf
 
           gc_pause do
             encoded_response = handle_request(data)
-            write_to_backend([client_address, "", encoded_response])
+            write_to_backend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
           end
         end
 
@@ -93,7 +93,7 @@ module Protobuf
 
         def teardown
           @backend_socket.try(:close)
-          @zmq_context.try(:terminate)
+          @zmq_context.try(:terminate) unless inproc?
         end
 
         def write_to_backend(frames)
