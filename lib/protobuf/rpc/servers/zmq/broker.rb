@@ -98,15 +98,15 @@ module Protobuf
 
           if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
             if local_queue.size < local_queue_max_size
-              write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
+              write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
-              write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
+              write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
             end
           else
             if @idle_workers.empty?
-              local_queue << [address, "", message ].concat(frames)
+              local_queue << [address, , message ].concat(frames)
             else
-              write_to_backend([@idle_workers.shift, ""].concat([address, "", message ]).concat(frames))
+              write_to_backend([@idle_workers.shift, ::Protobuf::Rpc::Zmq::EMPTY_STRING].concat([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message ]).concat(frames))
             end
           end
         end
@@ -115,7 +115,7 @@ module Protobuf
           return if local_queue.empty?
           return if @idle_workers.empty?
 
-          write_to_backend([@idle_workers.shift, ""].concat(local_queue.shift))
+          write_to_backend([@idle_workers.shift, ::Protobuf::Rpc::Zmq::EMPTY_STRING].concat(local_queue.shift))
           process_local_queue
         end
 

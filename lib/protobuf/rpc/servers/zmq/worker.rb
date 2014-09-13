@@ -31,7 +31,7 @@ module Protobuf
 
           gc_pause do
             encoded_response = handle_request(data)
-            write_to_backend([client_address, "", encoded_response])
+            write_to_backend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
           end
         end
 
