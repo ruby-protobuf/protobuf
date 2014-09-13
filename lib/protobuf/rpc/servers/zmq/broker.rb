@@ -104,7 +104,7 @@ module Protobuf
             end
           else
             if @idle_workers.empty?
-              local_queue << [address, , message ].concat(frames)
+              local_queue << [address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message ].concat(frames)
             else
               write_to_backend([@idle_workers.shift, ::Protobuf::Rpc::Zmq::EMPTY_STRING].concat([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message ]).concat(frames))
             end
