@@ -45,16 +45,11 @@ module Protobuf
             end
           end
         ensure
-          shutdown_workers
           teardown
         end
 
         def running?
           @server.running?
-        end
-
-        def shutdown_workers
-          @server.shutdown_workers
         end
 
         def shutdown?
@@ -117,7 +112,7 @@ module Protobuf
               write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
             end
           else
-            job_queue << [address, "", message ] + frames
+            job_queue << [address, "", message ].concat(frames)
           end
         end
 
