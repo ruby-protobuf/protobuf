@@ -30,14 +30,14 @@ module Protobuf
 
             # No responses were pending, the server was shutdown, and all
             # workers have finished and been reaped
-            break if rc == 0 && shutdown? && workers.empty?
+            break if rc == 0 && !running? && workers.empty?
 
             # Something went wrong
             break if rc == -1
 
             @poller.readables.each do |readable|
               case readable
-              when @frontend_socket && running?
+              when @frontend_socket
                 process_frontend
               when @backend_socket
                 process_backend
@@ -50,10 +50,6 @@ module Protobuf
 
         def running?
           @server.running?
-        end
-
-        def shutdown?
-          !running?
         end
 
         def workers
