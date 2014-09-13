@@ -219,7 +219,7 @@ module Protobuf
       end
 
       def run
-        sweep_interval = 1 # sweep expired listings every 1 second
+        sweep_interval = 5 # sweep expired listings every 5 seconds
         next_sweep = Time.now.to_i + sweep_interval
 
         loop do

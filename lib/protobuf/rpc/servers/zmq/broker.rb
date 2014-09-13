@@ -25,26 +25,17 @@ module Protobuf
           @idle_workers = []
 
           loop do
-            unless local_queue.empty?
-              process_local_queue
-            end
-
+            process_local_queue
             rc = @poller.poll(500)
 
             # The server was shutdown and no requests are pending
             break if rc == 0 && !running?
-
             # Something went wrong
             break if rc == -1
 
-            @poller.readables.each do |readable|
-              case readable
-              when @frontend_socket
-                process_frontend
-              when @backend_socket
-                process_backend
-              end
-            end
+            process_backend if @poller.readables.include?(@backend_socket)
+            process_local_queue # Fair ordering so queued requests get in before new requests
+            process_frontend if @poller.readables.include?(@frontend_socket)
           end
         ensure
           teardown
