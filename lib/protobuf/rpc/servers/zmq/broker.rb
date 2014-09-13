@@ -28,14 +28,21 @@ module Protobuf
           loop do
             rc = @poller.poll(500)
 
-            # The server was shutdown and no requests are pending
-            break if rc == 0 && !running?
+            # No responses were pending, the server was shutdown, and all
+            # workers have finished and been reaped
+            break if rc == 0 && shutdown? && workers.empty?
+
             # Something went wrong
             break if rc == -1
 
-            process_backend if @poller.readables.include?(@backend_socket)
-            process_local_queue # Fair ordering so queued requests get in before new requests
-            process_frontend if @poller.readables.include?(@frontend_socket)
+            @poller.readables.each do |readable|
+              case readable
+              when @frontend_socket && running?
+                process_frontend
+              when @backend_socket
+                process_backend
+              end
+            end
           end
         ensure
           shutdown_workers
@@ -43,15 +50,19 @@ module Protobuf
         end
 
         def running?
-          @server.running? || job_queue.size > 0
+          @server.running?
         end
 
         def shutdown_workers
-          server.shutdown_workers
+          @server.shutdown_workers
+        end
+
+        def shutdown?
+          !running?
         end
 
         def workers
-          server.workers
+          @server.workers
         end
 
         private
@@ -100,8 +111,8 @@ module Protobuf
           address, _, message, *frames = read_from_frontend
 
           if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
-            if local_queue.size < local_queue_max_size
-              write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
+            if job_queue.size < job_queue_max_size && running?
+              write_to_frontend([address, "", ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
               write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
             end

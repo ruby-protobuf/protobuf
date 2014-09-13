@@ -189,18 +189,15 @@ module Protobuf
           yield if block_given? # runs on startup
           wait_for_shutdown_signal
           broadcast_flatline(20) if broadcast_beacons?
-          brokerless? ? shutdown_workers : @broker.join(10)
+          job_queue << :shutdown
+          Thread.pass until reap_dead_workers.empty?
+          @broker.join(10) unless brokerless?
         ensure
           teardown
         end
 
         def running?
           !!@running
-        end
-
-        def shutdown_workers
-          job_queue << :shutdown
-          @workers.each { |worker| worker.join(5) }
         end
 
         def start_missing_workers
