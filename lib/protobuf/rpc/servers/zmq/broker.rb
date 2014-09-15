@@ -50,6 +50,7 @@ module Protobuf
             while readables_include_frontend && message_count_read_from_frontend < frontend_poll_weight do
               message_count_read_from_frontend = message_count_read_from_frontend + 1
               process_frontend
+              break unless local_queue_available? # no need to read frontend just to throw away messages, will prioritize backend when full
               @poller.poll_nonblock
               readables_include_frontend = @poller.readables.include?(@frontend_socket)
             end
@@ -104,6 +105,10 @@ module Protobuf
           !!@server.try(:inproc?)
         end
 
+        def local_queue_available?
+          local_queue.size < local_queue_max_size
+        end
+
         def local_queue_max_size
           @local_queue_max_size ||= [ENV["PB_ZMQ_SERVER_QUEUE_MAX_SIZE"].to_i, 5].max
         end
@@ -122,7 +127,7 @@ module Protobuf
           address, _, message, *frames = read_from_frontend
 
           if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
-            if local_queue.size < local_queue_max_size
+            if local_queue_available?
               write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
               write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
