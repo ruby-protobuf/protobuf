@@ -33,9 +33,26 @@ module Protobuf
             # Something went wrong
             break if rc == -1
 
-            process_backend if @poller.readables.include?(@backend_socket)
+            readables_include_backend = @poller.readables.include?(@backend_socket)
+            message_count_read_from_backend = 0
+
+            while readables_include_backend && message_count_read_from_backend < backend_poll_weight do
+              message_count_read_from_backend = message_count_read_from_backend + 1
+              process_backend
+              @poller.poll_nonblock
+              readables_include_backend = @poller.readables.include?(@backend_socket)
+            end
+
             process_local_queue # Fair ordering so queued requests get in before new requests
-            process_frontend if @poller.readables.include?(@frontend_socket)
+            readables_include_frontend = @poller.readables.include?(@frontend_socket)
+            message_count_read_from_frontend = 0
+
+            while readables_include_frontend && message_count_read_from_frontend < frontend_poll_weight do
+              message_count_read_from_frontend = message_count_read_from_frontend + 1
+              process_frontend
+              @poller.poll_nonblock
+              readables_include_frontend = @poller.readables.include?(@frontend_socket)
+            end
           end
         ensure
           teardown
@@ -46,6 +63,14 @@ module Protobuf
         end
 
         private
+
+        def backend_poll_weight
+          @backend_poll_weight ||= [ENV["PB_ZMQ_SERVER_BACKEND_POLL_WEIGHT"].to_i, 2].max
+        end
+
+        def frontend_poll_weight
+          @frontend_poll_weight ||= [ENV["PB_ZMQ_SERVER_FRONTEND_POLL_WEIGHT"].to_i, 1].max
+        end
 
         def init_backend_socket
           @backend_socket = @zmq_context.socket(ZMQ::ROUTER)

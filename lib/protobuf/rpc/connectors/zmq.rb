@@ -75,10 +75,7 @@ module Protobuf
 
             if socket # Make sure the context builds the socket
               socket.setsockopt(::ZMQ::LINGER, 0)
-
-              logger.debug { sign_message("Establishing connection: #{server_uri}") }
               zmq_error_check(socket.connect(server_uri), :socket_connect)
-              logger.debug { sign_message("Connection established to #{server_uri}") }
 
               if first_alive_load_balance?
                 begin
@@ -110,7 +107,7 @@ module Protobuf
         # to the host and port in the options
         #
         def lookup_server_uri
-          15.times do
+          server_lookup_attempts.times do
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
@@ -121,7 +118,7 @@ module Protobuf
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
 
-            sleep (5.0/100.0)
+            sleep (1.0/100.0)
           end
 
           raise "Host not found for service #{service}"
@@ -131,7 +128,7 @@ module Protobuf
           return true unless ping_port_enabled?
 
           if (last_response = self.class.ping_port_responses[host])
-            if (Time.now.to_i - last_response[:at]) <= 2
+            if (Time.now.to_i - last_response[:at]) <= host_alive_check_interval
               return last_response[:ping_port_open]
             end
           end
@@ -142,6 +139,10 @@ module Protobuf
             :ping_port_open => ping_port_open
           }
           ping_port_open
+        end
+
+        def host_alive_check_interval
+          @host_alive_check_interval ||= [ENV["PB_ZMQ_CLIENT_HOST_ALIVE_CHECK_INTERVAL"].to_i, 1].max
         end
 
         def ping_port_open?(host)
@@ -195,6 +196,10 @@ module Protobuf
           logger.debug { sign_message("Closing Socket")  }
           zmq_error_check(socket.close, :socket_close) if socket
           logger.debug { sign_message("Socket closed")  }
+        end
+
+        def server_lookup_attempts
+          @server_lookup_attempts ||= [ENV["PB_ZMQ_CLIENT_SERVER_LOOKUP_ATTEMPTS"].to_i, 5].max
         end
 
         # The service we're attempting to connect to
