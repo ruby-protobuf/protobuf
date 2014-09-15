@@ -65,7 +65,7 @@ module Protobuf
         private
 
         def backend_poll_weight
-          @backend_poll_weight ||= [ENV["PB_ZMQ_SERVER_BACKEND_POLL_WEIGHT"].to_i, 2].max
+          @backend_poll_weight ||= [ENV["PB_ZMQ_SERVER_BACKEND_POLL_WEIGHT"].to_i, 1].max
         end
 
         def frontend_poll_weight
