@@ -33,8 +33,7 @@ module Protobuf
 
           gc_pause do
             encoded_response = handle_request(data)
-              @broker.write_to_frontend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
-            end
+            @broker.write_to_frontend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
           end
         end
 
