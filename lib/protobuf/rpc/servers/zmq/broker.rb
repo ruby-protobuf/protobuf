@@ -102,12 +102,7 @@ module Protobuf
 
         def teardown
           @frontend_socket.try(:close)
-          @backend_socket.try(:close)
           @zmq_context.try(:terminate) unless inproc?
-        end
-
-        def write_to_backend(frames)
-          zmq_error_check(@backend_socket.send_strings(frames))
         end
       end
     end
