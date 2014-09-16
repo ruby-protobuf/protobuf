@@ -35,7 +35,6 @@ module Protobuf
     option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
     option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
-    option :workers_only,               :type => :boolean, :default => false, :desc => "Starts process with only workers (no broker/frontend is started) only relevant for Zmq Server"
     option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
     option :zmq_inproc,                 :type => :boolean, :default => true, :desc => 'Use inproc protocol for zmq Server/Broker/Worker'
 
@@ -181,9 +180,6 @@ module Protobuf
       def runner_options
         # Symbolize keys
         opt = options.inject({}) { |h, (k, v)| h[k.to_sym] = v; h }
-
-        opt[:workers_only] = (!!ENV['PB_WORKERS_ONLY']) || options.workers_only
-
         opt
       end
 

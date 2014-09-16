@@ -8,7 +8,6 @@ describe Protobuf::Rpc::Zmq::Server do
     :host => '127.0.0.1',
     :port => 9399,
     :worker_port => 9400,
-    :workers_only => true
   }}
 
   before do

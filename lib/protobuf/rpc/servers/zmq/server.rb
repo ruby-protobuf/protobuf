@@ -19,12 +19,13 @@ module Protobuf
         }
 
         attr_accessor :options, :workers
-        attr_reader :zmq_context
+        attr_reader :zmq_context, :job_queue
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
           @workers = []
 
+          init_job_queue
           init_zmq_context
           init_beacon_socket if broadcast_beacons?
           init_shutdown_pipe
@@ -78,16 +79,16 @@ module Protobuf
         end
 
         def broadcast_beacons?
-          !brokerless? && options[:broadcast_beacons]
+          options[:broadcast_beacons]
         end
 
-        def broadcast_flatline
+        def broadcast_flatline(this_many = 1)
           flatline = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE,
             :server => self.to_proto
           )
 
-          @beacon_socket.send(flatline.encode, 0)
+          this_many.times { @beacon_socket.send(flatline.encode, 0) }
         end
 
         def broadcast_heartbeat
@@ -105,10 +106,6 @@ module Protobuf
 
         def broadcast_heartbeat?
           Time.now.to_i >= next_beacon && broadcast_beacons?
-        end
-
-        def brokerless?
-          !!options[:workers_only]
         end
 
         def busy_worker_count
@@ -182,16 +179,16 @@ module Protobuf
         def run
           @running = true
 
-          start_broker unless brokerless?
+          start_broker
           start_missing_workers
 
           yield if block_given? # runs on startup
           wait_for_shutdown_signal
-          broadcast_flatline if broadcast_beacons?
+          broadcast_flatline(20) if broadcast_beacons?
+          job_queue << :shutdown
           Thread.pass until reap_dead_workers.empty?
-          @broker.join unless brokerless?
+          @broker_thread.join(10)
         ensure
-          @running = false
           teardown
         end
 
@@ -214,11 +211,12 @@ module Protobuf
         end
 
         def teardown
+          @running = false
           @shutdown_r.try(:close)
           @shutdown_w.try(:close)
           @beacon_socket.try(:close)
           @zmq_context.try(:terminate)
-          @last_reaping = @last_beacon = @timeout = nil
+          @last_reaping = @last_beacon = @timeout = @workers = @job_queue = nil
         end
 
         def total_workers
@@ -282,6 +280,10 @@ module Protobuf
           @beacon_socket.connect(beacon_ip, beacon_port)
         end
 
+        def init_job_queue
+          @job_queue = Queue.new
+        end
+
         def init_shutdown_pipe
           @shutdown_r, @shutdown_w = IO.pipe
         end
@@ -291,15 +293,16 @@ module Protobuf
         end
 
         def start_broker
-          @broker = Thread.new(self) do |server|
-            ::Protobuf::Rpc::Zmq::Broker.new(server).run
+          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self)
+          @broker_thread = Thread.new(@broker) do |broker|
+            broker.run
           end
         end
 
         def start_worker
-          @workers << Thread.new(self) do |server|
+          @workers << Thread.new(self, @broker) do |server, broker|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(server).run
+              ::Protobuf::Rpc::Zmq::Worker.new(server, broker).run
             rescue => e
               message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
               $stderr.puts(message)
