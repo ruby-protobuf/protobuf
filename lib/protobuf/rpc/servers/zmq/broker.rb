@@ -33,9 +33,9 @@ module Protobuf
             # Something went wrong
             break if rc == -1
 
-            process_backend if @poller.readables.include?(@backend_socket)
+            check_and_process_backend
             process_local_queue # Fair ordering so queued requests get in before new requests
-            process_frontend if @poller.readables.include?(@frontend_socket)
+            check_and_process_frontend
           end
         ensure
           teardown
@@ -46,6 +46,39 @@ module Protobuf
         end
 
         private
+
+        def backend_poll_weight
+          @backend_poll_weight ||= [ENV["PB_ZMQ_SERVER_BACKEND_POLL_WEIGHT"].to_i, 1].max
+        end
+
+        def check_and_process_backend
+          readables_include_backend = @poller.readables.include?(@backend_socket)
+          message_count_read_from_backend = 0
+
+          while readables_include_backend && message_count_read_from_backend < backend_poll_weight do
+            message_count_read_from_backend += 1
+            process_backend
+            @poller.poll_nonblock
+            readables_include_backend = @poller.readables.include?(@backend_socket)
+          end
+        end
+
+        def check_and_process_frontend
+          readables_include_frontend = @poller.readables.include?(@frontend_socket)
+          message_count_read_from_frontend = 0
+
+          while readables_include_frontend && message_count_read_from_frontend < frontend_poll_weight do
+            message_count_read_from_frontend += 1
+            process_frontend
+            break unless local_queue_available? # no need to read frontend just to throw away messages, will prioritize backend when full
+            @poller.poll_nonblock
+            readables_include_frontend = @poller.readables.include?(@frontend_socket)
+          end
+        end
+
+        def frontend_poll_weight
+          @frontend_poll_weight ||= [ENV["PB_ZMQ_SERVER_FRONTEND_POLL_WEIGHT"].to_i, 1].max
+        end
 
         def init_backend_socket
           @backend_socket = @zmq_context.socket(ZMQ::ROUTER)
@@ -79,6 +112,10 @@ module Protobuf
           !!@server.try(:inproc?)
         end
 
+        def local_queue_available?
+          local_queue.size < local_queue_max_size
+        end
+
         def local_queue_max_size
           @local_queue_max_size ||= [ENV["PB_ZMQ_SERVER_QUEUE_MAX_SIZE"].to_i, 5].max
         end
@@ -97,7 +134,7 @@ module Protobuf
           address, _, message, *frames = read_from_frontend
 
           if message == ::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE
-            if local_queue.size < local_queue_max_size
+            if local_queue_available?
               write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::WORKERS_AVAILABLE])
             else
               write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
