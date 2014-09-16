@@ -293,7 +293,7 @@ module Protobuf
         end
 
         def start_broker
-          @broker = ::Protobuf::Rpc::Zmq::Broker.new(server)
+          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self)
           @broker_thread = Thread.new(@broker) do |broker|
             broker.run
           end
