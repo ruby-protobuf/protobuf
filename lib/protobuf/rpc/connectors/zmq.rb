@@ -8,6 +8,7 @@ module Protobuf
       class Zmq < Base
         RequestTimeout = Class.new(RuntimeError)
         ZmqRecoverableError = Class.new(RuntimeError)
+        ZmqEagainError = Class.new(RuntimeError)
 
         ##
         # Included Modules
@@ -58,6 +59,13 @@ module Protobuf
         ##
         # Private Instance methods
         #
+        def check_available_rcv_timeout
+          @check_available_rcv_timeout ||= [ENV["PB_ZMQ_CLIENT_CHECK_AVAILABLE_RCV_TIMEOUT"].to_i, 200].max
+        end
+
+        def check_available_snd_timeout
+          @check_available_snd_timeout ||= [ENV["PB_ZMQ_CLIENT_CHECK_AVAILABLE_SND_TIMEOUT"].to_i, 200].max
+        end
 
         def close_connection
           # The socket is automatically closed after every request.
@@ -80,8 +88,8 @@ module Protobuf
               if first_alive_load_balance?
                 begin
                   check_available_response = ""
-                  socket.setsockopt(::ZMQ::RCVTIMEO, 200)
-                  socket.setsockopt(::ZMQ::SNDTIMEO, 200)
+                  socket.setsockopt(::ZMQ::RCVTIMEO, check_available_rcv_timeout)
+                  socket.setsockopt(::ZMQ::SNDTIMEO, check_available_snd_timeout)
                   zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
                   zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
 
@@ -180,23 +188,39 @@ module Protobuf
           end
         end
 
+        def rcv_timeout
+          @rcv_timeout ||= begin
+            if ENV.has_key?("PB_ZMQ_CLIENT_RCV_TIMEOUT")
+              ENV["PB_ZMQ_CLIENT_RCV_TIMEOUT"].to_i
+            else
+              300_000 # 300 seconds
+            end
+          end
+        end
+
+        def snd_timeout
+          @snd_timeout ||= begin
+            if ENV.has_key?("PB_ZMQ_CLIENT_SND_TIMEOUT")
+              ENV["PB_ZMQ_CLIENT_SND_TIMEOUT"].to_i
+            else
+              300_000 # 300 seconds
+            end
+          end
+        end
+
         def send_request_with_timeout(timeout, attempt = 0)
           socket = create_socket
-
-          poller = ::ZMQ::Poller.new
-          poller.register_readable(socket)
+          socket.setsockopt(::ZMQ::RCVTIMEO, rcv_timeout)
+          socket.setsockopt(::ZMQ::SNDTIMEO, snd_timeout)
 
           logger.debug { sign_message("Sending Request (attempt #{attempt}, #{socket})") }
-          zmq_error_check(socket.send_string(@request_data), :socket_send_string)
+          zmq_eagain_error_check(socket.send_string(@request_data), :socket_send_string)
           logger.debug { sign_message("Waiting #{timeout} seconds for response (attempt #{attempt}, #{socket})") }
-
-          if poller.poll(timeout * 1000) == 1
-            zmq_error_check(socket.recv_string(@response_data = ""), :socket_recv_string)
-            logger.debug { sign_message("Response received (attempt #{attempt}, #{socket})") }
-          else
-            logger.debug { sign_message("Timed out waiting for response (attempt #{attempt}, #{socket})") }
-            raise RequestTimeout
-          end
+          zmq_eagain_error_check(socket.recv_string(@response_data = ""), :socket_recv_string)
+          logger.debug { sign_message("Response received (attempt #{attempt}, #{socket})") }
+        rescue ZmqEagainError
+          logger.debug { sign_message("Timed out waiting for response (attempt #{attempt}, #{socket})") }
+          raise RequestTimeout
         ensure
           logger.debug { sign_message("Closing Socket")  }
           zmq_error_check(socket.close, :socket_close) if socket
@@ -224,6 +248,24 @@ module Protobuf
         #
         def zmq_context
           self.class.zmq_context
+        end
+
+        def zmq_eagain_error_check(return_code, source)
+          unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
+            if ::ZMQ::Util.errno == ::ZMQ::EAGAIN
+              raise ZmqEagainError, <<-ERROR
+              Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+
+              #{caller(1).join($/)}
+              ERROR
+            else
+              raise <<-ERROR
+              Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+
+              #{caller(1).join($/)}
+              ERROR
+            end
+          end
         end
 
         def zmq_error_check(return_code, source)
