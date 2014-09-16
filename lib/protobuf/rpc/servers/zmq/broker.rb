@@ -6,15 +6,12 @@ module Protobuf
       class Broker
         include ::Protobuf::Rpc::Zmq::Util
 
-        attr_reader :job_queue
-
         def initialize(server)
           @server = server
+          @response_mutex = Mutex.new
 
           init_zmq_context
-          init_backend_socket
           init_frontend_socket
-          init_poller
         rescue
           teardown
           raise
@@ -25,24 +22,20 @@ module Protobuf
         end
 
         def run
-          loop do
-            rc = @poller.poll(500)
+          poller = ZMQ::Poller.new
+          poller.register_readable(@frontend_socket)
 
-            # No responses were pending, the server was shutdown, and all
-            # workers have finished and been reaped
-            break if rc == 0 && !running? && workers.empty?
+          loop do
+            rc = poller.poll(500)
+
+            # The server was shutdown, and all workers have finished and been
+            # reaped
+            break if !running? && workers.empty?
 
             # Something went wrong
             break if rc == -1
 
-            @poller.readables.each do |readable|
-              case readable
-              when @frontend_socket
-                process_frontend
-              when @backend_socket
-                process_backend
-              end
-            end
+            process_frontend if rc > 0
           end
         ensure
           teardown
@@ -56,22 +49,17 @@ module Protobuf
           @server.workers
         end
 
-        private
-
-        def init_backend_socket
-          @backend_socket = @zmq_context.socket(ZMQ::ROUTER)
-          zmq_error_check(@backend_socket.bind(@server.backend_uri))
+        def write_to_frontend(frames)
+          @response_mutex.synchronize do
+            zmq_error_check(@frontend_socket.send_strings(frames))
+          end
         end
+
+        private
 
         def init_frontend_socket
           @frontend_socket = @zmq_context.socket(ZMQ::ROUTER)
           zmq_error_check(@frontend_socket.bind(@server.frontend_uri))
-        end
-
-        def init_poller
-          @poller = ZMQ::Poller.new
-          @poller.register_readable(@frontend_socket)
-          @poller.register_readable(@backend_socket)
         end
 
         def init_zmq_context
@@ -88,14 +76,6 @@ module Protobuf
 
         def job_queue_max_size
           @job_queue_max_size ||= [ENV["PB_ZMQ_SERVER_QUEUE_MAX_SIZE"].to_i, 5].max
-        end
-
-        def process_backend
-          worker, ignore, *frames = read_from_backend
-
-          unless frames == [::Protobuf::Rpc::Zmq::WORKER_READY_MESSAGE]
-            write_to_frontend(frames)
-          end
         end
 
         def process_frontend
@@ -132,10 +112,6 @@ module Protobuf
 
         def write_to_backend(frames)
           zmq_error_check(@backend_socket.send_strings(frames))
-        end
-
-        def write_to_frontend(frames)
-          zmq_error_check(@frontend_socket.send_strings(frames))
         end
       end
     end

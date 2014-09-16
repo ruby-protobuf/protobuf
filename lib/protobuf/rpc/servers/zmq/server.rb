@@ -79,7 +79,7 @@ module Protobuf
         end
 
         def broadcast_beacons?
-          !brokerless? && options[:broadcast_beacons]
+          options[:broadcast_beacons]
         end
 
         def broadcast_flatline(this_many = 1)
@@ -106,10 +106,6 @@ module Protobuf
 
         def broadcast_heartbeat?
           Time.now.to_i >= next_beacon && broadcast_beacons?
-        end
-
-        def brokerless?
-          !!options[:workers_only]
         end
 
         def busy_worker_count
@@ -183,7 +179,7 @@ module Protobuf
         def run
           @running = true
 
-          start_broker unless brokerless?
+          start_broker
           start_missing_workers
 
           yield if block_given? # runs on startup
@@ -191,7 +187,7 @@ module Protobuf
           broadcast_flatline(20) if broadcast_beacons?
           job_queue << :shutdown
           Thread.pass until reap_dead_workers.empty?
-          @broker.join(10) unless brokerless?
+          @broker.join(10)
         ensure
           teardown
         end
@@ -303,9 +299,9 @@ module Protobuf
         end
 
         def start_worker
-          @workers << Thread.new(self) do |server|
+          @workers << Thread.new(self, @broker) do |server, broker|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(server).run
+              ::Protobuf::Rpc::Zmq::Worker.new(server, broker).run
             rescue => e
               message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
               $stderr.puts(message)

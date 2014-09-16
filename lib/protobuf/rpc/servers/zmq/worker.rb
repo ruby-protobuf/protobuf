@@ -12,8 +12,9 @@ module Protobuf
         ##
         # Constructor
         #
-        def initialize(server)
+        def initialize(server, broker)
           @server = server
+          @broker = broker
 
           init_zmq_context
           init_backend_socket
@@ -32,7 +33,8 @@ module Protobuf
 
           gc_pause do
             encoded_response = handle_request(data)
-            write_to_backend([::Protobuf::Rpc::Zmq::EMPTY_STRING, client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
+              @broker.write_to_frontend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
+            end
           end
         end
 
