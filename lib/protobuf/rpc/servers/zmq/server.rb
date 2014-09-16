@@ -187,7 +187,7 @@ module Protobuf
           broadcast_flatline(20) if broadcast_beacons?
           job_queue << :shutdown
           Thread.pass until reap_dead_workers.empty?
-          @broker.join(10)
+          @broker_thread.join(10)
         ensure
           teardown
         end
@@ -293,8 +293,9 @@ module Protobuf
         end
 
         def start_broker
-          @broker = Thread.new(self) do |server|
-            ::Protobuf::Rpc::Zmq::Broker.new(server).run
+          @broker = ::Protobuf::Rpc::Zmq::Broker.new(server)
+          @broker_thread = Thread.new(@broker) do |broker|
+            broker.run
           end
         end
 
