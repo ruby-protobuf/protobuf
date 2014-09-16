@@ -8,13 +8,17 @@ module Protobuf
 
         def initialize(server)
           @server = server
-          @frontend_mutex = Mutex.new
+          @response_queue = Queue
 
           init_zmq_context
           init_frontend_socket
         rescue
           teardown
           raise
+        end
+
+        def enqueue_response(response)
+          @response_queue << response
         end
 
         def job_queue
@@ -26,9 +30,7 @@ module Protobuf
           poller.register_readable(@frontend_socket)
 
           loop do
-            @frontend_mutex.synchronize do
-              rc = poller.poll(5)
-            end
+            rc = poller.poll(5)
 
             # The server was shutdown, and all workers have finished and been
             # reaped
@@ -38,6 +40,10 @@ module Protobuf
             break if rc == -1
 
             process_frontend if rc > 0
+
+            @response_queue.size.times do
+              write_to_frontend @response_queue.deq
+            end
           end
         ensure
           teardown
@@ -49,12 +55,6 @@ module Protobuf
 
         def workers
           @server.workers
-        end
-
-        def write_to_frontend(frames)
-          @frontend_mutex.synchronize do
-            zmq_error_check(@frontend_socket.send_strings(frames))
-          end
         end
 
         private
@@ -96,15 +96,18 @@ module Protobuf
 
         def read_from_frontend
           frames = []
-          @frontend_mutex.synchronize do
-            zmq_error_check(@frontend_socket.recv_strings(frames))
-          end
+          zmq_error_check(@frontend_socket.recv_strings(frames))
           frames
         end
 
         def teardown
+          @response_queue = nil
           @frontend_socket.try(:close)
           @zmq_context.try(:terminate) unless inproc?
+        end
+
+        def write_to_frontend(frames)
+          zmq_error_check(@frontend_socket.send_strings(frames))
         end
       end
     end
