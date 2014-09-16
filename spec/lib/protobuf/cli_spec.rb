@@ -196,33 +196,6 @@ describe ::Protobuf::CLI do
         end
       end
 
-      context 'zmq workers only' do
-        let(:test_args) { [ '--workers_only', '--zmq' ] }
-        let(:runner) { ::Protobuf::Rpc::ZmqRunner }
-
-        before do
-          expect(::Protobuf::Rpc::SocketRunner).not_to receive(:new)
-        end
-
-        it 'is activated by the --workers_only switch' do
-          expect(runner).to receive(:new) do |options|
-            expect(options[:workers_only]).to be true
-          end.and_return(zmq_runner)
-
-          described_class.start(args)
-        end
-
-        it 'is activated by PB_WORKERS_ONLY=1 ENV variable' do
-          ENV['PB_WORKERS_ONLY'] = "1"
-          expect(runner).to receive(:new) do |options|
-            expect(options[:workers_only]).to be true
-          end.and_return(zmq_runner)
-
-          described_class.start(args)
-          ENV.delete('PB_WORKERS_ONLY')
-        end
-      end
-
       context 'zmq worker port' do
         let(:test_args) { [ '--worker_port=1234', '--zmq' ] }
         let(:runner) { ::Protobuf::Rpc::ZmqRunner }
