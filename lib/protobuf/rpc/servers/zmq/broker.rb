@@ -8,7 +8,7 @@ module Protobuf
 
         def initialize(server)
           @server = server
-          @response_queue = Queue
+          @response_queue = Queue.new
 
           init_zmq_context
           init_frontend_socket
