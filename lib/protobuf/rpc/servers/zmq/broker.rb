@@ -8,7 +8,7 @@ module Protobuf
 
         def initialize(server)
           @server = server
-          @response_mutex = Mutex.new
+          @frontend_mutex = Mutex.new
 
           init_zmq_context
           init_frontend_socket
@@ -50,7 +50,7 @@ module Protobuf
         end
 
         def write_to_frontend(frames)
-          @response_mutex.synchronize do
+          @frontend_mutex.synchronize do
             zmq_error_check(@frontend_socket.send_strings(frames))
           end
         end
@@ -92,15 +92,11 @@ module Protobuf
           end
         end
 
-        def read_from_backend
-          frames = []
-          zmq_error_check(@backend_socket.recv_strings(frames))
-          frames
-        end
-
         def read_from_frontend
           frames = []
-          zmq_error_check(@frontend_socket.recv_strings(frames))
+          @frontend_mutex.synchronize do
+            zmq_error_check(@frontend_socket.recv_strings(frames))
+          end
           frames
         end
 
