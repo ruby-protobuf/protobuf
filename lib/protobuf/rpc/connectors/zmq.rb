@@ -176,11 +176,10 @@ module Protobuf
         #
         def send_request_with_lazy_pirate
           attempt = 0
-          timeout = options[:timeout].to_f
 
           begin
             attempt += 1
-            send_request_with_timeout(timeout, attempt)
+            send_request_with_timeout(attempt)
             parse_response
           rescue RequestTimeout
             retry if attempt < CLIENT_RETRIES
@@ -190,7 +189,10 @@ module Protobuf
 
         def rcv_timeout
           @rcv_timeout ||= begin
-            if ENV.has_key?("PB_ZMQ_CLIENT_RCV_TIMEOUT")
+            case
+            when options[:timeout] then
+              options[:timeout]
+            when ENV.has_key?("PB_ZMQ_CLIENT_RCV_TIMEOUT") then
               ENV["PB_ZMQ_CLIENT_RCV_TIMEOUT"].to_i
             else
               300_000 # 300 seconds
@@ -200,7 +202,10 @@ module Protobuf
 
         def snd_timeout
           @snd_timeout ||= begin
-            if ENV.has_key?("PB_ZMQ_CLIENT_SND_TIMEOUT")
+            case
+            when options[:timeout] then
+              options[:timeout]
+            when ENV.has_key?("PB_ZMQ_CLIENT_SND_TIMEOUT") then
               ENV["PB_ZMQ_CLIENT_SND_TIMEOUT"].to_i
             else
               300_000 # 300 seconds
@@ -208,14 +213,14 @@ module Protobuf
           end
         end
 
-        def send_request_with_timeout(timeout, attempt = 0)
+        def send_request_with_timeout(attempt = 0)
           socket = create_socket
           socket.setsockopt(::ZMQ::RCVTIMEO, rcv_timeout)
           socket.setsockopt(::ZMQ::SNDTIMEO, snd_timeout)
 
           logger.debug { sign_message("Sending Request (attempt #{attempt}, #{socket})") }
           zmq_eagain_error_check(socket.send_string(@request_data), :socket_send_string)
-          logger.debug { sign_message("Waiting #{timeout} seconds for response (attempt #{attempt}, #{socket})") }
+          logger.debug { sign_message("Waiting #{rcv_timeout}ms for response (attempt #{attempt}, #{socket})") }
           zmq_eagain_error_check(socket.recv_string(@response_data = ""), :socket_recv_string)
           logger.debug { sign_message("Response received (attempt #{attempt}, #{socket})") }
         rescue ZmqEagainError
