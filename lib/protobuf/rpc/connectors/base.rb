@@ -17,9 +17,9 @@ module Protobuf
         :request                 => nil,         # The request object sent by the client
         :request_type            => nil,         # The request type expected by the client
         :response_type           => nil,         # The response type expected by the client
-        :timeout                 => 300,         # The default timeout for the request, also handled by client.rb
+        :timeout                 => nil,         # The timeout for the request, also handled by client.rb
         :client_host             => nil,         # The hostname or address of this client
-        :first_alive_load_balance => false,       # Do we want to use check_avail frames before request
+        :first_alive_load_balance => false,      # Do we want to use check_avail frames before request
       }
 
       class Base

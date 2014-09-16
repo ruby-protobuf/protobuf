@@ -135,12 +135,20 @@ module Protobuf
           complete
         end
 
+        def timeout
+          if options[:timeout]
+            options[:timeout]
+          else
+            300 # seconds
+          end
+        end
+
         # Wrap the given block in a timeout of the configured number of seconds.
         #
         def timeout_wrap(&block)
-          ::Timeout.timeout(options[:timeout], &block)
+          ::Timeout.timeout(timeout, &block)
         rescue ::Timeout::Error
-          fail(:RPC_FAILED, "The server took longer than #{options[:timeout]} seconds to respond")
+          fail(:RPC_FAILED, "The server took longer than #{timeout} seconds to respond")
         end
 
         def validate_request_type!
