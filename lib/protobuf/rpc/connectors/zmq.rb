@@ -80,6 +80,8 @@ module Protobuf
               if first_alive_load_balance?
                 begin
                   check_available_response = ""
+                  socket.setsockopt(::ZMQ::RCVTIMEO, 200)
+                  socket.setsockopt(::ZMQ::SNDTIMEO, 200)
                   zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
                   zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
 
@@ -88,6 +90,9 @@ module Protobuf
                   end
                 rescue ZmqRecoverableError
                   socket = nil # couldn't make a connection and need to try again
+                else
+                  socket.setsockopt(::ZMQ::RCVTIMEO, -1)
+                  socket.setsockopt(::ZMQ::SNDTIMEO, -1)
                 end
               end
             end
