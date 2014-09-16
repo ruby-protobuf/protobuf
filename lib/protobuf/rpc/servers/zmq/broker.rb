@@ -32,9 +32,9 @@ module Protobuf
           loop do
             rc = poller.poll(5)
 
-            # The server was shutdown, and all workers have finished and been
-            # reaped
-            break if !running? && workers.empty?
+            # The server was shutdown, all workers have finished and been
+            # reaped, and all responses have been sent.
+            break if !running? && workers.empty? && @response_queue.empty?
 
             # Something went wrong
             break if rc == -1
