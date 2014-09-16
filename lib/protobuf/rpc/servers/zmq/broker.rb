@@ -26,7 +26,9 @@ module Protobuf
           poller.register_readable(@frontend_socket)
 
           loop do
-            rc = poller.poll(500)
+            @frontend_mutex.synchronize do
+              rc = poller.poll(5)
+            end
 
             # The server was shutdown, and all workers have finished and been
             # reaped
