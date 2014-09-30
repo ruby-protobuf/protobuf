@@ -97,11 +97,9 @@ module Protobuf
         field_store[field_name] = field
         field_store[tag] = field
 
-        class_eval(<<-RAW_GETTER, __FILE__, __LINE__ + 1)
-          define_method("#{field_name}!") do
-            @values[:#{field_name}]
-          end
-        RAW_GETTER
+        define_method("#{field_name}!") do
+          @values[field_name]
+        end
       end
 
       def raise_if_tag_collision(tag, field_name)

@@ -16,19 +16,19 @@ module Protobuf
       #
       def self.hash_accessor(*names) #:nodoc:
         names.each do |name|
-          class_eval <<-METHOD, __FILE__, __LINE__ + 1
-            def #{name}
-              self['#{name}']
-            end
+          name_str = name.to_s.freeze
 
-            def #{name}=(value)
-              self['#{name}'] = value
-            end
+          define_method name do
+            self[name_str]
+          end
 
-            def #{name}?
-              ! self['#{name}'].nil?
-            end
-          METHOD
+          define_method "#{name}=" do |value|
+            self[name_str] = value
+          end
+
+          define_method "#{name}?" do
+            !self[name_str].nil?
+          end
         end
       end
 
