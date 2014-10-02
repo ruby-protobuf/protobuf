@@ -45,7 +45,7 @@ module Protobuf
       #
 
       def all_fields
-        @all_fields ||= field_store.values.uniq
+        @all_fields ||= field_store.values.uniq.sort_by(&:tag)
       end
 
       def extension_fields

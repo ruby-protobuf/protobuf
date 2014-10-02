@@ -1,9 +1,16 @@
+before_install: sudo apt-get install libzmq3-dev
 language: ruby
 rvm:
-  - "1.9.3"
-  - "2.0.0"
-  - "2.1.1"
-script: NO_COMPILE_TEST_PROTOS=1 bundle exec rake spec/lib
+  - 1.9.3
+  - 2.0.0
+  - 2.1
+  - jruby
+  - rbx-2
+matrix:
+  allow_failures:
+    - rvm: jruby
+    - rvm: rbx-2
+script: NO_COMPILE_TEST_PROTOS=1 bundle exec rake
 notifications:
   webhooks:
     urls:

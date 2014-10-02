@@ -198,7 +198,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
       it "should not return expired listings" do
         send_beacon(:heartbeat, hello_server_with_short_ttl)
-        sleep 1
+        sleep 5
         expect(subject.lookup("HelloService")).to be_nil
       end
 

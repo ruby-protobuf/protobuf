@@ -42,7 +42,7 @@ describe 'Functional Socket Client' do
       c.on_failure {|e| error = e}
     end
 
-    expect(error.message).to match(/name.*required/)
+    expect(error.message).to match(/Required field.*does not have a value/)
   end
 
   it 'calls the on_failure callback when the request type is wrong' do

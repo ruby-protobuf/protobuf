@@ -69,7 +69,7 @@ describe 'Functional ZMQ Client' do
         c.on_success { raise "shouldn't pass" }
         c.on_failure {|e| error = e }
       end
-      expect(error.message).to match(/name.*required/)
+      expect(error.message).to match(/Required field.*does not have a value/)
     end
   end
 
