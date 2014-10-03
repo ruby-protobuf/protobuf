@@ -29,7 +29,7 @@ module Protobuf
             rc = @poller.poll(500)
 
             # The server was shutdown and no requests are pending
-            break if rc == 0 && !running?
+            break if rc == 0 && !running? && @server.workers.empty?
             # Something went wrong
             break if rc == -1
 
@@ -42,7 +42,7 @@ module Protobuf
         end
 
         def running?
-          @server.running? || @server.workers.any?
+          @server.running?
         end
 
         private
@@ -113,7 +113,7 @@ module Protobuf
         end
 
         def local_queue_available?
-          local_queue.size < local_queue_max_size
+          local_queue.size < local_queue_max_size && running?
         end
 
         def local_queue_max_size
