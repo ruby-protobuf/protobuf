@@ -1,10 +1,13 @@
-# protobuf
+# Protobuffy
+
+(the JSON slayer)
 
 [![Gem Version](https://badge.fury.io/rb/protobuf.png)](http://badge.fury.io/rb/protobuf)
 [![Build Status](https://secure.travis-ci.org/localshred/protobuf.png?branch=master)](https://travis-ci.org/localshred/protobuf)
 [![Gitter chat](https://badges.gitter.im/localshred/protobuf.png)](https://gitter.im/localshred/protobuf)
 
-Protobuf is an implementation of [Google's protocol buffers][google-pb] in ruby, version 2.5.0 is currently supported.
+Protobuffy is an implementation of [Google's protocol buffers][google-pb] in
+ruby, version 2.5.0 is currently supported.
 
 ## Install
 

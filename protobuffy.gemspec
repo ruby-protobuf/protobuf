@@ -3,14 +3,14 @@ $:.push ::File.expand_path("../lib", __FILE__)
 require "protobuf/version"
 
 ::Gem::Specification.new do |s|
-  s.name          = 'protobuf'
+  s.name          = 'protobuffy'
   s.version       = ::Protobuf::VERSION
   s.date          = ::Time.now.strftime('%Y-%m-%d')
   s.license       = 'WTFPL'
 
-  s.authors       = ['BJ Neilsen', 'Brandon Dewitt', 'Devin Christensen', 'Adam Hutchison']
-  s.email         = ['bj.neilsen+protobuf@gmail.com', 'brandonsdewitt+protobuf@gmail.com', 'quixoten@gmail.com', 'liveh2o@gmail.com']
-  s.homepage      = 'https://github.com/localshred/protobuf'
+  s.authors       = ['BJ Neilsen', 'Brandon Dewitt', 'Devin Christensen', 'Adam Hutchison', 'R. Tyler Croy',]
+  s.email         = ['bj.neilsen+protobuf@gmail.com', 'brandonsdewitt+protobuf@gmail.com', 'quixoten@gmail.com', 'liveh2o@gmail.com', 'tyler@monkeypox.org']
+  s.homepage      = 'https://github.com/lookout/protobuffy'
   s.summary       = "Google Protocol Buffers serialization and RPC implementation for Ruby."
   s.description   = s.summary
 
