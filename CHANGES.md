@@ -1,5 +1,10 @@
 # Stable (3.x)
 
+3.1.0
+--------
+
+- Add Protobuf::Rpc::Stats.statsd_client API to pass statistics on to Statsd. [@dgolombek]
+
 3.0.4
 --------
 

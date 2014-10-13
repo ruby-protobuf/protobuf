@@ -67,4 +67,85 @@ describe ::Protobuf::Rpc::Stat do
     end
   end
 
+  describe "statsd_base_path" do
+    let(:stats) { described_class.new(:CLIENT) }
+    subject(:statsd_base_path) { stats.statsd_base_path }
+
+    before :each do
+      stats.service = 'Foo::BarService'
+      stats.method_name = 'find_bars'
+    end
+
+    it "should use correct base path" do
+      expect(statsd_base_path).to eq "rpc.foo.barservice.find_bars"
+    end
+  end
+
+  describe "#stop" do
+    let(:stats) { described_class.new(:CLIENT) }
+    let(:start_time) { Time.now - 3000 }
+    let(:end_time) { Time.now }
+    let(:service) { 'Foo::BarService' }
+    let(:method_name) { 'find_bars' }
+    let(:stats_path) { 'rpc.foo.barservice.find_bars' }
+
+    before :each do
+      stats.service = service
+      stats.method_name = method_name
+      stats.start_time = start_time
+      stats.end_time = end_time
+      stats.stub(:statsd_base_path).and_return(stats_path)
+    end
+
+    subject(:stop) { stats.stop }
+
+    context "when statsd_client hasn't been set" do
+      it "should not raise" do
+        expect{ stop }.not_to raise_error
+      end
+    end
+
+    context "when statsd_client has been set" do
+      let(:statsd_client) { double("Statsd::Client") }
+
+      before :each do
+        Protobuf::Rpc::Stat.statsd_client = statsd_client
+      end
+
+      after :each do
+        Protobuf::Rpc::Stat.statsd_client = nil
+      end
+
+      context "on success" do
+        before :each do
+          stats.success
+        end
+
+        it "should increment the proper stats" do
+          expect(statsd_client).to receive(:increment).with("#{stats_path}.success")
+          expect(statsd_client).to receive(:timing).with("#{stats_path}.time",
+                                                         end_time - start_time)
+
+          stop
+        end
+      end
+
+      context "on failure" do
+        let(:code) { 8 }
+
+        before :each do
+          stats.failure(code)
+        end
+
+        it "should increment the proper stats" do
+          expect(statsd_client).to receive(:increment).with("#{stats_path}.failure.total")
+          expect(statsd_client).to receive(:increment).with("#{stats_path}.failure.#{code}")
+          expect(statsd_client).to receive(:timing).with("#{stats_path}.time",
+                                                         end_time - start_time)
+
+          stop
+        end
+      end
+    end
+  end
 end

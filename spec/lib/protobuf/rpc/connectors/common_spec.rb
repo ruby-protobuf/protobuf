@@ -124,6 +124,8 @@ describe Protobuf::Rpc::Connectors::Common do
 
     it "calls #complete before exit" do
       stats = double("Object")
+      stats.stub(:success) { true }
+      stats.stub(:failure) { true }
       stats.stub(:stop) { true }
       subject.stats = stats
 
@@ -133,6 +135,8 @@ describe Protobuf::Rpc::Connectors::Common do
 
     it "calls the #{cb} callback when provided" do
       stats = double("Object")
+      stats.stub(:success) { true }
+      stats.stub(:failure) { true }
       stats.stub(:stop) { true }
       subject.stats = stats
       _cb = double("Object")
@@ -144,6 +148,8 @@ describe Protobuf::Rpc::Connectors::Common do
 
     it "calls the complete callback when provided" do
       stats = double("Object")
+      stats.stub(:success) { true }
+      stats.stub(:failure) { true }
       stats.stub(:stop) { true }
       subject.stats = stats
       comp_cb = double("Object")
