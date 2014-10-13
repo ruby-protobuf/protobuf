@@ -10,10 +10,24 @@ module Protobuf
 
       MODES = [:SERVER, :CLIENT].freeze
 
+      # Set the StatsD Client to send stats to. The client must match
+      # the interface provided by lookout-statsd
+      # (https://github.com/lookout/statsd).
+      def self.statsd_client=(statsd_client)
+        @statsd_client = statsd_client
+      end
+
+      # The StatsD Client configured, if any.
+      def self.statsd_client
+        @statsd_client
+      end
+
       def initialize(mode = :SERVER)
         @mode = mode
         @request_size = 0
         @response_size = 0
+        @success = false
+        @failure_code = nil
         start
       end
 
@@ -60,6 +74,15 @@ module Protobuf
       def stop
         start unless @start_time
         @end_time ||= ::Time.now
+        call_statsd_client
+      end
+
+      def success
+        @success = true
+      end
+
+      def failure(code)
+        @failure_code = code
       end
 
       def stopped?
@@ -94,6 +117,24 @@ module Protobuf
         ::Thread.current.object_id.to_s(16)
       end
 
+      # If a StatsD Client has been configured, send stats to it upon
+      # completion.
+      def call_statsd_client
+        path = "#{service}.#{method_name}".gsub('::', '.').downcase
+        return unless statsd_client = self.class.statsd_client
+        if @success
+          statsd_client.increment("#{path}.success")
+        elsif @failure_code
+          statsd_client.increment("#{path}.failure.total")
+          statsd_client.increment("#{path}.failure.#{@failure_code}")
+        end
+
+        if start_time && end_time
+          duration = end_time - start_time
+          statsd_client.timing("#{path}.time", duration)
+        end
+      end
+      private :call_statsd_client
     end
   end
 end

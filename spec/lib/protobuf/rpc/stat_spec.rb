@@ -67,4 +67,66 @@ describe ::Protobuf::Rpc::Stat do
     end
   end
 
+  describe "#stop" do
+    let(:stats) { described_class.new(:CLIENT) }
+    let(:start_time) { Time.now - 3000 }
+    let(:end_time) { Time.now }
+    let(:service) { 'Foo::BarService' }
+    let(:method_name) { 'find_bars' }
+    let(:stats_path) { 'foo.barservice.find_bars' }
+
+    before :each do
+      stats.service = service
+      stats.method_name = method_name
+      stats.start_time = start_time
+      stats.end_time = end_time
+    end
+
+    subject(:stop) { stats.stop }
+
+    context "when statsd_client hasn't been set" do
+      it "should not raise" do
+        expect{ stop }.not_to raise_error
+      end
+    end
+
+    context "when statsd_client has been set" do
+      let(:statsd_client) { double("Statsd::Client") }
+
+      before :each do
+        Protobuf::Rpc::Stat.statsd_client = statsd_client
+      end
+
+      context "on success" do
+        before :each do
+          stats.success
+        end
+
+        it "should increment the proper stats" do
+          expect(statsd_client).to receive(:increment).with("#{stats_path}.success")
+          expect(statsd_client).to receive(:timing).with("#{stats_path}.time",
+                                                         end_time - start_time)
+
+          stop
+        end
+      end
+
+      context "on failure" do
+        let(:code) { 8 }
+
+        before :each do
+          stats.failure(code)
+        end
+
+        it "should increment the proper stats" do
+          expect(statsd_client).to receive(:increment).with("#{stats_path}.failure.total")
+          expect(statsd_client).to receive(:increment).with("#{stats_path}.failure.#{code}")
+          expect(statsd_client).to receive(:timing).with("#{stats_path}.time",
+                                                         end_time - start_time)
+
+          stop
+        end
+      end
+    end
+  end
 end
