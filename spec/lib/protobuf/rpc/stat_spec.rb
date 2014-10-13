@@ -73,7 +73,7 @@ describe ::Protobuf::Rpc::Stat do
     let(:end_time) { Time.now }
     let(:service) { 'Foo::BarService' }
     let(:method_name) { 'find_bars' }
-    let(:stats_path) { 'foo.barservice.find_bars' }
+    let(:stats_path) { 'rpc.foo.barservice.find_bars' }
 
     before :each do
       stats.service = service

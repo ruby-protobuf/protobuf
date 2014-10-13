@@ -120,7 +120,7 @@ module Protobuf
       # If a StatsD Client has been configured, send stats to it upon
       # completion.
       def call_statsd_client
-        path = "#{service}.#{method_name}".gsub('::', '.').downcase
+        path = "rpc.#{service}.#{method_name}".gsub('::', '.').downcase
         return unless statsd_client = self.class.statsd_client
         if @success
           statsd_client.increment("#{path}.success")
