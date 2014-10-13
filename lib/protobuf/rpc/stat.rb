@@ -117,11 +117,18 @@ module Protobuf
         ::Thread.current.object_id.to_s(16)
       end
 
+      # Return base path for StatsD metrics
+      def statsd_base_path
+        "rpc.#{service}.#{method_name}".gsub('::', '.').downcase
+      end
+
       # If a StatsD Client has been configured, send stats to it upon
       # completion.
       def call_statsd_client
-        path = "rpc.#{service}.#{method_name}".gsub('::', '.').downcase
-        return unless statsd_client = self.class.statsd_client
+        path = statsd_base_path
+        statsd_client = self.class.statsd_client
+        return unless statsd_client
+
         if @success
           statsd_client.increment("#{path}.success")
         elsif @failure_code
