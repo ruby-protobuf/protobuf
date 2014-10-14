@@ -45,7 +45,7 @@ module Protobuf
 
         def define_filter(type, filter, options = {})
           return if filter_defined?(type, filter)
-          filters[type] << options.merge({ :callable => filter })
+          filters[type] << options.merge(:callable => filter)
           remember_filter(type, filter)
         end
 

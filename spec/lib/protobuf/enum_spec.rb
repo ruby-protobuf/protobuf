@@ -175,20 +175,20 @@ describe Protobuf::Enum do
 
     describe '.values' do
       it 'provides a hash of defined Enums' do
-        expect(Test::EnumTestType.values).to eq({
+        expect(Test::EnumTestType.values).to eq(
           :MINUS_ONE => Test::EnumTestType::MINUS_ONE,
           :ONE       => Test::EnumTestType::ONE,
           :TWO       => Test::EnumTestType::TWO,
           :THREE     => Test::EnumTestType::THREE
-        })
+        )
       end
 
       it 'contains aliased Enums' do
-        expect(EnumAliasTest.values).to eq({
+        expect(EnumAliasTest.values).to eq(
           :FOO => EnumAliasTest::FOO,
           :BAR => EnumAliasTest::BAR,
           :BAZ => EnumAliasTest::BAZ
-        })
+        )
       end
     end
 

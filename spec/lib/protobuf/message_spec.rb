@@ -363,7 +363,7 @@ describe Protobuf::Message do
     context 'generating values for an ENUM field' do
       it 'converts the enum to its tag representation' do
         hash = Test::EnumTestMessage.new(:non_default_enum => :TWO).to_hash
-        expect(hash).to eq({ :non_default_enum => 2 })
+        expect(hash).to eq(:non_default_enum => 2)
       end
 
       it 'does not populate default values' do
@@ -373,14 +373,14 @@ describe Protobuf::Message do
 
       it 'converts repeated enum fields to an array of the tags' do
         hash = Test::EnumTestMessage.new(:repeated_enums => [ :ONE, :TWO, :TWO, :ONE ]).to_hash
-        expect(hash).to eq({ :repeated_enums => [ 1, 2, 2, 1 ] })
+        expect(hash).to eq(:repeated_enums => [ 1, 2, 2, 1 ])
       end
     end
 
     context 'generating values for a Message field' do
       it 'recursively hashes field messages' do
-        hash = Test::Nested.new({ :resource => { :name => 'Nested' } }).to_hash
-        expect(hash).to eq({ :resource => { :name => 'Nested' } })
+        hash = Test::Nested.new(:resource => { :name => 'Nested' }).to_hash
+        expect(hash).to eq(:resource => { :name => 'Nested' })
       end
 
       it 'recursively hashes a repeated set of messages' do
@@ -390,12 +390,10 @@ describe Protobuf::Message do
         ])
 
         expect(proto.to_hash).to eq(
-          {
-            :multiple_resources => [
-              { :name => 'Resource 1' },
-              { :name => 'Resource 2' },
-            ],
-          }
+          :multiple_resources => [
+            { :name => 'Resource 1' },
+            { :name => 'Resource 2' },
+          ]
         )
       end
     end
@@ -403,7 +401,7 @@ describe Protobuf::Message do
 
   describe '#to_json' do
     subject do
-      ::Test::ResourceFindRequest.new({ :name => 'Test Name', :active => false })
+      ::Test::ResourceFindRequest.new(:name => 'Test Name', :active => false)
     end
 
     specify { expect(subject.to_json).to eq '{"name":"Test Name","active":false}' }

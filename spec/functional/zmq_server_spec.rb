@@ -6,12 +6,14 @@ require 'protobuf/rpc/service_directory'
 describe 'Functional ZMQ Client' do
   before(:all) do
     load "protobuf/zmq.rb"
-    @runner = ::Protobuf::Rpc::ZmqRunner.new({ :host => "127.0.0.1",
-                                               :port => 9399,
-                                               :worker_port => 9408,
-                                               :backlog => 100,
-                                               :threshold => 100,
-                                               :threads => 5 })
+    @runner = ::Protobuf::Rpc::ZmqRunner.new(
+      :host => "127.0.0.1",
+      :port => 9399,
+      :worker_port => 9408,
+      :backlog => 100,
+      :threshold => 100,
+      :threads => 5
+    )
     @server_thread = Thread.new(@runner) { |runner| runner.run }
     Thread.pass until @runner.running?
   end
