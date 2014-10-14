@@ -133,10 +133,10 @@ describe Protobuf::Rpc::Connectors::Common do
       stats = double("Object")
       allow(stats).to receive(:stop).and_return(true)
       subject.stats = stats
-      _cb = double("Object")
+      some_cb = double("Object")
 
-      subject.instance_variable_set("@#{cb}", _cb)
-      expect(_cb).to receive(:call).and_return(true)
+      subject.instance_variable_set("@#{cb}", some_cb)
+      expect(some_cb).to receive(:call).and_return(true)
       subject.method(meth).call(*args)
     end
 
