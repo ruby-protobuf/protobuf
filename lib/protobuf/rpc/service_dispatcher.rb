@@ -7,7 +7,7 @@ module Protobuf
 
       attr_reader :env
 
-      def initialize(app)
+      def initialize(_app)
         # End of the line...
       end
 

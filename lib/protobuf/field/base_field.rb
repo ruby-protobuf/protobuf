@@ -51,7 +51,7 @@ module Protobuf
       # Public Instance Methods
       #
 
-      def acceptable?(value)
+      def acceptable?(_value)
         true
       end
 
@@ -59,8 +59,8 @@ module Protobuf
         value
       end
 
-      def decode(bytes)
-        raise NotImplementedError, "#{self.class.name}\#decode"
+      def decode(_bytes)
+        raise NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
       def default
@@ -79,8 +79,8 @@ module Protobuf
         options.key?(:deprecated)
       end
 
-      def encode(value)
-        raise NotImplementedError, "#{self.class.name}\#encode"
+      def encode(_value)
+        raise NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
       def extension?

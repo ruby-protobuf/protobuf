@@ -119,7 +119,7 @@ module Protobuf
         # Value can either be a symbol/string indicating an instance method to call
         # or an object that responds to `call`.
         #
-        def invoke_via_if?(rpc_method, filter)
+        def invoke_via_if?(_rpc_method, filter)
           if_check = filter.fetch(:if) { lambda { |_service| return true } }
           do_invoke = case
                       when if_check.nil? then
@@ -149,7 +149,7 @@ module Protobuf
         # Value can either be a symbol/string indicating an instance method to call
         # or an object that responds to `call`.
         #
-        def invoke_via_unless?(rpc_method, filter)
+        def invoke_via_unless?(_rpc_method, filter)
           unless_check = filter.fetch(:unless) { lambda { |_service| return false } }
           skip_invoke = case
                         when unless_check.nil? then
