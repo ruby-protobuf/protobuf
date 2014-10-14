@@ -11,7 +11,8 @@ describe ::Protobuf::Generators::ServiceGenerator do
     ]
   }
   let(:service_fields) { { :name => 'TestService',
-                           :method => methods } }
+                           :method => methods }
+  }
 
   let(:service) { ::Google::Protobuf::ServiceDescriptorProto.new(service_fields) }
 

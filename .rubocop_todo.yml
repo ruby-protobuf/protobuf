@@ -37,11 +37,6 @@ Metrics/ParameterLists:
 Metrics/PerceivedComplexity:
   Max: 12
 
-# Offense count: 5
-# Cop supports --auto-correct.
-Style/BlockEndNewline:
-  Enabled: false
-
 # Offense count: 67
 # Cop supports --auto-correct.
 Style/Blocks:

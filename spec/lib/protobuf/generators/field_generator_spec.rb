@@ -20,7 +20,8 @@ describe ::Protobuf::Generators::FieldGenerator do
                          :type_name => type_name,
                          :default_value => default_value,
                          :extendee => extendee,
-                         :options => field_options } }
+                         :options => field_options }
+  }
 
   let(:field) { ::Google::Protobuf::FieldDescriptorProto.new(field_fields) }
 

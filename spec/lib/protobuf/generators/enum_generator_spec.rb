@@ -14,7 +14,8 @@ describe ::Protobuf::Generators::EnumGenerator do
   let(:options) { nil }
   let(:enum_fields) { { :name => 'TestEnum',
                         :value => values,
-                        :options => options } }
+                        :options => options }
+  }
 
   let(:enum) { ::Google::Protobuf::EnumDescriptorProto.new(enum_fields) }
 
