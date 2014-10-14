@@ -91,10 +91,10 @@ module Protobuf
         @type_name ||= begin
                          case descriptor.type.name
                          when :TYPE_MESSAGE, :TYPE_ENUM, :TYPE_GROUP then
-                           type_name = modulize(descriptor.type_name)
+                           modulize(descriptor.type_name)
                          else
                            type_name = descriptor.type.name.to_s.downcase.sub(/type_/, '')
-                           type_name = ":#{type_name}"
+                           ":#{type_name}"
                          end
                        end
       end

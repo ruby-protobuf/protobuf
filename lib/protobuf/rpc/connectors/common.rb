@@ -9,7 +9,7 @@ module Protobuf
 
         def any_callbacks?
           return [@complete_cb, @failure_cb, @success_cb].inject(false) do |reduction, cb|
-            reduction = (reduction || !cb.nil?)
+            reduction || !cb.nil?
           end
         end
 

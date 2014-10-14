@@ -121,7 +121,7 @@ module Protobuf
         end
 
         def process_backend
-          worker, ignore, *frames = read_from_backend
+          worker, _ignore, *frames = read_from_backend
 
           @idle_workers << worker
 

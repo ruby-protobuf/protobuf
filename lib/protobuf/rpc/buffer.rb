@@ -26,9 +26,9 @@ module Protobuf
 
       def write(force_mode=true)
         if force_mode and reading?
-          mode = :write
+          self.mode = :write
         elsif not force_mode and reading?
-          raise = 'You chose to write the buffer when in read mode'
+          raise 'You chose to write the buffer when in read mode'
         end
 
         @size = @data.length

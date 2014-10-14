@@ -74,7 +74,7 @@ module Protobuf
                   # no-op
                 when client == @server then
                   logger.debug { sign_message("Accepted new connection") }
-                  client, sockaddr = @server.accept
+                  client, _sockaddr = @server.accept
                   @listen_fds << client
                 else
                   unless @working.include?(client)
