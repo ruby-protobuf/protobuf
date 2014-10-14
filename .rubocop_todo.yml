@@ -37,10 +37,6 @@ Metrics/ParameterLists:
 Metrics/PerceivedComplexity:
   Max: 12
 
-# Offense count: 2
-Style/AccessorMethodName:
-  Enabled: false
-
 # Offense count: 7
 # Cop supports --auto-correct.
 Style/AlignArray:
