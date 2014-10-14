@@ -37,11 +37,6 @@ Metrics/ParameterLists:
 Metrics/PerceivedComplexity:
   Max: 12
 
-# Offense count: 7
-# Cop supports --auto-correct.
-Style/AlignArray:
-  Enabled: false
-
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.

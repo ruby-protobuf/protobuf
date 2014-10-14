@@ -331,11 +331,15 @@ describe Protobuf::Rpc::ServiceFilters do
 
     it 'calls filters in the order they were defined' do
       subject.__send__(:run_filters, :endpoint)
-      expect(subject.called).to eq([ :outer_around_top,
-                                 :inner_around_top,
-                                 :endpoint,
-                                 :inner_around_bottom,
-                                 :outer_around_bottom ])
+      expect(subject.called).to eq(
+        [
+          :outer_around_top,
+          :inner_around_top,
+          :endpoint,
+          :inner_around_bottom,
+          :outer_around_bottom,
+        ]
+      )
     end
 
     context 'when around_filter does not yield' do
@@ -356,9 +360,13 @@ describe Protobuf::Rpc::ServiceFilters do
       it 'cancels calling the rest of the filters and the endpoint' do
         expect(subject).not_to receive(:endpoint)
         subject.__send__(:run_filters, :endpoint)
-        expect(subject.called).to eq([ :outer_around_top,
-                                   :inner_around,
-                                   :outer_around_bottom ])
+        expect(subject.called).to eq(
+          [
+            :outer_around_top,
+            :inner_around,
+            :outer_around_bottom,
+          ]
+        )
       end
 
     end

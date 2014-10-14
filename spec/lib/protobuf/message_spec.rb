@@ -389,9 +389,14 @@ describe Protobuf::Message do
           Test::Resource.new(:name => 'Resource 2')
         ])
 
-        expect(proto.to_hash).to eq({ :multiple_resources => [ { :name => 'Resource 1' },
-                                                           { :name => 'Resource 2' } ] })
-
+        expect(proto.to_hash).to eq(
+          {
+            :multiple_resources => [
+              { :name => 'Resource 1' },
+              { :name => 'Resource 2' },
+            ],
+          }
+        )
       end
     end
   end
