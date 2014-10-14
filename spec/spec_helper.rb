@@ -27,15 +27,10 @@ end
 ENV.delete("PB_IGNORE_DEPRECATIONS")
 
 ::RSpec.configure do |c|
-  c.mock_with :rspec
-
   c.before(:suite) do
-    unless ENV['NO_COMPILE_TEST_PROTOS']
-      require 'rake'
-      load ::File.expand_path('../../Rakefile', __FILE__)
-      $stdout.puts 'Compiling test protos (use NO_COMPILE_TEST_PROTOS=1 to skip)'
-      ::Rake::Task['compile:spec']
-    end
+    require 'rake'
+    load ::File.expand_path('../../Rakefile', __FILE__)
+    ::Rake::Task['compile:spec'].invoke
   end
 end
 

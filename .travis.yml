@@ -1,4 +1,7 @@
-before_install: sudo apt-get install libzmq3-dev
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y libzmq3-dev
+  - sudo ./install-protobuf.sh
 language: ruby
 rvm:
   - 1.9.3
@@ -10,7 +13,6 @@ matrix:
   allow_failures:
     - rvm: jruby
     - rvm: rbx-2
-script: NO_COMPILE_TEST_PROTOS=1 bundle exec rake
 notifications:
   webhooks:
     urls:
