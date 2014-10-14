@@ -149,7 +149,7 @@ describe Protobuf::Rpc::ServiceFilters do
       context 'when "if" option is a callable that returns true' do
         before do
           FilterTest.clear_filters!
-          FilterTest.before_filter(:verify_before, :if => lambda { |service| true })
+          FilterTest.before_filter(:verify_before, :if => lambda { |_service| true })
         end
 
         it 'invokes the filter' do
@@ -173,7 +173,7 @@ describe Protobuf::Rpc::ServiceFilters do
       context 'when "if" option is a callable that returns false' do
         before do
           FilterTest.clear_filters!
-          FilterTest.before_filter(:verify_before, :if => lambda { |service| false })
+          FilterTest.before_filter(:verify_before, :if => lambda { |_service| false })
         end
 
         it 'skips the filter' do
@@ -208,7 +208,7 @@ describe Protobuf::Rpc::ServiceFilters do
       context 'when "unless" option is a callable that returns true' do
         before do
           FilterTest.clear_filters!
-          FilterTest.before_filter(:verify_before, :unless => lambda { |service| false })
+          FilterTest.before_filter(:verify_before, :unless => lambda { |_service| false })
         end
 
         it 'invokes the filter' do
@@ -232,7 +232,7 @@ describe Protobuf::Rpc::ServiceFilters do
       context 'when "unless" option is a callable that returns false' do
         before do
           FilterTest.clear_filters!
-          FilterTest.before_filter(:verify_before, :unless => lambda { |service| true })
+          FilterTest.before_filter(:verify_before, :unless => lambda { |_service| true })
         end
 
         it 'skips the filter' do

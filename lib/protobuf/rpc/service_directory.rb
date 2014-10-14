@@ -204,7 +204,7 @@ module Protobuf
 
         logger.debug { sign_message("Removing listing: #{listing.inspect}") }
 
-        @listings_by_service.each do |service, listings|
+        @listings_by_service.each_value do |listings|
           listings.delete(listing)
         end
 

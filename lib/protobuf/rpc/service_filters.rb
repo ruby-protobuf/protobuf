@@ -120,7 +120,7 @@ module Protobuf
         # or an object that responds to `call`.
         #
         def invoke_via_if?(rpc_method, filter)
-          if_check = filter.fetch(:if) { lambda { |service| return true } }
+          if_check = filter.fetch(:if) { lambda { |_service| return true } }
           do_invoke = case
                       when if_check.nil? then
                         true
@@ -150,7 +150,7 @@ module Protobuf
         # or an object that responds to `call`.
         #
         def invoke_via_unless?(rpc_method, filter)
-          unless_check = filter.fetch(:unless) { lambda { |service| return false } }
+          unless_check = filter.fetch(:unless) { lambda { |_service| return false } }
           skip_invoke = case
                         when unless_check.nil? then
                           false
