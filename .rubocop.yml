@@ -1,0 +1,13 @@
+inherit_from: .rubocop_todo.yml
+
+Lint/Loop:
+  Enabled: false
+
+Style/CaseIndentation:
+  IndentWhenRelativeTo: end
+
+Style/IndentHash:
+  EnforcedStyle: consistent
+
+Style/TrailingComma:
+  EnforcedStyleForMultiline: comma

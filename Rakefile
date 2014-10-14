@@ -8,11 +8,12 @@ require 'bundler/gem_tasks'
 require 'benchmark/tasks'
 
 require 'rspec/core/rake_task'
-
-desc 'Default: run specs.'
-task :default => :spec
+require 'rubocop/rake_task'
 
 RSpec::Core::RakeTask.new(:spec)
+RuboCop::RakeTask.new
+
+task :default => [:spec, :rubocop]
 
 desc 'Run specs'
 namespace :compile do
