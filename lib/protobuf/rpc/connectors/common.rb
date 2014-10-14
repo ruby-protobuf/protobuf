@@ -90,7 +90,7 @@ module Protobuf
             # Ensure client_response is an instance
             parsed = @options[:response_type].decode(response_wrapper.response_proto.to_s)
 
-            if parsed.nil? and not response_wrapper.has_field?(:error_reason)
+            if parsed.nil? && !response_wrapper.has_field?(:error_reason)
               fail(:BAD_RESPONSE_PROTO, 'Unable to parse response from server')
             else
               verify_callbacks

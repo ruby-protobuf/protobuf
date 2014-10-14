@@ -200,7 +200,7 @@ module Protobuf
       end
 
       def remove_listing(uuid)
-        listing = @listings_by_uuid[uuid] or return
+        listing = @listings_by_uuid[uuid] || return
 
         logger.debug { sign_message("Removing listing: #{listing.inspect}") }
 

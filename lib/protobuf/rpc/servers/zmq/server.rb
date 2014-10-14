@@ -162,7 +162,7 @@ module Protobuf
           @last_reaping = Time.now.to_i
 
           @workers.keep_if do |worker|
-            worker.alive? or worker.join && false
+            worker.alive? || worker.join && false
           end
         end
 
