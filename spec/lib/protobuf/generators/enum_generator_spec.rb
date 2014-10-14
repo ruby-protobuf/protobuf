@@ -22,23 +22,25 @@ describe ::Protobuf::Generators::EnumGenerator do
 
   describe '#compile' do
     let(:compiled) {
-      %q{class TestEnum < ::Protobuf::Enum
+      <<-RUBY
+class TestEnum < ::Protobuf::Enum
   define :FOO, 1
   define :BAR, 2
   define :BAZ, 3
 end
 
-}
+      RUBY
     }
 
-    it 'compiles the enum and it\'s field values' do
+    it 'compiles the enum and its field values' do
       subject.compile
       expect(subject.to_s).to eq(compiled)
     end
 
     context 'when allow_alias option is set' do
       let(:compiled) {
-        %q{class TestEnum < ::Protobuf::Enum
+        <<-RUBY
+class TestEnum < ::Protobuf::Enum
   set_option :allow_alias
 
   define :FOO, 1
@@ -46,8 +48,8 @@ end
   define :BAZ, 3
 end
 
-}
-    }
+        RUBY
+      }
 
       let(:options) { { :allow_alias => true } }
 
@@ -65,4 +67,3 @@ end
   end
 
 end
-
