@@ -6,10 +6,6 @@
 # versions of RuboCop, may require this file to be generated again.
 
 # Offense count: 2
-Lint/ParenthesesAsGroupedExpression:
-  Enabled: false
-
-# Offense count: 2
 # Cop supports --auto-correct.
 Lint/StringConversionInInterpolation:
   Enabled: false

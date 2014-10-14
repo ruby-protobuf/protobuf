@@ -13,7 +13,7 @@ module Test
     # request -> Test::ResourceSleepRequest
     # response -> Test::Resource
     def find_with_sleep
-      sleep (request.sleep || 1)
+      sleep(request.sleep || 1)
       response.name = 'Request should have timed out'
     end
 
