@@ -62,15 +62,10 @@ module Protobuf
         end
 
         def beacon_port
-          unless @beacon_port
-            unless port = options[:beacon_port]
-              port = ::Protobuf::Rpc::ServiceDirectory.port
-            end
-
-            @beacon_port = port.to_i
-          end
-
-          @beacon_port
+          @beacon_port ||= options.fetch(
+            :beacon_port,
+            ::Protobuf::Rpc::ServiceDirectory.port,
+          ).to_i
         end
 
         def beacon_uri

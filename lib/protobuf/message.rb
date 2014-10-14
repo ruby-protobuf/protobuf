@@ -128,13 +128,13 @@ module Protobuf
     end
 
     def [](name)
-      if field = self.class.get_field(name, true)
+      if (field = self.class.get_field(name, true))
         __send__(field.getter)
       end
     end
 
     def []=(name, value)
-      if field = self.class.get_field(name, true)
+      if (field = self.class.get_field(name, true))
         __send__(field.setter, value) unless value.nil?
       else
         unless ::Protobuf.ignore_unknown_fields?
