@@ -53,7 +53,7 @@ describe ::Protobuf::Generators::FieldGenerator do
         let(:type_enum) { :TYPE_STRING }
         let(:default_value) { "a default \"string\"" }
 
-        specify { expect(subject).to eq %Q{optional :string, :foo_bar, 3, :default => "a default \"string\""\n} }
+        specify { expect(subject).to eq %{optional :string, :foo_bar, 3, :default => "a default \"string\""\n} }
       end
 
       context 'when float or double field type' do

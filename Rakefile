@@ -21,7 +21,7 @@ namespace :compile do
   desc 'Compile spec protos in spec/supprt/ directory'
   task :spec do
     proto_path = ::File.expand_path('../spec/support/', __FILE__)
-    cmd = %Q{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
+    cmd = %{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
 
     puts cmd
     exec(cmd)
@@ -33,7 +33,7 @@ namespace :compile do
     output_dir = ::File.expand_path('../tmp/rpc', __FILE__)
     ::FileUtils.mkdir_p(output_dir)
 
-    cmd = %Q{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{output_dir} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
+    cmd = %{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{output_dir} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
 
     puts cmd
     system(cmd)
