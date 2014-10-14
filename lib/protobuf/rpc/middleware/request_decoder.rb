@@ -30,7 +30,7 @@ module Protobuf
           env.log_signature || super
         end
 
-      private
+        private
 
         def method_name
           @method_name ||= begin

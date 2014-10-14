@@ -147,7 +147,7 @@ module Protobuf
         self.class.rpcs
       end
 
-    private
+      private
 
       def request_type
         @_request_type ||= env.request_type

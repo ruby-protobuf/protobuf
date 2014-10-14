@@ -19,7 +19,7 @@ module Protobuf
           env
         end
 
-      private
+        private
 
         def instrumenter
           @instrumenter ||= Instrumenter.new
@@ -67,7 +67,7 @@ module Protobuf
             ].compact.join(' - ')
           end
 
-        private
+          private
 
           def elapsed_time
             (@start_time && @end_time ? "#{(@end_time - @start_time).round(4)}s" : nil)

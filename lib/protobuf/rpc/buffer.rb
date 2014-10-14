@@ -67,7 +67,7 @@ module Protobuf
         end
       end
 
-    private
+      private
 
       def check_for_flush
         if !@size.nil? && @data.length == @size
