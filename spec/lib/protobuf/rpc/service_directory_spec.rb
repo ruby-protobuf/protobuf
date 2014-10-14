@@ -5,7 +5,7 @@ require 'protobuf/rpc/service_directory'
 describe ::Protobuf::Rpc::ServiceDirectory do
   subject { described_class.instance }
 
-  let(:echo_server) {
+  let(:echo_server) do
     ::Protobuf::Rpc::DynamicDiscovery::Server.new(
       :uuid => 'echo',
       :address => '127.0.0.1',
@@ -13,9 +13,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       :ttl => 10,
       :services => %w[EchoService]
     )
-  }
+  end
 
-  let(:hello_server) {
+  let(:hello_server) do
     ::Protobuf::Rpc::DynamicDiscovery::Server.new(
       :uuid => "hello",
       :address => '127.0.0.1',
@@ -23,9 +23,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       :ttl => 10,
       :services => %w[HelloService]
     )
-  }
+  end
 
-  let(:hello_server_with_short_ttl) {
+  let(:hello_server_with_short_ttl) do
     ::Protobuf::Rpc::DynamicDiscovery::Server.new(
       :uuid => "hello_server_with_short_ttl",
       :address => '127.0.0.1',
@@ -33,9 +33,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       :ttl => 1,
       :services => %w[HelloService]
     )
-  }
+  end
 
-  let(:combo_server) {
+  let(:combo_server) do
     ::Protobuf::Rpc::DynamicDiscovery::Server.new(
       :uuid => "combo",
       :address => '127.0.0.1',
@@ -43,7 +43,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       :ttl => 10,
       :services => %w[HelloService EchoService]
     )
-  }
+  end
 
   before(:all) do
     @address = "127.0.0.1"
@@ -175,9 +175,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         send_beacon(:heartbeat, echo_server)
         send_beacon(:heartbeat, combo_server)
 
-        expect { |block|
+        expect do |block|
           subject.each_listing(&block)
-        }.to yield_control.exactly(3).times
+        end.to yield_control.exactly(3).times
       end
     end
 
@@ -259,7 +259,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
   if ENV.key?("BENCH")
     context "performance" do
-      let(:servers) {
+      let(:servers) do
         100.times.collect do |x|
           ::Protobuf::Rpc::DynamicDiscovery::Server.new(
             :uuid => "performance_server#{x + 1}",
@@ -269,7 +269,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
             :services => 10.times.collect { |y| "PerformanceService#{y}" }
           )
         end
-      }
+      end
 
       before do
         require 'benchmark'

@@ -101,9 +101,9 @@ module Protobuf
     # Returns an array with zero or more Enum objects or nil.
     #
     def self.enums_for_tag(tag)
-      self.enums.select { |enum|
+      self.enums.select do |enum|
         enum.to_i == tag.to_i
-      }
+      end
     end
 
     # Public: Get the Enum associated with the given name.

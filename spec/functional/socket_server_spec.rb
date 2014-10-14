@@ -16,7 +16,7 @@ describe 'Functional Socket Client' do
   end
 
   it 'runs fine when required fields are set' do
-    expect {
+    expect do
       client = ::Test::ResourceService.client
 
       client.find(:name => 'Test Name', :active => true) do |c|
@@ -29,7 +29,7 @@ describe 'Functional Socket Client' do
           raise err.inspect
         end
       end
-    }.to_not raise_error
+    end.to_not raise_error
   end
 
   it 'calls the on_failure callback when a message is malformed' do

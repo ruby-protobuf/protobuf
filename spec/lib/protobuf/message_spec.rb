@@ -74,47 +74,47 @@ describe Protobuf::Message do
   describe 'defining a new field' do
     context 'when defining a field with a tag that has already been used' do
       it 'raises a TagCollisionError' do
-        expect {
+        expect do
           Class.new(Protobuf::Message) do
             optional ::Protobuf::Field::Int32Field, :foo, 1
             optional ::Protobuf::Field::Int32Field, :bar, 1
           end
-        }.to raise_error(Protobuf::TagCollisionError, /Field number 1 has already been used/)
+        end.to raise_error(Protobuf::TagCollisionError, /Field number 1 has already been used/)
       end
     end
 
     context 'when defining an extension field with a tag that has already been used' do
       it 'raises a TagCollisionError' do
-        expect {
+        expect do
           Class.new(Protobuf::Message) do
             extensions 100...110
             optional ::Protobuf::Field::Int32Field, :foo, 100
             optional ::Protobuf::Field::Int32Field, :bar, 100, :extension => true
           end
-        }.to raise_error(Protobuf::TagCollisionError, /Field number 100 has already been used/)
+        end.to raise_error(Protobuf::TagCollisionError, /Field number 100 has already been used/)
       end
     end
 
     context 'when defining a field with a name that has already been used' do
       it 'raises a DuplicateFieldNameError' do
-        expect {
+        expect do
           Class.new(Protobuf::Message) do
             optional ::Protobuf::Field::Int32Field, :foo, 1
             optional ::Protobuf::Field::Int32Field, :foo, 2
           end
-        }.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
+        end.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
       end
     end
 
     context 'when defining an extension field with a name that has already been used' do
       it 'raises a DuplicateFieldNameError' do
-        expect {
+        expect do
           Class.new(Protobuf::Message) do
             extensions 100...110
             optional ::Protobuf::Field::Int32Field, :foo, 1
             optional ::Protobuf::Field::Int32Field, :foo, 100, :extension => true
           end
-        }.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
+        end.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
       end
     end
   end
@@ -246,9 +246,9 @@ describe Protobuf::Message do
       let(:message) { ::Test::ResourceWithRequiredField.new }
 
       it "raises a 'message not initialized' error" do
-        expect {
+        expect do
           message.encode
-        }.to raise_error(Protobuf::SerializationError, /required/i)
+        end.to raise_error(Protobuf::SerializationError, /required/i)
       end
     end
 
@@ -256,10 +256,10 @@ describe Protobuf::Message do
       let(:message) { ::Test::Resource.new(:name => "something") }
 
       it "does not raise an error when repeated fields are []" do
-        expect {
+        expect do
           message.repeated_enum = []
           message.encode
-        }.to_not raise_error
+        end.to_not raise_error
       end
 
       it "sets the value to nil when empty array is passed" do
@@ -280,9 +280,9 @@ describe Protobuf::Message do
       end
 
       it "raises TypeError when a non-array replaces it" do
-        expect {
+        expect do
           message.repeated_enum = 2
-        }.to raise_error(/value of type/)
+        end.to raise_error(/value of type/)
       end
     end
   end
@@ -411,11 +411,11 @@ describe Protobuf::Message do
 
   describe '.to_json' do
     it 'returns the class name of the message for use in json encoding' do
-      expect {
+      expect do
         ::Timeout.timeout(0.1) do
           expect(::Test::Resource.to_json).to eq("Test::Resource")
         end
-      }.not_to raise_error
+      end.not_to raise_error
     end
   end
 

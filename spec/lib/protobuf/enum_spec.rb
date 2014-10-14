@@ -40,10 +40,10 @@ describe Protobuf::Enum do
         end
 
         it 'allows defining enums with the same tag number' do
-          expect {
+          expect do
             DefineEnumAlias.define(:FOO, 1)
             DefineEnumAlias.define(:BAR, 1)
-          }.not_to raise_error
+          end.not_to raise_error
         end
       end
     end

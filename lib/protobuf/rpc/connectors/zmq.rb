@@ -25,9 +25,9 @@ module Protobuf
         # Class Methods
         #
         def self.zmq_context
-          @zmq_contexts ||= Hash.new { |hash, key|
+          @zmq_contexts ||= Hash.new do |hash, key|
             hash[key] = ZMQ::Context.new
-          }
+          end
 
           @zmq_contexts[Process.pid]
         end

@@ -74,17 +74,23 @@ describe Protobuf::Rpc::Connectors::Common do
     let(:method) { :find }
     let(:request) { '' }
     let(:client_host) { 'myhost.myservice.com' }
-    let(:subject_options) { { :service => service,
-                              :method => method,
-                              :request => request,
-                              :client_host => client_host }
-    }
+    let(:subject_options) do
+      {
+        :service => service,
+        :method => method,
+        :request => request,
+        :client_host => client_host
+      }
+    end
 
-    let(:expected) { ::Protobuf::Socketrpc::Request.new({ :service_name => service.name,
-                                                          :method_name => 'find',
-                                                          :request_proto => '',
-                                                          :caller => client_host })
-    }
+    let(:expected) do
+      ::Protobuf::Socketrpc::Request.new(
+        :service_name => service.name,
+        :method_name => 'find',
+        :request_proto => '',
+        :caller => client_host
+      )
+    end
 
     before { allow(subject).to receive(:validate_request_type!).and_return(true) }
     before { expect(subject).not_to receive(:fail) }

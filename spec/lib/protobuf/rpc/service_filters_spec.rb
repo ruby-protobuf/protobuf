@@ -419,12 +419,12 @@ describe Protobuf::Rpc::ServiceFilters do
       before { FilterTest.before_filter(:filter_with_error3) }
 
       it 'short-circuits the call stack' do
-        expect {
+        expect do
           expect(subject).not_to receive(:endpoint)
           subject.__send__(:run_filters, :endpoint)
           expect(subject.called).to eq([ :filter_with_error3, :custom_error_occurred ])
           expect(subject.ex_class).to eq CustomError3
-        }.not_to raise_error
+        end.not_to raise_error
       end
     end
 
@@ -440,12 +440,12 @@ describe Protobuf::Rpc::ServiceFilters do
         before { FilterTest.before_filter(:filter_with_error1) }
 
         it 'short-circuits the call stack' do
-          expect {
+          expect do
             expect(subject).not_to receive(:endpoint)
             subject.__send__(:run_filters, :endpoint)
             expect(subject.called).to eq([ :filter_with_error1, :custom_error_occurred ])
             expect(subject.ex_class).to eq CustomError1
-          }.not_to raise_error
+          end.not_to raise_error
         end
       end
     end
@@ -460,12 +460,12 @@ describe Protobuf::Rpc::ServiceFilters do
       before { FilterTest.before_filter(:filter_with_error1) }
 
       it 'short-circuits the call stack' do
-        expect {
+        expect do
           expect(subject).not_to receive(:endpoint)
           subject.__send__(:run_filters, :endpoint)
           expect(subject.called).to eq([ :filter_with_error1, :block_rescue_handler ])
           expect(subject.ex_class).to eq CustomError1
-        }.not_to raise_error
+        end.not_to raise_error
       end
     end
 
@@ -479,12 +479,12 @@ describe Protobuf::Rpc::ServiceFilters do
       before { FilterTest.before_filter(:filter_with_runtime_error) }
 
       it 'rescues with the given callable' do
-        expect {
+        expect do
           expect(subject).not_to receive(:endpoint)
           subject.__send__(:run_filters, :endpoint)
           expect(subject.called).to eq([ :filter_with_runtime_error, :standard_error_rescue_handler ])
           expect(subject.ex_class).to eq RuntimeError
-        }.not_to raise_error
+        end.not_to raise_error
       end
     end
   end

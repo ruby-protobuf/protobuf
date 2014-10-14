@@ -210,13 +210,13 @@ module Protobuf
         #
         def run_around_filters(rpc_method)
           final = lambda { __send__(rpc_method) }
-          filters[:around].reverse.inject(final) { |previous, filter|
+          filters[:around].reverse.inject(final) do |previous, filter|
             if invoke_filter?(rpc_method, filter)
               lambda { call_or_send(filter[:callable], &previous) }
             else
               previous
             end
-          }.call
+          end.call
         end
 
 
@@ -240,10 +240,10 @@ module Protobuf
             begin
               yield
             rescue *rescue_filters.keys => ex
-              callable = rescue_filters.fetch(ex.class) {
+              callable = rescue_filters.fetch(ex.class) do
                 mapped_klass = rescue_filters.keys.detect { |child_klass| ex.class < child_klass }
                 rescue_filters[mapped_klass]
-              }
+              end
 
               call_or_send(callable, ex)
             end

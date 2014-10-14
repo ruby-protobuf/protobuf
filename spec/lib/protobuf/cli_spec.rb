@@ -7,17 +7,17 @@ describe ::Protobuf::CLI do
     File.expand_path('../../../support/test_app_file.rb', __FILE__)
   end
 
-  let(:sock_runner) {
+  let(:sock_runner) do
     runner = double("SocketRunner", :register_signals => nil)
     allow(runner).to receive(:run).and_return(::ActiveSupport::Notifications.publish("after_server_bind"))
     runner
-  }
+  end
 
-  let(:zmq_runner) {
+  let(:zmq_runner) do
     runner = double "ZmqRunner", register_signals: nil
     allow(runner).to receive(:run).and_return(::ActiveSupport::Notifications.publish("after_server_bind"))
     runner
-  }
+  end
 
   around(:each) do |example|
     logger = ::Protobuf::Logging.logger

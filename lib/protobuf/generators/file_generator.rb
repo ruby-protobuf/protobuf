@@ -118,9 +118,9 @@ module Protobuf
       def print_package(&block)
         final = lambda { block.call }
         namespaces = descriptor.package.split('.')
-        namespaces.reverse.inject(final) { |previous, namespace|
+        namespaces.reverse.inject(final) do |previous, namespace|
           lambda { print_module(namespace, &previous) }
-        }.call
+        end.call
       end
 
       private

@@ -164,12 +164,12 @@ module Protobuf
     private
 
     def copy_to(object, method)
-      duplicate = proc { |obj|
+      duplicate = proc do |obj|
         case obj
         when Message, String then obj.__send__(method)
         else                      obj
         end
-      }
+      end
 
       object.__send__(:initialize)
       @values.each do |name, value|

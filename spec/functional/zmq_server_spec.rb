@@ -22,7 +22,7 @@ describe 'Functional ZMQ Client' do
   end
 
   it 'runs fine when required fields are set' do
-    expect {
+    expect do
       client = ::Test::ResourceService.client
 
       client.find(:name => 'Test Name', :active => true) do |c|
@@ -35,7 +35,7 @@ describe 'Functional ZMQ Client' do
           raise err.inspect
         end
       end
-    }.to_not raise_error
+    end.to_not raise_error
   end
 
   it 'runs under heavy load' do

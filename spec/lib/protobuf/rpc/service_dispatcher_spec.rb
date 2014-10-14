@@ -3,14 +3,14 @@ require 'protobuf/rpc/service_dispatcher'
 
 describe Protobuf::Rpc::ServiceDispatcher do
   let(:app) { proc { |env| env } }
-  let(:env) {
+  let(:env) do
     Protobuf::Rpc::Env.new(
       'method_name' => method_name,
       'request' => request,
       'rpc_service' => service_class,
       'service_name' => service_name,
     )
-  }
+  end
   let(:method_name) { :find }
   let(:request) { request_type.new(:name => 'required') }
   let(:request_type) { service_class.rpcs[method_name].request_type }

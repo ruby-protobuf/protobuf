@@ -35,9 +35,9 @@ describe ::Protobuf do
 
     it 'does not accept other types' do
       [:hello, :world, :evented].each do |type|
-        expect {
+        expect do
           described_class.connector_type = type
-        }.to raise_error(ArgumentError)
+        end.to raise_error(ArgumentError)
       end
     end
   end
@@ -87,9 +87,9 @@ describe ::Protobuf do
     end
 
     it 'is settable' do
-      expect {
+      expect do
         described_class.ignore_unknown_fields = false
-      }.to change {
+      end.to change {
         described_class.ignore_unknown_fields?
       }.from(true).to(false)
     end

@@ -183,9 +183,9 @@ describe ::Protobuf::Field do
 
     context 'when type is not mapped' do
       it 'raises an ArgumentError' do
-        expect {
+        expect do
           subject.field_class("boom")
-        }.to raise_error
+        end.to raise_error
       end
     end
 
