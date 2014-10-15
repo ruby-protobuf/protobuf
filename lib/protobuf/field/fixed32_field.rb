@@ -17,7 +17,7 @@ module Protobuf
       end
 
       def wire_type
-       ::Protobuf::WireType::FIXED32
+        ::Protobuf::WireType::FIXED32
       end
 
     end
