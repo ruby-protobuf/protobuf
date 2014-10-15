@@ -321,11 +321,6 @@ Style/UnlessElse:
 Style/UnneededPercentQ:
   Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/WhileUntilDo:
-  Enabled: false
-
 # Offense count: 4
 # Cop supports --auto-correct.
 Style/WordArray:
