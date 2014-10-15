@@ -24,7 +24,7 @@ module Protobuf
         # whose values are Sets.
         #
         def filters
-          @filters ||= Hash.new { |h,k| h[k] = [] }
+          @filters ||= Hash.new { |h, k| h[k] = [] }
         end
 
         # Filters hash keyed based on filter type (e.g. :before, :after, :around),
@@ -50,7 +50,7 @@ module Protobuf
         end
 
         def defined_filters
-          @defined_filters ||= Hash.new { |h,k| h[k] = Set.new }
+          @defined_filters ||= Hash.new { |h, k| h[k] = Set.new }
         end
 
         # Check to see if the filter has been defined.

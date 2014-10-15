@@ -159,7 +159,7 @@ module Protobuf
         def ping_port_open?(host)
           socket = TCPSocket.new(host, ping_port.to_i)
           socket.setsockopt(::Socket::IPPROTO_TCP, ::Socket::TCP_NODELAY, 1)
-          socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_LINGER, [1,0].pack('ii'))
+          socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_LINGER, [1, 0].pack('ii'))
 
           true
         rescue
