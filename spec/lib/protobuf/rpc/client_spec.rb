@@ -55,7 +55,7 @@ describe Protobuf::Rpc::Client do
     it 'should be able to create the correct request object if passed a hash' do
       client = Test::ResourceService.client
       expect(client).to receive(:send_request)
-      client.find({:name => 'Test Name', :active => false})
+      client.find(:name => 'Test Name', :active => false)
       expect(client.options[:request]).to be_a(Test::ResourceFindRequest)
       expect(client.options[:request].name).to eq('Test Name')
       expect(client.options[:request].active).to eq(false)

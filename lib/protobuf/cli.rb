@@ -227,9 +227,9 @@ module Protobuf
         debug_say('Running server')
 
         @runner.run do
-          logger.info {
+          logger.info do
             "pid #{::Process.pid} -- #{@runner_mode} RPC Server listening at #{options.host}:#{options.port}"
-          }
+          end
 
           ::ActiveSupport::Notifications.instrument("after_server_bind")
         end

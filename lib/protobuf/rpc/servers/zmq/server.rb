@@ -62,15 +62,10 @@ module Protobuf
         end
 
         def beacon_port
-          unless @beacon_port
-            unless port = options[:beacon_port]
-              port = ::Protobuf::Rpc::ServiceDirectory.port
-            end
-
-            @beacon_port = port.to_i
-          end
-
-          @beacon_port
+          @beacon_port ||= options.fetch(
+            :beacon_port,
+            ::Protobuf::Rpc::ServiceDirectory.port,
+          ).to_i
         end
 
         def beacon_uri
@@ -167,7 +162,7 @@ module Protobuf
           @last_reaping = Time.now.to_i
 
           @workers.keep_if do |worker|
-            worker.alive? or worker.join && false
+            worker.alive? || worker.join && false
           end
         end
 

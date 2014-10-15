@@ -106,10 +106,10 @@ module Protobuf
       def method_missing(method_name, *params)
         service = options[:service]
         unless service.rpc_method?(method_name)
-          logger.error { sign_message("#{service.name}##{method_name.to_s} not rpc method, passing to super") }
+          logger.error { sign_message("#{service.name}##{method_name} not rpc method, passing to super") }
           super(method_name, *params)
         else
-          logger.debug { sign_message("#{service.name}##{method_name.to_s}") }
+          logger.debug { sign_message("#{service.name}##{method_name}") }
           rpc = service.rpcs[method_name.to_sym]
 
           options[:request_type] = rpc.request_type

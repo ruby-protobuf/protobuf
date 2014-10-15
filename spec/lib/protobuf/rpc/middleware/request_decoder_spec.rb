@@ -3,24 +3,24 @@ require 'spec_helper'
 describe Protobuf::Rpc::Middleware::RequestDecoder do
   let(:app) { Proc.new { |env| env } }
   let(:client_host) { 'client_host.test.co' }
-  let(:env) {
+  let(:env) do
     Protobuf::Rpc::Env.new(
       'encoded_request' => encoded_request,
       'log_signature' => 'log_signature'
     )
-  }
+  end
   let(:encoded_request) { request_wrapper.encode }
   let(:method_name) { :find }
   let(:request) { request_type.new(:name => 'required') }
   let(:request_type) { rpc_method.request_type }
-  let(:request_wrapper) {
+  let(:request_wrapper) do
     Protobuf::Socketrpc::Request.new(
       :caller => client_host,
       :service_name => service_name,
       :method_name => method_name.to_s,
       :request_proto => request
     )
-  }
+  end
   let(:response_type) { rpc_method.response_type }
   let(:rpc_method) { rpc_service.rpcs[method_name] }
   let(:rpc_service) { Test::ResourceService }
@@ -83,14 +83,14 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
     end
 
     context "when the RPC service is not defined" do
-      let(:request_wrapper) {
+      let(:request_wrapper) do
         Protobuf::Socketrpc::Request.new(
           :caller => client_host,
           :service_name => 'Foo',
           :method_name => method_name.to_s,
           :request_proto => request
         )
-      }
+      end
 
       it "raises a bad request data exception" do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::ServiceNotFound)
@@ -98,14 +98,14 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
     end
 
     context "when RPC method is not defined" do
-      let(:request_wrapper) {
+      let(:request_wrapper) do
         Protobuf::Socketrpc::Request.new(
           :caller => client_host,
           :service_name => service_name,
           :method_name => 'foo',
           :request_proto => request
         )
-      }
+      end
 
       it "raises a bad request data exception" do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::MethodNotFound)

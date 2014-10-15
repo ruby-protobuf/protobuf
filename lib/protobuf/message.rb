@@ -128,13 +128,13 @@ module Protobuf
     end
 
     def [](name)
-      if field = self.class.get_field(name, true)
+      if (field = self.class.get_field(name, true))
         __send__(field.getter)
       end
     end
 
     def []=(name, value)
-      if field = self.class.get_field(name, true)
+      if (field = self.class.get_field(name, true))
         __send__(field.setter, value) unless value.nil?
       else
         unless ::Protobuf.ignore_unknown_fields?
@@ -164,12 +164,12 @@ module Protobuf
     private
 
     def copy_to(object, method)
-      duplicate = proc { |obj|
+      duplicate = proc do |obj|
         case obj
         when Message, String then obj.__send__(method)
         else                      obj
         end
-      }
+      end
 
       object.__send__(:initialize)
       @values.each do |name, value|

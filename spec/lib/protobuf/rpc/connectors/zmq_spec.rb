@@ -4,13 +4,15 @@ require 'protobuf/zmq'
 describe ::Protobuf::Rpc::Connectors::Zmq do
   subject { described_class.new(options) }
 
-  let(:options) {{
-    :service => "Test::Service",
-    :method => "find",
-    :timeout => 3,
-    :host => "127.0.0.1",
-    :port => "9400"
-  }}
+  let(:options) do
+    {
+      :service => "Test::Service",
+      :method => "find",
+      :timeout => 3,
+      :host => "127.0.0.1",
+      :port => "9400"
+    }
+  end
 
   let(:socket_double) { double(::ZMQ::Socket, :connect => 0) }
   let(:zmq_context_double) { double(::ZMQ::Context, :socket => socket_double) }

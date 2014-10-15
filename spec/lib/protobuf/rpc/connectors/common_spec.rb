@@ -74,15 +74,23 @@ describe Protobuf::Rpc::Connectors::Common do
     let(:method) { :find }
     let(:request) { '' }
     let(:client_host) { 'myhost.myservice.com' }
-    let(:subject_options) { { :service => service,
-                              :method => method,
-                              :request => request,
-                              :client_host => client_host } }
+    let(:subject_options) do
+      {
+        :service => service,
+        :method => method,
+        :request => request,
+        :client_host => client_host
+      }
+    end
 
-    let(:expected) { ::Protobuf::Socketrpc::Request.new({ :service_name => service.name,
-                                                          :method_name => 'find',
-                                                          :request_proto => '',
-                                                          :caller => client_host }) }
+    let(:expected) do
+      ::Protobuf::Socketrpc::Request.new(
+        :service_name => service.name,
+        :method_name => 'find',
+        :request_proto => '',
+        :caller => client_host
+      )
+    end
 
     before { allow(subject).to receive(:validate_request_type!).and_return(true) }
     before { expect(subject).not_to receive(:fail) }
@@ -133,10 +141,10 @@ describe Protobuf::Rpc::Connectors::Common do
       stats = double("Object")
       allow(stats).to receive(:stop).and_return(true)
       subject.stats = stats
-      _cb = double("Object")
+      some_cb = double("Object")
 
-      subject.instance_variable_set("@#{cb}", _cb)
-      expect(_cb).to receive(:call).and_return(true)
+      subject.instance_variable_set("@#{cb}", some_cb)
+      expect(some_cb).to receive(:call).and_return(true)
       subject.method(meth).call(*args)
     end
 

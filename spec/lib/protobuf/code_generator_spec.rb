@@ -40,9 +40,9 @@ describe ::Protobuf::CodeGenerator do
   context 'class-level printing methods' do
     describe '.fatal' do
       it 'raises a CodeGeneratorFatalError error' do
-        expect {
+        expect do
           described_class.fatal("something is wrong")
-        }.to raise_error(
+        end.to raise_error(
           ::Protobuf::CodeGenerator::CodeGeneratorFatalError,
           "something is wrong"
         )

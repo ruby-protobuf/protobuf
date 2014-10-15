@@ -22,7 +22,7 @@ module Protobuf
           env.log_signature || super
         end
 
-      private
+        private
 
         # Encode the response wrapper to return to the client
         #

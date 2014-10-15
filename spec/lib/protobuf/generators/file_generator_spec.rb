@@ -13,8 +13,12 @@ describe ::Protobuf::Generators::FileGenerator do
 
   describe '#print_import_requires' do
     let(:descriptor_fields) do
-      base_descriptor_fields.merge!({ :dependency => [ 'test/bar.proto',
-                                                       'test/baz.proto' ] })
+      base_descriptor_fields.merge(
+        :dependency => [
+          'test/bar.proto',
+          'test/baz.proto'
+        ]
+      )
     end
 
     it 'prints a ruby require for each dependency' do

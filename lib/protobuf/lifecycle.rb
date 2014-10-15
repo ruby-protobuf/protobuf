@@ -13,7 +13,7 @@ module Protobuf
         ERROR
       end
 
-      ::ActiveSupport::Notifications.subscribe(event_name) do |name, start, finish, id, args|
+      ::ActiveSupport::Notifications.subscribe(event_name) do |_name, _start, _finish, _id, args|
         blk.call(*args)
       end
     end

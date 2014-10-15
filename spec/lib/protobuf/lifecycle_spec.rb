@@ -14,9 +14,9 @@ describe ::Protobuf::Lifecycle do
   end
 
   it "only registers blocks for event callbacks" do
-    expect {
+    expect do
       subject.register("something")
-    }.to raise_error( /block/ )
+    end.to raise_error( /block/ )
   end
 
   it "calls the registered block when triggered" do

@@ -13,14 +13,18 @@ describe ::Protobuf::Generators::FieldGenerator do
   let(:extendee) { nil }
   let(:field_options) { {} }
 
-  let(:field_fields) { { :label => label_enum,
-                         :name => name,
-                         :number => number,
-                         :type => type_enum,
-                         :type_name => type_name,
-                         :default_value => default_value,
-                         :extendee => extendee,
-                         :options => field_options } }
+  let(:field_fields) do
+    {
+      :label => label_enum,
+      :name => name,
+      :number => number,
+      :type => type_enum,
+      :type_name => type_name,
+      :default_value => default_value,
+      :extendee => extendee,
+      :options => field_options
+    }
+  end
 
   let(:field) { ::Google::Protobuf::FieldDescriptorProto.new(field_fields) }
 
@@ -53,7 +57,7 @@ describe ::Protobuf::Generators::FieldGenerator do
         let(:type_enum) { :TYPE_STRING }
         let(:default_value) { "a default \"string\"" }
 
-        specify { expect(subject).to eq %Q{optional :string, :foo_bar, 3, :default => "a default \"string\""\n} }
+        specify { expect(subject).to eq %{optional :string, :foo_bar, 3, :default => "a default \"string\""\n} }
       end
 
       context 'when float or double field type' do

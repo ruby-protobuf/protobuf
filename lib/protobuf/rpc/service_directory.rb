@@ -200,11 +200,11 @@ module Protobuf
       end
 
       def remove_listing(uuid)
-        listing = @listings_by_uuid[uuid] or return
+        listing = @listings_by_uuid[uuid] || return
 
         logger.debug { sign_message("Removing listing: #{listing.inspect}") }
 
-        @listings_by_service.each do |service, listings|
+        @listings_by_service.each_value do |listings|
           listings.delete(listing)
         end
 

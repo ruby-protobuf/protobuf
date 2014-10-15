@@ -102,9 +102,9 @@ unless ENV.key?('PB_NO_NETWORKING')
   require 'protobuf/rpc/client'
   require 'protobuf/rpc/service'
 
-  env_connector_type = ENV.fetch('PB_CLIENT_TYPE') {
+  env_connector_type = ENV.fetch('PB_CLIENT_TYPE') do
     ::Protobuf::DEFAULT_CONNECTOR
-  }.to_s.downcase.strip.to_sym
+  end.to_s.downcase.strip.to_sym
 
   if ::Protobuf::CONNECTORS.include?(env_connector_type)
     require "protobuf/#{env_connector_type}"

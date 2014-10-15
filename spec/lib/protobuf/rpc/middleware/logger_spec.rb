@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::Logger do
   let(:app) { Proc.new { |inner_env| inner_env } }
-  let(:env) {
+  let(:env) do
     Protobuf::Rpc::Env.new(
       'client_host' => 'client_host.test.co',
       'encoded_request' => request_wrapper.encode,
@@ -16,17 +16,17 @@ describe Protobuf::Rpc::Middleware::Logger do
       'rpc_service' => service_class,
       'service_name' => service_name,
     )
-  }
+  end
   let(:method_name) { :find }
   let(:request) { request_type.new(:name => 'required') }
   let(:request_type) { rpc_method.request_type }
-  let(:request_wrapper) {
+  let(:request_wrapper) do
     Protobuf::Socketrpc::Request.new(
       :service_name => service_name,
       :method_name => method_name.to_s,
       :request_proto => request
     )
-  }
+  end
   let(:response_wrapper) { Protobuf::Socketrpc::Response.new(:response_proto => response) }
   let(:response) { rpc_method.response_type.new(:name => 'required') }
   let(:rpc_method) { service_class.rpcs[method_name] }

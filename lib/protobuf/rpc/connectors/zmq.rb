@@ -25,9 +25,9 @@ module Protobuf
         # Class Methods
         #
         def self.zmq_context
-          @zmq_contexts ||= Hash.new { |hash, key|
+          @zmq_contexts ||= Hash.new do |hash, key|
             hash[key] = ZMQ::Context.new
-          }
+          end
 
           @zmq_contexts[Process.pid]
         end
@@ -75,8 +75,6 @@ module Protobuf
         # service. The LINGER is set to 0 so we can close immediately in
         # the event of a timeout
         def create_socket
-          socket = nil
-
           begin
             server_uri = lookup_server_uri
             socket = zmq_context.socket(::ZMQ::REQ)
@@ -131,7 +129,7 @@ module Protobuf
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
 
-            sleep (1.0/100.0)
+            sleep(1.0/100.0)
           end
 
           raise "Host not found for service #{service}"

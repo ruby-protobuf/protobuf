@@ -45,7 +45,7 @@ module Protobuf
 
         def define_filter(type, filter, options = {})
           return if filter_defined?(type, filter)
-          filters[type] << options.merge({ :callable => filter })
+          filters[type] << options.merge(:callable => filter)
           remember_filter(type, filter)
         end
 
@@ -119,8 +119,8 @@ module Protobuf
         # Value can either be a symbol/string indicating an instance method to call
         # or an object that responds to `call`.
         #
-        def invoke_via_if?(rpc_method, filter)
-          if_check = filter.fetch(:if) { lambda { |service| return true } }
+        def invoke_via_if?(_rpc_method, filter)
+          if_check = filter.fetch(:if) { lambda { |_service| return true } }
           do_invoke = case
                       when if_check.nil? then
                         true
@@ -149,8 +149,8 @@ module Protobuf
         # Value can either be a symbol/string indicating an instance method to call
         # or an object that responds to `call`.
         #
-        def invoke_via_unless?(rpc_method, filter)
-          unless_check = filter.fetch(:unless) { lambda { |service| return false } }
+        def invoke_via_unless?(_rpc_method, filter)
+          unless_check = filter.fetch(:unless) { lambda { |_service| return false } }
           skip_invoke = case
                         when unless_check.nil? then
                           false
@@ -210,13 +210,13 @@ module Protobuf
         #
         def run_around_filters(rpc_method)
           final = lambda { __send__(rpc_method) }
-          filters[:around].reverse.inject(final) { |previous, filter|
+          filters[:around].reverse.inject(final) do |previous, filter|
             if invoke_filter?(rpc_method, filter)
               lambda { call_or_send(filter[:callable], &previous) }
             else
               previous
             end
-          }.call
+          end.call
         end
 
 
@@ -240,10 +240,10 @@ module Protobuf
             begin
               yield
             rescue *rescue_filters.keys => ex
-              callable = rescue_filters.fetch(ex.class) {
+              callable = rescue_filters.fetch(ex.class) do
                 mapped_klass = rescue_filters.keys.detect { |child_klass| ex.class < child_klass }
                 rescue_filters[mapped_klass]
-              }
+              end
 
               call_or_send(callable, ex)
             end

@@ -23,7 +23,6 @@ module Protobuf
       def compile
         run_once(:compile) do
           map_extensions(descriptor, [ descriptor.package ])
-          extract_dangling_extensions
 
           print_file_comment
           print_generic_requires
@@ -34,7 +33,7 @@ module Protobuf
             group.add_enums(descriptor.enum_type, :namespace => [ descriptor.package ])
             group.add_message_declarations(descriptor.message_type)
             group.add_messages(descriptor.message_type, :extension_fields => @extension_fields, :namespace => [ descriptor.package ])
-            group.add_extended_messages(@unknown_extensions)
+            group.add_extended_messages(unknown_extensions)
             group.add_services(descriptor.service)
 
             group.add_header(:enum, 'Enum Classes')
@@ -48,9 +47,9 @@ module Protobuf
         end
       end
 
-      def extract_dangling_extensions
-        @unknown_extensions = @extension_fields.select do |k, v|
-          ! @known_messages.include?(k)
+      def unknown_extensions
+        @unknown_extensions ||= @extension_fields.reject do |k, _|
+          @known_messages.include?(k)
         end
       end
 
@@ -119,9 +118,9 @@ module Protobuf
       def print_package(&block)
         final = lambda { block.call }
         namespaces = descriptor.package.split('.')
-        namespaces.reverse.inject(final) { |previous, namespace|
+        namespaces.reverse.inject(final) do |previous, namespace|
           lambda { print_module(namespace, &previous) }
-        }.call
+        end.call
       end
 
       private

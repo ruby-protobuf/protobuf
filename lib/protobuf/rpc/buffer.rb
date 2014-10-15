@@ -25,10 +25,10 @@ module Protobuf
       end
 
       def write(force_mode=true)
-        if force_mode and reading?
-          mode = :write
-        elsif not force_mode and reading?
-          raise = 'You chose to write the buffer when in read mode'
+        if force_mode && reading?
+          self.mode = :write
+        elsif !force_mode && reading?
+          raise 'You chose to write the buffer when in read mode'
         end
 
         @size = @data.length
@@ -43,7 +43,7 @@ module Protobuf
         end
       end
 
-      def set_data(data)
+      def set_data(data) # rubocop:disable Style/AccessorMethodName
         @data = data.to_s
         @size = @data.size
       end
@@ -60,14 +60,14 @@ module Protobuf
         @flush
       end
 
-      def get_data_size
+      def get_data_size # rubocop:disable Style/AccessorMethodName
         if @size == 0 || @data.match(SIZE_REGEX)
           sliced_size = @data.slice!(SIZE_REGEX)
           @size = sliced_size.gsub('-', '').to_i unless sliced_size.nil?
         end
       end
 
-    private
+      private
 
       def check_for_flush
         if !@size.nil? && @data.length == @size
