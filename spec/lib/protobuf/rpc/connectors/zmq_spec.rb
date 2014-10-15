@@ -31,7 +31,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
   end
 
   describe "#lookup_server_uri" do
-    let(:service_directory) { double('ServiceDirectory', :running? => running? ) }
+    let(:service_directory) { double('ServiceDirectory', :running? => running?) }
     let(:listing) { double('Listing', :address => '127.0.0.2', :port => 9399) }
     let(:listings) { [listing] }
     let(:running?) { true }

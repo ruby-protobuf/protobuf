@@ -18,7 +18,7 @@ module Protobuf
       end
     end
 
-    def self.trigger( event_name, *args )
+    def self.trigger(event_name, *args)
       if ::Protobuf.print_deprecation_warnings?
         $stderr.puts <<-ERROR
             [DEPRECATED] ::Protobuf::Lifecycle has been deprecated and will be removed in a future version.
@@ -26,7 +26,7 @@ module Protobuf
         ERROR
       end
 
-      event_name = normalized_event_name( event_name )
+      event_name = normalized_event_name(event_name)
 
       ::ActiveSupport::Notifications.instrument(event_name, args)
     end

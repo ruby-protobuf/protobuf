@@ -17,7 +17,7 @@ require 'google/protobuf/compiler/plugin.pb'
 
 # Including a way to turn on debug logger for spec runs
 if ENV.key?('DEBUG')
-  debug_log = ::File.expand_path('../../debug_specs.log', __FILE__ )
+  debug_log = ::File.expand_path('../../debug_specs.log', __FILE__)
   ::Protobuf::Logging.initialize_logger(debug_log, ::Logger::DEBUG)
 else
   ::Protobuf::Logging.initialize_logger('/dev/null')
