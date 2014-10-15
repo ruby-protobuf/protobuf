@@ -117,11 +117,6 @@ Style/SignalException:
 Style/SingleLineMethods:
   Enabled: false
 
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/SpaceAfterColon:
-  Enabled: false
-
 # Offense count: 9
 # Cop supports --auto-correct.
 Style/SpaceAfterComma:
