@@ -12,7 +12,7 @@ module Protobuf
                    when options.respond_to?(:to_hash) then
                      options.to_hash
                    else
-                     raise "Cannot parser Zmq Server - server options"
+                     fail "Cannot parser Zmq Server - server options"
                    end
 
       end

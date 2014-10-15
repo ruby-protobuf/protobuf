@@ -37,7 +37,7 @@ module Protobuf
         def rescue_from(*ex_klasses, &block)
           options = ex_klasses.last.is_a?(Hash) ? ex_klasses.pop : {}
           callable = options.delete(:with) { block }
-          raise ArgumentError, 'Option :with missing from rescue_from options' if callable.nil?
+          fail ArgumentError, 'Option :with missing from rescue_from options' if callable.nil?
           ex_klasses.each { |ex_klass| rescue_filters[ex_klass] = callable }
         end
 
@@ -259,7 +259,7 @@ module Protobuf
                          when respond_to?(callable, true) then
                            __send__(callable, *args, &block)
                          else
-                           raise "Object #{callable} is not callable"
+                           fail "Object #{callable} is not callable"
                          end
 
           return_value

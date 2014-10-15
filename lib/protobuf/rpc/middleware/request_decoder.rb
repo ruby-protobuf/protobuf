@@ -37,7 +37,7 @@ module Protobuf
             method_name = request_wrapper.method_name.underscore.to_sym
 
             unless service.rpc_method?(method_name)
-              raise MethodNotFound.new("#{service.name}##{method_name} is not a defined RPC method.")
+              fail MethodNotFound.new("#{service.name}##{method_name} is not a defined RPC method.")
             end
 
             method_name

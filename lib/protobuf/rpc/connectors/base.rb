@@ -38,7 +38,7 @@ module Protobuf
         end
 
         def send_request
-          raise 'If you inherit a Connector from Base you must implement send_request'
+          fail 'If you inherit a Connector from Base you must implement send_request'
         end
 
         def ping_port

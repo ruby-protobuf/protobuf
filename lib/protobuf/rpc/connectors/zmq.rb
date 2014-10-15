@@ -132,7 +132,7 @@ module Protobuf
             sleep(1.0 / 100.0)
           end
 
-          raise "Host not found for service #{service}"
+          fail "Host not found for service #{service}"
         end
 
         def host_alive?(host)
@@ -181,7 +181,7 @@ module Protobuf
             parse_response
           rescue RequestTimeout
             retry if attempt < CLIENT_RETRIES
-            fail(:RPC_FAILED, "The server repeatedly failed to respond within #{timeout} seconds")
+            failure(:RPC_FAILED, "The server repeatedly failed to respond within #{timeout} seconds")
           end
         end
 
@@ -256,13 +256,13 @@ module Protobuf
         def zmq_eagain_error_check(return_code, source)
           unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
             if ::ZMQ::Util.errno == ::ZMQ::EAGAIN
-              raise ZmqEagainError, <<-ERROR
+              fail ZmqEagainError, <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
               #{caller(1).join($INPUT_RECORD_SEPARATOR)}
               ERROR
             else
-              raise <<-ERROR
+              fail <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
               #{caller(1).join($INPUT_RECORD_SEPARATOR)}
@@ -273,7 +273,7 @@ module Protobuf
 
         def zmq_error_check(return_code, source)
           unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
-            raise <<-ERROR
+            fail <<-ERROR
             Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
             #{caller(1).join($INPUT_RECORD_SEPARATOR)}
@@ -283,7 +283,7 @@ module Protobuf
 
         def zmq_recoverable_error_check(return_code, source)
           unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
-            raise ZmqRecoverableError, <<-ERROR
+            fail ZmqRecoverableError, <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
               #{caller(1).join($INPUT_RECORD_SEPARATOR)}

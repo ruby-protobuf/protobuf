@@ -6,7 +6,7 @@ module Protobuf
     CodeGeneratorFatalError = Class.new(RuntimeError)
 
     def self.fatal(message)
-      raise CodeGeneratorFatalError, message
+      fail CodeGeneratorFatalError, message
     end
 
     def self.print_tag_warning_suppress

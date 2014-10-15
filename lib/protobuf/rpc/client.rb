@@ -27,7 +27,7 @@ module Protobuf
       #   })
       #
       def initialize(options = {})
-        raise "Invalid client configuration. Service must be defined." if options[:service].nil?
+        fail "Invalid client configuration. Service must be defined." if options[:service].nil?
         @connector = Connector.connector_for_client.new(options)
         logger.debug { sign_message("Initialized with options: #{options.inspect}") }
       end
@@ -47,7 +47,7 @@ module Protobuf
 
       def on_complete=(callable)
         if !callable.nil? && !callable.respond_to?(:call) && callable.arity != 1
-          raise "callable must take a single argument and respond to :call"
+          fail "callable must take a single argument and respond to :call"
         end
 
         @connector.complete_cb = callable
@@ -66,7 +66,7 @@ module Protobuf
 
       def on_failure=(callable)
         if !callable.nil? && !callable.respond_to?(:call) && callable.arity != 1
-          raise "Callable must take a single argument and respond to :call"
+          fail "Callable must take a single argument and respond to :call"
         end
 
         @connector.failure_cb = callable
@@ -85,7 +85,7 @@ module Protobuf
 
       def on_success=(callable)
         if !callable.nil? && !callable.respond_to?(:call) && callable.arity != 1
-          raise "Callable must take a single argument and respond to :call"
+          fail "Callable must take a single argument and respond to :call"
         end
 
         @connector.success_cb = callable

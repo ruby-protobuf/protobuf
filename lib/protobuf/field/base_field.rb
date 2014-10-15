@@ -60,7 +60,7 @@ module Protobuf
       end
 
       def decode(_bytes)
-        raise NotImplementedError, "#{self.class.name}##{__method__}"
+        fail NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
       def default
@@ -80,7 +80,7 @@ module Protobuf
       end
 
       def encode(_value)
-        raise NotImplementedError, "#{self.class.name}##{__method__}"
+        fail NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
       def extension?
@@ -204,7 +204,7 @@ module Protobuf
               val = val.dup
               val.compact!
             else
-              raise TypeError, <<-TYPE_ERROR
+              fail TypeError, <<-TYPE_ERROR
                 Expected repeated value of type '#{field.type_class}'
                 Got '#{val.class}' for repeated protobuf field #{field.name}
               TYPE_ERROR
@@ -241,7 +241,7 @@ module Protobuf
             elsif field.acceptable?(val)
               @values[field.name] = field.coerce!(val)
             else
-              raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+              fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
           end
         end
@@ -257,7 +257,7 @@ module Protobuf
 
       def validate_packed_field
         if packed? && ! ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
-          raise "Can't use packed encoding for '#{type_class}' type"
+          fail "Can't use packed encoding for '#{type_class}' type"
         end
       end
 

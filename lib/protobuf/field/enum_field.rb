@@ -9,7 +9,7 @@ module Protobuf
       #
 
       def self.default
-        raise NoMethodError, "#{self}.#{__method__} must be called on an instance"
+        fail NoMethodError, "#{self}.#{__method__} must be called on an instance"
       end
 
       ##
@@ -49,7 +49,7 @@ module Protobuf
               @values.delete(field.name)
             else
               value = field.type_class.fetch(value)
-              raise TypeError, "Invalid Enum value: #{orig_value.inspect} for #{field.name}" unless value
+              fail TypeError, "Invalid Enum value: #{orig_value.inspect} for #{field.name}" unless value
 
               @values[field.name] = value
             end

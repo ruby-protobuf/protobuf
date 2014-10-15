@@ -84,7 +84,7 @@ module Protobuf
         when :service then
           PARENT_CLASS_SERVICE
         else
-          raise "Unknown parent class type #{type}: #{caller[0..5].join("\n")}"
+          fail "Unknown parent class type #{type}: #{caller[0..5].join("\n")}"
         end
       end
 

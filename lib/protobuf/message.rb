@@ -74,7 +74,7 @@ module Protobuf
         value = @values[field.getter]
 
         if value.nil?
-          raise ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value."
+          fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value."
         else
           yield(field, value)
         end
@@ -138,7 +138,7 @@ module Protobuf
         __send__(field.setter, value) unless value.nil?
       else
         unless ::Protobuf.ignore_unknown_fields?
-          raise ::Protobuf::FieldNotDefinedError, name
+          fail ::Protobuf::FieldNotDefinedError, name
         end
       end
     end

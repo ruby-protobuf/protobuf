@@ -410,22 +410,22 @@ describe Protobuf::Rpc::ServiceFilters do
 
         def filter_with_error1
           @called << :filter_with_error1
-          raise CustomError1, 'Filter 1 failed'
+          fail CustomError1, 'Filter 1 failed'
         end
 
         def filter_with_error2
           @called << :filter_with_error2
-          raise CustomError1, 'Filter 2 failed'
+          fail CustomError1, 'Filter 2 failed'
         end
 
         def filter_with_error3
           @called << :filter_with_error3
-          raise CustomError3, 'Filter 3 failed'
+          fail CustomError3, 'Filter 3 failed'
         end
 
         def filter_with_runtime_error
           @called << :filter_with_runtime_error
-          raise 'Filter with runtime error failed'
+          fail 'Filter with runtime error failed'
         end
 
         def custom_error_occurred(ex)

@@ -66,7 +66,7 @@ module Protobuf
           expected = env.response_type
 
           if expected != actual
-            raise BadResponseProto.new("Expected response to be of type #{expected.name} but was #{actual.name}")
+            fail BadResponseProto.new("Expected response to be of type #{expected.name} but was #{actual.name}")
           end
 
           candidate

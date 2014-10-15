@@ -41,7 +41,7 @@ module Protobuf
   end
 
   def self.connector_type=(type)
-    raise ArgumentError, 'Invalid connector type given' unless CONNECTORS.include?(type)
+    fail ArgumentError, 'Invalid connector type given' unless CONNECTORS.include?(type)
     @connector_type = type
   end
 

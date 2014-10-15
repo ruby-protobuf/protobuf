@@ -34,7 +34,7 @@ describe 'Functional ZMQ Client' do
         end
 
         c.on_failure do |err|
-          raise err.inspect
+          fail err.inspect
         end
       end
     end.to_not raise_error
@@ -53,7 +53,7 @@ describe 'Functional ZMQ Client' do
             end
 
             c.on_failure do |err|
-              raise err.inspect
+              fail err.inspect
             end
           end
         end
@@ -68,7 +68,7 @@ describe 'Functional ZMQ Client' do
       client = ::Test::ResourceService.client
 
       client.find(request) do |c|
-        c.on_success { raise "shouldn't pass" }
+        c.on_success { fail "shouldn't pass" }
         c.on_failure { |e| error = e }
       end
       expect(error.message).to match(/Required field.*does not have a value/)
@@ -82,7 +82,7 @@ describe 'Functional ZMQ Client' do
       client = ::Test::ResourceService.client
 
       client.find(request) do |c|
-        c.on_success { raise "shouldn't pass" }
+        c.on_success { fail "shouldn't pass" }
         c.on_failure { |e| error = e }
       end
       expect(error.message).to match(/expected request.*ResourceFindRequest.*Resource instead/i)
@@ -95,7 +95,7 @@ describe 'Functional ZMQ Client' do
       client = ::Test::ResourceService.client(:timeout => 1)
 
       client.find_with_sleep(:sleep => 2) do |c|
-        c.on_success { raise "shouldn't pass" }
+        c.on_success { fail "shouldn't pass" }
         c.on_failure { |e| error = e }
       end
       expect(error.message).to match(/The server repeatedly failed to respond/)

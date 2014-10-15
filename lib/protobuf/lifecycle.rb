@@ -3,7 +3,7 @@ module Protobuf
     include ::Protobuf::Logging
 
     def self.register(event_name, &blk)
-      raise "Lifecycle register must have a block" unless block_given?
+      fail "Lifecycle register must have a block" unless block_given?
       event_name = normalized_event_name(event_name)
 
       if ::Protobuf.print_deprecation_warnings?

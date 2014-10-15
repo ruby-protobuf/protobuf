@@ -99,12 +99,6 @@ Style/RaiseArgs:
 Style/RescueModifier:
   Enabled: false
 
-# Offense count: 67
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/SignalException:
-  Enabled: false
-
 # Offense count: 126
 # Cop supports --auto-correct.
 Style/SpaceInsideBrackets:

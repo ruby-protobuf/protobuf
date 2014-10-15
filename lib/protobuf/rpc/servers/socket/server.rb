@@ -55,7 +55,7 @@ module Protobuf
 
           @threads = []
           @server = ::TCPServer.new(host, port)
-          raise "The server was unable to start properly." if @server.closed?
+          fail "The server was unable to start properly." if @server.closed?
 
           @server.listen(backlog)
           @working = []

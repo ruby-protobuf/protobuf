@@ -59,7 +59,7 @@ module Protobuf
       elsif type < ::Protobuf::Field::BaseField
         type
       else
-        raise ArgumentError, "Invalid field type #{type}"
+        fail ArgumentError, "Invalid field type #{type}"
       end
     end
 
