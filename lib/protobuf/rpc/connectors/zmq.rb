@@ -129,7 +129,7 @@ module Protobuf
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
 
-            sleep(1.0/100.0)
+            sleep(1.0 / 100.0)
           end
 
           raise "Host not found for service #{service}"
