@@ -75,11 +75,6 @@ Style/IfUnlessModifier:
 Style/Lambda:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/LeadingCommentSpace:
-  Enabled: false
-
 # Offense count: 6
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
