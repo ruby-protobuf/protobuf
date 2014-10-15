@@ -82,7 +82,7 @@ module Protobuf
     end
 
     def has_field?(name)
-      @values.has_key?(name)
+      @values.key?(name)
     end
 
     def inspect

@@ -190,7 +190,7 @@ module Protobuf
             case
             when options[:timeout] then
               options[:timeout]
-            when ENV.has_key?("PB_ZMQ_CLIENT_RCV_TIMEOUT") then
+            when ENV.key?("PB_ZMQ_CLIENT_RCV_TIMEOUT") then
               ENV["PB_ZMQ_CLIENT_RCV_TIMEOUT"].to_i
             else
               300_000 # 300 seconds
@@ -203,7 +203,7 @@ module Protobuf
             case
             when options[:timeout] then
               options[:timeout]
-            when ENV.has_key?("PB_ZMQ_CLIENT_SND_TIMEOUT") then
+            when ENV.key?("PB_ZMQ_CLIENT_SND_TIMEOUT") then
               ENV["PB_ZMQ_CLIENT_SND_TIMEOUT"].to_i
             else
               300_000 # 300 seconds

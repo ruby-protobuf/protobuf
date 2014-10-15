@@ -33,7 +33,7 @@ module Protobuf
         end
 
         def first_alive_load_balance?
-          ENV.has_key?("PB_FIRST_ALIVE_LOAD_BALANCE") ||
+          ENV.key?("PB_FIRST_ALIVE_LOAD_BALANCE") ||
             options[:first_alive_load_balance]
         end
 
@@ -46,7 +46,7 @@ module Protobuf
         end
 
         def ping_port_enabled?
-          ENV.has_key?("PB_RPC_PING_PORT")
+          ENV.key?("PB_RPC_PING_PORT")
         end
       end
     end
