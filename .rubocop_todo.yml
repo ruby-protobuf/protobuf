@@ -66,11 +66,6 @@ Style/GuardClause:
 Style/HashSyntax:
   Enabled: false
 
-# Offense count: 2
-# Configuration parameters: MaxLineLength.
-Style/IfUnlessModifier:
-  Enabled: false
-
 # Offense count: 14
 Style/Lambda:
   Enabled: false

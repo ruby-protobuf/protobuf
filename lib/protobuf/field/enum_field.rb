@@ -25,9 +25,7 @@ module Protobuf
       end
 
       def decode(value)
-        if acceptable?(value)
-          value
-        end
+        value if acceptable?(value)
       end
 
       def enum?

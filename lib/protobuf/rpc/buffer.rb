@@ -70,9 +70,7 @@ module Protobuf
       private
 
       def check_for_flush
-        if !@size.nil? && @data.length == @size
-          @flush = true
-        end
+        @flush = true if !@size.nil? && @data.length == @size
       end
     end
   end
