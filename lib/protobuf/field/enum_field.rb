@@ -17,7 +17,7 @@ module Protobuf
       #
 
       def acceptable?(val)
-        ! type_class.fetch(val).nil?
+        !type_class.fetch(val).nil?
       end
 
       def encode(value)

@@ -109,7 +109,7 @@ module Protobuf
         #
         def invoke_via_except?(rpc_method, filter)
           except = [ filter.fetch(:except) { [] } ].flatten
-          except.empty? || ! except.include?(rpc_method)
+          except.empty? || !except.include?(rpc_method)
         end
 
         # Invoke the given :if callable (if any) and return its return value.
@@ -158,7 +158,7 @@ module Protobuf
                           call_or_send(unless_check)
                         end
 
-          ! skip_invoke
+          !skip_invoke
         end
 
         def rescue_filters

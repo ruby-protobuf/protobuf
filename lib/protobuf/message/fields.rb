@@ -82,7 +82,7 @@ module Protobuf
         name_or_tag = name_or_tag.to_sym if name_or_tag.respond_to?(:to_sym)
         field = field_store[name_or_tag]
 
-        if field && (allow_extension || ! field.extension?)
+        if field && (allow_extension || !field.extension?)
           field
         else
           nil

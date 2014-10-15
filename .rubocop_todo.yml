@@ -105,11 +105,6 @@ Style/RescueModifier:
 Style/SignalException:
   Enabled: false
 
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/SpaceAfterNot:
-  Enabled: false
-
 # Offense count: 126
 # Cop supports --auto-correct.
 Style/SpaceInsideBrackets:

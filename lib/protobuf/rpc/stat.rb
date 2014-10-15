@@ -61,7 +61,7 @@ module Protobuf
       end
 
       def stopped?
-        ! end_time.nil?
+        !end_time.nil?
       end
 
       def rpc

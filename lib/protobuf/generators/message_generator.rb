@@ -62,7 +62,7 @@ module Protobuf
       private
 
       def has_extensions?
-        ! message_extension_fields.empty?
+        !message_extension_fields.empty?
       end
 
       def has_fields?
