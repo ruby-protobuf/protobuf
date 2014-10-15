@@ -46,7 +46,7 @@ module Protobuf
       end
 
       def on_complete=(callable)
-        if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
+        if !callable.nil? && !callable.respond_to?(:call) && callable.arity != 1
           raise "callable must take a single argument and respond to :call"
         end
 
@@ -65,7 +65,7 @@ module Protobuf
       end
 
       def on_failure=(callable)
-        if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
+        if !callable.nil? && !callable.respond_to?(:call) && callable.arity != 1
           raise "Callable must take a single argument and respond to :call"
         end
 
@@ -84,7 +84,7 @@ module Protobuf
       end
 
       def on_success=(callable)
-        if callable != nil && !callable.respond_to?(:call) && callable.arity != 1
+        if !callable.nil? && !callable.respond_to?(:call) && callable.arity != 1
           raise "Callable must take a single argument and respond to :call"
         end
 

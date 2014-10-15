@@ -80,12 +80,6 @@ Style/Lambda:
 Style/Next:
   Enabled: false
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: IncludeSemanticChanges.
-Style/NonNilCheck:
-  Enabled: false
-
 # Offense count: 46
 # Cop supports --auto-correct.
 Style/NumericLiterals:
