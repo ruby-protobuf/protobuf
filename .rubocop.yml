@@ -17,6 +17,10 @@ Style/EmptyLines:
   Exclude:
     - '**/*.pb.rb'
 
+Style/FileName:
+  Exclude:
+    - '**/protoc-gen-ruby*'
+
 Style/IndentHash:
   EnforcedStyle: consistent
 
