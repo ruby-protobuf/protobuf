@@ -30,4 +30,3 @@ describe ::Protobuf::Generators::FileGenerator do
   end
 
 end
-

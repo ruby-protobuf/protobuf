@@ -19,4 +19,3 @@ require 'protobuf'
 
 require 'protobuf/rpc/servers/socket/server'
 require 'protobuf/rpc/connectors/socket'
-

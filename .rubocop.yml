@@ -9,6 +9,10 @@ Style/CaseIndentation:
 Style/IndentHash:
   EnforcedStyle: consistent
 
+Style/TrailingBlankLines:
+  Exclude:
+    - '**/*.pb.rb'
+
 Style/TrailingComma:
   EnforcedStyleForMultiline: comma
 

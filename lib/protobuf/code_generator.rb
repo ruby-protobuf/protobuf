@@ -38,4 +38,3 @@ module Protobuf
 
   end
 end
-

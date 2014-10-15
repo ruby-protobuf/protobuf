@@ -57,4 +57,3 @@ describe 'Functional Socket Client' do
     expect(error.message).to match(/expected request.*ResourceFindRequest.*Resource instead/i)
   end
 end
-

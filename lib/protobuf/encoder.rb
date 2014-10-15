@@ -59,4 +59,3 @@ module Protobuf
 
   end
 end
-

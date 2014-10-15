@@ -71,4 +71,3 @@ module Protobuf
 
   end
 end
-

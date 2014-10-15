@@ -100,4 +100,3 @@ describe ::Protobuf::Generators::FieldGenerator do
   end
 
 end
-

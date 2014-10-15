@@ -81,4 +81,3 @@ describe ::Protobuf::Generators::Base do
   end
 
 end
-
