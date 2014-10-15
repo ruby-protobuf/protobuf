@@ -119,10 +119,10 @@ module Protobuf
       self
     end
 
-    def ==(obj)
-      return false unless obj.is_a?(self.class)
+    def ==(other)
+      return false unless other.is_a?(self.class)
       each_field do |field, value|
-        return false unless value == obj.__send__(field.name)
+        return false unless value == other.__send__(field.name)
       end
       true
     end
