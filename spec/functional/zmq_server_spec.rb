@@ -42,7 +42,7 @@ describe 'Functional ZMQ Client' do
 
   it 'runs under heavy load' do
     10.times do
-      5.times do
+      5.times.map do
         Thread.new do
           client = ::Test::ResourceService.client
 

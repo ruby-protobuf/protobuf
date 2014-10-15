@@ -26,14 +26,6 @@ end
 # Get rid of the deprecation env var if present (messes with specs).
 ENV.delete("PB_IGNORE_DEPRECATIONS")
 
-::RSpec.configure do |c|
-  c.before(:suite) do
-    require 'rake'
-    load ::File.expand_path('../../Rakefile', __FILE__)
-    ::Rake::Task['compile:spec'].invoke
-  end
-end
-
 support_proto_glob = File.expand_path('../support/**/*.pb.rb', __FILE__)
 Dir[support_proto_glob].each { |proto_file| require proto_file }
 

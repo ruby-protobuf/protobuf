@@ -13,7 +13,7 @@ require 'rubocop/rake_task'
 RSpec::Core::RakeTask.new(:spec)
 RuboCop::RakeTask.new
 
-task :default => [:spec, :rubocop]
+task :default => ['compile:spec', 'compile:rpc', :spec, :rubocop]
 
 desc 'Run specs'
 namespace :compile do
@@ -21,19 +21,21 @@ namespace :compile do
   desc 'Compile spec protos in spec/supprt/ directory'
   task :spec do
     proto_path = ::File.expand_path('../spec/support/', __FILE__)
-    cmd = %{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
+    proto_files = Dir[File.join(proto_path, '**', '*.proto')]
+    cmd = %{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{proto_files.join(' ')}}
 
     puts cmd
-    exec(cmd)
+    system(cmd)
   end
 
   desc 'Compile rpc protos in protos/ directory'
   task :rpc do
     proto_path = ::File.expand_path('../proto', __FILE__)
+    proto_files = Dir[File.join(proto_path, '**', '*.proto')]
     output_dir = ::File.expand_path('../tmp/rpc', __FILE__)
     ::FileUtils.mkdir_p(output_dir)
 
-    cmd = %{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{output_dir} -I #{proto_path} #{File.join(proto_path, '**', '*.proto')}}
+    cmd = %{protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{output_dir} -I #{proto_path} #{proto_files.join(' ')}}
 
     puts cmd
     system(cmd)
