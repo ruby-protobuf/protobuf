@@ -161,6 +161,7 @@ module Protobuf
     ##
     # Private Instance Methods
     #
+
     private
 
     def copy_to(object, method)

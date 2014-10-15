@@ -38,6 +38,7 @@ describe Protobuf::Rpc::ServiceFilters do
     before(:all) do
       class FilterTest
         private
+
         def verify_before
           @called << :verify_before
           @before_filter_calls += 1
@@ -68,6 +69,7 @@ describe Protobuf::Rpc::ServiceFilters do
       before(:all) do
         class FilterTest
           private
+
           def endpoint_with_verify
             @called << :endpoint_with_verify
           end
@@ -98,6 +100,7 @@ describe Protobuf::Rpc::ServiceFilters do
       before(:all) do
         class FilterTest
           private
+
           def endpoint_without_verify
             @called << :endpoint_without_verify
           end
@@ -128,6 +131,7 @@ describe Protobuf::Rpc::ServiceFilters do
       before(:all) do
         class FilterTest
           private
+
           def check_true; return true; end
           def check_false; return false; end
           def verify_before; @called << :verify_before; end
@@ -187,6 +191,7 @@ describe Protobuf::Rpc::ServiceFilters do
       before(:all) do
         class FilterTest
           private
+
           def check_true; return true; end
           def check_false; return false; end
           def verify_before; @called << :verify_before; end
@@ -246,6 +251,7 @@ describe Protobuf::Rpc::ServiceFilters do
       before(:all) do
         class FilterTest
           private
+
           def short_circuit_filter
             @called << :short_circuit_filter
             return false
@@ -272,6 +278,7 @@ describe Protobuf::Rpc::ServiceFilters do
     before(:all) do
       class FilterTest
         private
+
         def verify_after
           @called << :verify_after
           @after_filter_calls += 1
@@ -305,6 +312,7 @@ describe Protobuf::Rpc::ServiceFilters do
     before(:all) do
       class FilterTest
         private
+
         def outer_around
           @called << :outer_around_top
           yield
@@ -346,6 +354,7 @@ describe Protobuf::Rpc::ServiceFilters do
       before do
         class FilterTest
           private
+
           def inner_around
             @called << :inner_around
           end
