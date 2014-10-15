@@ -38,7 +38,7 @@ module Protobuf
         end
 
         def resolve_ip(hostname)
-          ::Resolv.getaddresses(hostname).detect do |address|
+          ::Resolv.getaddresses(hostname).find do |address|
             address =~ ADDRESS_MATCH
           end
         end

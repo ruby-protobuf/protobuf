@@ -37,12 +37,6 @@ Metrics/ParameterLists:
 Metrics/PerceivedComplexity:
   Max: 12
 
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: PreferredMethods.
-Style/CollectionMethods:
-  Enabled: false
-
 # Offense count: 5
 # Configuration parameters: Keywords.
 Style/CommentAnnotation:

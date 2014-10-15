@@ -260,13 +260,13 @@ describe ::Protobuf::Rpc::ServiceDirectory do
   if ENV.key?("BENCH")
     context "performance" do
       let(:servers) do
-        100.times.collect do |x|
+        100.times.map do |x|
           ::Protobuf::Rpc::DynamicDiscovery::Server.new(
             :uuid => "performance_server#{x + 1}",
             :address => '127.0.0.1',
             :port => (5555 + x).to_s,
             :ttl => rand(1..5),
-            :services => 10.times.collect { |y| "PerformanceService#{y}" }
+            :services => 10.times.map { |y| "PerformanceService#{y}" }
           )
         end
       end

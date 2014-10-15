@@ -120,7 +120,7 @@ module Protobuf
       def print_package(&block)
         final = lambda { block.call }
         namespaces = descriptor.package.split('.')
-        namespaces.reverse.inject(final) do |previous, namespace|
+        namespaces.reverse.reduce(final) do |previous, namespace|
           lambda { print_module(namespace, &previous) }
         end.call
       end
