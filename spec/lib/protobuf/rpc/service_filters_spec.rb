@@ -400,7 +400,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         def filter_with_runtime_error
           @called << :filter_with_runtime_error
-          raise RuntimeError, 'Filter with runtime error failed'
+          raise 'Filter with runtime error failed'
         end
 
         def custom_error_occurred(ex)
