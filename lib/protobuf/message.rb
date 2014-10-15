@@ -11,6 +11,8 @@ module Protobuf
     # Includes & Extends
     #
 
+    extend ::Protobuf::Deprecator
+
     extend ::Protobuf::Message::Fields
     include ::Protobuf::Message::Serialization
 
@@ -81,16 +83,17 @@ module Protobuf
       end
     end
 
-    def has_field?(name)
+    def field?(name)
       @values.key?(name)
     end
+    deprecate_method(:has_field?, :field?)
 
     def inspect
       to_hash.inspect
     end
 
     def respond_to_has?(key)
-      respond_to?(key) && has_field?(key)
+      respond_to?(key) && field?(key)
     end
 
     def respond_to_has_and_present?(key)

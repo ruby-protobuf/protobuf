@@ -11,7 +11,7 @@ module Protobuf
     def deprecate_method(old_method, new_method)
       class_eval(<<-DEPRECATED, __FILE__, __LINE__ + 1)
         def #{old_method}(*args)
-          warn_deprecated("#{old_method}", "#{new_method}")
+          self.class.warn_deprecated("#{old_method}", "#{new_method}")
           new_meth = method("#{new_method}")
           if new_meth.arity == 0
             __send__("#{new_method}")
