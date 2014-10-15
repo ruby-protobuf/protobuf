@@ -78,8 +78,8 @@ module Protobuf
 
     # Public: All defined enums.
     #
-    def self.enums
-      @enums
+    class << self
+      attr_reader :enums
     end
 
     # Public: Get an array of Enum objects with the given tag.

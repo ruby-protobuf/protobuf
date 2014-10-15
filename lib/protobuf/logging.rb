@@ -14,8 +14,8 @@ module Protobuf
       defined?(@logger) ? @logger : initialize_logger
     end
 
-    def self.logger=(new_logger)
-      @logger = new_logger
+    class << self
+      attr_writer :logger
     end
 
     def logger

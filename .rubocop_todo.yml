@@ -306,12 +306,6 @@ Style/TrailingBlankLines:
 Style/TrailingComma:
   Enabled: false
 
-# Offense count: 12
-# Cop supports --auto-correct.
-# Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, Whitelist.
-Style/TrivialAccessors:
-  Enabled: false
-
 # Offense count: 4
 # Cop supports --auto-correct.
 Style/WordArray:

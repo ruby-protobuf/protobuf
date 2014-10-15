@@ -11,3 +11,7 @@ Style/IndentHash:
 
 Style/TrailingComma:
   EnforcedStyleForMultiline: comma
+
+Style/TrivialAccessors:
+  AllowDSLWriters: true
+  AllowPredicates: true

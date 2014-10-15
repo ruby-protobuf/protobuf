@@ -13,12 +13,8 @@ Thread.abort_on_exception = true
 module StubProtobufServerFactory
   def self.build(delay)
     new_server = Class.new(Protobuf::Rpc::Socket::Server) do
-      def self.sleep_interval
-        @sleep_interval
-      end
-
-      def self.sleep_interval=(si)
-        @sleep_interval = si
+      class << self
+        attr_accessor :sleep_interval
       end
 
       def post_init

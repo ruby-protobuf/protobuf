@@ -17,9 +17,7 @@ module Protobuf
         start
       end
 
-      def client=(client_host)
-        @client = client_host
-      end
+      attr_writer :client
 
       def client
         @client || nil

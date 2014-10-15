@@ -17,7 +17,7 @@ module Protobuf
       DEFAULT_PORT = 53000
       DEFAULT_TIMEOUT = 1
 
-      class Listing < Delegator
+      class Listing < SimpleDelegator
         attr_reader :expires_at
 
         def initialize(server)
@@ -45,12 +45,8 @@ module Protobuf
         end
 
         def update(server)
-          @server = server
+          __setobj__(server)
           @expires_at = Time.now.to_i + ttl
-        end
-
-        def __getobj__
-          @server
         end
       end
 

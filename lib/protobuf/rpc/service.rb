@@ -54,13 +54,13 @@ module Protobuf
       # The host location of the service.
       #
       def self.host
-        @_host ||= DEFAULT_HOST
+        @host ||= DEFAULT_HOST
       end
 
       # The host location setter.
       #
-      def self.host=(new_host)
-        @_host = new_host
+      class << self
+        attr_writer :host
       end
 
       # An array of defined service classes that contain implementation
@@ -88,13 +88,13 @@ module Protobuf
       # The port of the service on the destination server.
       #
       def self.port
-        @_port ||= DEFAULT_PORT
+        @port ||= DEFAULT_PORT
       end
 
       # The port location setter.
       #
-      def self.port=(new_port)
-        @_port = new_port
+      class << self
+        attr_writer :port
       end
 
       # Define an rpc method with the given request and response types.
@@ -108,7 +108,7 @@ module Protobuf
       # Hash containing the set of methods defined via `rpc`.
       #
       def self.rpcs
-        @_rpcs ||= {}
+        @rpcs ||= {}
       end
 
       # Check if the given method name is a known rpc endpoint.
@@ -132,7 +132,7 @@ module Protobuf
       # Response object for this rpc cycle. Not assignable.
       #
       def response
-        @_response ||= response_type.new
+        @response ||= response_type.new
       end
 
       # Convenience method to get back to class method.
@@ -150,7 +150,7 @@ module Protobuf
       private
 
       def request_type
-        @_request_type ||= env.request_type
+        @request_type ||= env.request_type
       end
 
       # Sugar to make an rpc method feel like a controller method.
@@ -158,12 +158,12 @@ module Protobuf
       # object returned by the response reader.
       #
       def respond_with(candidate)
-        @_response = candidate
+        @response = candidate
       end
       alias_method :return_from_whence_you_came, :respond_with
 
       def response_type
-        @_response_type ||= env.response_type
+        @response_type ||= env.response_type
       end
 
       # Automatically fail a service method.

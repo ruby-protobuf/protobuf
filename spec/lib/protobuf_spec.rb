@@ -4,7 +4,7 @@ require 'protobuf'
 describe ::Protobuf do
 
   describe '.client_host' do
-    after { ::Protobuf.instance_variable_set(:@_client_host, nil) }
+    after { ::Protobuf.client_host = nil }
 
     subject { ::Protobuf.client_host }
 
@@ -20,7 +20,7 @@ describe ::Protobuf do
   end
 
   describe '.connector_type' do
-    before { described_class.instance_variable_set(:@_connector_type, nil) }
+    before { described_class.instance_variable_set(:@connector_type, nil) }
 
     it 'defaults to socket' do
       expect(described_class.connector_type).to eq :socket
@@ -43,7 +43,7 @@ describe ::Protobuf do
   end
 
   describe '.gc_pause_server_request?' do
-    before { described_class.instance_variable_set(:@_gc_pause_server_request, nil) }
+    before { described_class.instance_variable_set(:@gc_pause_server_request, nil) }
 
     it 'defaults to a false value' do
       expect(described_class.gc_pause_server_request?).to be false
@@ -56,7 +56,7 @@ describe ::Protobuf do
   end
 
   describe '.print_deprecation_warnings?' do
-    before { described_class.instance_variable_set(:@_print_deprecation_warnings, nil) }
+    before { described_class.instance_variable_set(:@print_deprecation_warnings, nil) }
 
     it 'defaults to a true value' do
       expect(described_class.print_deprecation_warnings?).to be true
