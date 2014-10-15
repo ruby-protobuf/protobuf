@@ -239,12 +239,6 @@ Style/SpaceAfterComma:
 Style/SpaceAfterNot:
   Enabled: false
 
-# Offense count: 17
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/SpaceAroundEqualsInParameterDefault:
-  Enabled: false
-
 # Offense count: 126
 # Cop supports --auto-correct.
 Style/SpaceInsideBrackets:

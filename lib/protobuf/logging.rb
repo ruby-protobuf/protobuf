@@ -2,7 +2,7 @@ require 'logger'
 
 module Protobuf
   module Logging
-    def self.initialize_logger(log_target=$stdout, log_level=::Logger::INFO)
+    def self.initialize_logger(log_target = $stdout, log_level = ::Logger::INFO)
       @counter ||= 0
       @counter = @counter + 1
       @logger = Logger.new(log_target)
