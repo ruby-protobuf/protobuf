@@ -6,6 +6,9 @@ Lint/Loop:
 Style/CaseIndentation:
   IndentWhenRelativeTo: end
 
+Style/EmptyLineBetweenDefs:
+  AllowAdjacentOneLineDefs: true
+
 Style/IndentHash:
   EnforcedStyle: consistent
 
