@@ -119,7 +119,7 @@ module Protobuf
       end
 
       def string_default_value
-        %{"#{verbatim_default_value.gsub(/'/, '\\\\\'')}"}
+        %("#{verbatim_default_value.gsub(/'/, '\\\\\'')}")
       end
 
       def verbatim_default_value

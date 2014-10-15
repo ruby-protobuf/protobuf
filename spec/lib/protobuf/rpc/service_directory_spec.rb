@@ -11,7 +11,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       :address => '127.0.0.1',
       :port => '1111',
       :ttl => 10,
-      :services => %w[EchoService]
+      :services => %w(EchoService)
     )
   end
 
@@ -21,7 +21,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       :address => '127.0.0.1',
       :port => "1112",
       :ttl => 10,
-      :services => %w[HelloService]
+      :services => %w(HelloService)
     )
   end
 
@@ -31,7 +31,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       :address => '127.0.0.1',
       :port => '1113',
       :ttl => 1,
-      :services => %w[HelloService]
+      :services => %w(HelloService)
     )
   end
 
@@ -41,7 +41,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
       :address => '127.0.0.1',
       :port => '1114',
       :ttl => 10,
-      :services => %w[HelloService EchoService]
+      :services => %w(HelloService EchoService)
     )
   end
 
