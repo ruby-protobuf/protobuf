@@ -1,3 +1,5 @@
+require 'active_support/core_ext/hash/keys'
+
 require 'thor'
 require 'protobuf/version'
 require 'protobuf/logging'
@@ -179,8 +181,7 @@ module Protobuf
       end
 
       def runner_options
-        # Symbolize keys
-        opt = options.reduce({}) { |h, (k, v)| h[k.to_sym] = v; h }
+        opt = options.symbolize_keys
 
         opt[:workers_only] = (!!ENV['PB_WORKERS_ONLY']) || options.workers_only
 

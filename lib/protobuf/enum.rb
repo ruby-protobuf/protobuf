@@ -226,9 +226,8 @@ module Protobuf
       self.warn_deprecated(:values, :enums)
 
       @values ||= begin
-                    self.enums.reduce({}) do |hash, enum|
+                    self.enums.each_with_object({}) do |enum, hash|
                       hash[enum.name] = enum
-                      hash
                     end
                   end
     end
