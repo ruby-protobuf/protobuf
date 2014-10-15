@@ -312,10 +312,6 @@ Style/TrailingComma:
 Style/TrivialAccessors:
   Enabled: false
 
-# Offense count: 1
-Style/UnlessElse:
-  Enabled: false
-
 # Offense count: 4
 # Cop supports --auto-correct.
 Style/WordArray:
