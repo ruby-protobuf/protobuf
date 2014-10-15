@@ -174,7 +174,7 @@ module Protobuf
       object.__send__(:initialize)
       @values.each do |name, value|
         if value.is_a?(::Protobuf::Field::FieldArray)
-          object.__send__(name).replace(value.map {|v| duplicate.call(v)})
+          object.__send__(name).replace(value.map { |v| duplicate.call(v) })
         else
           object.__send__("#{name}=", duplicate.call(value))
         end

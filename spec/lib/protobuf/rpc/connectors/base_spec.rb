@@ -30,7 +30,7 @@ describe Protobuf::Rpc::Connectors::Base do
   describe '#success_cb' do
     it 'allows setting the success callback and calling it' do
       expect(subject.success_cb).to be_nil
-      cb = proc {|res| raise res }
+      cb = proc { |res| raise res }
       subject.success_cb = cb
       expect(subject.success_cb).to eq(cb)
       expect { subject.success_cb.call('an error from cb') }.to raise_error 'an error from cb'
@@ -40,7 +40,7 @@ describe Protobuf::Rpc::Connectors::Base do
   describe '#failure_cb' do
     it 'allows setting the failure callback and calling it' do
       expect(subject.failure_cb).to be_nil
-      cb = proc {|res| raise res }
+      cb = proc { |res| raise res }
       subject.failure_cb = cb
       expect(subject.failure_cb).to eq(cb)
       expect { subject.failure_cb.call('an error from cb') }.to raise_error 'an error from cb'

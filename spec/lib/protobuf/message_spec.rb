@@ -425,7 +425,7 @@ describe Protobuf::Message do
     end
 
     it "does not allow string fields to be set to Numeric" do
-      expect { subject.name = 1}.to raise_error(/name/)
+      expect { subject.name = 1 }.to raise_error(/name/)
     end
   end
 

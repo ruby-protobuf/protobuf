@@ -38,8 +38,8 @@ describe 'Functional Socket Client' do
     client = ::Test::ResourceService.client
 
     client.find(request) do |c|
-      c.on_success { raise "shouldn't pass"}
-      c.on_failure {|e| error = e}
+      c.on_success { raise "shouldn't pass" }
+      c.on_failure { |e| error = e }
     end
 
     expect(error.message).to match(/Required field.*does not have a value/)
@@ -51,8 +51,8 @@ describe 'Functional Socket Client' do
     client = ::Test::ResourceService.client
 
     client.find(request) do |c|
-      c.on_success { raise "shouldn't pass"}
-      c.on_failure {|e| error = e}
+      c.on_success { raise "shouldn't pass" }
+      c.on_failure { |e| error = e }
     end
     expect(error.message).to match(/expected request.*ResourceFindRequest.*Resource instead/i)
   end
