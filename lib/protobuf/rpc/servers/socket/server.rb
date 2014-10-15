@@ -64,7 +64,11 @@ module Protobuf
 
           while running?
             logger.debug { sign_message("Waiting for connections") }
-            ready_cnxns = IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT) rescue nil
+            ready_cnxns = begin
+              IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT)
+            rescue IOError
+              nil
+            end
 
             if ready_cnxns
               cnxns = ready_cnxns.first

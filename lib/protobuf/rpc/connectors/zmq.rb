@@ -165,7 +165,11 @@ module Protobuf
         rescue
           false
         ensure
-          socket.close rescue nil
+          begin
+            socket && socket.close
+          rescue IOError
+            nil
+          end
         end
 
         # Trying a number of times, attempt to get a response from the server.

@@ -26,7 +26,7 @@ Metrics/LineLength:
 # Offense count: 47
 # Configuration parameters: CountComments.
 Metrics/MethodLength:
-  Max: 41
+  Max: 45
 
 # Offense count: 2
 # Configuration parameters: CountKeywordArgs.
@@ -79,10 +79,6 @@ Style/Next:
 # Cop supports --auto-correct.
 Style/NumericLiterals:
   MinDigits: 21
-
-# Offense count: 2
-Style/RescueModifier:
-  Enabled: false
 
 # Offense count: 126
 # Cop supports --auto-correct.
