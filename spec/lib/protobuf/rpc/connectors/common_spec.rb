@@ -111,7 +111,7 @@ describe Protobuf::Rpc::Connectors::Common do
     end
 
     it "doesn't set @failure_cb when already defined" do
-      set_cb = lambda{ true }
+      set_cb = lambda { true }
       subject.instance_variable_set(:@failure_cb, set_cb)
       subject.verify_callbacks
       expect(subject.instance_variable_get(:@failure_cb)).to eq(set_cb)
@@ -119,7 +119,7 @@ describe Protobuf::Rpc::Connectors::Common do
     end
 
     it "doesn't set @success_cb when already defined" do
-      set_cb = lambda{ true }
+      set_cb = lambda { true }
       subject.instance_variable_set(:@success_cb, set_cb)
       subject.verify_callbacks
       expect(subject.instance_variable_get(:@success_cb)).to eq(set_cb)
