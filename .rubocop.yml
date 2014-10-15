@@ -6,6 +6,10 @@ Lint/Loop:
 Style/CaseIndentation:
   IndentWhenRelativeTo: end
 
+Style/ClassAndModuleChildren:
+  Exclude:
+    - '**/*.pb.rb'
+
 Style/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true
 

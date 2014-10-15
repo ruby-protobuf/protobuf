@@ -29,7 +29,7 @@ ENV.delete("PB_IGNORE_DEPRECATIONS")
 support_proto_glob = File.expand_path('../support/**/*.pb.rb', __FILE__)
 Dir[support_proto_glob].each { |proto_file| require proto_file }
 
-class ::Protobuf::Rpc::Client
+::Protobuf::Rpc::Client.class_eval do
   def ==(other)
     connector.options == other.options && \
       success_cb == other.success_cb && \

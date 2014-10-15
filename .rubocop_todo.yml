@@ -37,11 +37,6 @@ Metrics/ParameterLists:
 Metrics/PerceivedComplexity:
   Max: 12
 
-# Offense count: 4
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/ClassAndModuleChildren:
-  Enabled: false
-
 # Offense count: 9
 # Cop supports --auto-correct.
 # Configuration parameters: PreferredMethods.

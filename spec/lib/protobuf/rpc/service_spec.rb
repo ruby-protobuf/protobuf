@@ -100,8 +100,8 @@ describe Protobuf::Rpc::Service do
 
   context 'instance methods' do
     context 'when invoking a service call' do
-      before(:all) do
-        class ::NewTestService < Protobuf::Rpc::Service
+      before do
+        stub_const('NewTestService', Class.new(Protobuf::Rpc::Service) do
           rpc :find_with_implied_response, Test::ResourceFindRequest, Test::Resource
           def find_with_implied_response
             response.name = 'Implicit response'
@@ -118,7 +118,7 @@ describe Protobuf::Rpc::Service do
             rpc_failed('This is a failed endpoint')
             response.name = 'Name will still be set'
           end
-        end
+        end)
       end
 
       let(:request) { Test::ResourceFindRequest.new(:name => 'resource') }
