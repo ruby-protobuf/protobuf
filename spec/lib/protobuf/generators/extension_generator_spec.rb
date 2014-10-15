@@ -24,13 +24,13 @@ describe ::Protobuf::Generators::ExtensionGenerator do
 
   describe '#compile' do
     let(:compiled) do
-      %q{class FooBar < ::Protobuf::Message
+      'class FooBar < ::Protobuf::Message
   field 1
   field 2
   field 3
 end
 
-}
+'
     end
 
     it 'compiles the a class with the extension fields' do
