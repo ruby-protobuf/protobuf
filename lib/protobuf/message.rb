@@ -100,7 +100,7 @@ module Protobuf
 
     # Return a hash-representation of the given fields for this message type.
     def to_hash
-      result = Hash.new
+      result = {}
 
       @values.keys.each do |field_name|
         value = __send__(field_name)
