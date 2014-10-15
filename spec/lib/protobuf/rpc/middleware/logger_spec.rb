@@ -24,7 +24,7 @@ describe Protobuf::Rpc::Middleware::Logger do
     Protobuf::Socketrpc::Request.new(
       :service_name => service_name,
       :method_name => method_name.to_s,
-      :request_proto => request
+      :request_proto => request,
     )
   end
   let(:response_wrapper) { Protobuf::Socketrpc::Response.new(:response_proto => response) }

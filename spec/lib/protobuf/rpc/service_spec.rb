@@ -67,7 +67,7 @@ describe Protobuf::Rpc::Service do
                                             .with(hash_including(
                                               :service => subject,
                                               :host => subject.host,
-                                              :port => subject.port
+                                              :port => subject.port,
                                             )).and_return(client)
         expect(subject.client).to eq client
       end
@@ -129,7 +129,7 @@ describe Protobuf::Rpc::Service do
           let(:env) do
             Protobuf::Rpc::Env.new(
               'request' => request,
-              'response_type' => response_type
+              'response_type' => response_type,
             )
           end
           let(:response_type) { service.rpcs[:find_with_implied_response].response_type }
@@ -146,7 +146,7 @@ describe Protobuf::Rpc::Service do
           let(:env) do
             Protobuf::Rpc::Env.new(
               'method_name' => :find_with_respond_with,
-              'request' => request
+              'request' => request,
             )
           end
 

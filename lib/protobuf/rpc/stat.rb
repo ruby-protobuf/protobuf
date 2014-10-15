@@ -84,7 +84,7 @@ module Protobuf
           rpc,
           sizes,
           elapsed_time,
-          @end_time.try(:iso8601)
+          @end_time.try(:iso8601),
         ].compact.join(' - ')
       end
 

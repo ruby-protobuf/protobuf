@@ -44,7 +44,7 @@ describe ::Protobuf::CodeGenerator do
           described_class.fatal("something is wrong")
         end.to raise_error(
           ::Protobuf::CodeGenerator::CodeGeneratorFatalError,
-          "something is wrong"
+          "something is wrong",
         )
       end
     end

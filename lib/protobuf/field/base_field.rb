@@ -14,7 +14,7 @@ module Protobuf
       PACKED_TYPES = [
         ::Protobuf::WireType::VARINT,
         ::Protobuf::WireType::FIXED32,
-        ::Protobuf::WireType::FIXED64
+        ::Protobuf::WireType::FIXED64,
       ].freeze
 
       ##

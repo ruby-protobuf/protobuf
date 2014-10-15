@@ -386,14 +386,14 @@ describe Protobuf::Message do
       it 'recursively hashes a repeated set of messages' do
         proto = Test::Nested.new(:multiple_resources => [
           Test::Resource.new(:name => 'Resource 1'),
-          Test::Resource.new(:name => 'Resource 2')
+          Test::Resource.new(:name => 'Resource 2'),
         ])
 
         expect(proto.to_hash).to eq(
           :multiple_resources => [
             { :name => 'Resource 1' },
             { :name => 'Resource 2' },
-          ]
+          ],
         )
       end
     end

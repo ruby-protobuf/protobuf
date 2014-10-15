@@ -79,7 +79,7 @@ describe Protobuf::Rpc::Connectors::Common do
         :service => service,
         :method => method,
         :request => request,
-        :client_host => client_host
+        :client_host => client_host,
       }
     end
 
@@ -88,7 +88,7 @@ describe Protobuf::Rpc::Connectors::Common do
         :service_name => service.name,
         :method_name => 'find',
         :request_proto => '',
-        :caller => client_host
+        :caller => client_host,
       )
     end
 

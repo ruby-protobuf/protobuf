@@ -54,7 +54,7 @@ describe Protobuf::Enum do
           Test::EnumTestType::ONE,
           Test::EnumTestType::TWO,
           Test::EnumTestType::MINUS_ONE,
-          Test::EnumTestType::THREE
+          Test::EnumTestType::THREE,
         ])
       end
 
@@ -63,7 +63,7 @@ describe Protobuf::Enum do
           expect(EnumAliasTest.enums).to eq([
             EnumAliasTest::FOO,
             EnumAliasTest::BAR,
-            EnumAliasTest::BAZ
+            EnumAliasTest::BAZ,
           ])
         end
       end
@@ -178,7 +178,7 @@ describe Protobuf::Enum do
           :MINUS_ONE => Test::EnumTestType::MINUS_ONE,
           :ONE       => Test::EnumTestType::ONE,
           :TWO       => Test::EnumTestType::TWO,
-          :THREE     => Test::EnumTestType::THREE
+          :THREE     => Test::EnumTestType::THREE,
         )
       end
 
@@ -186,7 +186,7 @@ describe Protobuf::Enum do
         expect(EnumAliasTest.values).to eq(
           :FOO => EnumAliasTest::FOO,
           :BAR => EnumAliasTest::BAR,
-          :BAZ => EnumAliasTest::BAZ
+          :BAZ => EnumAliasTest::BAZ,
         )
       end
     end

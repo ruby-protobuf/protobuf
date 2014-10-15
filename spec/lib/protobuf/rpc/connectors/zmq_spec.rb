@@ -10,7 +10,7 @@ describe ::Protobuf::Rpc::Connectors::Zmq do
       :method => "find",
       :timeout => 3,
       :host => "127.0.0.1",
-      :port => "9400"
+      :port => "9400",
     }
   end
 

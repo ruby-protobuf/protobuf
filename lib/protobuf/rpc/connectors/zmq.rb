@@ -147,7 +147,7 @@ module Protobuf
           ping_port_open = ping_port_open?(host)
           self.class.ping_port_responses[host] = {
             :at => Time.now.to_i,
-            :ping_port_open => ping_port_open
+            :ping_port_open => ping_port_open,
           }
           ping_port_open
         end

@@ -7,13 +7,13 @@ describe ::Protobuf::Generators::ServiceGenerator do
   let(:methods) do
     [
       { :name => 'Search', :input_type => 'FooRequest', :output_type => 'FooResponse' },
-      { :name => 'FooBar', :input_type => '.foo.Request', :output_type => '.bar.Response' }
+      { :name => 'FooBar', :input_type => '.foo.Request', :output_type => '.bar.Response' },
     ]
   end
   let(:service_fields) do
     {
       :name => 'TestService',
-      :method => methods
+      :method => methods,
     }
   end
 
