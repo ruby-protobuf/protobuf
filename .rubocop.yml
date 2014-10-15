@@ -20,6 +20,9 @@ Style/EmptyLines:
 Style/IndentHash:
   EnforcedStyle: consistent
 
+Style/Semicolon:
+  AllowAsExpressionSeparator: true
+
 Style/TrailingBlankLines:
   Exclude:
     - '**/*.pb.rb'

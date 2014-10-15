@@ -99,12 +99,6 @@ Style/RaiseArgs:
 Style/RescueModifier:
   Enabled: false
 
-# Offense count: 7
-# Cop supports --auto-correct.
-# Configuration parameters: AllowAsExpressionSeparator.
-Style/Semicolon:
-  Enabled: false
-
 # Offense count: 67
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
