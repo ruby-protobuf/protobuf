@@ -52,7 +52,7 @@ module Protobuf
 
               group.add_extension_fields(message_extension_fields)
 
-              group.order = [ :message, :field, :extension_range, :extension_field ]
+              group.order = [:message, :field, :extension_range, :extension_field]
               print group.to_s
             end
           end

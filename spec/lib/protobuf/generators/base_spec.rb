@@ -9,8 +9,8 @@ describe ::Protobuf::Generators::Base do
 
   context 'namespaces' do
     let(:descriptor) { double(:name => 'Baz') }
-    subject { described_class.new(descriptor, 0, :namespace => [ :foo, :bar ]) }
-    specify { expect(subject.type_namespace).to eq([ :foo, :bar, 'Baz' ]) }
+    subject { described_class.new(descriptor, 0, :namespace => [:foo, :bar]) }
+    specify { expect(subject.type_namespace).to eq([:foo, :bar, 'Baz']) }
     specify { expect(subject.fully_qualified_type_namespace).to eq('.foo.bar.Baz') }
   end
 

@@ -71,11 +71,6 @@ Style/Next:
 Style/NumericLiterals:
   MinDigits: 21
 
-# Offense count: 126
-# Cop supports --auto-correct.
-Style/SpaceInsideBrackets:
-  Enabled: false
-
 # Offense count: 464
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.

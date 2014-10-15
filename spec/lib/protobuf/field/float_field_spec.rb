@@ -44,7 +44,7 @@ describe Protobuf::Field::FloatField do
     end
 
     context 'when set with something that is not a float' do
-      let(:value) { [ 1, 2, 3 ] }
+      let(:value) { [1, 2, 3] }
 
       it 'throws an error' do
         expect { subject }.to raise_error(TypeError)

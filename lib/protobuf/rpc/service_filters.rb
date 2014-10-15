@@ -108,7 +108,7 @@ module Protobuf
         # Value should be a symbol/string or an array of symbols/strings.
         #
         def invoke_via_except?(rpc_method, filter)
-          except = [ filter.fetch(:except) { [] } ].flatten
+          except = [filter.fetch(:except) { [] }].flatten
           except.empty? || !except.include?(rpc_method)
         end
 
@@ -138,7 +138,7 @@ module Protobuf
         # Value should be a symbol/string or an array of symbols/strings.
         #
         def invoke_via_only?(rpc_method, filter)
-          only = [ filter.fetch(:only) { [] } ].flatten
+          only = [filter.fetch(:only) { [] }].flatten
           only.empty? || only.include?(rpc_method)
         end
 

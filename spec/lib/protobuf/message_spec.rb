@@ -54,18 +54,18 @@ describe Protobuf::Message do
 
       context 'with a repeated field' do
         it 'treats the field as if it was unset when decoding' do
-          newer = newer_message.new(:enum_list => [ :HOORAY ]).serialize
+          newer = newer_message.new(:enum_list => [:HOORAY]).serialize
 
           expect(older_message.decode(newer).enum_list).to eq([])
         end
 
         it 'rejects an unknown value when using the constructor' do
-          expect { older_message.new(:enum_list => [ :HOORAY ]) }.to raise_error
+          expect { older_message.new(:enum_list => [:HOORAY]) }.to raise_error
         end
 
         it 'rejects an unknown value when the setter' do
           older = older_message.new
-          expect { older.enum_field = [ :HOORAY ] }.to raise_error
+          expect { older.enum_field = [:HOORAY] }.to raise_error
         end
       end
     end
@@ -372,8 +372,8 @@ describe Protobuf::Message do
       end
 
       it 'converts repeated enum fields to an array of the tags' do
-        hash = Test::EnumTestMessage.new(:repeated_enums => [ :ONE, :TWO, :TWO, :ONE ]).to_hash
-        expect(hash).to eq(:repeated_enums => [ 1, 2, 2, 1 ])
+        hash = Test::EnumTestMessage.new(:repeated_enums => [:ONE, :TWO, :TWO, :ONE]).to_hash
+        expect(hash).to eq(:repeated_enums => [1, 2, 2, 1])
       end
     end
 

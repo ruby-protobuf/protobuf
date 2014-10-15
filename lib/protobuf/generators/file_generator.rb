@@ -22,7 +22,7 @@ module Protobuf
 
       def compile
         run_once(:compile) do
-          map_extensions(descriptor, [ descriptor.package ])
+          map_extensions(descriptor, [descriptor.package])
 
           print_file_comment
           print_generic_requires
@@ -30,9 +30,9 @@ module Protobuf
 
           print_package do
             group = GroupGenerator.new(current_indent)
-            group.add_enums(descriptor.enum_type, :namespace => [ descriptor.package ])
+            group.add_enums(descriptor.enum_type, :namespace => [descriptor.package])
             group.add_message_declarations(descriptor.message_type)
-            group.add_messages(descriptor.message_type, :extension_fields => @extension_fields, :namespace => [ descriptor.package ])
+            group.add_messages(descriptor.message_type, :extension_fields => @extension_fields, :namespace => [descriptor.package])
             group.add_extended_messages(unknown_extensions)
             group.add_services(descriptor.service)
 
@@ -80,13 +80,13 @@ module Protobuf
 
         if descriptor.respond_to_has_and_present?(:message_type)
           descriptor.message_type.each do |message_descriptor|
-            map_extensions(message_descriptor, (namespaces + [ message_descriptor.name ]))
+            map_extensions(message_descriptor, (namespaces + [message_descriptor.name]))
           end
         end
 
         if descriptor.respond_to_has_and_present?(:nested_type)
           descriptor.nested_type.each do |nested_descriptor|
-            map_extensions(nested_descriptor, (namespaces + [ nested_descriptor.name ]))
+            map_extensions(nested_descriptor, (namespaces + [nested_descriptor.name]))
           end
         end
       end

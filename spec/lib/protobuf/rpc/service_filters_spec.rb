@@ -61,7 +61,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
     it 'calls filters in the order they were defined' do
       subject.__send__(:run_filters, :endpoint)
-      expect(subject.called).to eq [ :verify_before, :foo, :endpoint ]
+      expect(subject.called).to eq [:verify_before, :foo, :endpoint]
       expect(subject.before_filter_calls).to eq 1
     end
 
@@ -84,14 +84,14 @@ describe Protobuf::Rpc::ServiceFilters do
       context 'when invoking a method defined in "only" option' do
         it 'invokes the filter' do
           subject.__send__(:run_filters, :endpoint_with_verify)
-          expect(subject.called).to eq [ :verify_before, :endpoint_with_verify ]
+          expect(subject.called).to eq [:verify_before, :endpoint_with_verify]
         end
       end
 
       context 'when invoking a method not defined by "only" option' do
         it 'does not invoke the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :endpoint ]
+          expect(subject.called).to eq [:endpoint]
         end
       end
     end
@@ -115,14 +115,14 @@ describe Protobuf::Rpc::ServiceFilters do
       context 'when invoking a method not defined in "except" option' do
         it 'invokes the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :verify_before, :endpoint ]
+          expect(subject.called).to eq [:verify_before, :endpoint]
         end
       end
 
       context 'when invoking a method defined by "except" option' do
         it 'does not invoke the filter' do
           subject.__send__(:run_filters, :endpoint_without_verify)
-          expect(subject.called).to eq [ :endpoint_without_verify ]
+          expect(subject.called).to eq [:endpoint_without_verify]
         end
       end
     end
@@ -154,7 +154,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         it 'invokes the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :verify_before, :endpoint ]
+          expect(subject.called).to eq [:verify_before, :endpoint]
         end
       end
 
@@ -166,7 +166,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         it 'invokes the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :verify_before, :endpoint ]
+          expect(subject.called).to eq [:verify_before, :endpoint]
         end
       end
 
@@ -178,7 +178,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         it 'skips the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :endpoint ]
+          expect(subject.called).to eq [:endpoint]
         end
       end
 
@@ -190,7 +190,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         it 'skips the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :endpoint ]
+          expect(subject.called).to eq [:endpoint]
         end
       end
     end
@@ -222,7 +222,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         it 'invokes the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :verify_before, :endpoint ]
+          expect(subject.called).to eq [:verify_before, :endpoint]
         end
       end
 
@@ -234,7 +234,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         it 'invokes the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :verify_before, :endpoint ]
+          expect(subject.called).to eq [:verify_before, :endpoint]
         end
       end
 
@@ -246,7 +246,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         it 'skips the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :endpoint ]
+          expect(subject.called).to eq [:endpoint]
         end
       end
 
@@ -258,7 +258,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
         it 'skips the filter' do
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq [ :endpoint ]
+          expect(subject.called).to eq [:endpoint]
         end
       end
     end
@@ -283,7 +283,7 @@ describe Protobuf::Rpc::ServiceFilters do
       it 'does not invoke the rpc method' do
         expect(subject).not_to receive(:endpoint)
         subject.__send__(:run_filters, :endpoint)
-        expect(subject.called).to eq [ :short_circuit_filter ]
+        expect(subject.called).to eq [:short_circuit_filter]
       end
     end
   end
@@ -317,7 +317,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
     it 'calls filters in the order they were defined' do
       subject.__send__(:run_filters, :endpoint)
-      expect(subject.called).to eq [ :endpoint, :verify_after, :foo ]
+      expect(subject.called).to eq [:endpoint, :verify_after, :foo]
       expect(subject.after_filter_calls).to eq 1
     end
   end
@@ -447,7 +447,7 @@ describe Protobuf::Rpc::ServiceFilters do
         expect do
           expect(subject).not_to receive(:endpoint)
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq([ :filter_with_error3, :custom_error_occurred ])
+          expect(subject.called).to eq([:filter_with_error3, :custom_error_occurred])
           expect(subject.ex_class).to eq CustomError3
         end.not_to raise_error
       end
@@ -468,7 +468,7 @@ describe Protobuf::Rpc::ServiceFilters do
           expect do
             expect(subject).not_to receive(:endpoint)
             subject.__send__(:run_filters, :endpoint)
-            expect(subject.called).to eq([ :filter_with_error1, :custom_error_occurred ])
+            expect(subject.called).to eq([:filter_with_error1, :custom_error_occurred])
             expect(subject.ex_class).to eq CustomError1
           end.not_to raise_error
         end
@@ -488,7 +488,7 @@ describe Protobuf::Rpc::ServiceFilters do
         expect do
           expect(subject).not_to receive(:endpoint)
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq([ :filter_with_error1, :block_rescue_handler ])
+          expect(subject.called).to eq([:filter_with_error1, :block_rescue_handler])
           expect(subject.ex_class).to eq CustomError1
         end.not_to raise_error
       end
@@ -507,7 +507,7 @@ describe Protobuf::Rpc::ServiceFilters do
         expect do
           expect(subject).not_to receive(:endpoint)
           subject.__send__(:run_filters, :endpoint)
-          expect(subject.called).to eq([ :filter_with_runtime_error, :standard_error_rescue_handler ])
+          expect(subject.called).to eq([:filter_with_runtime_error, :standard_error_rescue_handler])
           expect(subject.ex_class).to eq RuntimeError
         end.not_to raise_error
       end
