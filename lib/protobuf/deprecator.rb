@@ -2,8 +2,8 @@ module Protobuf
   module Deprecator
 
     def warn_deprecated(old_method, new_method)
-      $stderr.puts %([DEPRECATED] #{self.name}.#{old_method} is deprecated and will disappear in a future version.
-              Please use #{self.name}.#{new_method} instead.\n)
+      $stderr.puts %([DEPRECATED] #{name}.#{old_method} is deprecated and will disappear in a future version.
+              Please use #{name}.#{new_method} instead.\n)
     end
 
     # Given deprecations should be a hash whose keys are the new methods

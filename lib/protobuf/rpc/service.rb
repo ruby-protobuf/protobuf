@@ -66,7 +66,7 @@ module Protobuf
       # An array of defined service classes that contain implementation
       # code
       def self.implemented_services
-        classes = (self.subclasses || []).select do |subclass|
+        classes = (subclasses || []).select do |subclass|
           subclass.rpcs.any? do |(name, _)|
             subclass.method_defined? name
           end

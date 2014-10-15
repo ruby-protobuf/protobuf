@@ -66,11 +66,11 @@ module Protobuf
 
       def self.start
         yield(self) if block_given?
-        self.instance.start
+        instance.start
       end
 
       def self.stop
-        self.instance.stop
+        instance.stop
       end
 
       #
@@ -113,7 +113,7 @@ module Protobuf
         unless running?
           init_socket
           logger.info { sign_message("listening to udp://#{self.class.address}:#{self.class.port}") }
-          @thread = Thread.new { self.send(:run) }
+          @thread = Thread.new { send(:run) }
         end
 
         self

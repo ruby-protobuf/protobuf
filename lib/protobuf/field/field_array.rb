@@ -41,7 +41,7 @@ module Protobuf
       # Return a hash-representation of the given values for this field type.
       # The value in this case would be an array.
       def to_hash_value
-        self.map do |value|
+        map do |value|
           value.respond_to?(:to_hash_value) ? value.to_hash_value : value
         end
       end

@@ -8,12 +8,12 @@ module Protobuf
 
       module ClassMethods
         def decode(bytes)
-          self.new.decode(bytes)
+          new.decode(bytes)
         end
 
         # Create a new object with the given values and return the encoded bytes.
         def encode(fields = {})
-          self.new(fields).encode
+          new(fields).encode
         end
       end
 

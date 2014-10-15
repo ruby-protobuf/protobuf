@@ -29,7 +29,7 @@ module Protobuf
     end
 
     def log_signature
-      @_log_signature ||= "[#{self.class == Class ? self.name : self.class.name}]"
+      @_log_signature ||= "[#{self.class == Class ? name : self.class.name}]"
     end
 
     def sign_message(message)

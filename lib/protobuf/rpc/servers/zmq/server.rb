@@ -79,7 +79,7 @@ module Protobuf
         def broadcast_flatline
           flatline = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE,
-            :server => self.to_proto
+            :server => to_proto
           )
 
           @beacon_socket.send(flatline.encode, 0)
@@ -90,7 +90,7 @@ module Protobuf
 
           heartbeat = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT,
-            :server => self.to_proto
+            :server => to_proto
           )
 
           @beacon_socket.send(heartbeat.encode, 0)
@@ -124,7 +124,7 @@ module Protobuf
         end
 
         def inproc?
-          !!self.options[:zmq_inproc]
+          !!options[:zmq_inproc]
         end
 
         def maintenance_timeout

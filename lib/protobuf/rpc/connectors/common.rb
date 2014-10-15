@@ -162,7 +162,7 @@ module Protobuf
         def verify_callbacks
           unless any_callbacks?
             logger.debug { sign_message("No callbacks set, using data_callback") }
-            @success_cb = @failure_cb = self.method(:data_callback)
+            @success_cb = @failure_cb = method(:data_callback)
           end
         end
 
