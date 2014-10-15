@@ -296,7 +296,7 @@ module Protobuf
             begin
               ::Protobuf::Rpc::Zmq::Worker.new(server).run
             rescue => e
-              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
+              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($INPUT_RECORD_SEPARATOR)}"
               $stderr.puts(message)
               logger.error { message }
             end

@@ -1,5 +1,5 @@
-$: << ::File.expand_path('../', __FILE__)
-$: << ::File.expand_path('../spec', __FILE__)
+$LOAD_PATH << ::File.expand_path('../', __FILE__)
+$LOAD_PATH << ::File.expand_path('../spec', __FILE__)
 
 require 'fileutils'
 require 'rubygems'

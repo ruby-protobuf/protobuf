@@ -259,13 +259,13 @@ module Protobuf
               raise ZmqEagainError, <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-              #{caller(1).join($/)}
+              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
               ERROR
             else
               raise <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-              #{caller(1).join($/)}
+              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
               ERROR
             end
           end
@@ -276,7 +276,7 @@ module Protobuf
             raise <<-ERROR
             Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-            #{caller(1).join($/)}
+            #{caller(1).join($INPUT_RECORD_SEPARATOR)}
             ERROR
           end
         end
@@ -286,7 +286,7 @@ module Protobuf
             raise ZmqRecoverableError, <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-              #{caller(1).join($/)}
+              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
               ERROR
           end
         end
