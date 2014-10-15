@@ -42,5 +42,4 @@ describe ::Protobuf::Field::StringField do
     end
   end
 
-
 end

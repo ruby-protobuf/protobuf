@@ -219,7 +219,6 @@ module Protobuf
           end.call
         end
 
-
         # Entry method to call each filter type in the appropriate order. This should
         # be used instead of the other run methods directly.
         #

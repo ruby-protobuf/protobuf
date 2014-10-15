@@ -241,7 +241,6 @@ module Protobuf
     deprecate_class_method :get_name_by_tag, :name_for_tag
     deprecate_class_method :value_by_name,   :enum_for_name
 
-
     ##
     # Attributes
     #

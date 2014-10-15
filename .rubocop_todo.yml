@@ -45,11 +45,6 @@ Style/Documentation:
 Style/DoubleNegation:
   Enabled: false
 
-# Offense count: 35
-# Cop supports --auto-correct.
-Style/EmptyLines:
-  Enabled: false
-
 # Offense count: 10
 # Cop supports --auto-correct.
 Style/EmptyLinesAroundAccessModifier:

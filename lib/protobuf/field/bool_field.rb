@@ -12,7 +12,6 @@ module Protobuf
         false
       end
 
-
       ##
       # Public Instance Methods
       # #

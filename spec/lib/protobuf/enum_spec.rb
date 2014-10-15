@@ -69,7 +69,6 @@ describe Protobuf::Enum do
       end
     end
 
-
     describe '.enums_for_tag' do
       it 'returns an array of Enums for the given tag, if any' do
         expect(EnumAliasTest.enums_for_tag(1)).to eq([ EnumAliasTest::FOO, EnumAliasTest::BAR ])
