@@ -32,7 +32,7 @@ module Protobuf
       end
 
       def server=(peer)
-        @server = {:port => peer[0], :ip => peer[1]}
+        @server = { :port => peer[0], :ip => peer[1] }
       end
 
       def server
