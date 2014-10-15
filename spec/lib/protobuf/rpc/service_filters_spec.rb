@@ -132,9 +132,17 @@ describe Protobuf::Rpc::ServiceFilters do
         class FilterTest
           private
 
-          def check_true; true; end
-          def check_false; false; end
-          def verify_before; @called << :verify_before; end
+          def check_true
+            true
+          end
+
+          def check_false
+            false
+          end
+
+          def verify_before
+            @called << :verify_before
+          end
         end
       end
 
@@ -192,9 +200,17 @@ describe Protobuf::Rpc::ServiceFilters do
         class FilterTest
           private
 
-          def check_true; true; end
-          def check_false; false; end
-          def verify_before; @called << :verify_before; end
+          def check_true
+            true
+          end
+
+          def check_false
+            false
+          end
+
+          def verify_before
+            @called << :verify_before
+          end
         end
       end
 
