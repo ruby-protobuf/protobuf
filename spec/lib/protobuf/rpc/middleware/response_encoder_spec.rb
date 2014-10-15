@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::ResponseEncoder do
-  let(:app) { Proc.new { |env| env.response = response; env } }
+  let(:app) { proc { |env| env.response = response; env } }
   let(:env) do
     Protobuf::Rpc::Env.new(
       'response_type' => Test::Resource,

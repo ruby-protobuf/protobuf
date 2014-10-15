@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::Logger do
-  let(:app) { Proc.new { |inner_env| inner_env } }
+  let(:app) { proc { |inner_env| inner_env } }
   let(:env) do
     Protobuf::Rpc::Env.new(
       'client_host' => 'client_host.test.co',

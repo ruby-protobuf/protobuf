@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::RequestDecoder do
-  let(:app) { Proc.new { |env| env } }
+  let(:app) { proc { |env| env } }
   let(:client_host) { 'client_host.test.co' }
   let(:env) do
     Protobuf::Rpc::Env.new(
