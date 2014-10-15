@@ -200,15 +200,15 @@ describe Protobuf::Enum do
     end
   end
 
-	subject { Test::EnumTestType::ONE }
+  subject { Test::EnumTestType::ONE }
   specify { expect(subject.class).to eq(Fixnum) }
   specify { expect(subject.parent_class).to eq(Test::EnumTestType) }
-	specify { expect(subject.name).to eq(:ONE) }
-	specify { expect(subject.tag).to eq(1) }
-	specify { expect(subject.value).to eq(1) }
-	specify { expect(subject.to_hash_value).to eq(1) }
-	specify { expect(subject.to_s).to eq("1") }
-	specify { expect(subject.inspect).to eq('#<Protobuf::Enum(Test::EnumTestType)::ONE=1>') }
+  specify { expect(subject.name).to eq(:ONE) }
+  specify { expect(subject.tag).to eq(1) }
+  specify { expect(subject.value).to eq(1) }
+  specify { expect(subject.to_hash_value).to eq(1) }
+  specify { expect(subject.to_s).to eq("1") }
+  specify { expect(subject.inspect).to eq('#<Protobuf::Enum(Test::EnumTestType)::ONE=1>') }
   specify { expect(subject.to_s(:tag)).to eq("1") }
   specify { expect(subject.to_s(:name)).to eq("ONE") }
 
