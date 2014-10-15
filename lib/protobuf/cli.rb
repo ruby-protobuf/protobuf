@@ -126,7 +126,7 @@ module Protobuf
       end
 
       # Configure signal traps.
-      # TODO add signal handling for hot-reloading the application.
+      # TODO: add signal handling for hot-reloading the application.
       def configure_traps
         debug_say('Configuring traps')
 

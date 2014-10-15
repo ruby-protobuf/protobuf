@@ -38,11 +38,6 @@ Metrics/PerceivedComplexity:
   Max: 12
 
 # Offense count: 5
-# Configuration parameters: Keywords.
-Style/CommentAnnotation:
-  Enabled: false
-
-# Offense count: 5
 # Cop supports --auto-correct.
 Style/DeprecatedHashMethods:
   Enabled: false

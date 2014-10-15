@@ -119,7 +119,7 @@ module Protobuf
         rule == :required
       end
 
-      # FIXME need to cleanup (rename) this warthog of a method.
+      # FIXME: need to cleanup (rename) this warthog of a method.
       def set(message_instance, bytes)
         if packed?
           array = message_instance.__send__(getter)
@@ -148,7 +148,7 @@ module Protobuf
         @setter ||= "#{name}="
       end
 
-      # FIXME add packed, deprecated, extension options to to_s output
+      # FIXME: add packed, deprecated, extension options to to_s output
       def to_s
         "#{rule} #{type_class} #{name} = #{tag} #{default ? "[default=#{default.inspect}]" : ''}"
       end

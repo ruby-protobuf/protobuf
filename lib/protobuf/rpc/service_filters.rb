@@ -66,8 +66,8 @@ module Protobuf
         end
 
         # Takes a list of actually (or potentially) callable objects.
-        # TODO add support for if/unless
-        # TODO add support for only/except sub-filters
+        # TODO: add support for if/unless
+        # TODO: add support for only/except sub-filters
         #
         def set_filters(type, *args)
           options = args.last.is_a?(Hash) ? args.pop : {}
