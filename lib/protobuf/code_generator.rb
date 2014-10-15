@@ -33,7 +33,7 @@ module Protobuf
         generate_file(file_descriptor)
       end
 
-      return ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => @generated_files)
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => @generated_files)
     end
 
   end

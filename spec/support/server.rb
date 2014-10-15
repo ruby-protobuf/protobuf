@@ -24,7 +24,7 @@ module StubProtobufServerFactory
     end
 
     new_server.sleep_interval = delay
-    return new_server
+    new_server
   end
 end
 

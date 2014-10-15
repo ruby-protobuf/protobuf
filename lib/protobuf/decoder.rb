@@ -31,7 +31,7 @@ module Protobuf
                 raise InvalidWireType, wire_type
               end
 
-      return tag, bytes
+      [tag, bytes]
     end
 
     # Read 32-bit string value from +stream+.

@@ -94,7 +94,7 @@ module Protobuf
         # if the filter should not be invoked, true if invocation should occur.
         #
         def invoke_filter?(rpc_method, filter)
-          return invoke_via_only?(rpc_method, filter) \
+          invoke_via_only?(rpc_method, filter) \
             && invoke_via_except?(rpc_method, filter) \
             && invoke_via_if?(rpc_method, filter) \
             && invoke_via_unless?(rpc_method, filter)
@@ -109,7 +109,7 @@ module Protobuf
         #
         def invoke_via_except?(rpc_method, filter)
           except = [ filter.fetch(:except) { [] } ].flatten
-          return except.empty? || ! except.include?(rpc_method)
+          except.empty? || ! except.include?(rpc_method)
         end
 
         # Invoke the given :if callable (if any) and return its return value.
@@ -128,7 +128,7 @@ module Protobuf
                         call_or_send(if_check)
                       end
 
-          return do_invoke
+          do_invoke
         end
 
         # If the target rpc endpoint method is listed in the :only option,
@@ -139,7 +139,7 @@ module Protobuf
         #
         def invoke_via_only?(rpc_method, filter)
           only = [ filter.fetch(:only) { [] } ].flatten
-          return only.empty? || only.include?(rpc_method)
+          only.empty? || only.include?(rpc_method)
         end
 
         # Invoke the given :unless callable (if any) and return the opposite
@@ -158,7 +158,7 @@ module Protobuf
                           call_or_send(unless_check)
                         end
 
-          return ! skip_invoke
+          ! skip_invoke
         end
 
         def rescue_filters
@@ -176,7 +176,7 @@ module Protobuf
             end
           end
 
-          return true
+          true
         end
 
         # Reverse build a chain of around filters. To implement an around chain,
@@ -262,7 +262,7 @@ module Protobuf
                            raise "Object #{callable} is not callable"
                          end
 
-          return return_value
+          return_value
         end
 
       end

@@ -33,7 +33,7 @@ module Protobuf
       def build_value(enum_value_descriptor)
         name = enum_value_descriptor.name
         number = enum_value_descriptor.number
-        return "define :#{name}, #{number}"
+        "define :#{name}, #{number}"
       end
 
     end

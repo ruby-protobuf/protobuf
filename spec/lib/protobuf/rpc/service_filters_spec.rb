@@ -132,8 +132,8 @@ describe Protobuf::Rpc::ServiceFilters do
         class FilterTest
           private
 
-          def check_true; return true; end
-          def check_false; return false; end
+          def check_true; true; end
+          def check_false; false; end
           def verify_before; @called << :verify_before; end
         end
       end
@@ -192,8 +192,8 @@ describe Protobuf::Rpc::ServiceFilters do
         class FilterTest
           private
 
-          def check_true; return true; end
-          def check_false; return false; end
+          def check_true; true; end
+          def check_false; false; end
           def verify_before; @called << :verify_before; end
         end
       end
@@ -254,7 +254,7 @@ describe Protobuf::Rpc::ServiceFilters do
 
           def short_circuit_filter
             @called << :short_circuit_filter
-            return false
+            false
           end
         end
       end

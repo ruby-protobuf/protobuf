@@ -18,7 +18,7 @@ module Protobuf
         name = method_descriptor.name
         request_klass = modulize(method_descriptor.input_type)
         response_klass = modulize(method_descriptor.output_type)
-        return "rpc :#{name.underscore}, #{request_klass}, #{response_klass}"
+        "rpc :#{name.underscore}, #{request_klass}, #{response_klass}"
       end
 
     end

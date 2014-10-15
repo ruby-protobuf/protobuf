@@ -108,7 +108,7 @@ module Protobuf
         result.merge!(field_name => hashed_value)
       end
 
-      return result
+      result
     end
 
     def to_json(options = {})
