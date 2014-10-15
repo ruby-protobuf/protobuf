@@ -170,7 +170,7 @@ module Protobuf
       #
       def rpc_failed(message)
         message = message.message if message.respond_to?(:message)
-        fail RpcFailed.new(message)
+        fail RpcFailed, message
       end
     end
 

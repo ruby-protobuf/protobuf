@@ -90,11 +90,6 @@ Style/NumericLiterals:
 Style/PredicateName:
   Enabled: false
 
-# Offense count: 8
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/RaiseArgs:
-  Enabled: false
-
 # Offense count: 2
 Style/RescueModifier:
   Enabled: false
