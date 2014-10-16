@@ -77,7 +77,7 @@ describe ::Protobuf::Rpc::Stat do
     end
 
     it "should use correct base path" do
-      expect(statsd_base_path).to eq "rpc.foo.barservice.find_bars"
+      expect(statsd_base_path).to eq "rpc-client.foo.barservice.find_bars"
     end
   end
 
@@ -87,7 +87,7 @@ describe ::Protobuf::Rpc::Stat do
     let(:end_time) { Time.now }
     let(:service) { 'Foo::BarService' }
     let(:method_name) { 'find_bars' }
-    let(:stats_path) { 'rpc.foo.barservice.find_bars' }
+    let(:stats_path) { 'rpc-client.foo.barservice.find_bars' }
 
     before :each do
       stats.service = service
@@ -109,11 +109,11 @@ describe ::Protobuf::Rpc::Stat do
       let(:statsd_client) { double("Statsd::Client") }
 
       before :each do
-        Protobuf::Rpc::Stat.statsd_client = statsd_client
+        Protobuf::Statsd.client = statsd_client
       end
 
       after :each do
-        Protobuf::Rpc::Stat.statsd_client = nil
+        Protobuf::Statsd.client = nil
       end
 
       context "on success" do

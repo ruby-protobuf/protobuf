@@ -1,5 +1,11 @@
 # Stable (3.x)
 
+3.2.0
+--------
+
+- Change Protobuf::Rpc::Stats.statsd_client to Protobuf::Statsd.client
+    and track both RPC calls and service handling. [@dgolombek]
+
 3.1.0
 --------
 

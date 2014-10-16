@@ -1,6 +1,7 @@
 require 'date'
 require 'time'
 require 'protobuf/logger'
+require 'protobuf/statsd'
 
 module Protobuf
   module Rpc
@@ -9,18 +10,6 @@ module Protobuf
       attr_accessor :response_size, :client, :server, :service, :method_name
 
       MODES = [:SERVER, :CLIENT].freeze
-
-      # Set the StatsD Client to send stats to. The client must match
-      # the interface provided by lookout-statsd
-      # (https://github.com/lookout/statsd).
-      def self.statsd_client=(statsd_client)
-        @statsd_client = statsd_client
-      end
-
-      # The StatsD Client configured, if any.
-      def self.statsd_client
-        @statsd_client
-      end
 
       def initialize(mode = :SERVER)
         @mode = mode
@@ -119,14 +108,14 @@ module Protobuf
 
       # Return base path for StatsD metrics
       def statsd_base_path
-        "rpc.#{service}.#{method_name}".gsub('::', '.').downcase
+        "rpc-client.#{service}.#{method_name}".gsub('::', '.').downcase
       end
 
       # If a StatsD Client has been configured, send stats to it upon
       # completion.
       def call_statsd_client
         path = statsd_base_path
-        statsd_client = self.class.statsd_client
+        statsd_client = Protobuf::Statsd.client
         return unless statsd_client
 
         if @success
