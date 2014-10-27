@@ -359,6 +359,24 @@ describe Protobuf::Message do
 
   end
 
+  describe '#inspect' do
+    let(:klass) do
+      Class.new(Protobuf::Message) do
+        optional :string, :name, 1
+        repeated :int, :counts, 2
+        optional :int, :timestamp, 2
+      end
+    end
+
+    before { stub_const('MyMessage', klass) }
+
+    it 'lists the fields' do
+      proto = klass.new(:name => 'wooo', :counts => [ 1, 2, 3 ])
+      expect(proto.inspect).to eq \
+        '#<MyMessage name="wooo" counts=[1, 2, 3] timestamp=0>'
+    end
+  end
+
   describe '#to_hash' do
     context 'generating values for an ENUM field' do
       it 'converts the enum to its tag representation' do

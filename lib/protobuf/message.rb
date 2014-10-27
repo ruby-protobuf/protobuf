@@ -89,7 +89,11 @@ module Protobuf
     deprecate_method(:has_field?, :field?)
 
     def inspect
-      to_hash.inspect
+      attrs = self.class.fields.map do |field|
+        [ field.name, send(field.name).inspect ].join('=')
+      end.join(' ')
+
+      "#<#{self.class} #{attrs}>"
     end
 
     def respond_to_has?(key)
