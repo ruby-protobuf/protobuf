@@ -8,7 +8,7 @@ describe ::Protobuf::Generators::EnumGenerator do
     [
       { :name => 'FOO', :number => 1 },
       { :name => 'BAR', :number => 2 },
-      { :name => 'BAZ', :number => 3 }
+      { :name => 'BAZ', :number => 3 },
     ]
   end
   let(:options) { nil }
@@ -16,7 +16,7 @@ describe ::Protobuf::Generators::EnumGenerator do
     {
       :name => 'TestEnum',
       :value => values,
-      :options => options
+      :options => options,
     }
   end
 

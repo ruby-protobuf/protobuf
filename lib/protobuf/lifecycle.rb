@@ -3,7 +3,7 @@ module Protobuf
     include ::Protobuf::Logging
 
     def self.register(event_name, &blk)
-      raise "Lifecycle register must have a block" unless block_given?
+      fail "Lifecycle register must have a block" unless block_given?
       event_name = normalized_event_name(event_name)
 
       if ::Protobuf.print_deprecation_warnings?
@@ -18,7 +18,7 @@ module Protobuf
       end
     end
 
-    def self.trigger( event_name, *args )
+    def self.trigger(event_name, *args)
       if ::Protobuf.print_deprecation_warnings?
         $stderr.puts <<-ERROR
             [DEPRECATED] ::Protobuf::Lifecycle has been deprecated and will be removed in a future version.
@@ -26,13 +26,13 @@ module Protobuf
         ERROR
       end
 
-      event_name = normalized_event_name( event_name )
+      event_name = normalized_event_name(event_name)
 
       ::ActiveSupport::Notifications.instrument(event_name, args)
     end
 
     def self.normalized_event_name(event_name)
-      return "#{event_name}".downcase
+      "#{event_name}".downcase
     end
 
     class << self

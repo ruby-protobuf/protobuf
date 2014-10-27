@@ -24,7 +24,7 @@ module Protobuf
         # whose values are Sets.
         #
         def filters
-          @filters ||= Hash.new { |h,k| h[k] = [] }
+          @filters ||= Hash.new { |h, k| h[k] = [] }
         end
 
         # Filters hash keyed based on filter type (e.g. :before, :after, :around),
@@ -37,7 +37,7 @@ module Protobuf
         def rescue_from(*ex_klasses, &block)
           options = ex_klasses.last.is_a?(Hash) ? ex_klasses.pop : {}
           callable = options.delete(:with) { block }
-          raise ArgumentError, 'Option :with missing from rescue_from options' if callable.nil?
+          fail ArgumentError, 'Option :with missing from rescue_from options' if callable.nil?
           ex_klasses.each { |ex_klass| rescue_filters[ex_klass] = callable }
         end
 
@@ -50,7 +50,7 @@ module Protobuf
         end
 
         def defined_filters
-          @defined_filters ||= Hash.new { |h,k| h[k] = Set.new }
+          @defined_filters ||= Hash.new { |h, k| h[k] = Set.new }
         end
 
         # Check to see if the filter has been defined.
@@ -66,8 +66,8 @@ module Protobuf
         end
 
         # Takes a list of actually (or potentially) callable objects.
-        # TODO add support for if/unless
-        # TODO add support for only/except sub-filters
+        # TODO: add support for if/unless
+        # TODO: add support for only/except sub-filters
         #
         def set_filters(type, *args)
           options = args.last.is_a?(Hash) ? args.pop : {}
@@ -94,7 +94,7 @@ module Protobuf
         # if the filter should not be invoked, true if invocation should occur.
         #
         def invoke_filter?(rpc_method, filter)
-          return invoke_via_only?(rpc_method, filter) \
+          invoke_via_only?(rpc_method, filter) \
             && invoke_via_except?(rpc_method, filter) \
             && invoke_via_if?(rpc_method, filter) \
             && invoke_via_unless?(rpc_method, filter)
@@ -108,8 +108,8 @@ module Protobuf
         # Value should be a symbol/string or an array of symbols/strings.
         #
         def invoke_via_except?(rpc_method, filter)
-          except = [ filter.fetch(:except) { [] } ].flatten
-          return except.empty? || ! except.include?(rpc_method)
+          except = [filter.fetch(:except) { [] }].flatten
+          except.empty? || !except.include?(rpc_method)
         end
 
         # Invoke the given :if callable (if any) and return its return value.
@@ -120,7 +120,7 @@ module Protobuf
         # or an object that responds to `call`.
         #
         def invoke_via_if?(_rpc_method, filter)
-          if_check = filter.fetch(:if) { lambda { |_service| return true } }
+          if_check = filter.fetch(:if) { ->(_service) { return true } }
           do_invoke = case
                       when if_check.nil? then
                         true
@@ -128,7 +128,7 @@ module Protobuf
                         call_or_send(if_check)
                       end
 
-          return do_invoke
+          do_invoke
         end
 
         # If the target rpc endpoint method is listed in the :only option,
@@ -138,8 +138,8 @@ module Protobuf
         # Value should be a symbol/string or an array of symbols/strings.
         #
         def invoke_via_only?(rpc_method, filter)
-          only = [ filter.fetch(:only) { [] } ].flatten
-          return only.empty? || only.include?(rpc_method)
+          only = [filter.fetch(:only) { [] }].flatten
+          only.empty? || only.include?(rpc_method)
         end
 
         # Invoke the given :unless callable (if any) and return the opposite
@@ -150,7 +150,7 @@ module Protobuf
         # or an object that responds to `call`.
         #
         def invoke_via_unless?(_rpc_method, filter)
-          unless_check = filter.fetch(:unless) { lambda { |_service| return false } }
+          unless_check = filter.fetch(:unless) { ->(_service) { return false } }
           skip_invoke = case
                         when unless_check.nil? then
                           false
@@ -158,7 +158,7 @@ module Protobuf
                           call_or_send(unless_check)
                         end
 
-          return ! skip_invoke
+          !skip_invoke
         end
 
         def rescue_filters
@@ -176,7 +176,7 @@ module Protobuf
             end
           end
 
-          return true
+          true
         end
 
         # Reverse build a chain of around filters. To implement an around chain,
@@ -209,16 +209,15 @@ module Protobuf
         #   end
         #
         def run_around_filters(rpc_method)
-          final = lambda { __send__(rpc_method) }
-          filters[:around].reverse.inject(final) do |previous, filter|
+          final = -> { __send__(rpc_method) }
+          filters[:around].reverse.reduce(final) do |previous, filter|
             if invoke_filter?(rpc_method, filter)
-              lambda { call_or_send(filter[:callable], &previous) }
+              -> { call_or_send(filter[:callable], &previous) }
             else
               previous
             end
           end.call
         end
-
 
         # Entry method to call each filter type in the appropriate order. This should
         # be used instead of the other run methods directly.
@@ -241,7 +240,7 @@ module Protobuf
               yield
             rescue *rescue_filters.keys => ex
               callable = rescue_filters.fetch(ex.class) do
-                mapped_klass = rescue_filters.keys.detect { |child_klass| ex.class < child_klass }
+                mapped_klass = rescue_filters.keys.find { |child_klass| ex.class < child_klass }
                 rescue_filters[mapped_klass]
               end
 
@@ -260,10 +259,10 @@ module Protobuf
                          when respond_to?(callable, true) then
                            __send__(callable, *args, &block)
                          else
-                           raise "Object #{callable} is not callable"
+                           fail "Object #{callable} is not callable"
                          end
 
-          return return_value
+          return_value
         end
 
       end

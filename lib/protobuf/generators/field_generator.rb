@@ -54,7 +54,7 @@ module Protobuf
 
       def compile
         run_once(:compile) do
-          field_definition = [ "#{label} #{type_name}", name, number, applicable_options ]
+          field_definition = ["#{label} #{type_name}", name, number, applicable_options]
           puts field_definition.flatten.compact.join(', ')
         end
       end
@@ -119,7 +119,7 @@ module Protobuf
       end
 
       def string_default_value
-        %{"#{verbatim_default_value.gsub(/'/, '\\\\\'')}"}
+        %("#{verbatim_default_value.gsub(/'/, '\\\\\'')}")
       end
 
       def verbatim_default_value
@@ -129,4 +129,3 @@ module Protobuf
     end
   end
 end
-

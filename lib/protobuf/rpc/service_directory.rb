@@ -17,7 +17,7 @@ module Protobuf
       DEFAULT_PORT = 53000
       DEFAULT_TIMEOUT = 1
 
-      class Listing < Delegator
+      class Listing < SimpleDelegator
         attr_reader :expires_at
 
         def initialize(server)
@@ -45,12 +45,8 @@ module Protobuf
         end
 
         def update(server)
-          @server = server
+          __setobj__(server)
           @expires_at = Time.now.to_i + ttl
-        end
-
-        def __getobj__
-          @server
         end
       end
 
@@ -70,11 +66,11 @@ module Protobuf
 
       def self.start
         yield(self) if block_given?
-        self.instance.start
+        instance.start
       end
 
       def self.stop
-        self.instance.stop
+        instance.stop
       end
 
       #
@@ -117,7 +113,7 @@ module Protobuf
         unless running?
           init_socket
           logger.info { sign_message("listening to udp://#{self.class.address}:#{self.class.port}") }
-          @thread = Thread.new { self.send(:run) }
+          @thread = Thread.new { send(:run) }
         end
 
         self

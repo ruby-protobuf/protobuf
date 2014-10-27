@@ -62,10 +62,9 @@ module Protobuf
       end
 
       def type_namespace
-        @type_namespace ||= @namespace + [ descriptor.name ]
+        @type_namespace ||= @namespace + [descriptor.name]
       end
 
     end
   end
 end
-

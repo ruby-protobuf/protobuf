@@ -16,8 +16,8 @@ describe ::Protobuf::Generators::FileGenerator do
       base_descriptor_fields.merge(
         :dependency => [
           'test/bar.proto',
-          'test/baz.proto'
-        ]
+          'test/baz.proto',
+        ],
       )
     end
 
@@ -30,4 +30,3 @@ describe ::Protobuf::Generators::FileGenerator do
   end
 
 end
-

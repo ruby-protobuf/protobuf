@@ -3,7 +3,7 @@ require 'fileutils'
 namespace :protobuf do
 
   desc 'Clean & Compile the protobuf source to ruby classes. Pass PB_NO_CLEAN=1 if you do not want to force-clean first.'
-  task :compile, [ :package, :source, :destination, :plugin, :file_extension ] do |_tasks, args|
+  task :compile, [:package, :source, :destination, :plugin, :file_extension] do |_tasks, args|
     args.with_defaults(:destination => 'lib')
     args.with_defaults(:source => 'definitions')
     args.with_defaults(:plugin => 'ruby')
@@ -27,7 +27,7 @@ namespace :protobuf do
   end
 
   desc 'Clean the generated *.pb.rb files from the destination package. Pass PB_FORCE_CLEAN=1 to skip confirmation step.'
-  task :clean, [ :package, :destination, :file_extension ] do |_task, args|
+  task :clean, [:package, :destination, :file_extension] do |_task, args|
     args.with_defaults(:destination => 'lib')
     args.with_defaults(:file_extension => '.pb.rb')
 

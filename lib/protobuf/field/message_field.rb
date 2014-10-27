@@ -10,7 +10,7 @@ module Protobuf
 
       def acceptable?(val)
         unless val.instance_of?(type_class) || val.respond_to?(:to_hash)
-          raise TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
+          fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
         end
 
         true
@@ -54,7 +54,7 @@ module Protobuf
             when val.respond_to?(:to_hash) then
               @values[field.name] = field.type_class.new(val.to_hash)
             else
-              raise TypeError, "Expected value of type '#{field.type_class}' for field #{field.name}, but got '#{val.class}'"
+              fail TypeError, "Expected value of type '#{field.type_class}' for field #{field.name}, but got '#{val.class}'"
             end
           end
         end
@@ -63,4 +63,3 @@ module Protobuf
     end
   end
 end
-

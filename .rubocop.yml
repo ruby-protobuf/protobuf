@@ -6,8 +6,34 @@ Lint/Loop:
 Style/CaseIndentation:
   IndentWhenRelativeTo: end
 
+Style/ClassAndModuleChildren:
+  Exclude:
+    - '**/*.pb.rb'
+
+Style/EmptyLineBetweenDefs:
+  AllowAdjacentOneLineDefs: true
+
+Style/EmptyLines:
+  Exclude:
+    - '**/*.pb.rb'
+
+Style/FileName:
+  Exclude:
+    - '**/protoc-gen-ruby*'
+
 Style/IndentHash:
   EnforcedStyle: consistent
 
+Style/Semicolon:
+  AllowAsExpressionSeparator: true
+
+Style/TrailingBlankLines:
+  Exclude:
+    - '**/*.pb.rb'
+
 Style/TrailingComma:
   EnforcedStyleForMultiline: comma
+
+Style/TrivialAccessors:
+  AllowDSLWriters: true
+  AllowPredicates: true

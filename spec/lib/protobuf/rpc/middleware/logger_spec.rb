@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::Logger do
-  let(:app) { Proc.new { |inner_env| inner_env } }
+  let(:app) { proc { |inner_env| inner_env } }
   let(:env) do
     Protobuf::Rpc::Env.new(
       'client_host' => 'client_host.test.co',
@@ -24,7 +24,7 @@ describe Protobuf::Rpc::Middleware::Logger do
     Protobuf::Socketrpc::Request.new(
       :service_name => service_name,
       :method_name => method_name.to_s,
-      :request_proto => request
+      :request_proto => request,
     )
   end
   let(:response_wrapper) { Protobuf::Socketrpc::Response.new(:response_proto => response) }

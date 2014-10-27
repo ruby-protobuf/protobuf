@@ -37,7 +37,7 @@ module Protobuf
             method_name = request_wrapper.method_name.underscore.to_sym
 
             unless service.rpc_method?(method_name)
-              raise MethodNotFound.new("#{service.name}##{method_name} is not a defined RPC method.")
+              fail MethodNotFound, "#{service.name}##{method_name} is not a defined RPC method."
             end
 
             method_name
@@ -50,7 +50,7 @@ module Protobuf
             rpc_method.request_type.decode(data)
           end
         rescue => exception
-          raise BadRequestData.new("Unable to decode request: #{exception.message}")
+          raise BadRequestData, "Unable to decode request: #{exception.message}"
         end
 
         # Decode the incoming request object into our expected request object
@@ -61,7 +61,7 @@ module Protobuf
             Socketrpc::Request.decode(env.encoded_request)
           end
         rescue => exception
-          raise BadRequestData.new("Unable to decode request: #{exception.message}")
+          raise BadRequestData, "Unable to decode request: #{exception.message}"
         end
 
         def rpc_method
@@ -71,7 +71,7 @@ module Protobuf
         def service
           @service ||= service_name.constantize
         rescue NameError
-          raise ServiceNotFound.new("Service class #{service_name} is not defined.")
+          raise ServiceNotFound, "Service class #{service_name} is not defined."
         end
 
         def service_name

@@ -55,7 +55,7 @@ module Protobuf
 
           @threads = []
           @server = ::TCPServer.new(host, port)
-          raise "The server was unable to start properly." if @server.closed?
+          fail "The server was unable to start properly." if @server.closed?
 
           @server.listen(backlog)
           @working = []
@@ -64,7 +64,11 @@ module Protobuf
 
           while running?
             logger.debug { sign_message("Waiting for connections") }
-            ready_cnxns = IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT) rescue nil
+            ready_cnxns = begin
+              IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT)
+            rescue IOError
+              nil
+            end
 
             if ready_cnxns
               cnxns = ready_cnxns.first
@@ -96,7 +100,7 @@ module Protobuf
           raise
         rescue
           # Closing the server causes the loop to raise an exception here
-          raise #if running?
+          raise # if running?
         end
 
         def running?

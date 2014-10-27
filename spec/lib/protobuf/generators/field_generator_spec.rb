@@ -22,7 +22,7 @@ describe ::Protobuf::Generators::FieldGenerator do
       :type_name => type_name,
       :default_value => default_value,
       :extendee => extendee,
-      :options => field_options
+      :options => field_options,
     }
   end
 
@@ -57,7 +57,7 @@ describe ::Protobuf::Generators::FieldGenerator do
         let(:type_enum) { :TYPE_STRING }
         let(:default_value) { "a default \"string\"" }
 
-        specify { expect(subject).to eq %{optional :string, :foo_bar, 3, :default => "a default \"string\""\n} }
+        specify { expect(subject).to eq "optional :string, :foo_bar, 3, :default => \"a default \"string\"\"\n" }
       end
 
       context 'when float or double field type' do
@@ -100,4 +100,3 @@ describe ::Protobuf::Generators::FieldGenerator do
   end
 
 end
-

@@ -9,8 +9,8 @@ describe ::Protobuf::Generators::Base do
 
   context 'namespaces' do
     let(:descriptor) { double(:name => 'Baz') }
-    subject { described_class.new(descriptor, 0, :namespace => [ :foo, :bar ]) }
-    specify { expect(subject.type_namespace).to eq([ :foo, :bar, 'Baz' ]) }
+    subject { described_class.new(descriptor, 0, :namespace => [:foo, :bar]) }
+    specify { expect(subject.type_namespace).to eq([:foo, :bar, 'Baz']) }
     specify { expect(subject.fully_qualified_type_namespace).to eq('.foo.bar.Baz') }
   end
 
@@ -68,17 +68,16 @@ describe ::Protobuf::Generators::Base do
     context 'when tags are duplicated' do
       it 'fails with a GeneratorFatalError' do
         expect(::Protobuf::CodeGenerator).to receive(:fatal).with(/FooBar object has duplicate tags\. Expected 3 tags, but got 4/)
-        described_class.validate_tags("FooBar", [1,2,2,3])
+        described_class.validate_tags("FooBar", [1, 2, 2, 3])
       end
     end
 
     context 'when tags are missing in the range' do
       it 'prints a warning' do
         expect(::Protobuf::CodeGenerator).to receive(:warn).with(/FooBar object should have 5 tags \(1\.\.5\), but found 4 tags/)
-        described_class.validate_tags("FooBar", [1,2,4,5])
+        described_class.validate_tags("FooBar", [1, 2, 4, 5])
       end
     end
   end
 
 end
-

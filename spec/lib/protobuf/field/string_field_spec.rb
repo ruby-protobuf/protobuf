@@ -8,7 +8,7 @@ describe ::Protobuf::Field::StringField do
     context 'when a repeated string field contains frozen strings' do
       it 'does not raise an encoding error' do
         expect do
-          frozen_strings = [ "foo".freeze, "bar".freeze, "baz".freeze ]
+          frozen_strings = ["foo".freeze, "bar".freeze, "baz".freeze]
           ::Test::ResourceFindRequest.encode(:name => 'resource', :widgets => frozen_strings)
         end.not_to raise_error
       end
@@ -17,7 +17,7 @@ describe ::Protobuf::Field::StringField do
     context 'when a repeated bytes field contains frozen strings' do
       it 'does not raise an encoding error' do
         expect do
-          frozen_strings = [ "foo".freeze, "bar".freeze, "baz".freeze ]
+          frozen_strings = ["foo".freeze, "bar".freeze, "baz".freeze]
           ::Test::ResourceFindRequest.encode(:name => 'resource', :widget_bytes => frozen_strings)
         end.not_to raise_error
       end
@@ -41,6 +41,5 @@ describe ::Protobuf::Field::StringField do
       expect(proto.name).to eq source_string
     end
   end
-
 
 end

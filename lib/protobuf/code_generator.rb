@@ -6,7 +6,7 @@ module Protobuf
     CodeGeneratorFatalError = Class.new(RuntimeError)
 
     def self.fatal(message)
-      raise CodeGeneratorFatalError, message
+      fail CodeGeneratorFatalError, message
     end
 
     def self.print_tag_warning_suppress
@@ -33,9 +33,8 @@ module Protobuf
         generate_file(file_descriptor)
       end
 
-      return ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => @generated_files)
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => @generated_files)
     end
 
   end
 end
-

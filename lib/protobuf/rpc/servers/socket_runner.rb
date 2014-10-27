@@ -11,7 +11,7 @@ module Protobuf
                    when options.respond_to?(:to_hash) then
                      options.to_hash
                    else
-                     raise "Cannot parser Socket Server - server options"
+                     fail "Cannot parser Socket Server - server options"
                    end
 
         @server = ::Protobuf::Rpc::Socket::Server.new(@options)

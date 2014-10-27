@@ -9,7 +9,7 @@ module Protobuf
       # constantize this so we don't re-initialize the regex every time we need it
       SIZE_REGEX = /^\d+-/
 
-      def initialize(mode=:read)
+      def initialize(mode = :read)
         @flush = false
         @data = ""
         @size = 0
@@ -24,11 +24,11 @@ module Protobuf
         end
       end
 
-      def write(force_mode=true)
+      def write(force_mode = true)
         if force_mode && reading?
           self.mode = :write
         elsif !force_mode && reading?
-          raise 'You chose to write the buffer when in read mode'
+          fail 'You chose to write the buffer when in read mode'
         end
 
         @size = @data.length
@@ -70,9 +70,7 @@ module Protobuf
       private
 
       def check_for_flush
-        if !@size.nil? && @data.length == @size
-          @flush = true
-        end
+        @flush = true if !@size.nil? && @data.length == @size
       end
     end
   end

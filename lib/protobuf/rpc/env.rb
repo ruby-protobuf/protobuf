@@ -48,7 +48,7 @@ module Protobuf
                     :service_name,
                     :worker_id
 
-      def initialize(options={})
+      def initialize(options = {})
         merge!(options)
 
         self['worker_id'] = ::Thread.current.object_id.to_s(16)

@@ -14,4 +14,3 @@ request_bytes = STDIN.read
 code_generator = ::Protobuf::CodeGenerator.new(request_bytes)
 response_bytes = code_generator.response_bytes
 STDOUT.print(response_bytes)
-

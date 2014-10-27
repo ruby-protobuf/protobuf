@@ -148,7 +148,6 @@ describe ::Protobuf::Field do
       end
     end
 
-
     context 'when type is a string field class or symbol' do
       it 'returns that class' do
         expected_field = ::Protobuf::Field::StringField
@@ -159,7 +158,6 @@ describe ::Protobuf::Field do
       end
     end
 
-
     context 'when type is a bytes field class or symbol' do
       it 'returns that class' do
         expected_field = ::Protobuf::Field::BytesField
@@ -169,7 +167,6 @@ describe ::Protobuf::Field do
         expect(subject.field_type(:bytes)).to eq(expected_field)
       end
     end
-
 
     context 'when type is a bool field class or symbol' do
       it 'returns that class' do

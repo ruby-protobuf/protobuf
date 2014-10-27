@@ -18,7 +18,7 @@ module Protobuf
         @comments = {}
         @handlers = {}
         @indent_level = indent_level
-        @order = [ :enum, :message_declaration, :message, :extended_message, :service ]
+        @order = [:enum, :message_declaration, :message, :extended_message, :service]
         init_printer(indent_level)
       end
 
@@ -110,4 +110,3 @@ module Protobuf
     end
   end
 end
-

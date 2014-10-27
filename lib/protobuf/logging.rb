@@ -2,9 +2,7 @@ require 'logger'
 
 module Protobuf
   module Logging
-    def self.initialize_logger(log_target=$stdout, log_level=::Logger::INFO)
-      @counter ||= 0
-      @counter = @counter + 1
+    def self.initialize_logger(log_target = $stdout, log_level = ::Logger::INFO)
       @logger = Logger.new(log_target)
       @logger.level = log_level
       @logger
@@ -14,8 +12,8 @@ module Protobuf
       defined?(@logger) ? @logger : initialize_logger
     end
 
-    def self.logger=(new_logger)
-      @logger = new_logger
+    class << self
+      attr_writer :logger
     end
 
     def logger
@@ -29,7 +27,7 @@ module Protobuf
     end
 
     def log_signature
-      @_log_signature ||= "[#{self.class == Class ? self.name : self.class.name}]"
+      @_log_signature ||= "[#{self.class == Class ? name : self.class.name}]"
     end
 
     def sign_message(message)

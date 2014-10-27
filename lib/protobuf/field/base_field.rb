@@ -14,7 +14,7 @@ module Protobuf
       PACKED_TYPES = [
         ::Protobuf::WireType::VARINT,
         ::Protobuf::WireType::FIXED32,
-        ::Protobuf::WireType::FIXED64
+        ::Protobuf::WireType::FIXED64,
       ].freeze
 
       ##
@@ -60,7 +60,7 @@ module Protobuf
       end
 
       def decode(_bytes)
-        raise NotImplementedError, "#{self.class.name}##{__method__}"
+        fail NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
       def default
@@ -80,7 +80,7 @@ module Protobuf
       end
 
       def encode(_value)
-        raise NotImplementedError, "#{self.class.name}##{__method__}"
+        fail NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
       def extension?
@@ -119,7 +119,7 @@ module Protobuf
         rule == :required
       end
 
-      # FIXME need to cleanup (rename) this warthog of a method.
+      # FIXME: need to cleanup (rename) this warthog of a method.
       def set(message_instance, bytes)
         if packed?
           array = message_instance.__send__(getter)
@@ -148,7 +148,7 @@ module Protobuf
         @setter ||= "#{name}="
       end
 
-      # FIXME add packed, deprecated, extension options to to_s output
+      # FIXME: add packed, deprecated, extension options to to_s output
       def to_s
         "#{rule} #{type_class} #{name} = #{tag} #{default ? "[default=#{default.inspect}]" : ''}"
       end
@@ -204,7 +204,7 @@ module Protobuf
               val = val.dup
               val.compact!
             else
-              raise TypeError, <<-TYPE_ERROR
+              fail TypeError, <<-TYPE_ERROR
                 Expected repeated value of type '#{field.type_class}'
                 Got '#{val.class}' for repeated protobuf field #{field.name}
               TYPE_ERROR
@@ -241,7 +241,7 @@ module Protobuf
             elsif field.acceptable?(val)
               @values[field.name] = field.coerce!(val)
             else
-              raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+              fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
           end
         end
@@ -257,11 +257,10 @@ module Protobuf
 
       def validate_packed_field
         if packed? && ! ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
-          raise "Can't use packed encoding for '#{type_class}' type"
+          fail "Can't use packed encoding for '#{type_class}' type"
         end
       end
 
     end
   end
 end
-

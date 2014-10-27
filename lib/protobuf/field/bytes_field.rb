@@ -64,7 +64,7 @@ module Protobuf
               elsif field.acceptable?(val)
                 @values[field.name] = val.dup
               else
-                raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+                fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
               end
             rescue NoMethodError => ex
               logger.error { ex.message }
@@ -78,4 +78,3 @@ module Protobuf
     end
   end
 end
-

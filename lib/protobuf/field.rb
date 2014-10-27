@@ -38,7 +38,7 @@ module Protobuf
       :sfixed64 => ::Protobuf::Field::Sfixed64Field,
       :string   => ::Protobuf::Field::StringField,
       :bytes    => ::Protobuf::Field::BytesField,
-      :bool     => ::Protobuf::Field::BoolField
+      :bool     => ::Protobuf::Field::BoolField,
     }.freeze
 
     def self.build(message_class, rule, type, name, tag, options = {})
@@ -59,7 +59,7 @@ module Protobuf
       elsif type < ::Protobuf::Field::BaseField
         type
       else
-        raise ArgumentError, "Invalid field type #{type}"
+        fail ArgumentError, "Invalid field type #{type}"
       end
     end
 

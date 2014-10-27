@@ -82,7 +82,7 @@ module Protobuf
         name_or_tag = name_or_tag.to_sym if name_or_tag.respond_to?(:to_sym)
         field = field_store[name_or_tag]
 
-        if field && (allow_extension || ! field.extension?)
+        if field && (allow_extension || !field.extension?)
           field
         else
           nil
@@ -106,17 +106,16 @@ module Protobuf
 
       def raise_if_tag_collision(tag, field_name)
         if get_field(tag, true)
-          raise TagCollisionError, %!Field number #{tag} has already been used in "#{name}" by field "#{field_name}".!
+          fail TagCollisionError, %(Field number #{tag} has already been used in "#{name}" by field "#{field_name}".)
         end
       end
 
       def raise_if_name_collision(field_name)
         if get_field(field_name, true)
-          raise DuplicateFieldNameError, %!Field name #{field_name} has already been used in "#{name}".!
+          fail DuplicateFieldNameError, %(Field name #{field_name} has already been used in "#{name}".)
         end
       end
 
     end
   end
 end
-

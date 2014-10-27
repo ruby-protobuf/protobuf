@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::RequestDecoder do
-  let(:app) { Proc.new { |env| env } }
+  let(:app) { proc { |env| env } }
   let(:client_host) { 'client_host.test.co' }
   let(:env) do
     Protobuf::Rpc::Env.new(
       'encoded_request' => encoded_request,
-      'log_signature' => 'log_signature'
+      'log_signature' => 'log_signature',
     )
   end
   let(:encoded_request) { request_wrapper.encode }
@@ -18,7 +18,7 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
       :caller => client_host,
       :service_name => service_name,
       :method_name => method_name.to_s,
-      :request_proto => request
+      :request_proto => request,
     )
   end
   let(:response_type) { rpc_method.response_type }
@@ -88,7 +88,7 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
           :caller => client_host,
           :service_name => 'Foo',
           :method_name => method_name.to_s,
-          :request_proto => request
+          :request_proto => request,
         )
       end
 
@@ -103,7 +103,7 @@ describe Protobuf::Rpc::Middleware::RequestDecoder do
           :caller => client_host,
           :service_name => service_name,
           :method_name => 'foo',
-          :request_proto => request
+          :request_proto => request,
         )
       end
 

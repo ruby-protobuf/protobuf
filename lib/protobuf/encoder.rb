@@ -9,7 +9,7 @@ module Protobuf
 
     def initialize(message, stream)
       unless message.respond_to?(:each_field_for_serialization)
-        raise ArgumentError, "Message instance must respond to :each_field_for_serialization"
+        fail ArgumentError, "Message instance must respond to :each_field_for_serialization"
       end
 
       @message = message
@@ -59,4 +59,3 @@ module Protobuf
 
   end
 end
-

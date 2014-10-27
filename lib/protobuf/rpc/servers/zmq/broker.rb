@@ -55,7 +55,7 @@ module Protobuf
           readables_include_backend = @poller.readables.include?(@backend_socket)
           message_count_read_from_backend = 0
 
-          while readables_include_backend && message_count_read_from_backend < backend_poll_weight do
+          while readables_include_backend && message_count_read_from_backend < backend_poll_weight
             message_count_read_from_backend += 1
             process_backend
             @poller.poll_nonblock
@@ -67,7 +67,7 @@ module Protobuf
           readables_include_frontend = @poller.readables.include?(@frontend_socket)
           message_count_read_from_frontend = 0
 
-          while readables_include_frontend && message_count_read_from_frontend < frontend_poll_weight do
+          while readables_include_frontend && message_count_read_from_frontend < frontend_poll_weight
             message_count_read_from_frontend += 1
             process_frontend
             break unless local_queue_available? # no need to read frontend just to throw away messages, will prioritize backend when full
@@ -141,9 +141,9 @@ module Protobuf
             end
           else
             if @idle_workers.empty?
-              local_queue << [address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message ].concat(frames)
+              local_queue << [address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message].concat(frames)
             else
-              write_to_backend([@idle_workers.shift, ::Protobuf::Rpc::Zmq::EMPTY_STRING].concat([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message ]).concat(frames))
+              write_to_backend([@idle_workers.shift, ::Protobuf::Rpc::Zmq::EMPTY_STRING].concat([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message]).concat(frames))
             end
           end
         end

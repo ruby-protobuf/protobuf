@@ -11,6 +11,8 @@ module Protobuf
     # Includes & Extends
     #
 
+    extend ::Protobuf::Deprecator
+
     extend ::Protobuf::Message::Fields
     include ::Protobuf::Message::Serialization
 
@@ -74,23 +76,24 @@ module Protobuf
         value = @values[field.getter]
 
         if value.nil?
-          raise ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value."
+          fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value."
         else
           yield(field, value)
         end
       end
     end
 
-    def has_field?(name)
-      @values.has_key?(name)
+    def field?(name)
+      @values.key?(name)
     end
+    deprecate_method(:has_field?, :field?)
 
     def inspect
       to_hash.inspect
     end
 
     def respond_to_has?(key)
-      respond_to?(key) && has_field?(key)
+      respond_to?(key) && field?(key)
     end
 
     def respond_to_has_and_present?(key)
@@ -100,7 +103,7 @@ module Protobuf
 
     # Return a hash-representation of the given fields for this message type.
     def to_hash
-      result = Hash.new
+      result = {}
 
       @values.keys.each do |field_name|
         value = __send__(field_name)
@@ -108,7 +111,7 @@ module Protobuf
         result.merge!(field_name => hashed_value)
       end
 
-      return result
+      result
     end
 
     def to_json(options = {})
@@ -119,10 +122,10 @@ module Protobuf
       self
     end
 
-    def ==(obj)
-      return false unless obj.is_a?(self.class)
+    def ==(other)
+      return false unless other.is_a?(self.class)
       each_field do |field, value|
-        return false unless value == obj.__send__(field.name)
+        return false unless value == other.__send__(field.name)
       end
       true
     end
@@ -138,7 +141,7 @@ module Protobuf
         __send__(field.setter, value) unless value.nil?
       else
         unless ::Protobuf.ignore_unknown_fields?
-          raise ::Protobuf::FieldNotDefinedError, name
+          fail ::Protobuf::FieldNotDefinedError, name
         end
       end
     end
@@ -161,6 +164,7 @@ module Protobuf
     ##
     # Private Instance Methods
     #
+
     private
 
     def copy_to(object, method)
@@ -174,7 +178,7 @@ module Protobuf
       object.__send__(:initialize)
       @values.each do |name, value|
         if value.is_a?(::Protobuf::Field::FieldArray)
-          object.__send__(name).replace(value.map {|v| duplicate.call(v)})
+          object.__send__(name).replace(value.map { |v| duplicate.call(v) })
         else
           object.__send__("#{name}=", duplicate.call(value))
         end

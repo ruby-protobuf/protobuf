@@ -129,10 +129,10 @@ module Protobuf
             port = options[:port]
             return "tcp://#{host}:#{port}" if host_alive?(host)
 
-            sleep(1.0/100.0)
+            sleep(1.0 / 100.0)
           end
 
-          raise "Host not found for service #{service}"
+          fail "Host not found for service #{service}"
         end
 
         def host_alive?(host)
@@ -147,7 +147,7 @@ module Protobuf
           ping_port_open = ping_port_open?(host)
           self.class.ping_port_responses[host] = {
             :at => Time.now.to_i,
-            :ping_port_open => ping_port_open
+            :ping_port_open => ping_port_open,
           }
           ping_port_open
         end
@@ -159,13 +159,17 @@ module Protobuf
         def ping_port_open?(host)
           socket = TCPSocket.new(host, ping_port.to_i)
           socket.setsockopt(::Socket::IPPROTO_TCP, ::Socket::TCP_NODELAY, 1)
-          socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_LINGER, [1,0].pack('ii'))
+          socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_LINGER, [1, 0].pack('ii'))
 
           true
         rescue
           false
         ensure
-          socket.close rescue nil
+          begin
+            socket && socket.close
+          rescue IOError
+            nil
+          end
         end
 
         # Trying a number of times, attempt to get a response from the server.
@@ -181,7 +185,7 @@ module Protobuf
             parse_response
           rescue RequestTimeout
             retry if attempt < CLIENT_RETRIES
-            fail(:RPC_FAILED, "The server repeatedly failed to respond within #{timeout} seconds")
+            failure(:RPC_FAILED, "The server repeatedly failed to respond within #{timeout} seconds")
           end
         end
 
@@ -190,7 +194,7 @@ module Protobuf
             case
             when options[:timeout] then
               options[:timeout]
-            when ENV.has_key?("PB_ZMQ_CLIENT_RCV_TIMEOUT") then
+            when ENV.key?("PB_ZMQ_CLIENT_RCV_TIMEOUT") then
               ENV["PB_ZMQ_CLIENT_RCV_TIMEOUT"].to_i
             else
               300_000 # 300 seconds
@@ -203,7 +207,7 @@ module Protobuf
             case
             when options[:timeout] then
               options[:timeout]
-            when ENV.has_key?("PB_ZMQ_CLIENT_SND_TIMEOUT") then
+            when ENV.key?("PB_ZMQ_CLIENT_SND_TIMEOUT") then
               ENV["PB_ZMQ_CLIENT_SND_TIMEOUT"].to_i
             else
               300_000 # 300 seconds
@@ -256,16 +260,16 @@ module Protobuf
         def zmq_eagain_error_check(return_code, source)
           unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
             if ::ZMQ::Util.errno == ::ZMQ::EAGAIN
-              raise ZmqEagainError, <<-ERROR
+              fail ZmqEagainError, <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-              #{caller(1).join($/)}
+              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
               ERROR
             else
-              raise <<-ERROR
+              fail <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-              #{caller(1).join($/)}
+              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
               ERROR
             end
           end
@@ -273,20 +277,20 @@ module Protobuf
 
         def zmq_error_check(return_code, source)
           unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
-            raise <<-ERROR
+            fail <<-ERROR
             Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-            #{caller(1).join($/)}
+            #{caller(1).join($INPUT_RECORD_SEPARATOR)}
             ERROR
           end
         end
 
         def zmq_recoverable_error_check(return_code, source)
           unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
-            raise ZmqRecoverableError, <<-ERROR
+            fail ZmqRecoverableError, <<-ERROR
               Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-              #{caller(1).join($/)}
+              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
               ERROR
           end
         end

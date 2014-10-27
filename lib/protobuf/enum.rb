@@ -32,7 +32,7 @@ module Protobuf
     include ::Protobuf::Optionable
 
     def self.aliases_allowed?
-      self.get_option(:allow_alias)
+      get_option(:allow_alias)
     end
 
     # Public: Get all integer tags defined by this enum.
@@ -51,7 +51,7 @@ module Protobuf
     # Returns an array of unique integers.
     #
     def self.all_tags
-      @all_tags ||= self.enums.map(&:to_i).uniq
+      @all_tags ||= enums.map(&:to_i).uniq
     end
 
     # Internal: DSL method to create a new Enum. The given name will
@@ -70,7 +70,7 @@ module Protobuf
     # Returns nothing.
     #
     def self.define(name, tag)
-      enum = self.new(self, name, tag)
+      enum = new(self, name, tag)
       @enums ||= []
       @enums << enum
       const_set(name, enum)
@@ -78,8 +78,8 @@ module Protobuf
 
     # Public: All defined enums.
     #
-    def self.enums
-      @enums
+    class << self
+      attr_reader :enums
     end
 
     # Public: Get an array of Enum objects with the given tag.
@@ -101,7 +101,7 @@ module Protobuf
     # Returns an array with zero or more Enum objects or nil.
     #
     def self.enums_for_tag(tag)
-      self.enums.select do |enum|
+      enums.select do |enum|
         enum.to_i == tag.to_i
       end
     end
@@ -125,7 +125,7 @@ module Protobuf
     # Returns the Enum object with the given name or nil.
     #
     def self.enum_for_name(name)
-      self.const_get(name)
+      const_get(name)
     rescue ::NameError
       nil
     end
@@ -138,7 +138,7 @@ module Protobuf
     #   Enums, the first enum defined will be returned.
     #
     def self.enum_for_tag(tag)
-      self.enums_for_tag(tag).first
+      enums_for_tag(tag).first
     end
 
     # Public: Get an Enum by a variety of type-checking mechanisms.
@@ -206,7 +206,7 @@ module Protobuf
     #   the first defined name will be returned.
     #
     def self.name_for_tag(tag)
-      self.enum_for_tag(tag).try(:name)
+      enum_for_tag(tag).try(:name)
     end
 
     # Public: Check if the given tag is defined by this Enum.
@@ -216,19 +216,18 @@ module Protobuf
     # Returns a boolean.
     #
     def self.valid_tag?(tag)
-      tag.respond_to?(:to_i) && self.all_tags.include?(tag.to_i)
+      tag.respond_to?(:to_i) && all_tags.include?(tag.to_i)
     end
 
     # Public: [DEPRECATED] Return a hash of Enum objects keyed
     # by their :name.
     #
     def self.values
-      self.warn_deprecated(:values, :enums)
+      warn_deprecated(:values, :enums)
 
       @values ||= begin
-                    self.enums.inject({}) do |hash, enum|
+                    enums.each_with_object({}) do |enum, hash|
                       hash[enum.name] = enum
-                      hash
                     end
                   end
     end
@@ -241,7 +240,6 @@ module Protobuf
     deprecate_class_method :name_by_value,   :name_for_tag
     deprecate_class_method :get_name_by_tag, :name_for_tag
     deprecate_class_method :value_by_name,   :enum_for_name
-
 
     ##
     # Attributes
@@ -281,11 +279,11 @@ module Protobuf
     def to_s(format = :tag)
       case format
       when :tag then
-        self.to_i.to_s
+        to_i.to_s
       when :name then
         name.to_s
       else
-        self.to_i.to_s
+        to_i.to_s
       end
     end
 
@@ -316,4 +314,3 @@ module Protobuf
     alias_method :to_hash_value, :to_i
   end
 end
-

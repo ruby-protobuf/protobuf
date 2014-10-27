@@ -67,7 +67,7 @@ describe Protobuf::Rpc::Service do
                                             .with(hash_including(
                                               :service => subject,
                                               :host => subject.host,
-                                              :port => subject.port
+                                              :port => subject.port,
                                             )).and_return(client)
         expect(subject.client).to eq client
       end
@@ -100,8 +100,8 @@ describe Protobuf::Rpc::Service do
 
   context 'instance methods' do
     context 'when invoking a service call' do
-      before(:all) do
-        class ::NewTestService < Protobuf::Rpc::Service
+      before do
+        stub_const('NewTestService', Class.new(Protobuf::Rpc::Service) do
           rpc :find_with_implied_response, Test::ResourceFindRequest, Test::Resource
           def find_with_implied_response
             response.name = 'Implicit response'
@@ -118,7 +118,7 @@ describe Protobuf::Rpc::Service do
             rpc_failed('This is a failed endpoint')
             response.name = 'Name will still be set'
           end
-        end
+        end)
       end
 
       let(:request) { Test::ResourceFindRequest.new(:name => 'resource') }
@@ -129,7 +129,7 @@ describe Protobuf::Rpc::Service do
           let(:env) do
             Protobuf::Rpc::Env.new(
               'request' => request,
-              'response_type' => response_type
+              'response_type' => response_type,
             )
           end
           let(:response_type) { service.rpcs[:find_with_implied_response].response_type }
@@ -146,7 +146,7 @@ describe Protobuf::Rpc::Service do
           let(:env) do
             Protobuf::Rpc::Env.new(
               'method_name' => :find_with_respond_with,
-              'request' => request
+              'request' => request,
             )
           end
 

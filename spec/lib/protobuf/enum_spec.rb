@@ -54,7 +54,7 @@ describe Protobuf::Enum do
           Test::EnumTestType::ONE,
           Test::EnumTestType::TWO,
           Test::EnumTestType::MINUS_ONE,
-          Test::EnumTestType::THREE
+          Test::EnumTestType::THREE,
         ])
       end
 
@@ -63,17 +63,16 @@ describe Protobuf::Enum do
           expect(EnumAliasTest.enums).to eq([
             EnumAliasTest::FOO,
             EnumAliasTest::BAR,
-            EnumAliasTest::BAZ
+            EnumAliasTest::BAZ,
           ])
         end
       end
     end
 
-
     describe '.enums_for_tag' do
       it 'returns an array of Enums for the given tag, if any' do
-        expect(EnumAliasTest.enums_for_tag(1)).to eq([ EnumAliasTest::FOO, EnumAliasTest::BAR ])
-        expect(EnumAliasTest.enums_for_tag(2)).to eq([ EnumAliasTest::BAZ ])
+        expect(EnumAliasTest.enums_for_tag(1)).to eq([EnumAliasTest::FOO, EnumAliasTest::BAR])
+        expect(EnumAliasTest.enums_for_tag(2)).to eq([EnumAliasTest::BAZ])
         expect(EnumAliasTest.enums_for_tag(3)).to eq([])
       end
     end
@@ -179,7 +178,7 @@ describe Protobuf::Enum do
           :MINUS_ONE => Test::EnumTestType::MINUS_ONE,
           :ONE       => Test::EnumTestType::ONE,
           :TWO       => Test::EnumTestType::TWO,
-          :THREE     => Test::EnumTestType::THREE
+          :THREE     => Test::EnumTestType::THREE,
         )
       end
 
@@ -187,7 +186,7 @@ describe Protobuf::Enum do
         expect(EnumAliasTest.values).to eq(
           :FOO => EnumAliasTest::FOO,
           :BAR => EnumAliasTest::BAR,
-          :BAZ => EnumAliasTest::BAZ
+          :BAZ => EnumAliasTest::BAZ,
         )
       end
     end
@@ -200,15 +199,15 @@ describe Protobuf::Enum do
     end
   end
 
-	subject { Test::EnumTestType::ONE }
+  subject { Test::EnumTestType::ONE }
   specify { expect(subject.class).to eq(Fixnum) }
   specify { expect(subject.parent_class).to eq(Test::EnumTestType) }
-	specify { expect(subject.name).to eq(:ONE) }
-	specify { expect(subject.tag).to eq(1) }
-	specify { expect(subject.value).to eq(1) }
-	specify { expect(subject.to_hash_value).to eq(1) }
-	specify { expect(subject.to_s).to eq("1") }
-	specify { expect(subject.inspect).to eq('#<Protobuf::Enum(Test::EnumTestType)::ONE=1>') }
+  specify { expect(subject.name).to eq(:ONE) }
+  specify { expect(subject.tag).to eq(1) }
+  specify { expect(subject.value).to eq(1) }
+  specify { expect(subject.to_hash_value).to eq(1) }
+  specify { expect(subject.to_s).to eq("1") }
+  specify { expect(subject.inspect).to eq('#<Protobuf::Enum(Test::EnumTestType)::ONE=1>') }
   specify { expect(subject.to_s(:tag)).to eq("1") }
   specify { expect(subject.to_s(:name)).to eq("ONE") }
 

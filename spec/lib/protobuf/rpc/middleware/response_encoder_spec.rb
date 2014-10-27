@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 describe Protobuf::Rpc::Middleware::ResponseEncoder do
-  let(:app) { Proc.new { |env| env.response = response; env } }
+  let(:app) { proc { |env| env.response = response; env } }
   let(:env) do
     Protobuf::Rpc::Env.new(
       'response_type' => Test::Resource,
-      'log_signature' => 'log_signature'
+      'log_signature' => 'log_signature',
     )
   end
   let(:encoded_response) { response_wrapper.encode }

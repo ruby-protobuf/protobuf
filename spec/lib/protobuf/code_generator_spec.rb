@@ -19,11 +19,11 @@ describe ::Protobuf::CodeGenerator do
     let(:file_generator2) { double('file generator 2', :generate_output_file => output_file2) }
 
     let(:request_bytes) do
-      COMPILER::CodeGeneratorRequest.encode(:proto_file => [ input_file1, input_file2 ])
+      COMPILER::CodeGeneratorRequest.encode(:proto_file => [input_file1, input_file2])
     end
 
     let(:expected_response_bytes) do
-      COMPILER::CodeGeneratorResponse.encode(:file => [ output_file1, output_file2 ])
+      COMPILER::CodeGeneratorResponse.encode(:file => [output_file1, output_file2])
     end
 
     before do
@@ -44,7 +44,7 @@ describe ::Protobuf::CodeGenerator do
           described_class.fatal("something is wrong")
         end.to raise_error(
           ::Protobuf::CodeGenerator::CodeGeneratorFatalError,
-          "something is wrong"
+          "something is wrong",
         )
       end
     end

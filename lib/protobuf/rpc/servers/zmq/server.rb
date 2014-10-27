@@ -79,7 +79,7 @@ module Protobuf
         def broadcast_flatline
           flatline = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE,
-            :server => self.to_proto
+            :server => to_proto,
           )
 
           @beacon_socket.send(flatline.encode, 0)
@@ -90,7 +90,7 @@ module Protobuf
 
           heartbeat = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT,
-            :server => self.to_proto
+            :server => to_proto,
           )
 
           @beacon_socket.send(heartbeat.encode, 0)
@@ -124,7 +124,7 @@ module Protobuf
         end
 
         def inproc?
-          !!self.options[:zmq_inproc]
+          !!options[:zmq_inproc]
         end
 
         def maintenance_timeout
@@ -234,7 +234,7 @@ module Protobuf
             :address => frontend_ip,
             :port => frontend_port.to_s,
             :ttl => (beacon_interval * 1.5).ceil,
-            :services => ::Protobuf::Rpc::Service.implemented_services
+            :services => ::Protobuf::Rpc::Service.implemented_services,
           )
         end
 
@@ -296,7 +296,7 @@ module Protobuf
             begin
               ::Protobuf::Rpc::Zmq::Worker.new(server).run
             rescue => e
-              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
+              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($INPUT_RECORD_SEPARATOR)}"
               $stderr.puts(message)
               logger.error { message }
             end

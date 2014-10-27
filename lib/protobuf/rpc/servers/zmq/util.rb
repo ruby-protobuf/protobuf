@@ -20,10 +20,10 @@ module Protobuf
 
         def zmq_error_check(return_code, source = nil)
           unless ::ZMQ::Util.resultcode_ok?(return_code)
-            raise <<-ERROR
+            fail <<-ERROR
             Last ZMQ API call #{source ? "to #{source}" : ""} failed with "#{::ZMQ::Util.error_string}".
 
-            #{caller(1).join($/)}
+            #{caller(1).join($INPUT_RECORD_SEPARATOR)}
             ERROR
           end
         end
@@ -38,7 +38,7 @@ module Protobuf
         end
 
         def resolve_ip(hostname)
-          ::Resolv.getaddresses(hostname).detect do |address|
+          ::Resolv.getaddresses(hostname).find do |address|
             address =~ ADDRESS_MATCH
           end
         end

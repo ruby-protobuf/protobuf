@@ -9,7 +9,7 @@ describe ::Protobuf::Generators::ExtensionGenerator do
     [
       double('field descriptor 1', :to_s => "  field 1\n"),
       double('field descriptor 2', :to_s => "  field 2\n"),
-      double('field descriptor 3', :to_s => "  field 3\n")
+      double('field descriptor 3', :to_s => "  field 3\n"),
     ]
   end
   let(:message_type) { 'FooBar' }
@@ -24,13 +24,13 @@ describe ::Protobuf::Generators::ExtensionGenerator do
 
   describe '#compile' do
     let(:compiled) do
-      %q{class FooBar < ::Protobuf::Message
+      'class FooBar < ::Protobuf::Message
   field 1
   field 2
   field 3
 end
 
-}
+'
     end
 
     it 'compiles the a class with the extension fields' do
@@ -40,4 +40,3 @@ end
   end
 
 end
-
