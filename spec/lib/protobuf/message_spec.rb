@@ -360,18 +360,18 @@ describe Protobuf::Message do
   end
 
   describe '#inspect' do
-    before do
-      MyMessage = Class.new(Protobuf::Message) do
+    let(:klass) do
+      Class.new(Protobuf::Message) do
         optional :string, :name, 1
         repeated :int, :counts, 2
         optional :int, :timestamp, 2
       end
     end
 
-    after { remove_const(:MyMessage) }
+    before { stub_const('MyMessage', klass) }
 
     it 'lists the fields' do
-      proto = message.new(:name => 'wooo', :counts => [ 1, 2, 3 ])
+      proto = klass.new(:name => 'wooo', :counts => [ 1, 2, 3 ])
       expect(proto.inspect).to eq \
         '#<MyMessage name="wooo" counts=[1, 2, 3] timestamp=0>'
     end
