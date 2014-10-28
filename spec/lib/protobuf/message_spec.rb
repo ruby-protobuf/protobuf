@@ -363,15 +363,15 @@ describe Protobuf::Message do
     let(:klass) do
       Class.new(Protobuf::Message) do
         optional :string, :name, 1
-        repeated :int, :counts, 2
-        optional :int, :timestamp, 2
+        repeated :int32, :counts, 2
+        optional :int32, :timestamp, 3
       end
     end
 
     before { stub_const('MyMessage', klass) }
 
     it 'lists the fields' do
-      proto = klass.new(:name => 'wooo', :counts => [ 1, 2, 3 ])
+      proto = klass.new(:name => 'wooo', :counts => [1, 2, 3])
       expect(proto.inspect).to eq \
         '#<MyMessage name="wooo" counts=[1, 2, 3] timestamp=0>'
     end

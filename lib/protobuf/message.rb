@@ -90,7 +90,7 @@ module Protobuf
 
     def inspect
       attrs = self.class.fields.map do |field|
-        [ field.name, send(field.name).inspect ].join('=')
+        [field.name, send(field.name).inspect].join('=')
       end.join(' ')
 
       "#<#{self.class} #{attrs}>"
