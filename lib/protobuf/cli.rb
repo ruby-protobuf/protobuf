@@ -220,7 +220,6 @@ module Protobuf
         logger.info { 'RPC Server shutting down...' }
         @runner.try(:stop)
         ::Protobuf::Rpc::ServiceDirectory.instance.stop
-        logger.info { 'Shutdown complete' }
       end
 
       # Start the runner and log the relevant options.
@@ -234,6 +233,10 @@ module Protobuf
 
           ::ActiveSupport::Notifications.instrument("after_server_bind")
         end
+
+        logger.info { 'Shutdown complete' }
+
+        exit 0
       end
     end
   end
