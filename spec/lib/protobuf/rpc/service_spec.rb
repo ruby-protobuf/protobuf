@@ -64,11 +64,11 @@ RSpec.describe Protobuf::Rpc::Service do
       it 'initializes a client object for this service' do
         client = double('client')
         expect(::Protobuf::Rpc::Client).to receive(:new)
-                                            .with(hash_including(
-                                              :service => subject,
-                                              :host => subject.host,
-                                              :port => subject.port,
-                                            )).and_return(client)
+          .with(hash_including(
+            :service => subject,
+            :host => subject.host,
+            :port => subject.port,
+          )).and_return(client)
         expect(subject.client).to eq client
       end
     end
