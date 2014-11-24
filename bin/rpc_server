@@ -2,3 +2,4 @@
 
 require 'protobuf/cli'
 ::Protobuf::CLI.start(ARGV)
+exit
