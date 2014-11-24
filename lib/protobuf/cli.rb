@@ -235,8 +235,6 @@ module Protobuf
         end
 
         logger.info { 'Shutdown complete' }
-
-        exit 0
       end
     end
   end
