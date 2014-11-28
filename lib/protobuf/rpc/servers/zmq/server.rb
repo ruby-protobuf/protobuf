@@ -252,7 +252,7 @@ module Protobuf
             end
 
             if broadcast_heartbeat?
-              if all_workers_busy? && options[:broadcast_busy]
+              if options[:broadcast_busy] && all_workers_busy?
                 broadcast_flatline
               else
                 broadcast_heartbeat
