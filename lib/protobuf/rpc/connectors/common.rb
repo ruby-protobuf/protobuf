@@ -8,9 +8,7 @@ module Protobuf
         attr_reader :error
 
         def any_callbacks?
-          [@complete_cb, @failure_cb, @success_cb].reduce(false) do |reduction, cb|
-            reduction || !cb.nil?
-          end
+          [@complete_cb, @failure_cb, @success_cb].any?
         end
 
         def request_caller
