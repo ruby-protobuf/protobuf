@@ -82,25 +82,7 @@ module Protobuf
             if socket # Make sure the context builds the socket
               socket.setsockopt(::ZMQ::LINGER, 0)
               zmq_error_check(socket.connect(server_uri), :socket_connect)
-
-              if first_alive_load_balance?
-                begin
-                  check_available_response = ""
-                  socket.setsockopt(::ZMQ::RCVTIMEO, check_available_rcv_timeout)
-                  socket.setsockopt(::ZMQ::SNDTIMEO, check_available_snd_timeout)
-                  zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
-                  zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
-
-                  if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
-                    zmq_recoverable_error_check(socket.close, :socket_close)
-                  end
-                rescue ZmqRecoverableError
-                  socket = nil # couldn't make a connection and need to try again
-                else
-                  socket.setsockopt(::ZMQ::RCVTIMEO, -1)
-                  socket.setsockopt(::ZMQ::SNDTIMEO, -1)
-                end
-              end
+              socket = socket_to_available_server(socket) if first_alive_load_balance?
             end
           end while socket.try(:socket).nil?
 
@@ -189,6 +171,24 @@ module Protobuf
           end
         end
 
+        def socket_to_available_server(socket)
+          check_available_response = ""
+          socket.setsockopt(::ZMQ::RCVTIMEO, check_available_rcv_timeout)
+          socket.setsockopt(::ZMQ::SNDTIMEO, check_available_snd_timeout)
+          zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
+          zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
+
+          if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
+            zmq_recoverable_error_check(socket.close, :socket_close)
+          end
+
+          socket.setsockopt(::ZMQ::RCVTIMEO, -1)
+          socket.setsockopt(::ZMQ::SNDTIMEO, -1)
+          socket
+        rescue ZmqRecoverableError
+          return nil # couldn't make a connection and need to try again
+        end
+          
         def rcv_timeout
           @rcv_timeout ||= begin
             case
