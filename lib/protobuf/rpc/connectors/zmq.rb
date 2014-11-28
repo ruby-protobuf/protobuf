@@ -24,6 +24,10 @@ module Protobuf
         ##
         # Class Methods
         #
+        def self.ping_port_responses
+          @ping_port_responses ||= ::ThreadSafe::Cache.new
+        end
+
         def self.zmq_context
           @zmq_contexts ||= Hash.new do |hash, key|
             hash[key] = ZMQ::Context.new
@@ -32,13 +36,12 @@ module Protobuf
           @zmq_contexts[Process.pid]
         end
 
-        def self.ping_port_responses
-          @ping_port_responses ||= ::ThreadSafe::Cache.new
-        end
-
         ##
         # Instance methods
         #
+        def log_signature
+          @_log_signature ||= "[client-#{self.class}]"
+        end
 
         # Start the request/response cycle. We implement the Lazy Pirate
         # req/reply reliability pattern as laid out in the ZMQ Guide, Chapter 4.
@@ -48,10 +51,6 @@ module Protobuf
         def send_request
           setup_connection
           send_request_with_lazy_pirate unless error?
-        end
-
-        def log_signature
-          @_log_signature ||= "[client-#{self.class}]"
         end
 
         private
@@ -97,6 +96,27 @@ module Protobuf
           !! @error
         end
 
+        def host_alive?(host)
+          return true unless ping_port_enabled?
+
+          if (last_response = self.class.ping_port_responses[host])
+            if (Time.now.to_i - last_response[:at]) <= host_alive_check_interval
+              return last_response[:ping_port_open]
+            end
+          end
+
+          ping_port_open = ping_port_open?(host)
+          self.class.ping_port_responses[host] = {
+            :at => Time.now.to_i,
+            :ping_port_open => ping_port_open,
+          }
+          ping_port_open
+        end
+
+        def host_alive_check_interval
+          @host_alive_check_interval ||= [ENV["PB_ZMQ_CLIENT_HOST_ALIVE_CHECK_INTERVAL"].to_i, 1].max
+        end
+
         # Lookup a server uri for the requested service in the service
         # directory. If the service directory is not running, default
         # to the host and port in the options
@@ -119,27 +139,6 @@ module Protobuf
           fail "Host not found for service #{service}"
         end
 
-        def host_alive?(host)
-          return true unless ping_port_enabled?
-
-          if (last_response = self.class.ping_port_responses[host])
-            if (Time.now.to_i - last_response[:at]) <= host_alive_check_interval
-              return last_response[:ping_port_open]
-            end
-          end
-
-          ping_port_open = ping_port_open?(host)
-          self.class.ping_port_responses[host] = {
-            :at => Time.now.to_i,
-            :ping_port_open => ping_port_open,
-          }
-          ping_port_open
-        end
-
-        def host_alive_check_interval
-          @host_alive_check_interval ||= [ENV["PB_ZMQ_CLIENT_HOST_ALIVE_CHECK_INTERVAL"].to_i, 1].max
-        end
-
         def ping_port_open?(host)
           socket = TCPSocket.new(host, ping_port.to_i)
           socket.setsockopt(::Socket::IPPROTO_TCP, ::Socket::TCP_NODELAY, 1)
@@ -153,6 +152,19 @@ module Protobuf
             socket && socket.close
           rescue IOError
             nil
+          end
+        end
+
+        def rcv_timeout
+          @rcv_timeout ||= begin
+            case
+            when options[:timeout] then
+              options[:timeout]
+            when ENV.key?("PB_ZMQ_CLIENT_RCV_TIMEOUT") then
+              ENV["PB_ZMQ_CLIENT_RCV_TIMEOUT"].to_i
+            else
+              300_000 # 300 seconds
+            end
           end
         end
 
@@ -170,50 +182,6 @@ module Protobuf
           rescue RequestTimeout
             retry if attempt < CLIENT_RETRIES
             failure(:RPC_FAILED, "The server repeatedly failed to respond within #{timeout} seconds")
-          end
-        end
-
-        def socket_to_available_server(socket)
-          check_available_response = ""
-          socket.setsockopt(::ZMQ::RCVTIMEO, check_available_rcv_timeout)
-          socket.setsockopt(::ZMQ::SNDTIMEO, check_available_snd_timeout)
-          zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
-          zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
-
-          if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
-            zmq_recoverable_error_check(socket.close, :socket_close)
-          end
-
-          socket.setsockopt(::ZMQ::RCVTIMEO, -1)
-          socket.setsockopt(::ZMQ::SNDTIMEO, -1)
-          socket
-        rescue ZmqRecoverableError
-          return nil # couldn't make a connection and need to try again
-        end
-          
-        def rcv_timeout
-          @rcv_timeout ||= begin
-            case
-            when options[:timeout] then
-              options[:timeout]
-            when ENV.key?("PB_ZMQ_CLIENT_RCV_TIMEOUT") then
-              ENV["PB_ZMQ_CLIENT_RCV_TIMEOUT"].to_i
-            else
-              300_000 # 300 seconds
-            end
-          end
-        end
-
-        def snd_timeout
-          @snd_timeout ||= begin
-            case
-            when options[:timeout] then
-              options[:timeout]
-            when ENV.key?("PB_ZMQ_CLIENT_SND_TIMEOUT") then
-              ENV["PB_ZMQ_CLIENT_SND_TIMEOUT"].to_i
-            else
-              300_000 # 300 seconds
-            end
           end
         end
 
@@ -251,6 +219,37 @@ module Protobuf
           ::Protobuf::Rpc::ServiceDirectory.instance
         end
 
+        def snd_timeout
+          @snd_timeout ||= begin
+            case
+            when options[:timeout] then
+              options[:timeout]
+            when ENV.key?("PB_ZMQ_CLIENT_SND_TIMEOUT") then
+              ENV["PB_ZMQ_CLIENT_SND_TIMEOUT"].to_i
+            else
+              300_000 # 300 seconds
+            end
+          end
+        end
+
+        def socket_to_available_server(socket)
+          check_available_response = ""
+          socket.setsockopt(::ZMQ::RCVTIMEO, check_available_rcv_timeout)
+          socket.setsockopt(::ZMQ::SNDTIMEO, check_available_snd_timeout)
+          zmq_recoverable_error_check(socket.send_string(::Protobuf::Rpc::Zmq::CHECK_AVAILABLE_MESSAGE), :socket_send_string)
+          zmq_recoverable_error_check(socket.recv_string(check_available_response), :socket_recv_string)
+
+          if check_available_response == ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE
+            zmq_recoverable_error_check(socket.close, :socket_close)
+          end
+
+          socket.setsockopt(::ZMQ::RCVTIMEO, -1)
+          socket.setsockopt(::ZMQ::SNDTIMEO, -1)
+          socket
+        rescue ZmqRecoverableError
+          return nil # couldn't make a connection and need to try again
+        end
+          
         # Return the ZMQ Context to use for this process.
         # If the context does not exist, create it, then register
         # an exit block to ensure the context is terminated correctly.
