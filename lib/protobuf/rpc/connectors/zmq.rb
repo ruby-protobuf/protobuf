@@ -126,12 +126,21 @@ module Protobuf
             service_directory.all_listings_for(service).each do |listing|
               host = listing.try(:address)
               port = listing.try(:port)
-              return "tcp://#{host}:#{port}" if host_alive?(host)
+
+              if host_alive?(host)
+                # @stats from Common, need to get a better public interface for it
+                @stats.server = [port, host]
+                return "tcp://#{host}:#{port}"
+              end
             end
 
             host = options[:host]
             port = options[:port]
-            return "tcp://#{host}:#{port}" if host_alive?(host)
+
+            if host_alive?(host)
+              @stats.server = [port, host]
+              return "tcp://#{host}:#{port}"
+            end
 
             sleep(1.0 / 100.0)
           end
