@@ -26,7 +26,7 @@ module Protobuf
 
           loop do
             process_local_queue
-            rc = @poller.poll(500)
+            rc = @poller.poll(broker_polling_milliseconds)
 
             # The server was shutdown and no requests are pending
             break if rc == 0 && !running? && @server.workers.empty?
@@ -49,6 +49,10 @@ module Protobuf
 
         def backend_poll_weight
           @backend_poll_weight ||= [ENV["PB_ZMQ_SERVER_BACKEND_POLL_WEIGHT"].to_i, 1].max
+        end
+
+        def broker_polling_milliseconds
+          @broker_polling_milliseconds ||= [ENV["PB_ZMQ_BROKER_POLLING_MILLISECONDS"].to_i, 500].max
         end
 
         def check_and_process_backend
