@@ -74,13 +74,11 @@ module Protobuf
         # service. The LINGER is set to 0 so we can close immediately in
         # the event of a timeout
         def create_socket
-          socket = nil
+          socket = zmq_context.socket(::ZMQ::REQ)
 
           begin
-            server_uri = lookup_server_uri
-            socket = zmq_context.socket(::ZMQ::REQ)
-
             if socket # Make sure the context builds the socket
+              server_uri = lookup_server_uri
               socket.setsockopt(::ZMQ::LINGER, 0)
               zmq_error_check(socket.connect(server_uri), :socket_connect)
               socket = socket_to_available_server(socket) if first_alive_load_balance?
@@ -258,7 +256,7 @@ module Protobuf
         rescue ZmqRecoverableError
           return nil # couldn't make a connection and need to try again
         end
-          
+
         # Return the ZMQ Context to use for this process.
         # If the context does not exist, create it, then register
         # an exit block to ensure the context is terminated correctly.

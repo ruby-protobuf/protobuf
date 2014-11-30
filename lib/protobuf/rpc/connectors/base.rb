@@ -30,6 +30,7 @@ module Protobuf
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
+          @stats = ::Protobuf::Rpc::Stat.new(:CLIENT)
         end
 
         def first_alive_load_balance?
