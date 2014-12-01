@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Protobuf::Field::FloatField do
+RSpec.describe Protobuf::Field::FloatField do
 
   class SomeFloatMessage < ::Protobuf::Message
     optional :float, :some_float, 1

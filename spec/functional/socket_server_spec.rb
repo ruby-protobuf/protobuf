@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'spec/support/test/resource_service'
 
-describe 'Functional Socket Client' do
+RSpec.describe 'Functional Socket Client' do
   before(:all) do
     load "protobuf/socket.rb"
     @options = OpenStruct.new(:host => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)

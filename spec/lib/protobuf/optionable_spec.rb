@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/optionable'
 
-describe 'Optionable' do
+RSpec.describe 'Optionable' do
 
   describe '.set_option' do
     before(:all) do

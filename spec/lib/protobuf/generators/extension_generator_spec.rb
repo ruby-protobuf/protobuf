@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'protobuf/code_generator'
 require 'protobuf/generators/extension_generator'
 
-describe ::Protobuf::Generators::ExtensionGenerator do
+RSpec.describe ::Protobuf::Generators::ExtensionGenerator do
 
   let(:field_descriptors) do
     [

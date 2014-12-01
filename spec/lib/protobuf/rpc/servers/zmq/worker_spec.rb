@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Protobuf::Rpc::Zmq::Worker do
+RSpec.describe ::Protobuf::Rpc::Zmq::Worker do
   before(:each) do
     load 'protobuf/zmq.rb'
 

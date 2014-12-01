@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/generators/service_generator'
 
-describe ::Protobuf::Generators::ServiceGenerator do
+RSpec.describe ::Protobuf::Generators::ServiceGenerator do
 
   let(:methods) do
     [

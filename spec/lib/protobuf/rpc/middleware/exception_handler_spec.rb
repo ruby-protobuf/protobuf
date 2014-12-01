@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Protobuf::Rpc::Middleware::ExceptionHandler do
+RSpec.describe Protobuf::Rpc::Middleware::ExceptionHandler do
   let(:app) { proc { |env| env } }
   let(:env) { Protobuf::Rpc::Env.new }
 

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/rpc/service_directory'
 
-describe ::Protobuf::Rpc::ServiceDirectory do
+RSpec.describe ::Protobuf::Rpc::ServiceDirectory do
   subject { described_class.instance }
 
   let(:echo_server) do

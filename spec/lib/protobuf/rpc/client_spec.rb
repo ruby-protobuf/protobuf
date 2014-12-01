@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'spec/support/test/resource_service'
 
-describe Protobuf::Rpc::Client do
+RSpec.describe Protobuf::Rpc::Client do
   before(:each) do
     load 'protobuf/socket.rb'
   end

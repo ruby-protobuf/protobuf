@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/cli'
 
-describe ::Protobuf::CLI do
+RSpec.describe ::Protobuf::CLI do
 
   let(:app_file) do
     File.expand_path('../../../support/test_app_file.rb', __FILE__)

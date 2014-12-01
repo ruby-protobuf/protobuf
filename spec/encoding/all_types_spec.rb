@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Protobuf do
+RSpec.describe ::Protobuf do
   it "correctly encodes all types" do
     message = GoogleUnittest::TestAllTypes.new(
       optional_int32:    101,

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::Protobuf::Field::StringField do
+RSpec.describe ::Protobuf::Field::StringField do
 
   describe '#encode' do
     context 'when a repeated string field contains frozen strings' do

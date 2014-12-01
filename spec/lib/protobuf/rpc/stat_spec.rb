@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'timecop'
 require 'active_support/core_ext/numeric/time'
 
-describe ::Protobuf::Rpc::Stat do
+RSpec.describe ::Protobuf::Rpc::Stat do
 
   before(:all) do
     unless defined?(BarService)

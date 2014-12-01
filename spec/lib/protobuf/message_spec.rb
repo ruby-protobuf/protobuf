@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Protobuf::Message do
+RSpec.describe Protobuf::Message do
 
   describe '.decode' do
     let(:message) { ::Test::Resource.new(:name => "Jim") }

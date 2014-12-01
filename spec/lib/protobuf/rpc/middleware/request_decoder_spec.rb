@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Protobuf::Rpc::Middleware::RequestDecoder do
+RSpec.describe Protobuf::Rpc::Middleware::RequestDecoder do
   let(:app) { proc { |env| env } }
   let(:client_host) { 'client_host.test.co' }
   let(:env) do

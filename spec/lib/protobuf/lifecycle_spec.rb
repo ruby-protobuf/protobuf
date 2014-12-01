@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/lifecycle'
 
-describe ::Protobuf::Lifecycle do
+RSpec.describe ::Protobuf::Lifecycle do
   subject { described_class }
 
   around do |example|
