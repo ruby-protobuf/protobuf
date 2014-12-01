@@ -50,21 +50,25 @@ describe Protobuf::Enum do
 
     describe '.enums' do
       it 'provides an array of defined Enums' do
-        expect(Test::EnumTestType.enums).to eq([
-          Test::EnumTestType::ONE,
-          Test::EnumTestType::TWO,
-          Test::EnumTestType::MINUS_ONE,
-          Test::EnumTestType::THREE,
-        ])
+        expect(Test::EnumTestType.enums).to eq(
+          [
+            Test::EnumTestType::ONE,
+            Test::EnumTestType::TWO,
+            Test::EnumTestType::MINUS_ONE,
+            Test::EnumTestType::THREE,
+          ],
+        )
       end
 
       context 'when enum allows aliases' do
         it 'treats aliased enums as valid' do
-          expect(EnumAliasTest.enums).to eq([
-            EnumAliasTest::FOO,
-            EnumAliasTest::BAR,
-            EnumAliasTest::BAZ,
-          ])
+          expect(EnumAliasTest.enums).to eq(
+            [
+              EnumAliasTest::FOO,
+              EnumAliasTest::BAR,
+              EnumAliasTest::BAZ,
+            ],
+          )
         end
       end
     end
