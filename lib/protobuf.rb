@@ -5,9 +5,11 @@ require 'stringio'
 
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/object/try'
-require 'active_support/notifications'
 require 'active_support/inflector'
 require 'active_support/json'
+require 'active_support/notifications'
+
+require 'protobuf/deprecation'
 
 module Protobuf
 
@@ -62,6 +64,13 @@ module Protobuf
     @gc_pause_server_request = !!value
   end
 
+  def self.deprecator
+    @deprecator ||= Deprecation.new('4.0', to_s).tap do |deprecation|
+      deprecation.silenced = ENV.key?('PB_IGNORE_DEPRECATIONS')
+      deprecation.behavior = :stderr
+    end
+  end
+
   # Print Deprecation Warnings
   #
   # Default: true
@@ -73,12 +82,11 @@ module Protobuf
   #
   # The rpc_server option will override the ENV setting.
   def self.print_deprecation_warnings?
-    return @print_deprecation_warnings unless @print_deprecation_warnings.nil?
-    self.print_deprecation_warnings = ENV.key?('PB_IGNORE_DEPRECATIONS') ? false : true
+    !deprecator.silenced
   end
 
   def self.print_deprecation_warnings=(value)
-    @print_deprecation_warnings = !!value
+    deprecator.silenced = !value
   end
 
   # Permit unknown field on Message initialization

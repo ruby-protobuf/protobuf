@@ -5,13 +5,6 @@ module Protobuf
         fail "Lifecycle register must have a block" unless block_given?
         event_name = normalized_event_name(event_name)
 
-        if ::Protobuf.print_deprecation_warnings?
-          $stderr.puts <<-ERROR
-          [DEPRECATED] ::Protobuf::Lifecycle has been deprecated and will be removed in a future version.
-            Use ::ActiveSupport::Notifications.subscribe('#{event_name}')
-          ERROR
-        end
-
         ::ActiveSupport::Notifications.subscribe(event_name) do |_name, _start, _finish, _id, args|
           blk.call(*args)
         end
@@ -19,17 +12,18 @@ module Protobuf
       alias_method :on, :register
 
       def trigger(event_name, *args)
-        if ::Protobuf.print_deprecation_warnings?
-          $stderr.puts <<-ERROR
-          [DEPRECATED] ::Protobuf::Lifecycle has been deprecated and will be removed in a future version.
-            Use ::ActiveSupport::Notifications.instrument(...)
-          ERROR
-        end
-
         event_name = normalized_event_name(event_name)
 
         ::ActiveSupport::Notifications.instrument(event_name, args)
       end
+
+      replacement = ::ActiveSupport::Notifications
+
+      ::Protobuf.deprecator.deprecate_methods(
+        self,
+        :register => "#{replacement}.#{replacement.method(:subscribe).name}".to_sym,
+        :trigger => "#{replacement}.#{replacement.method(:instrument).name}".to_sym,
+      )
 
       def normalized_event_name(event_name)
         event_name.to_s.downcase

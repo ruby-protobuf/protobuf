@@ -1,15 +1,15 @@
-require 'protobuf/deprecator'
-
 module Protobuf
   class Message
     module Fields
 
       def self.extended(other)
-        other.extend(::Protobuf::Deprecator)
-        other.deprecate_class_method(:get_ext_field_by_name, :get_extension_field)
-        other.deprecate_class_method(:get_ext_field_by_tag, :get_extension_field)
-        other.deprecate_class_method(:get_field_by_name, :get_field)
-        other.deprecate_class_method(:get_field_by_tag, :get_field)
+        ::Protobuf.deprecator.define_deprecated_methods(
+          other.singleton_class,
+          :get_ext_field_by_name => :get_extension_field,
+          :get_ext_field_by_tag => :get_extension_field,
+          :get_field_by_name => :get_field,
+          :get_field_by_tag => :get_field,
+        )
       end
 
       ##
