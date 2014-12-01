@@ -66,12 +66,6 @@ Style/EmptyLinesAroundModuleBody:
 Style/GuardClause:
   Enabled: false
 
-# Offense count: 690
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/HashSyntax:
-  Enabled: false
-
 # Offense count: 53
 # Cop supports --auto-correct.
 Style/NumericLiterals:

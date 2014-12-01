@@ -14,7 +14,7 @@ RSpec.describe ::Protobuf::CLI do
   end
 
   let(:zmq_runner) do
-    runner = double "ZmqRunner", register_signals: nil
+    runner = double("ZmqRunner", :register_signals => nil)
     allow(runner).to receive(:run).and_return(::ActiveSupport::Notifications.publish("after_server_bind"))
     runner
   end

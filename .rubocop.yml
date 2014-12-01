@@ -24,6 +24,9 @@ Style/FileName:
   Exclude:
     - '**/protoc-gen-ruby*'
 
+Style/HashSyntax:
+  EnforcedStyle: hash_rockets
+
 Style/IndentHash:
   EnforcedStyle: consistent
 
