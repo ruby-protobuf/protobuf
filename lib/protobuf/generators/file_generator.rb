@@ -78,15 +78,11 @@ module Protobuf
           @extension_fields[field_descriptor.extendee] << field_descriptor
         end
 
-        if descriptor.respond_to_has_and_present?(:message_type)
-          descriptor.message_type.each do |message_descriptor|
-            map_extensions(message_descriptor, (namespaces + [message_descriptor.name]))
-          end
-        end
+        [:message_type, :nested_type].each do |type|
+          next unless descriptor.respond_to_has_and_present?(type)
 
-        if descriptor.respond_to_has_and_present?(:nested_type)
-          descriptor.nested_type.each do |nested_descriptor|
-            map_extensions(nested_descriptor, (namespaces + [nested_descriptor.name]))
+          descriptor.public_send(type).each do |type_descriptor|
+            map_extensions(type_descriptor, (namespaces + [type_descriptor.name]))
           end
         end
       end
@@ -106,15 +102,15 @@ module Protobuf
       end
 
       def print_import_requires
-        if descriptor.dependency.count > 0
-          header "Imports"
+        return if descriptor.dependency.empty?
 
-          descriptor.dependency.each do |dependency|
-            print_require(convert_filename(dependency))
-          end
+        header "Imports"
 
-          puts
+        descriptor.dependency.each do |dependency|
+          print_require(convert_filename(dependency))
         end
+
+        puts
       end
 
       def print_package(&block)
