@@ -205,11 +205,9 @@ module Protobuf
     # by their :name.
     #
     def self.values
-      @values ||= begin
-                    enums.each_with_object({}) do |enum, hash|
-                      hash[enum.name] = enum
-                    end
-                  end
+      @values ||= enums.each_with_object({}) do |enum, hash|
+        hash[enum.name] = enum
+      end
     end
 
     ##
