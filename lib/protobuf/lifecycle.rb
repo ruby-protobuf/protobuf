@@ -32,7 +32,7 @@ module Protobuf
       end
 
       def normalized_event_name(event_name)
-        "#{event_name}".downcase
+        event_name.to_s.downcase
       end
     end
   end
