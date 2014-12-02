@@ -5,6 +5,12 @@ module Protobuf
       new(stream, message).encode
     end
 
+    private
+
+    attr_writer :message, :stream
+
+    public
+
     attr_reader :message, :stream
 
     def initialize(message, stream)
@@ -12,8 +18,8 @@ module Protobuf
         fail ArgumentError, "Message instance must respond to :each_field_for_serialization"
       end
 
-      @message = message
-      @stream = stream
+      self.message = message
+      self.stream = stream
     end
 
     def encode

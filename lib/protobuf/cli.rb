@@ -11,7 +11,11 @@ module Protobuf
     include ::Thor::Actions
     include ::Protobuf::Logging
 
-    attr_accessor :runner, :mode
+    attr_accessor :runner, :mode, :exit_requested
+
+    no_commands do
+      alias_method :exit_requested?, :exit_requested
+    end
 
     default_task :start
 
@@ -102,27 +106,28 @@ module Protobuf
       # Re-write the $0 var to have a nice process name in ps.
       def configure_process_name(app_file)
         debug_say('Configuring process name')
-        $0 = "rpc_server --#{@runner_mode} #{options.host}:#{options.port} #{app_file}"
+        $0 = "rpc_server --#{mode} #{options.host}:#{options.port} #{app_file}"
       end
 
       # Configure the mode of the server and the runner class.
       def configure_runner_mode
         debug_say('Configuring runner mode')
 
-        if multi_mode?
+        self.mode = if multi_mode?
           say('WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow)
-          @runner_mode = :socket
+          :socket
         elsif options.zmq?
-          @runner_mode = :zmq
-        else
+          :zmq
+        else # rubocop:disable Style/ElseAlignment
+          # above: https://github.com/bbatsov/rubocop/pull/1470/files
           case server_type = ENV["PB_SERVER_TYPE"]
           when nil, /socket/i
-            @runner_mode = :socket
+            :socket
           when /zmq/i
-            @runner_mode = :zmq
+            :zmq
           else
             say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
-            @runner_mode = :socket
+            :socket
           end
         end
       end
@@ -139,7 +144,7 @@ module Protobuf
           debug_say("Registering trap for exit signal #{signal}", :blue)
 
           trap(signal) do
-            @exit_requested = true
+            self.exit_requested = true
             shutdown_server
           end
         end
@@ -147,24 +152,20 @@ module Protobuf
 
       # Create the runner for the configured mode
       def create_runner
-        debug_say("Creating #{@runner_mode} runner")
-        @runner = case @runner_mode
-                  when :zmq
-                    create_zmq_runner
-                  when :socket
-                    create_socket_runner
-                  else
-                    say_and_exit("Unknown runner mode: #{@runner_mode}")
-                  end
+        debug_say("Creating #{mode} runner")
+        self.runner = case mode
+        when :zmq
+          create_zmq_runner
+        when :socket
+          create_socket_runner
+        else
+          say_and_exit("Unknown runner mode: #{mode}")
+        end
       end
 
       # Say something if we're in debug mode.
       def debug_say(message, color = :yellow)
         say(message, color) if options.debug?
-      end
-
-      def exit_requested?
-        !!@exit_requested
       end
 
       # Internal helper to determine if the modes are multi-set which is not valid.
@@ -207,18 +208,18 @@ module Protobuf
       def create_socket_runner
         require 'protobuf/socket'
 
-        @runner = ::Protobuf::Rpc::SocketRunner.new(runner_options)
+        self.runner = ::Protobuf::Rpc::SocketRunner.new(runner_options)
       end
 
       def create_zmq_runner
         require 'protobuf/zmq'
 
-        @runner = ::Protobuf::Rpc::ZmqRunner.new(runner_options)
+        self.runner = ::Protobuf::Rpc::ZmqRunner.new(runner_options)
       end
 
       def shutdown_server
         logger.info { 'RPC Server shutting down...' }
-        @runner.try(:stop)
+        runner.stop
         ::Protobuf::Rpc::ServiceDirectory.instance.stop
       end
 
@@ -226,9 +227,9 @@ module Protobuf
       def start_server
         debug_say('Running server')
 
-        @runner.run do
+        runner.run do
           logger.info do
-            "pid #{::Process.pid} -- #{@runner_mode} RPC Server listening at #{options.host}:#{options.port}"
+            "pid #{::Process.pid} -- #{mode} RPC Server listening at #{options.host}:#{options.port}"
           end
 
           ::ActiveSupport::Notifications.instrument("after_server_bind")

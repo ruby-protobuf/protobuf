@@ -229,6 +229,12 @@ module Protobuf
     # Attributes
     #
 
+    private
+
+    attr_writer :parent_class, :name, :tag
+
+    public
+
     attr_reader :parent_class, :name, :tag
 
     ##
@@ -236,10 +242,10 @@ module Protobuf
     #
 
     def initialize(parent_class, name, tag)
-      @parent_class = parent_class
-      @name = name
-      @tag = tag
-      super(@tag)
+      self.parent_class = parent_class
+      self.name = name
+      self.tag = tag
+      super(tag)
     end
 
     # Overriding the class so ActiveRecord/Arel visitor will visit the enum as a Fixnum
