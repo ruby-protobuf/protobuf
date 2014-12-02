@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf'
 
-describe ::Protobuf do
+RSpec.describe ::Protobuf do
 
   describe '.client_host' do
     after { ::Protobuf.client_host = nil }

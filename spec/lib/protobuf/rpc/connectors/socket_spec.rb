@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/socket'
 
-shared_examples "a Protobuf Connector" do
+RSpec.shared_examples "a Protobuf Connector" do
   subject { described_class.new({}) }
 
   context "API" do
@@ -13,7 +13,7 @@ shared_examples "a Protobuf Connector" do
   end
 end
 
-describe Protobuf::Rpc::Connectors::Socket do
+RSpec.describe Protobuf::Rpc::Connectors::Socket do
   subject { described_class.new({}) }
 
   it_behaves_like "a Protobuf Connector"

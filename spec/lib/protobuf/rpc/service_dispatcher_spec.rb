@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/rpc/service_dispatcher'
 
-describe Protobuf::Rpc::ServiceDispatcher do
+RSpec.describe Protobuf::Rpc::ServiceDispatcher do
   let(:app) { proc { |env| env } }
   let(:env) do
     Protobuf::Rpc::Env.new(

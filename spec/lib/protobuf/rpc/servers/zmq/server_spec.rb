@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/rpc/servers/zmq/server'
 
-describe Protobuf::Rpc::Zmq::Server do
+RSpec.describe Protobuf::Rpc::Zmq::Server do
   subject { described_class.new(options) }
 
   let(:options) do

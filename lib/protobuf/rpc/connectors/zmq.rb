@@ -258,25 +258,15 @@ module Protobuf
         end
 
         def zmq_eagain_error_check(return_code, source)
-          unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
-            if ::ZMQ::Util.errno == ::ZMQ::EAGAIN
-              fail ZmqEagainError, <<-ERROR
-              Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+          return if ::ZMQ::Util.resultcode_ok?(return_code || -1)
 
-              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
-              ERROR
-            else
-              fail <<-ERROR
-              Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+          if ::ZMQ::Util.errno == ::ZMQ::EAGAIN
+            fail ZmqEagainError, <<-ERROR
+            Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
-              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
-              ERROR
-            end
-          end
-        end
-
-        def zmq_error_check(return_code, source)
-          unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
+            #{caller(1).join($INPUT_RECORD_SEPARATOR)}
+            ERROR
+          else
             fail <<-ERROR
             Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 
@@ -285,14 +275,24 @@ module Protobuf
           end
         end
 
-        def zmq_recoverable_error_check(return_code, source)
-          unless ::ZMQ::Util.resultcode_ok?(return_code || -1)
-            fail ZmqRecoverableError, <<-ERROR
-              Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+        def zmq_error_check(return_code, source)
+          return if ::ZMQ::Util.resultcode_ok?(return_code || -1)
 
-              #{caller(1).join($INPUT_RECORD_SEPARATOR)}
-              ERROR
-          end
+          fail <<-ERROR
+          Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+
+          #{caller(1).join($INPUT_RECORD_SEPARATOR)}
+          ERROR
+        end
+
+        def zmq_recoverable_error_check(return_code, source)
+          return if ::ZMQ::Util.resultcode_ok?(return_code || -1)
+
+          fail ZmqRecoverableError, <<-ERROR
+          Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
+
+          #{caller(1).join($INPUT_RECORD_SEPARATOR)}
+          ERROR
         end
       end
     end

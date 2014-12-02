@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Protobuf::Rpc::Connectors::Base do
+RSpec.describe Protobuf::Rpc::Connectors::Base do
 
   let(:options) do
     { :timeout => 60 }

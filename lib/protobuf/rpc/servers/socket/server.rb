@@ -1,4 +1,5 @@
-require 'protobuf/rpc/server'
+require 'set'
+
 require 'protobuf/rpc/servers/socket/worker'
 
 module Protobuf
@@ -9,33 +10,52 @@ module Protobuf
 
         AUTO_COLLECT_TIMEOUT = 5 # seconds
 
+        private
+
+        attr_accessor :threshold, :host, :port, :backlog
+        attr_writer :running
+
+        public
+
+        attr_reader :running
+        alias_method :running?, :running
+
         def initialize(options)
-          @options = options
+          self.running = false
+          self.host = options.fetch(:host)
+          self.port = options.fetch(:port)
+          self.backlog = options.fetch(:backlog, 100)
+          self.threshold = options.fetch(:threshold, 100)
+        end
+
+        def threads
+          @threads ||= []
+        end
+
+        def working
+          @working ||= Set.new
         end
 
         def cleanup?
-          # every 10 connections run a cleanup routine after closing the response
-          @threads.size > (@threshold - 1) && (@threads.size % @threshold) == 0
+          # every `threshold` connections run a cleanup routine after closing the response
+          threads.size > 0 && threads.size % threshold == 0
         end
 
         def cleanup_threads
-          logger.debug { sign_message("Thread cleanup - #{@threads.size} - start") }
+          logger.debug { sign_message("Thread cleanup - #{threads.size} - start") }
 
-          @threads = @threads.select do |t|
-            if t[:thread].alive?
-              true
-            else
-              t[:thread].join
-              @working.delete(t[:socket])
-              false
+          threads.delete_if do |hash|
+            unless (thread = hash.fetch(:thread)).alive?
+              thread.join
+              working.delete(hash.fetch(:socket))
             end
           end
 
-          logger.debug { sign_message("Thread cleanup - #{@threads.size} - complete") }
+          logger.debug { sign_message("Thread cleanup - #{threads.size} - complete") }
         end
 
         def log_signature
-          @_log_signature ||= "server-#{self.class.name}"
+          @_log_signature ||= "[server-#{self.class.name}]"
         end
 
         def new_worker(socket)
@@ -48,68 +68,54 @@ module Protobuf
 
         def run
           logger.debug { sign_message("Run") }
-          host = @options[:host]
-          port = @options[:port]
-          backlog = @options[:backlog]
-          @threshold = @options[:threshold]
 
-          @threads = []
-          @server = ::TCPServer.new(host, port)
-          fail "The server was unable to start properly." if @server.closed?
+          server = ::TCPServer.new(host, port)
+          fail "The server was unable to start properly." if server.closed?
 
-          @server.listen(backlog)
-          @working = []
-          @listen_fds = [@server]
-          @running = true
+          begin
+            server.listen(backlog)
+            listen_fds = [server]
+            self.running = true
 
-          while running?
-            logger.debug { sign_message("Waiting for connections") }
-            ready_cnxns = begin
-              IO.select(@listen_fds, [], [], AUTO_COLLECT_TIMEOUT)
-            rescue IOError
-              nil
-            end
+            while running?
+              logger.debug { sign_message("Waiting for connections") }
+              ready_cnxns = begin
+                IO.select(listen_fds, [], [], AUTO_COLLECT_TIMEOUT)
+              rescue IOError
+                nil
+              end
 
-            if ready_cnxns
-              cnxns = ready_cnxns.first
-              cnxns.each do |client|
-                case
-                when !running? then
-                  # no-op
-                when client == @server then
-                  logger.debug { sign_message("Accepted new connection") }
-                  client, _sockaddr = @server.accept
-                  @listen_fds << client
-                else
-                  unless @working.include?(client)
-                    @working << @listen_fds.delete(client)
-                    logger.debug { sign_message("Working")  }
-                    @threads << { :thread => new_worker(client), :socket => client }
+              if ready_cnxns
+                ready_cnxns.first.each do |client|
+                  case
+                  when !running?
+                    # no-op
+                  when client == server
+                    logger.debug { sign_message("Accepted new connection") }
+                    client, _sockaddr = server.accept
+                    listen_fds << client
+                  else
+                    unless working.include?(client)
+                      working << listen_fds.delete(client)
+                      logger.debug { sign_message("Working")  }
+                      threads << { :thread => new_worker(client), :socket => client }
 
-                    cleanup_threads if cleanup?
+                      cleanup_threads if cleanup?
+                    end
                   end
                 end
+              else
+                # Run a cleanup if select times out while waiting
+                cleanup_threads if threads.size > 1
               end
-            else
-              # Run a cleanup if select times out while waiting
-              cleanup_threads if @threads.size > 1
             end
+          ensure
+            server.close
           end
-
-        rescue Errno::EADDRINUSE
-          raise
-        rescue
-          # Closing the server causes the loop to raise an exception here
-          raise # if running?
-        end
-
-        def running?
-          !!@running
         end
 
         def stop
-          @running = false
-          @server.try(:close)
+          self.running = false
         end
       end
     end

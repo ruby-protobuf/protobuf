@@ -19,13 +19,13 @@ module Protobuf
         end
 
         def zmq_error_check(return_code, source = nil)
-          unless ::ZMQ::Util.resultcode_ok?(return_code)
-            fail <<-ERROR
-            Last ZMQ API call #{source ? "to #{source}" : ""} failed with "#{::ZMQ::Util.error_string}".
+          return if ::ZMQ::Util.resultcode_ok?(return_code)
 
-            #{caller(1).join($INPUT_RECORD_SEPARATOR)}
-            ERROR
-          end
+          fail <<-ERROR
+          Last ZMQ API call #{source ? "to #{source}" : ''} failed with "#{::ZMQ::Util.error_string}".
+
+          #{caller(1).join($INPUT_RECORD_SEPARATOR)}
+          ERROR
         end
 
         def log_signature

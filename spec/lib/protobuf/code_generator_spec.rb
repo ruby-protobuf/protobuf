@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/code_generator'
 
-describe ::Protobuf::CodeGenerator do
+RSpec.describe ::Protobuf::CodeGenerator do
 
   # Some constants to shorten things up
   DESCRIPTOR = ::Google::Protobuf

@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/rpc/service'
 
-describe Protobuf::Rpc::Connectors::Common do
+RSpec.describe Protobuf::Rpc::Connectors::Common do
   let(:common_class) do
     Class.new(Protobuf::Rpc::Connectors::Base) do
       include Protobuf::Rpc::Connectors::Common

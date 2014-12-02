@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/generators/field_generator'
 
-describe ::Protobuf::Generators::FieldGenerator do
+RSpec.describe ::Protobuf::Generators::FieldGenerator do
 
   let(:label_enum) { :LABEL_OPTIONAL }
   let(:name) { 'foo_bar' }

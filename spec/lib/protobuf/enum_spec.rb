@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Protobuf::Enum do
+RSpec.describe Protobuf::Enum do
 
   describe 'class dsl' do
     let(:name) { :THREE }

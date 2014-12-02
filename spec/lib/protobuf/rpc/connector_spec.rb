@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'protobuf/socket'
 require 'protobuf/zmq'
 
-describe ::Protobuf::Rpc::Connector do
+RSpec.describe ::Protobuf::Rpc::Connector do
 
   describe '.connector_for_client(true)' do
     subject { described_class.connector_for_client }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Protobuf::Message do
+RSpec.describe Protobuf::Message do
 
   describe '.decode' do
     let(:message) { ::Test::Resource.new(:name => "Jim") }
@@ -361,14 +361,16 @@ describe Protobuf::Message do
 
   describe '#inspect' do
     let(:klass) do
-      Class.new(Protobuf::Message) do
-        EnumKlass = Class.new(Protobuf::Enum) do
+      Class.new(Protobuf::Message) do |klass|
+        enum_class = Class.new(Protobuf::Enum) do
           define :YAY, 1
         end
 
+        klass.const_set(:EnumKlass, enum_class)
+
         optional :string, :name, 1
         repeated :int32, :counts, 2
-        optional EnumKlass, :enum, 3
+        optional enum_class, :enum, 3
       end
     end
 
@@ -376,8 +378,7 @@ describe Protobuf::Message do
 
     it 'lists the fields' do
       proto = klass.new(:name => 'wooo', :counts => [1, 2, 3], :enum => klass::EnumKlass::YAY)
-      expect(proto.inspect).to eq \
-        '#<MyMessage name="wooo" counts=[1, 2, 3] enum=#<Protobuf::Enum(EnumKlass)::YAY=1>>'
+      expect(proto.inspect).to eq('#<MyMessage name="wooo" counts=[1, 2, 3] enum=#<Protobuf::Enum(MyMessage::EnumKlass)::YAY=1>>')
     end
   end
 
@@ -406,10 +407,12 @@ describe Protobuf::Message do
       end
 
       it 'recursively hashes a repeated set of messages' do
-        proto = Test::Nested.new(:multiple_resources => [
-          Test::Resource.new(:name => 'Resource 1'),
-          Test::Resource.new(:name => 'Resource 2'),
-        ])
+        proto = Test::Nested.new(
+          :multiple_resources => [
+            Test::Resource.new(:name => 'Resource 1'),
+            Test::Resource.new(:name => 'Resource 2'),
+          ],
+        )
 
         expect(proto.to_hash).to eq(
           :multiple_resources => [

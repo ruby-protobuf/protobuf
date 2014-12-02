@@ -43,6 +43,8 @@ require "protobuf/version"
 
     s.add_development_dependency pry_debugger
     s.add_development_dependency 'pry-stack_explorer'
+  else
+    s.add_development_dependency 'pry'
   end
 
   s.add_development_dependency 'ruby-prof' if RUBY_ENGINE.to_sym == :ruby

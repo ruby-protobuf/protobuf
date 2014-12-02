@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/generators/enum_generator'
 
-describe ::Protobuf::Generators::EnumGenerator do
+RSpec.describe ::Protobuf::Generators::EnumGenerator do
 
   let(:values) do
     [

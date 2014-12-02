@@ -34,12 +34,14 @@ namespace :benchmark do
   def sock_client_sock_server(number_tests, test_length, global_bench = nil)
     load "protobuf/socket.rb"
 
-    StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |_server|
-      client = ::Test::ResourceService.client(:port => 9399)
+    port = 1000 + Kernel.rand(2**16 - 1000)
+
+    StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => port) do
+      client = ::Test::ResourceService.client(:port => port)
 
       benchmark_wrapper(global_bench) do |bench|
         bench.report("SS / SC") do
-          (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
+          Integer(number_tests).times { client.find(:name => "Test Name" * Integer(test_length), :active => true) }
         end
       end
     end
@@ -47,15 +49,17 @@ namespace :benchmark do
 
   def zmq_client_zmq_server(number_tests, test_length, global_bench = nil)
     load "protobuf/zmq.rb"
-    StubServer.new(:port => 9399, :server => Protobuf::Rpc::Zmq::Server) do |server|
-      client = ::Test::ResourceService.client(:port => 9399)
+
+    port = 1000 + Kernel.rand(2**16 - 1000)
+
+    StubServer.new(:port => port, :server => Protobuf::Rpc::Zmq::Server) do
+      client = ::Test::ResourceService.client(:port => port)
 
       benchmark_wrapper(global_bench) do |bench|
         bench.report("ZS / ZC") do
-          (1..number_tests.to_i).each { client.find(:name => "Test Name" * test_length.to_i, :active => true) }
+          Integer(number_tests).times { client.find(:name => "Test Name" * Integer(test_length), :active => true) }
         end
       end
-      server.stop
     end
   end
 
@@ -81,7 +85,7 @@ namespace :benchmark do
     args.with_defaults(:number => 1000, :profile_output => "/tmp/profiler_new_#{Time.now.to_i}")
     create_params = { :name => "The name that we set", :date_created => Time.now.to_i, :status => 2 }
     profile_code(args[:profile_output]) do
-      args[:number].to_i.times { Test::Resource.new(create_params) }
+      Integer(args[:number]).times { Test::Resource.new(create_params) }
     end
 
     puts args[:profile_output]
@@ -92,7 +96,7 @@ namespace :benchmark do
     args.with_defaults(:number => 1000, :profile_output => "/tmp/profiler_new_#{Time.now.to_i}")
     create_params = { :name => "The name that we set", :date_created => Time.now.to_i, :status => 2 }
     profile_code(args[:profile_output]) do
-      args[:number].to_i.times { Test::Resource.new(create_params).serialize }
+      Integer(args[:number]).times { Test::Resource.new(create_params).serialize }
     end
 
     puts args[:profile_output]

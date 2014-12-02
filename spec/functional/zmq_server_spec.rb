@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'spec/support/test/resource_service'
 require 'protobuf/rpc/service_directory'
 
-describe 'Functional ZMQ Client' do
+RSpec.describe 'Functional ZMQ Client' do
   before(:all) do
     load "protobuf/zmq.rb"
     @runner = ::Protobuf::Rpc::ZmqRunner.new(

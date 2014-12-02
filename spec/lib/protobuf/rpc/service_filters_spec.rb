@@ -27,7 +27,7 @@ class FilterTest
   end
 end
 
-describe Protobuf::Rpc::ServiceFilters do
+RSpec.describe Protobuf::Rpc::ServiceFilters do
   let(:params) { {} }
   subject { FilterTest.new(params) }
   after(:each) { FilterTest.clear_filters! }

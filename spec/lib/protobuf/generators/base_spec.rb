@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'protobuf/code_generator'
 require 'protobuf/generators/base'
 
-describe ::Protobuf::Generators::Base do
+RSpec.describe ::Protobuf::Generators::Base do
 
   subject { described_class.new(double) }
 

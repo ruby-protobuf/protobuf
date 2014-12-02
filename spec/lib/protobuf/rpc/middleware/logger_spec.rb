@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Protobuf::Rpc::Middleware::Logger do
+RSpec.describe Protobuf::Rpc::Middleware::Logger do
   let(:app) { proc { |inner_env| inner_env } }
   let(:env) do
     Protobuf::Rpc::Env.new(

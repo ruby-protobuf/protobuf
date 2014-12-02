@@ -11,7 +11,6 @@ rvm:
   - rbx-2
 matrix:
   allow_failures:
-    - rvm: jruby
     - rvm: rbx-2
 notifications:
   webhooks:
