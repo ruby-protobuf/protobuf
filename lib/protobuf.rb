@@ -71,6 +71,13 @@ module Protobuf
     end
   end
 
+  def self.field_deprecator
+    @field_deprecator ||= FieldDeprecation.new.tap do |deprecation|
+      deprecation.silenced = ENV.key?('PB_IGNORE_DEPRECATIONS')
+      deprecation.behavior = :stderr
+    end
+  end
+
   # Print Deprecation Warnings
   #
   # Default: true
@@ -82,11 +89,11 @@ module Protobuf
   #
   # The rpc_server option will override the ENV setting.
   def self.print_deprecation_warnings?
-    !deprecator.silenced
+    !field_deprecator.silenced
   end
 
   def self.print_deprecation_warnings=(value)
-    deprecator.silenced = !value
+    field_deprecator.silenced = !value
   end
 
   # Permit unknown field on Message initialization

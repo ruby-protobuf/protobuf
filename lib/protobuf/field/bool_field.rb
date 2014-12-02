@@ -38,13 +38,9 @@ module Protobuf
         super
 
         field = self
-        method_name = "#{field.getter}?"
 
         message_class.class_eval do
-          define_method(method_name) do
-            @values.fetch(field.name, field.default_value)
-          end
-          ::Protobuf.deprecator.deprecate_methods(method_name)
+          alias_method "#{field.getter}?", field.getter
         end
       end
 
