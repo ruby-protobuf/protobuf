@@ -1,4 +1,7 @@
 require 'ostruct'
+
+require 'active_support/core_ext/hash/reverse_merge'
+
 require 'protobuf/logging'
 require 'protobuf/rpc/server'
 require 'protobuf/rpc/servers/socket/server'
@@ -13,57 +16,46 @@ Thread.abort_on_exception = true
 class StubServer
   include Protobuf::Logging
 
-  attr_accessor :options
+  private
+
+  attr_accessor :options, :runner, :runner_thread
+
+  public
 
   def initialize(options = {})
-    @running = true
-    @options = OpenStruct.new({ :host => "127.0.0.1",
-                                :port => 9399,
-                                :worker_port => 9400,
-                                :delay => 0,
-                                :server => Protobuf::Rpc::Socket::Server }.merge(options))
+    self.options = OpenStruct.new(
+      options.reverse_merge(
+        :host => '127.0.0.1',
+        :port => 9399,
+        :worker_port => 9400,
+        :delay => 0,
+        :server => Protobuf::Rpc::Socket::Server,
+      ),
+    )
 
     start
     yield self
   ensure
-    stop if @running
+    stop
   end
 
   def start
-    case
-    when @options.server == Protobuf::Rpc::Zmq::Server
-      start_zmq_server
-    else
-      start_socket_server
-    end
-    logger.debug { sign_message("Server started #{@options.host}:#{@options.port}") }
-  end
+    runner_class = {
+      ::Protobuf::Rpc::Zmq::Server => ::Protobuf::Rpc::ZmqRunner,
+      ::Protobuf::Rpc::Socket::Server => ::Protobuf::Rpc::SocketRunner,
+    }.fetch(options.server)
 
-  def start_socket_server
-    @sock_runner = ::Protobuf::Rpc::SocketRunner.new(options)
-    @sock_thread = Thread.new(@sock_runner) { |runner| runner.run }
-    @sock_thread.abort_on_exception = true # Set for testing purposes
-    Thread.pass until @sock_runner.running?
-  end
+    self.runner = runner_class.new(options)
+    self.runner_thread = Thread.new(runner, &:run)
+    runner_thread.abort_on_exception = true # Set for testing purposes
+    Thread.pass until runner.running?
 
-  def start_zmq_server
-    @zmq_runner = ::Protobuf::Rpc::ZmqRunner.new(options)
-    @zmq_thread = Thread.new(@zmq_runner) { |runner| runner.run }
-    @zmq_thread.abort_on_exception = true # Set for testing purposes
-    Thread.pass until @zmq_runner.running?
+    logger.debug { sign_message("Server started #{options.host}:#{options.port}") }
   end
 
   def stop
-    case
-    when @options.server == Protobuf::Rpc::Zmq::Server then
-      @zmq_runner.try :stop
-      @zmq_thread.join if @zmq_thread
-    else
-      @sock_runner.stop
-      @sock_thread.join if @sock_thread
-    end
-
-    @running = false
+    runner.stop
+    runner_thread.join
   end
 
   def log_signature

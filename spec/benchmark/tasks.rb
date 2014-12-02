@@ -36,7 +36,7 @@ namespace :benchmark do
 
     port = 1000 + Kernel.rand(2**16 - 1000)
 
-    StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => port) do |_server|
+    StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => port) do
       client = ::Test::ResourceService.client(:port => port)
 
       benchmark_wrapper(global_bench) do |bench|
@@ -52,7 +52,7 @@ namespace :benchmark do
 
     port = 1000 + Kernel.rand(2**16 - 1000)
 
-    StubServer.new(:port => port, :server => Protobuf::Rpc::Zmq::Server) do |server|
+    StubServer.new(:port => port, :server => Protobuf::Rpc::Zmq::Server) do
       client = ::Test::ResourceService.client(:port => port)
 
       benchmark_wrapper(global_bench) do |bench|
@@ -60,7 +60,6 @@ namespace :benchmark do
           Integer(number_tests).times { client.find(:name => "Test Name" * Integer(test_length), :active => true) }
         end
       end
-      server.stop
     end
   end
 
