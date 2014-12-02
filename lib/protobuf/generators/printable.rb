@@ -1,10 +1,14 @@
+require 'protobuf/message'
+require 'protobuf/enum'
+require 'protobuf/service'
+
 module Protobuf
   module Generators
     module Printable
 
-      PARENT_CLASS_MESSAGE = "::Protobuf::Message".freeze
-      PARENT_CLASS_ENUM    = "::Protobuf::Enum".freeze
-      PARENT_CLASS_SERVICE = "::Protobuf::Rpc::Service".freeze
+      PARENT_CLASS_MESSAGE = "::#{Protobuf::Message}".freeze
+      PARENT_CLASS_ENUM    = "::#{Protobuf::Enum}".freeze
+      PARENT_CLASS_SERVICE = "::#{Protobuf::Service}".freeze
 
       # Initialize the printer.
       # Must be called by any class/module that includes the Printable module.

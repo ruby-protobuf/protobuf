@@ -1,10 +1,13 @@
 module Protobuf
-  module Rpc
-    # Object to encapsulate the request/response types for a given service method
-    #
-    RpcMethod = Struct.new(:method, :request_type, :response_type)
-
+  if defined?(::Protobuf::Rpc)
+    require 'protobuf/rpc/service'
+    Service = ::Protobuf::Rpc::Service
+  else
     class Service
+      # Object to encapsulate the request/response types for a given service method
+      #
+      RpcMethod = Struct.new(:method, :request_type, :response_type)
+
       class << self
         # An array of defined service classes that contain implementation
         # code
@@ -49,6 +52,16 @@ module Protobuf
       #
       def rpcs
         self.class.rpcs
+      end
+    end
+
+    unless defined?(::Protobuf::Rpc)
+      module Rpc
+        Service = ActiveSupport::Deprecation::DeprecatedObjectProxy.new(
+          ::Protobuf::Service,
+          'Service is now a top level constant',
+          ::Protobuf.deprecator,
+        ) unless defined?(::Protobuf::Rpc::Service)
       end
     end
   end

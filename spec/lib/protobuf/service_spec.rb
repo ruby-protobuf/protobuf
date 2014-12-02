@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Protobuf::Rpc::Service do
+RSpec.describe Protobuf::Service do
   context 'class methods' do
     subject { Test::ResourceService }
 
