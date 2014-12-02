@@ -407,10 +407,12 @@ RSpec.describe Protobuf::Message do
       end
 
       it 'recursively hashes a repeated set of messages' do
-        proto = Test::Nested.new(:multiple_resources => [
-          Test::Resource.new(:name => 'Resource 1'),
-          Test::Resource.new(:name => 'Resource 2'),
-        ])
+        proto = Test::Nested.new(
+          :multiple_resources => [
+            Test::Resource.new(:name => 'Resource 1'),
+            Test::Resource.new(:name => 'Resource 2'),
+          ],
+        )
 
         expect(proto.to_hash).to eq(
           :multiple_resources => [
