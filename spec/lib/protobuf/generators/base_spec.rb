@@ -74,6 +74,7 @@ describe ::Protobuf::Generators::Base do
 
     context 'when tags are missing in the range' do
       it 'prints a warning' do
+        expect(::Protobuf::CodeGenerator).to receive(:print_tag_warning_suppress)
         expect(::Protobuf::CodeGenerator).to receive(:warn).with(/FooBar object should have 5 tags \(1\.\.5\), but found 4 tags/)
         described_class.validate_tags("FooBar", [1, 2, 4, 5])
       end

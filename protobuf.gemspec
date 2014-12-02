@@ -25,7 +25,6 @@ require "protobuf/version"
   s.add_dependency 'thread_safe'
 
   s.add_development_dependency 'ffi-rzmq'
-  s.add_development_dependency 'pry'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '>= 3.0'
   s.add_development_dependency 'rubocop'
@@ -33,6 +32,18 @@ require "protobuf/version"
   s.add_development_dependency 'timecop'
   s.add_development_dependency 'yard'
 
+  # debuggers only work in MRI
+  if RUBY_ENGINE.to_sym == :ruby
+    # we don't support MRI < 1.9.3
+    pry_debugger = if RUBY_VERSION < '2.0.0'
+      'pry-debugger'
+    else
+      'pry-byebug'
+    end
+
+    s.add_development_dependency pry_debugger
+    s.add_development_dependency 'pry-stack_explorer'
+  end
+
   s.add_development_dependency 'ruby-prof' if RUBY_ENGINE.to_sym == :ruby
-  s.add_development_dependency 'pry-nav' unless RUBY_ENGINE.to_sym == :rbx
 end

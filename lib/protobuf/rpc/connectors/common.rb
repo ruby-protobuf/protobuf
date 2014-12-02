@@ -78,7 +78,7 @@ module Protobuf
           response_wrapper = Protobuf::Socketrpc::Response.decode(@response_data)
 
           # Determine success or failure based on parsed data
-          if response_wrapper.has_field?(:error_reason)
+          if response_wrapper.field?(:error_reason)
             logger.debug { sign_message("Error response parsed") }
 
             # fail the call if we already know the client is failed
@@ -90,7 +90,7 @@ module Protobuf
             # Ensure client_response is an instance
             parsed = @options[:response_type].decode(response_wrapper.response_proto.to_s)
 
-            if parsed.nil? && !response_wrapper.has_field?(:error_reason)
+            if parsed.nil? && !response_wrapper.field?(:error_reason)
               failure(:BAD_RESPONSE_PROTO, 'Unable to parse response from server')
             else
               verify_callbacks

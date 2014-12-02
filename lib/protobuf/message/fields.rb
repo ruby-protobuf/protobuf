@@ -1,15 +1,15 @@
-require 'protobuf/deprecator'
-
 module Protobuf
   class Message
     module Fields
 
       def self.extended(other)
-        other.extend(::Protobuf::Deprecator)
-        other.deprecate_class_method(:get_ext_field_by_name, :get_extension_field)
-        other.deprecate_class_method(:get_ext_field_by_tag, :get_extension_field)
-        other.deprecate_class_method(:get_field_by_name, :get_field)
-        other.deprecate_class_method(:get_field_by_tag, :get_field)
+        ::Protobuf.deprecator.define_deprecated_methods(
+          other.singleton_class,
+          :get_ext_field_by_name => :get_extension_field,
+          :get_ext_field_by_tag => :get_extension_field,
+          :get_field_by_name => :get_field,
+          :get_field_by_tag => :get_field,
+        )
       end
 
       ##
@@ -97,11 +97,9 @@ module Protobuf
         field_store[field_name] = field
         field_store[tag] = field
 
-        class_eval(<<-RAW_GETTER, __FILE__, __LINE__ + 1)
-          define_method("#{field_name}!") do
-            @values[:#{field_name}]
-          end
-        RAW_GETTER
+        define_method("#{field_name}!") do
+          @values[field_name]
+        end
       end
 
       def raise_if_tag_collision(tag, field_name)

@@ -50,21 +50,25 @@ describe Protobuf::Enum do
 
     describe '.enums' do
       it 'provides an array of defined Enums' do
-        expect(Test::EnumTestType.enums).to eq([
-          Test::EnumTestType::ONE,
-          Test::EnumTestType::TWO,
-          Test::EnumTestType::MINUS_ONE,
-          Test::EnumTestType::THREE,
-        ])
+        expect(Test::EnumTestType.enums).to eq(
+          [
+            Test::EnumTestType::ONE,
+            Test::EnumTestType::TWO,
+            Test::EnumTestType::MINUS_ONE,
+            Test::EnumTestType::THREE,
+          ],
+        )
       end
 
       context 'when enum allows aliases' do
         it 'treats aliased enums as valid' do
-          expect(EnumAliasTest.enums).to eq([
-            EnumAliasTest::FOO,
-            EnumAliasTest::BAR,
-            EnumAliasTest::BAZ,
-          ])
+          expect(EnumAliasTest.enums).to eq(
+            [
+              EnumAliasTest::FOO,
+              EnumAliasTest::BAR,
+              EnumAliasTest::BAZ,
+            ],
+          )
         end
       end
     end
@@ -173,6 +177,11 @@ describe Protobuf::Enum do
     end
 
     describe '.values' do
+      around do |example|
+        # this method is deprecated
+        ::Protobuf.deprecator.silence(&example)
+      end
+
       it 'provides a hash of defined Enums' do
         expect(Test::EnumTestType.values).to eq(
           :MINUS_ONE => Test::EnumTestType::MINUS_ONE,
@@ -204,7 +213,16 @@ describe Protobuf::Enum do
   specify { expect(subject.parent_class).to eq(Test::EnumTestType) }
   specify { expect(subject.name).to eq(:ONE) }
   specify { expect(subject.tag).to eq(1) }
-  specify { expect(subject.value).to eq(1) }
+
+  context 'deprecated' do
+    around do |example|
+      # this method is deprecated
+      ::Protobuf.deprecator.silence(&example)
+    end
+
+    specify { expect(subject.value).to eq(1) }
+  end
+
   specify { expect(subject.to_hash_value).to eq(1) }
   specify { expect(subject.to_s).to eq("1") }
   specify { expect(subject.inspect).to eq('#<Protobuf::Enum(Test::EnumTestType)::ONE=1>') }
@@ -221,7 +239,16 @@ describe Protobuf::Enum do
     specify { expect(subject.try(:class)).to eq(subject.class) }
     specify { expect(subject.try(:name)).to eq(subject.name) }
     specify { expect(subject.try(:tag)).to eq(subject.tag) }
-    specify { expect(subject.try(:value)).to eq(subject.value) }
+
+    context 'deprecated' do
+      around do |example|
+        # this method is deprecated
+        ::Protobuf.deprecator.silence(&example)
+      end
+
+      specify { expect(subject.try(:value)).to eq(subject.value) }
+    end
+
     specify { expect(subject.try(:to_i)).to eq(subject.to_i) }
     specify { expect(subject.try(:to_int)).to eq(subject.to_int) }
     specify { subject.try { |yielded| expect(yielded).to eq(subject) } }
