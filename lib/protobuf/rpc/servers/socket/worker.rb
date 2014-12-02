@@ -44,7 +44,7 @@ module Protobuf
         end
 
         def log_signature
-          @_log_signature ||= "server-#{self.class}-#{object_id}"
+          @_log_signature ||= "[server-#{self.class}-#{object_id}]"
         end
 
         def socket_writable?

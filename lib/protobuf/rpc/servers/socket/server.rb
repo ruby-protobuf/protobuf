@@ -35,7 +35,7 @@ module Protobuf
         end
 
         def log_signature
-          @_log_signature ||= "server-#{self.class.name}"
+          @_log_signature ||= "[server-#{self.class.name}]"
         end
 
         def new_worker(socket)
