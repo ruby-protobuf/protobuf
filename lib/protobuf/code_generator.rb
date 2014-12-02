@@ -1,3 +1,4 @@
+require 'protobuf/descriptors'
 require 'protobuf/generators/file_generator'
 
 module Protobuf
