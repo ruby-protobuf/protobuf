@@ -10,24 +10,6 @@ require 'spec/support/test/resource_service'
 # Want to abort if server dies?
 Thread.abort_on_exception = true
 
-module StubProtobufServerFactory
-  def self.build(delay)
-    new_server = Class.new(Protobuf::Rpc::Socket::Server) do
-      class << self
-        attr_accessor :sleep_interval
-      end
-
-      def post_init
-        sleep self.class.sleep_interval
-        super
-      end
-    end
-
-    new_server.sleep_interval = delay
-    new_server
-  end
-end
-
 class StubServer
   include Protobuf::Logging
 
