@@ -362,18 +362,22 @@ describe Protobuf::Message do
   describe '#inspect' do
     let(:klass) do
       Class.new(Protobuf::Message) do
+        EnumKlass = Class.new(Protobuf::Enum) do
+          define :YAY, 1
+        end
+
         optional :string, :name, 1
         repeated :int32, :counts, 2
-        optional :int32, :timestamp, 3
+        optional EnumKlass, :enum, 3
       end
     end
 
     before { stub_const('MyMessage', klass) }
 
     it 'lists the fields' do
-      proto = klass.new(:name => 'wooo', :counts => [1, 2, 3])
+      proto = klass.new(:name => 'wooo', :counts => [1, 2, 3], :enum => klass::EnumKlass::YAY)
       expect(proto.inspect).to eq \
-        '#<MyMessage name="wooo" counts=[1, 2, 3] timestamp=0>'
+        '#<MyMessage name="wooo" counts=[1, 2, 3] enum=#<Protobuf::Enum(EnumKlass)::YAY=1>>'
     end
   end
 
