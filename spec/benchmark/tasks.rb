@@ -34,8 +34,10 @@ namespace :benchmark do
   def sock_client_sock_server(number_tests, test_length, global_bench = nil)
     load "protobuf/socket.rb"
 
-    StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => 9399) do |_server|
-      client = ::Test::ResourceService.client(:port => 9399)
+    port = 1000 + Kernel.rand(2**16 - 1000)
+
+    StubServer.new(:server => Protobuf::Rpc::Socket::Server, :port => port) do |_server|
+      client = ::Test::ResourceService.client(:port => port)
 
       benchmark_wrapper(global_bench) do |bench|
         bench.report("SS / SC") do
@@ -47,8 +49,11 @@ namespace :benchmark do
 
   def zmq_client_zmq_server(number_tests, test_length, global_bench = nil)
     load "protobuf/zmq.rb"
-    StubServer.new(:port => 9399, :server => Protobuf::Rpc::Zmq::Server) do |server|
-      client = ::Test::ResourceService.client(:port => 9399)
+
+    port = 1000 + Kernel.rand(2**16 - 1000)
+
+    StubServer.new(:port => port, :server => Protobuf::Rpc::Zmq::Server) do |server|
+      client = ::Test::ResourceService.client(:port => port)
 
       benchmark_wrapper(global_bench) do |bench|
         bench.report("ZS / ZC") do
