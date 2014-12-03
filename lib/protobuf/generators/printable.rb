@@ -1,3 +1,5 @@
+require 'stringio'
+
 require 'protobuf/message'
 require 'protobuf/enum'
 require 'protobuf/service'

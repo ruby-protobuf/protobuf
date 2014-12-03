@@ -1,12 +1,3 @@
-require 'pp'
-require 'stringio'
-
-require 'active_support/core_ext/object/blank'
-require 'active_support/core_ext/object/try'
-require 'active_support/inflector'
-require 'active_support/json'
-require 'active_support/notifications'
-
 require 'protobuf/deprecation'
 
 module Protobuf

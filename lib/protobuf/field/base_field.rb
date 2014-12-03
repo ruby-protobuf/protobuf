@@ -1,3 +1,5 @@
+require 'stringio'
+
 require 'protobuf/field/field_array'
 require 'protobuf/wire_type'
 

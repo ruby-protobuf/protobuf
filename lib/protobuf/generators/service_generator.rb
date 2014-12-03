@@ -1,4 +1,5 @@
 require 'protobuf/generators/base'
+require 'active_support/inflector'
 
 module Protobuf
   module Generators

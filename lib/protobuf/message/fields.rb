@@ -75,7 +75,12 @@ module Protobuf
       def get_extension_field(name_or_tag)
         name_or_tag = name_or_tag.to_sym if name_or_tag.respond_to?(:to_sym)
         field = field_store[name_or_tag]
-        field if field.try(:extension?) { false }
+
+        if field && field.extension?
+          field
+        else
+          nil
+        end
       end
 
       def get_field(name_or_tag, allow_extension = false)

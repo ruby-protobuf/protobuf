@@ -1,6 +1,3 @@
-require 'timeout'
-require 'rubygems'
-require 'bundler'
 require 'pry'
 
 $LOAD_PATH << ::File.expand_path('../support', __FILE__)

@@ -6,12 +6,17 @@ module Protobuf
 
     module ClassMethods
       def get_option(name)
-        @_optionable_options.try(:[], name)
+        optionable_options[name]
       end
 
       def set_option(name, value = true)
-        @_optionable_options ||= {}
-        @_optionable_options[name] = value
+        optionable_options[name] = value
+      end
+
+      private
+
+      def optionable_options
+        @optionable_options ||= {}
       end
     end
 

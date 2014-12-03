@@ -1,3 +1,5 @@
+require 'active_support/notifications'
+
 module Protobuf
   class Lifecycle
     class << self
