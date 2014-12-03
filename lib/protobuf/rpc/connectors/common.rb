@@ -52,7 +52,7 @@ module Protobuf
         end
 
         def initialize_stats
-          @stats ||= ::Protobuf::Rpc::Stat.new(:CLIENT)
+          @stats = ::Protobuf::Rpc::Stat.new(:CLIENT)
           @stats.server = [@options[:port], @options[:host]]
           @stats.service = @options[:service].name
           @stats.method_name = @options[:method].to_s
