@@ -153,16 +153,7 @@ module Protobuf
         "#{rule} #{type_class} #{name} = #{tag} #{default ? "[default=#{default.inspect}]" : ''}"
       end
 
-      def type
-        $stderr.puts("[DEPRECATED] #{self.class.name}#type usage is deprecated.\nPlease use #type_class instead.")
-        type_class
-      end
-
-      def warn_if_deprecated
-        if ::Protobuf.print_deprecation_warnings? && deprecated?
-          $stderr.puts("[WARNING] #{message_class.name}##{name} field usage is deprecated.")
-        end
-      end
+      ::Protobuf.deprecator.define_deprecated_methods(self, :type => :type_class)
 
       def wire_type
         ::Protobuf::WireType::VARINT
@@ -186,20 +177,22 @@ module Protobuf
 
       def define_array_getter
         field = self
+        method_name = field.getter
+
         message_class.class_eval do
-          define_method(field.getter) do
-            field.warn_if_deprecated
+          define_method(method_name) do
             @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
           end
+          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
       end
 
       def define_array_setter
         field = self
-        message_class.class_eval do
-          define_method(field.setter) do |val|
-            field.warn_if_deprecated
+        method_name = field.setter
 
+        message_class.class_eval do
+          define_method(method_name) do |val|
             if val.is_a?(Array)
               val = val.dup
               val.compact!
@@ -217,25 +210,28 @@ module Protobuf
               @values[field.name].replace(val)
             end
           end
+          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
       end
 
       def define_getter
         field = self
+        method_name = field.getter
+
         message_class.class_eval do
-          define_method(field.getter) do
-            field.warn_if_deprecated
+          define_method(method_name) do
             @values.fetch(field.name, field.default_value)
           end
+          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
       end
 
       def define_setter
         field = self
-        message_class.class_eval do
-          define_method(field.setter) do |val|
-            field.warn_if_deprecated
+        method_name = field.setter
 
+        message_class.class_eval do
+          define_method(method_name) do |val|
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
               @values.delete(field.name)
             elsif field.acceptable?(val)
@@ -244,6 +240,7 @@ module Protobuf
               fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
           end
+          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
       end
 

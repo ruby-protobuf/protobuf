@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/code_generator'
 
-describe 'protoc-gen-ruby' do
+RSpec.describe 'protoc-gen-ruby' do
   let(:binpath) { ::File.expand_path('../../../bin/protoc-gen-ruby', __FILE__) }
   let(:package) { 'test' }
   let(:request_bytes) do

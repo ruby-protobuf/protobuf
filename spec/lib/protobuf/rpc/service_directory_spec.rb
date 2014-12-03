@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/rpc/service_directory'
 
-describe ::Protobuf::Rpc::ServiceDirectory do
+RSpec.describe ::Protobuf::Rpc::ServiceDirectory do
   subject { described_class.instance }
 
   let(:echo_server) do
@@ -57,8 +57,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
   def expect_event_trigger(event)
     expect(::ActiveSupport::Notifications).to receive(:instrument)
-                                                .with(event, hash_including(:listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing)))
-                                                .once
+      .with(event, hash_including(
+        :listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing),
+      )).once
   end
 
   def send_beacon(type, server)

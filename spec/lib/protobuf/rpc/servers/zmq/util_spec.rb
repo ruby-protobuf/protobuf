@@ -4,7 +4,7 @@ class UtilTest
   include ::Protobuf::Rpc::Zmq::Util
 end
 
-describe ::Protobuf::Rpc::Zmq::Util do
+RSpec.describe ::Protobuf::Rpc::Zmq::Util do
   before(:each) do
     load 'protobuf/zmq.rb'
   end

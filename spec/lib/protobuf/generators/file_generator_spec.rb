@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/generators/file_generator'
 
-describe ::Protobuf::Generators::FileGenerator do
+RSpec.describe ::Protobuf::Generators::FileGenerator do
 
   let(:base_descriptor_fields) { { :name => 'test/foo.proto' } }
   let(:descriptor_fields) { base_descriptor_fields }

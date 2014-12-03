@@ -1,33 +1,15 @@
 require 'delegate'
 require 'protobuf/optionable'
-require 'protobuf/deprecator'
 
 ##
 # Adding extension to Numeric until
 # we can get people to stop calling #value
 # on Enum instances.
 #
-class Numeric
-  unless method_defined?(:value)
-    def value
-      $stderr.puts <<-DEPRECATION
-[DEPRECATED] Enum#value is deprecated and will be removed in the next release.
-              Use Enum#to_i instead.
-DEPRECATION
-      self
-    end
-  end
-end
+::Protobuf.deprecator.define_deprecated_methods(Numeric, :value => :to_int)
 
 module Protobuf
   class Enum < SimpleDelegator
-
-    ##
-    # Deprecations
-    #
-
-    extend ::Protobuf::Deprecator
-
     # Public: Allows setting Options on the Enum class.
     include ::Protobuf::Optionable
 
@@ -223,27 +205,35 @@ module Protobuf
     # by their :name.
     #
     def self.values
-      warn_deprecated(:values, :enums)
-
-      @values ||= begin
-                    enums.each_with_object({}) do |enum, hash|
-                      hash[enum.name] = enum
-                    end
-                  end
+      @values ||= enums.each_with_object({}) do |enum, hash|
+        hash[enum.name] = enum
+      end
     end
 
     ##
     # Class Deprecations
     #
+    class << self
+      ::Protobuf.deprecator.define_deprecated_methods(
+        self,
+        :enum_by_value => :enum_for_tag,
+        :name_by_value => :name_for_tag,
+        :get_name_by_tag => :name_for_tag,
+        :value_by_name => :enum_for_name,
+      )
 
-    deprecate_class_method :enum_by_value,   :enum_for_tag
-    deprecate_class_method :name_by_value,   :name_for_tag
-    deprecate_class_method :get_name_by_tag, :name_for_tag
-    deprecate_class_method :value_by_name,   :enum_for_name
+      ::Protobuf.deprecator.deprecate_methods(self, :values => :enums)
+    end
 
     ##
     # Attributes
     #
+
+    private
+
+    attr_writer :parent_class, :name, :tag
+
+    public
 
     attr_reader :parent_class, :name, :tag
 
@@ -252,10 +242,10 @@ module Protobuf
     #
 
     def initialize(parent_class, name, tag)
-      @parent_class = parent_class
-      @name = name
-      @tag = tag
-      super(@tag)
+      self.parent_class = parent_class
+      self.name = name
+      self.tag = tag
+      super(tag)
     end
 
     # Overriding the class so ActiveRecord/Arel visitor will visit the enum as a Fixnum
@@ -303,10 +293,7 @@ module Protobuf
       end
     end
 
-    def value
-      parent_class.warn_deprecated(:value, :to_i)
-      to_i
-    end
+    ::Protobuf.deprecator.define_deprecated_methods(self, :value => :to_i)
 
     ##
     # Instance Aliases

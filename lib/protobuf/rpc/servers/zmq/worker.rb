@@ -46,13 +46,11 @@ module Protobuf
           loop do
             rc = poller.poll(500)
 
-            # The server was shutdown and no requests are pending
-            break if rc == 0 && !running?
-
-            # Something went wrong
-            break if rc == -1
-
-            if rc > 0
+            if rc == 0 && !running?
+              break # The server was shutdown and no requests are pending
+            elsif rc == -1
+              break # Something went wrong
+            elsif rc > 0
               ::Thread.current[:busy] = true
               process_request
               ::Thread.current[:busy] = false

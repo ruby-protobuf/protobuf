@@ -2,8 +2,14 @@ module Protobuf
   module Rpc
     class SocketRunner
 
+      private
+
+      attr_accessor :server
+
+      public
+
       def initialize(options)
-        @options = case
+        options = case
                    when options.is_a?(OpenStruct) then
                      options.marshal_dump
                    when options.is_a?(Hash) then
@@ -14,20 +20,20 @@ module Protobuf
                      fail "Cannot parser Socket Server - server options"
                    end
 
-        @server = ::Protobuf::Rpc::Socket::Server.new(@options)
+        self.server = ::Protobuf::Rpc::Socket::Server.new(options)
       end
 
       def run
         yield if block_given?
-        @server.run
+        server.run
       end
 
       def running?
-        @server.running?
+        server.running?
       end
 
       def stop
-        @server.stop
+        server.stop
       end
     end
   end

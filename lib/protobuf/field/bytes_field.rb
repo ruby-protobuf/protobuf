@@ -53,10 +53,11 @@ module Protobuf
 
       def define_setter
         field = self
+        method_name = field.setter
+
         message_class.class_eval do
-          define_method(field.setter) do |val|
+          define_method(method_name) do |val|
             begin
-              field.warn_if_deprecated
               val = "#{val}" if val.is_a?(Symbol)
 
               if val.nil?
@@ -72,6 +73,7 @@ module Protobuf
               raise TypeError, "Got NoMethodError attempting to set #{val} for field #{field.name} of type #{field.type_class}: #{ex.message}"
             end
           end
+          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
       end
 

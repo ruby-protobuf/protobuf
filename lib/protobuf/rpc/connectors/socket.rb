@@ -28,8 +28,8 @@ module Protobuf
         end
 
         def connect_to_rpc_server
-          @socket = TCPSocket.new(options[:host], options[:port])
-          logger.debug { sign_message("Connection established #{options[:host]}:#{options[:port]}")  }
+          @socket ||= TCPSocket.new(options[:host], options[:port])
+          logger.debug { sign_message("Connection established #{options[:host]}:#{options[:port]}") }
         end
 
         # Method to determine error state, must be used with Connector api

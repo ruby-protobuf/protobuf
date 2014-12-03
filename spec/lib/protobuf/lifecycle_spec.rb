@@ -1,10 +1,15 @@
 require 'spec_helper'
 require 'protobuf/lifecycle'
 
-describe ::Protobuf::Lifecycle do
+RSpec.describe ::Protobuf::Lifecycle do
   subject { described_class }
 
-  before(:each) do
+  around do |example|
+    # this entire class is deprecated
+    ::Protobuf.deprecator.silence(&example)
+  end
+
+  before do
     ::ActiveSupport::Notifications.notifier = ::ActiveSupport::Notifications::Fanout.new
   end
 

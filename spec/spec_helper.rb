@@ -3,7 +3,6 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup :default, :development, :test
 require 'pry'
-# require 'rspec/its'
 
 $LOAD_PATH << ::File.expand_path('../..', __FILE__)
 $LOAD_PATH << ::File.expand_path('../support', __FILE__)
@@ -28,6 +27,8 @@ ENV.delete("PB_IGNORE_DEPRECATIONS")
 
 support_proto_glob = File.expand_path('../support/**/*.pb.rb', __FILE__)
 Dir[support_proto_glob].each { |proto_file| require proto_file }
+
+RSpec.configure(&:disable_monkey_patching!)
 
 ::Protobuf::Rpc::Client.class_eval do
   def ==(other)

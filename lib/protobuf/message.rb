@@ -11,8 +11,6 @@ module Protobuf
     # Includes & Extends
     #
 
-    extend ::Protobuf::Deprecator
-
     extend ::Protobuf::Message::Fields
     include ::Protobuf::Message::Serialization
 
@@ -86,7 +84,7 @@ module Protobuf
     def field?(name)
       @values.key?(name)
     end
-    deprecate_method(:has_field?, :field?)
+    ::Protobuf.deprecator.define_deprecated_methods(self, :has_field? => :field?)
 
     def inspect
       attrs = self.class.fields.map do |field|

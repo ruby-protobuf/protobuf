@@ -15,7 +15,6 @@ module Protobuf
                    else
                      fail "Cannot parser Zmq Server - server options"
                    end
-
       end
 
       def run

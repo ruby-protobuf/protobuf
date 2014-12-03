@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/field'
 
-describe ::Protobuf::Field do
+RSpec.describe ::Protobuf::Field do
 
   describe '.build' do
     pending

@@ -251,14 +251,13 @@ module Protobuf
               start_missing_workers
             end
 
-            if broadcast_heartbeat?
-              if options[:broadcast_busy] && all_workers_busy?
-                broadcast_flatline
-              else
-                broadcast_heartbeat
-              end
-            end
+            next unless broadcast_heartbeat?
 
+            if options[:broadcast_busy] && all_workers_busy?
+              broadcast_flatline
+            else
+              broadcast_heartbeat
+            end
           end
         end
 
