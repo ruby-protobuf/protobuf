@@ -121,15 +121,15 @@ module Protobuf
         #
         def lookup_server_uri
           server_lookup_attempts.times do
-            service_directory.all_listings_for(service).each do |listing|
-              host = listing.try(:address)
-              port = listing.try(:port)
+            first_alive_listing = service_directory.all_listings_for(service).find do |listing|
+              host_alive?(listing.try(:address))
+            end
 
-              if host_alive?(host)
-                # @stats from Common, need to get a better public interface for it
-                @stats.server = [port, host]
-                return "tcp://#{host}:#{port}"
-              end
+            if first_alive_listing
+              host = first_alive_listing.try(:address)
+              port = first_alive_listing.try(:port)
+              @stats.server = [port, host]
+              return "tcp://#{host}:#{port}"
             end
 
             host = options[:host]
