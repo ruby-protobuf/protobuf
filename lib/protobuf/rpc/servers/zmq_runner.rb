@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'thread'
 
 module Protobuf
   module Rpc
@@ -35,6 +36,17 @@ module Protobuf
       private
 
       def register_signals
+        trap(:TRAP) do
+          ::Thread.list.each do |thread|
+            logger.info do
+              <<-THREAD_TRACE
+                #{thread.inspect}:
+                  #{thread.backtrace.join($INPUT_RECORD_SEPARATOR)}"
+              THREAD_TRACE
+            end
+          end
+        end
+
         trap(:TTIN) do
           @server.add_worker
           logger.info { "Increased worker size to: #{@server.total_workers}" }
@@ -42,7 +54,7 @@ module Protobuf
 
         trap(:TTOU) do
           logger.info { "Current worker size: #{@server.workers.size}" }
-          logger.info { "Current worker size: #{@server.busy_worker_count}" }
+          logger.info { "Current busy worker size: #{@server.busy_worker_count}" }
         end
       end
     end

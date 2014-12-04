@@ -216,16 +216,16 @@ module Protobuf
           @last_reaping = @last_beacon = @timeout = nil
         end
 
-        def total_workers
-          @total_workers ||= [@options[:threads].to_i, 1].max
-        end
-
         def timeout
           if @timeout.nil?
             @timeout = 0
           else
             @timeout = [minimum_timeout, maintenance_timeout].max
           end
+        end
+
+        def total_workers
+          @total_workers ||= [@options[:threads].to_i, 1].max
         end
 
         def to_proto
@@ -253,7 +253,7 @@ module Protobuf
 
             next unless broadcast_heartbeat?
 
-            if all_workers_busy? && options[:broadcast_busy]
+            if options[:broadcast_busy] && all_workers_busy?
               broadcast_flatline
             else
               broadcast_heartbeat

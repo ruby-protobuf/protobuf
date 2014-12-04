@@ -44,10 +44,10 @@ module Protobuf
       # Encode this message
       #
       def encode
-        ::StringIO.new.tap do |stream|
-          stream.set_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
-          encode_to(stream)
-        end.string
+        stream = ::StringIO.new
+        stream.set_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+        encode_to(stream)
+        stream.string
       end
 
       # Encode this message to the given stream.
