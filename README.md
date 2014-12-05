@@ -1,8 +1,8 @@
 # protobuf
 
-[![Gem Version](https://badge.fury.io/rb/protobuf.png)](http://badge.fury.io/rb/protobuf)
-[![Build Status](https://secure.travis-ci.org/localshred/protobuf.png?branch=master)](https://travis-ci.org/localshred/protobuf)
-[![Gitter chat](https://badges.gitter.im/localshred/protobuf.png)](https://gitter.im/localshred/protobuf)
+[![Gem Version](https://badge.fury.io/rb/protobuf.svg)](http://badge.fury.io/rb/protobuf)
+[![Build Status](https://secure.travis-ci.org/localshred/protobuf.svg?branch=master)](https://travis-ci.org/localshred/protobuf)
+[![Gitter chat](https://badges.gitter.im/localshred/protobuf.svg)](https://gitter.im/localshred/protobuf)
 
 Protobuf is an implementation of [Google's protocol buffers][google-pb] in ruby, version 2.5.0 is currently supported.
 
