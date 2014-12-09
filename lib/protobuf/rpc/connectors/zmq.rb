@@ -74,9 +74,9 @@ module Protobuf
         # service. The LINGER is set to 0 so we can close immediately in
         # the event of a timeout
         def create_socket
-          socket = zmq_context.socket(::ZMQ::REQ)
-
           begin
+            socket = zmq_context.socket(::ZMQ::REQ)
+
             if socket # Make sure the context builds the socket
               server_uri = lookup_server_uri
               socket.setsockopt(::ZMQ::LINGER, 0)
