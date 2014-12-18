@@ -64,38 +64,6 @@ module Protobuf
     @gc_pause_server_request = !!value
   end
 
-  def self.deprecator
-    @deprecator ||= Deprecation.new('4.0', to_s).tap do |deprecation|
-      deprecation.silenced = ENV.key?('PB_IGNORE_DEPRECATIONS')
-      deprecation.behavior = :stderr
-    end
-  end
-
-  def self.field_deprecator
-    @field_deprecator ||= FieldDeprecation.new.tap do |deprecation|
-      deprecation.silenced = ENV.key?('PB_IGNORE_DEPRECATIONS')
-      deprecation.behavior = :stderr
-    end
-  end
-
-  # Print Deprecation Warnings
-  #
-  # Default: true
-  #
-  # Simple boolean to define whether we want field deprecation warnings to
-  # be printed to stderr or not. The rpc_server has an option to set this value
-  # explicitly, or you can turn this option off by setting
-  # ENV['PB_IGNORE_DEPRECATIONS'] to a non-empty value.
-  #
-  # The rpc_server option will override the ENV setting.
-  def self.print_deprecation_warnings?
-    !field_deprecator.silenced
-  end
-
-  def self.print_deprecation_warnings=(value)
-    field_deprecator.silenced = !value
-  end
-
   # Permit unknown field on Message initialization
   #
   # Default: true
