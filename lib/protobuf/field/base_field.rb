@@ -183,8 +183,9 @@ module Protobuf
           define_method(method_name) do
             @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
           end
-          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
+
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
       def define_array_setter
@@ -210,8 +211,9 @@ module Protobuf
               @values[field.name].replace(val)
             end
           end
-          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
+
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
       def define_getter
@@ -222,8 +224,9 @@ module Protobuf
           define_method(method_name) do
             @values.fetch(field.name, field.default_value)
           end
-          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
+
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
       def define_setter
@@ -240,8 +243,9 @@ module Protobuf
               fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
           end
-          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
+
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
       def typed_default_value

@@ -73,10 +73,10 @@ module Protobuf
               raise TypeError, "Got NoMethodError attempting to set #{val} for field #{field.name} of type #{field.type_class}: #{ex.message}"
             end
           end
-          ::Protobuf.deprecator.deprecate_methods(method_name)
         end
-      end
 
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
+      end
     end
   end
 end
