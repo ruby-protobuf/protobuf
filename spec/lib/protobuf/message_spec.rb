@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+require 'stringio'
 require 'spec_helper'
 
 RSpec.describe Protobuf::Message do
@@ -68,6 +69,15 @@ RSpec.describe Protobuf::Message do
           expect { older.enum_field = [:HOORAY] }.to raise_error
         end
       end
+    end
+  end
+
+  describe '.decode_from' do
+    let(:message) { ::Test::Resource.new(:name => "Jim") }
+
+    it 'creates a new message object decoded from the given byte stream' do
+      stream = ::StringIO.new(message.encode)
+      expect(::Test::Resource.decode_from(stream)).to eq message
     end
   end
 
