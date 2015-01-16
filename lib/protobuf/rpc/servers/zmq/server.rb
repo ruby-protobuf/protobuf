@@ -289,7 +289,13 @@ module Protobuf
           @broker = ::Protobuf::Rpc::Zmq::Broker.new(self)
 
           @broker_thread = Thread.new(@broker) do |broker|
-            broker.run
+            begin
+              broker.run
+            rescue => e
+              message = "Broker failed: #{e.inspect}\n #{e.backtrace.join($INPUT_RECORD_SEPARATOR)}"
+              $stderr.puts(message)
+              logger.error { message }
+            end
           end
 
           ::Thread.pass until @broker.running?
