@@ -285,9 +285,13 @@ module Protobuf
 
         def start_broker
           return if @broker && @broker.running? && !@broker_thread.stop?
-          broadcast_flatline if broadcast_busy?
-          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self)
+          if @broker && !@broker.running?
+            broadcast_flatline if broadcast_busy?
+            @broker_thread.join if @broker_thread
+            init_zmq_context # need a new context to restart the broker
+          end
 
+          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self)
           @broker_thread = Thread.new(@broker) do |broker|
             begin
               broker.run
@@ -297,8 +301,6 @@ module Protobuf
               logger.error { message }
             end
           end
-
-          ::Thread.pass until @broker.running?
         end
 
         def start_worker
