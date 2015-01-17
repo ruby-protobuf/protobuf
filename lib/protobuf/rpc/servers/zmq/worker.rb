@@ -12,8 +12,9 @@ module Protobuf
         ##
         # Constructor
         #
-        def initialize(server)
+        def initialize(server, broker)
           @server = server
+          @broker = broker
 
           init_zmq_context
           init_backend_socket
@@ -61,7 +62,7 @@ module Protobuf
         end
 
         def running?
-          @server.running?
+          @broker.running? && @server.running?
         end
 
         private

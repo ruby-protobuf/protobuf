@@ -6,6 +6,9 @@ Lint/EndAlignment:
 Lint/Loop:
   Enabled: false
 
+Metrics/ClassLength:
+  Enabled: false
+
 Style/CaseIndentation:
   IndentWhenRelativeTo: end
 

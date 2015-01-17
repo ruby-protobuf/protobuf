@@ -76,6 +76,10 @@ module Protobuf
           !brokerless? && options[:broadcast_beacons]
         end
 
+        def broadcast_busy?
+          broadcast_beacons? && options[:broadcast_busy]
+        end
+
         def broadcast_flatline
           flatline = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE,
@@ -176,15 +180,11 @@ module Protobuf
 
         def run
           @running = true
-
-          start_broker unless brokerless?
-          start_missing_workers
-
           yield if block_given? # runs on startup
           wait_for_shutdown_signal
           broadcast_flatline if broadcast_beacons?
           Thread.pass until reap_dead_workers.empty?
-          @broker.join unless brokerless?
+          @broker_thread.join unless brokerless?
         ensure
           @running = false
           teardown
@@ -246,14 +246,13 @@ module Protobuf
           loop do
             break if IO.select([@shutdown_r], nil, nil, timeout)
 
-            if reap_dead_workers?
-              reap_dead_workers
-              start_missing_workers
-            end
+            start_broker unless brokerless?
+            reap_dead_workers if reap_dead_workers?
+            start_missing_workers
 
             next unless broadcast_heartbeat?
 
-            if options[:broadcast_busy] && all_workers_busy?
+            if broadcast_busy? && all_workers_busy?
               broadcast_flatline
             else
               broadcast_heartbeat
@@ -285,15 +284,29 @@ module Protobuf
         end
 
         def start_broker
-          @broker = Thread.new(self) do |server|
-            ::Protobuf::Rpc::Zmq::Broker.new(server).run
+          return if @broker && @broker.running? && !@broker_thread.stop?
+          if @broker && !@broker.running?
+            broadcast_flatline if broadcast_busy?
+            @broker_thread.join if @broker_thread
+            init_zmq_context # need a new context to restart the broker
+          end
+
+          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self)
+          @broker_thread = Thread.new(@broker) do |broker|
+            begin
+              broker.run
+            rescue => e
+              message = "Broker failed: #{e.inspect}\n #{e.backtrace.join($INPUT_RECORD_SEPARATOR)}"
+              $stderr.puts(message)
+              logger.error { message }
+            end
           end
         end
 
         def start_worker
-          @workers << Thread.new(self) do |server|
+          @workers << Thread.new(self, @broker) do |server, broker|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(server).run
+              ::Protobuf::Rpc::Zmq::Worker.new(server, broker).run
             rescue => e
               message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($INPUT_RECORD_SEPARATOR)}"
               $stderr.puts(message)

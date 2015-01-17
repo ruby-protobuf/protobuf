@@ -23,6 +23,7 @@ module Protobuf
 
         def run
           @idle_workers = []
+          @running = true
 
           loop do
             process_local_queue
@@ -39,10 +40,11 @@ module Protobuf
           end
         ensure
           teardown
+          @running = false
         end
 
         def running?
-          @server.running?
+          @running && @server.running?
         end
 
         private
