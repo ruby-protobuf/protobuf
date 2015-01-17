@@ -11,6 +11,10 @@ module Protobuf
           new.decode(bytes)
         end
 
+        def decode_from(stream)
+          new.decode_from(stream)
+        end
+
         # Create a new object with the given values and return the encoded bytes.
         def encode(fields = {})
           new(fields).encode

@@ -59,11 +59,25 @@ module Protobuf
         # Private Instance methods
         #
         def check_available_rcv_timeout
-          @check_available_rcv_timeout ||= [ENV["PB_ZMQ_CLIENT_CHECK_AVAILABLE_RCV_TIMEOUT"].to_i, 200].max
+          @check_available_rcv_timeout ||= begin
+            case
+            when ENV.key?("PB_ZMQ_CLIENT_CHECK_AVAILABLE_RCV_TIMEOUT") then
+              ENV["PB_ZMQ_CLIENT_CHECK_AVAILABLE_RCV_TIMEOUT"].to_i
+            else
+              200 # ms
+            end
+          end
         end
 
         def check_available_snd_timeout
-          @check_available_snd_timeout ||= [ENV["PB_ZMQ_CLIENT_CHECK_AVAILABLE_SND_TIMEOUT"].to_i, 200].max
+          @check_available_snd_timeout ||= begin
+            case
+            when ENV.key?("PB_ZMQ_CLIENT_CHECK_AVAILABLE_SND_TIMEOUT") then
+              ENV["PB_ZMQ_CLIENT_CHECK_AVAILABLE_SND_TIMEOUT"].to_i
+            else
+              200 # ms
+            end
+          end
         end
 
         def close_connection
