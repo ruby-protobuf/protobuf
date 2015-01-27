@@ -1,5 +1,6 @@
 require 'delegate'
 require 'protobuf/optionable'
+require 'active_support/core_ext/object/try'
 
 ##
 # Adding extension to Numeric until

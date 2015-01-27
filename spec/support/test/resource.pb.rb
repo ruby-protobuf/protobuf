@@ -4,7 +4,7 @@
 # This file is auto-generated. DO NOT EDIT!
 #
 require 'protobuf/message'
-require 'protobuf/rpc/service'
+require 'protobuf/service'
 
 module Test
 
@@ -108,7 +108,7 @@ module Test
   ##
   # Service Classes
   #
-  class ResourceService < ::Protobuf::Rpc::Service
+  class ResourceService < ::Protobuf::Service
     rpc :find, ::Test::ResourceFindRequest, ::Test::Resource
     rpc :find_with_rpc_failed, ::Test::ResourceFindRequest, ::Test::Resource
     rpc :find_with_sleep, ::Test::ResourceSleepRequest, ::Test::Resource

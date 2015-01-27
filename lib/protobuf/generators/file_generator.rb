@@ -2,6 +2,8 @@ require 'set'
 require 'protobuf/generators/base'
 require 'protobuf/generators/group_generator'
 
+require 'protobuf/descriptors'
+
 module Protobuf
   module Generators
     class FileGenerator < Base
@@ -12,7 +14,7 @@ module Protobuf
         super
         @output_file = ::Google::Protobuf::Compiler::CodeGeneratorResponse::File.new(:name => file_name)
         @extension_fields = Hash.new { |h, k| h[k] = [] }
-        @known_messages = []
+        @known_messages = Set.new
         @dangling_messages = {}
       end
 
@@ -96,8 +98,8 @@ module Protobuf
       end
 
       def print_generic_requires
-        print_require("protobuf/message")
-        print_require("protobuf/rpc/service") if descriptor.service.count > 0
+        print_require('protobuf/message')
+        print_require('protobuf/service') if descriptor.service.count > 0
         puts
       end
 

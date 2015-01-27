@@ -45,7 +45,7 @@ module Protobuf
       end
 
       def deprecated?
-        descriptor.options.try(:deprecated?) { false }
+        descriptor.options && descriptor.options.deprecated?
       end
 
       def extension?
@@ -83,7 +83,7 @@ module Protobuf
       end
 
       def packed?
-        descriptor.options.try(:packed?) { false }
+        descriptor.options && descriptor.options.packed?
       end
 
       # Determine the field type

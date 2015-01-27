@@ -3,6 +3,8 @@
 require 'stringio'
 require 'spec_helper'
 
+require 'timeout'
+
 RSpec.describe Protobuf::Message do
 
   describe '.decode' do

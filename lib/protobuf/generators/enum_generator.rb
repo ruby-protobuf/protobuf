@@ -5,7 +5,7 @@ module Protobuf
     class EnumGenerator < Base
 
       def allow_alias?
-        descriptor.options.try(:allow_alias!) { false }
+        descriptor.options && descriptor.options.allow_alias
       end
 
       def compile

@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 require 'protobuf/code_generator'
+require 'active_support/inflector'
 
 RSpec.describe 'protoc-gen-ruby' do
   let(:binpath) { ::File.expand_path('../../../bin/protoc-gen-ruby', __FILE__) }

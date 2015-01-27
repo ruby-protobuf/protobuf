@@ -4,7 +4,7 @@
 # This file is auto-generated. DO NOT EDIT!
 #
 require 'protobuf/message'
-require 'protobuf/rpc/service'
+require 'protobuf/service'
 
 
 ##
@@ -534,7 +534,7 @@ module GoogleUnittest
   ##
   # Service Classes
   #
-  class TestService < ::Protobuf::Rpc::Service
+  class TestService < ::Protobuf::Service
     rpc :foo, ::GoogleUnittest::FooRequest, ::GoogleUnittest::FooResponse
     rpc :bar, ::GoogleUnittest::BarRequest, ::GoogleUnittest::BarResponse
   end

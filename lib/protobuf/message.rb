@@ -1,3 +1,5 @@
+require 'active_support/json'
+
 require 'protobuf/field'
 require 'protobuf/enum'
 require 'protobuf/exceptions'

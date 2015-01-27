@@ -23,7 +23,7 @@ RSpec.describe ::Protobuf::Generators::ServiceGenerator do
 
   describe '#compile' do
     let(:compiled) do
-      'class TestService < ::Protobuf::Rpc::Service
+      'class TestService < ::Protobuf::Service
   rpc :search, FooRequest, FooResponse
   rpc :foo_bar, ::Foo::Request, ::Bar::Response
 end
