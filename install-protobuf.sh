@@ -1,8 +1,10 @@
+#!/usr/bin/env sh
+
 set -ex
 
-basename=protobuf-2.6.0
-tarball=$basename.tar.bz2
+version=2.6.1
+basename=protobuf-$version
 
-wget https://protobuf.googlecode.com/svn/rc/$tarball
-tar -xvf $tarball
+curl -sL https://github.com/google/protobuf/releases/download/v$version/$basename.tar.bz2 | tar jx
+
 cd $basename && ./configure --prefix=/usr && make && make install
