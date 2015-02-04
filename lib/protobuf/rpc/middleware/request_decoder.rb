@@ -27,7 +27,7 @@ module Protobuf
         end
 
         def log_signature
-          env.signature || super
+          env.log_signature || super
         end
 
       private
