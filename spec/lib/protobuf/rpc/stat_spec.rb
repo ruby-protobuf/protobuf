@@ -5,9 +5,7 @@ require 'active_support/core_ext/numeric/time'
 RSpec.describe ::Protobuf::Rpc::Stat do
 
   before(:all) do
-    unless defined?(BarService)
-      class BarService < ::Struct.new(:method_name); end
-    end
+    BarService = ::Struct.new(:method_name) unless defined?(BarService)
   end
 
   describe 'server mode' do

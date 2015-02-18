@@ -401,7 +401,7 @@ RSpec.describe Protobuf::Message do
 
       it 'does not populate default values' do
         hash = Test::EnumTestMessage.new.to_hash
-        expect(hash).to eq(Hash.new)
+        expect(hash).to eq({})
       end
 
       it 'converts repeated enum fields to an array of the tags' do
