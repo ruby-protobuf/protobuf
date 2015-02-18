@@ -52,6 +52,15 @@ describe Protobuf::Logger do
       subject.instance.level.should == ::Logger::WARN
     end
 
+    context 'specifying logger' do
+      let(:logger) { double('Logger') }
+
+      it 'sets the logger instance' do
+        subject.instance.should_not be
+        subject.configure :logger => logger
+        subject.instance.should == logger
+      end
+    end
   end
 
   describe '.reset_device!' do

@@ -14,8 +14,14 @@ module Protobuf
       end
     end
 
-    # One-line file/level configuration
+    # One-line file/level/logger configuration
+    #
+    # @param options [Hash] Hash of options for the logger
+    # @option :logger [::Logger] Logger instance to use underneath.
+    # @option :file [String] File name to log to. Ignored if :logger is specified
+    # @option :level [Logger::Severity] Level to log at. Ignored if :logger is specified
     def self.configure(options)
+      @__instance = options.fetch(:logger, nil)
       self.file = options.fetch(:file, false)
       self.level = options.fetch(:level, false)
     end
