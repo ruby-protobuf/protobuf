@@ -14,7 +14,8 @@ module Protobuf
       end
     end
 
-    # One-line file/level/logger configuration
+    # One-line file/level/logger configuration. If logger is
+    # specified, file and level are ignored.
     #
     # @param options [Hash] Hash of options for the logger
     # @option :logger [::Logger] Logger instance to use underneath.
