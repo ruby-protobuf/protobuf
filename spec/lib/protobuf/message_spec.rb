@@ -175,6 +175,12 @@ RSpec.describe Protobuf::Message do
       expect(test_enum.non_default_enum).to eq(2)
     end
 
+    it "initializes with an object with a block" do
+      hashie_object = OpenStruct.new(:to_hash => { :non_default_enum => 2 })
+      test_enum = Test::EnumTestMessage.new { |p| p.non_default_enum = 2 }
+      expect(test_enum.non_default_enum).to eq(2)
+    end
+
     context 'ignoring unknown fields' do
       before { ::Protobuf.ignore_unknown_fields = true }
 
