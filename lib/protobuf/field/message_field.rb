@@ -9,7 +9,7 @@ module Protobuf
       #
 
       def acceptable?(val)
-        unless val.instance_of?(type_class) || val.respond_to?(:to_hash)
+        unless val.is_a?(type_class) || val.is_a?(Hash)
           fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
         end
 
