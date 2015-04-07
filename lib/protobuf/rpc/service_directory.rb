@@ -82,6 +82,7 @@ module Protobuf
 
       def all_listings_for(service)
         if running? && @listings_by_service.key?(service.to_s)
+          start_listener_thread if listener_dead?
           @listings_by_service[service.to_s].entries.shuffle
         else
           []
@@ -89,15 +90,22 @@ module Protobuf
       end
 
       def each_listing(&block)
+        start_listener_thread if listener_dead?
         @listings_by_uuid.each_value(&block)
       end
 
       def lookup(service)
         if running?
+          start_listener_thread if listener_dead?
+
           if @listings_by_service.key?(service.to_s)
             @listings_by_service[service.to_s].entries.sample
           end
         end
+      end
+
+      def listener_dead?
+        @thread.nil? || !@thread.alive?
       end
 
       def restart
@@ -106,22 +114,29 @@ module Protobuf
       end
 
       def running?
-        !!@thread.try(:alive?)
+        !!@running
       end
 
       def start
         unless running?
           init_socket
           logger.info { sign_message("listening to udp://#{self.class.address}:#{self.class.port}") }
-          @thread = Thread.new { send(:run) }
+          @running = true
         end
 
+        start_listener_thread if listener_dead?
         self
+      end
+
+      def start_listener_thread
+        return if @thread.try(:alive?)
+        @thread = Thread.new { send(:run) }
       end
 
       def stop
         logger.info { sign_message("Stopping directory") }
 
+        @running = false
         @thread.try(:kill).try(:join)
         @socket.try(:close)
 
