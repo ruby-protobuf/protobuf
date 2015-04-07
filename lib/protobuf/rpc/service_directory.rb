@@ -95,13 +95,10 @@ module Protobuf
       end
 
       def lookup(service)
-        if running?
-          start_listener_thread if listener_dead?
-
-          if @listings_by_service.key?(service.to_s)
-            @listings_by_service[service.to_s].entries.sample
-          end
-        end
+        return unless running?
+        start_listener_thread if listener_dead?
+        return unless @listings_by_service.key?(service.to_s)
+        @listings_by_service[service.to_s].entries.sample
       end
 
       def listener_dead?
