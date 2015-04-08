@@ -41,7 +41,7 @@ module Protobuf
             logger.info do
               <<-THREAD_TRACE
                 #{thread.inspect}:
-                  #{thread.backtrace.join($INPUT_RECORD_SEPARATOR)}"
+                  #{thread.backtrace.try(:join, $INPUT_RECORD_SEPARATOR)}"
               THREAD_TRACE
             end
           end
