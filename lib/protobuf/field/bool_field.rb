@@ -17,7 +17,17 @@ module Protobuf
       # #
 
       def acceptable?(val)
-        [true, false].include?(val)
+        [true, false].include?(val) || %w(true false).include?(val)
+      end
+
+      def coerce!(val)
+        if val == 'true'
+          true
+        elsif val == 'false'
+          false
+        else
+          val
+        end
       end
 
       def decode(value)
