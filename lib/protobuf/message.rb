@@ -26,16 +26,13 @@ module Protobuf
     # Constructor
     #
 
-    def initialize(fields = {}, &blk)
+    def initialize(fields = {})
       @values = {}
-
-      if blk
-        blk.call(self)
-      else
-        fields.to_hash.each_pair do |name, value|
-          self[name] = value
-        end
+      fields.to_hash.each_pair do |name, value|
+        self[name] = value
       end
+
+      yield self if block_given?
     end
 
     ##
