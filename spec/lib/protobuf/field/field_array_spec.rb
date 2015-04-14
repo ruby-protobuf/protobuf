@@ -63,13 +63,7 @@ RSpec.describe Protobuf::Field::FieldArray do
           expect(instance.multiple_basic_msgs).to eq([basic_msg1])
           expect(instance.multiple_basic_msgs.first).to be_a(MoreComplexMessage)
         end
-
-        it 'fails if not adding the expected MessageField object' do
-          expect { instance.multiple_basic_msgs.send(method, 100.0) }.to raise_error(TypeError)
-          expect { instance.multiple_basic_msgs.send(method, OtherBasicMessage.new) }.to raise_error(TypeError)
-        end
       end
     end
-
   end
 end
