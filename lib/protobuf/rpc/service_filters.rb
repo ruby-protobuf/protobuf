@@ -94,10 +94,10 @@ module Protobuf
         # if the filter should not be invoked, true if invocation should occur.
         #
         def invoke_filter?(rpc_method, filter)
-          invoke_via_only?(rpc_method, filter) \
-            && invoke_via_except?(rpc_method, filter) \
-            && invoke_via_if?(rpc_method, filter) \
-            && invoke_via_unless?(rpc_method, filter)
+          invoke_via_only?(rpc_method, filter) &&
+            invoke_via_except?(rpc_method, filter) &&
+            invoke_via_if?(rpc_method, filter) &&
+            invoke_via_unless?(rpc_method, filter)
         end
 
         # If the target rpc endpoint method is listed under an :except option,
