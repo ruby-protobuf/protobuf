@@ -66,6 +66,8 @@ module Protobuf
 
         if field.is_a?(::Protobuf::Field::EnumField)
           field.type_class.fetch(value)
+        elsif field.is_a?(::Protobuf::Field::MessageField) && value.is_a?(field.type_class)
+          value
         elsif field.is_a?(::Protobuf::Field::MessageField) && value.respond_to?(:to_hash)
           field.type_class.new(value.to_hash)
         else
