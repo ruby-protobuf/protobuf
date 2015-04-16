@@ -95,7 +95,7 @@ module Protobuf
       end
 
       def oneof?
-        ! descriptor.oneof_index!.nil?
+        !descriptor.oneof_index!.nil?
       end
 
       def oneof_name

@@ -16,13 +16,13 @@ RuboCop::RakeTask.new
 task :default => ['compile:spec', 'compile:descriptors', :spec, :rubocop]
 
 desc 'Run both the spec and descriptors compilation tasks'
-task :compile => [ 'compile:spec', 'compile:descriptors' ]
+task :compile => ['compile:spec', 'compile:descriptors']
 
 desc 'Run specs'
 namespace :compile do
 
   desc 'Compile spec protos in spec/supprt/ directory'
-  task :spec do |task, args|
+  task :spec do
     source = ::File.expand_path('../spec/support/', __FILE__)
     input_files = ::File.join(source, '**', '*.proto')
     destination = source
@@ -40,7 +40,7 @@ namespace :compile do
   end
 
   desc 'Compile rpc protos in protos/ directory'
-  task :descriptors do |task, args|
+  task :descriptors do
     source      = ::File.expand_path('../proto', __FILE__)
     input_files = ::File.join(source, '**', '*.proto')
     destination = ::File.expand_path('../tmp/rpc', __FILE__)
@@ -57,22 +57,17 @@ namespace :compile do
     puts command
     system(command)
 
-    if $?.success?
-      files = {
-        'tmp/rpc/dynamic_discovery.pb.rb'               => 'lib/protobuf/rpc',
-        'tmp/rpc/rpc.pb.rb'                             => 'lib/protobuf/rpc',
-        'tmp/rpc/google/protobuf/descriptor.pb.rb'      => 'lib/protobuf/descriptors/google/protobuf',
-        'tmp/rpc/google/protobuf/compiler/plugin.pb.rb' => 'lib/protobuf/descriptors/google/protobuf/compiler',
-      }
+    files = {
+      'tmp/rpc/dynamic_discovery.pb.rb'               => 'lib/protobuf/rpc',
+      'tmp/rpc/rpc.pb.rb'                             => 'lib/protobuf/rpc',
+      'tmp/rpc/google/protobuf/descriptor.pb.rb'      => 'lib/protobuf/descriptors/google/protobuf',
+      'tmp/rpc/google/protobuf/compiler/plugin.pb.rb' => 'lib/protobuf/descriptors/google/protobuf/compiler',
+    }
 
-      files.each_pair do |source_file, destination_dir|
-        source_file     = ::File.expand_path("../#{source_file}", __FILE__)
-        destination_dir = ::File.expand_path("../#{destination_dir}", __FILE__)
-        ::FileUtils::Verbose.cp(source_file, destination_dir)
-      end
-    else
-      puts "Failed to compile protos"
-      exit 1
+    files.each_pair do |source_file, destination_dir|
+      source_file     = ::File.expand_path("../#{source_file}", __FILE__)
+      destination_dir = ::File.expand_path("../#{destination_dir}", __FILE__)
+      ::FileUtils::Verbose.cp(source_file, destination_dir)
     end
   end
 

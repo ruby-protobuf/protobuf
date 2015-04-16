@@ -102,7 +102,7 @@ RSpec.describe ::Protobuf::Generators::FieldGenerator do
 
     context 'when field is in a oneof group' do
       let(:oneof_name) { :MyOneOfUnion }
-      let(:oneof_descriptors) { [ ::Google::Protobuf::FieldDescriptorProto.new(:name => oneof_name) ] }
+      let(:oneof_descriptors) { [::Google::Protobuf::FieldDescriptorProto.new(:name => oneof_name)] }
       let(:oneof_index) { 0 }
       let(:field) { ::Google::Protobuf::FieldDescriptorProto.new(field_fields) }
 
