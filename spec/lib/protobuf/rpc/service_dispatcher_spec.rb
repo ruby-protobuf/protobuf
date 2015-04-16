@@ -1,16 +1,16 @@
 require 'spec_helper'
 require 'protobuf/rpc/service_dispatcher'
 
-describe Protobuf::Rpc::ServiceDispatcher do
+RSpec.describe Protobuf::Rpc::ServiceDispatcher do
   let(:app) { proc { |env| env } }
-  let(:env) {
+  let(:env) do
     Protobuf::Rpc::Env.new(
       'method_name' => method_name,
       'request' => request,
       'rpc_service' => service_class,
       'service_name' => service_name,
     )
-  }
+  end
   let(:method_name) { :find }
   let(:request) { request_type.new(:name => 'required') }
   let(:request_type) { service_class.rpcs[method_name].request_type }
@@ -42,7 +42,7 @@ describe Protobuf::Rpc::ServiceDispatcher do
     end
 
     context "when the given RPC method is implemented and a NoMethodError is raised" do
-      before { allow(rpc_service).to receive(:callable_rpc_method).and_return(lambda { rpc_service.__send__(:foo) }) }
+      before { allow(rpc_service).to receive(:callable_rpc_method).and_return(-> { rpc_service.__send__(:foo) }) }
 
       it "raises the exeception" do
         expect { subject.call(env) }.to raise_exception(NoMethodError)

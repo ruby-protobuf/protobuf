@@ -1,23 +1,23 @@
 require 'spec_helper'
 require 'protobuf/cli'
 
-describe ::Protobuf::CLI do
+RSpec.describe ::Protobuf::CLI do
 
   let(:app_file) do
     File.expand_path('../../../support/test_app_file.rb', __FILE__)
   end
 
-  let(:sock_runner) {
+  let(:sock_runner) do
     runner = double("SocketRunner", :register_signals => nil)
     allow(runner).to receive(:run).and_return(::ActiveSupport::Notifications.publish("after_server_bind"))
     runner
-  }
+  end
 
-  let(:zmq_runner) {
-    runner = double "ZmqRunner", register_signals: nil
+  let(:zmq_runner) do
+    runner = double("ZmqRunner", :register_signals => nil)
     allow(runner).to receive(:run).and_return(::ActiveSupport::Notifications.publish("after_server_bind"))
     runner
-  }
+  end
 
   around(:each) do |example|
     logger = ::Protobuf::Logging.logger
@@ -31,12 +31,12 @@ describe ::Protobuf::CLI do
   end
 
   describe '#start' do
-    let(:base_args) { [ 'start', app_file ] }
+    let(:base_args) { ['start', app_file] }
     let(:test_args) { [] }
     let(:args) { base_args + test_args }
 
     context 'host option' do
-      let(:test_args) { [ '--host=123.123.123.123' ] }
+      let(:test_args) { ['--host=123.123.123.123'] }
 
       it 'sends the host option to the runner' do
         expect(::Protobuf::Rpc::SocketRunner).to receive(:new) do |options|
@@ -47,7 +47,7 @@ describe ::Protobuf::CLI do
     end
 
     context 'port option' do
-      let(:test_args) { [ '--port=12345' ] }
+      let(:test_args) { ['--port=12345'] }
 
       it 'sends the port option to the runner' do
         expect(::Protobuf::Rpc::SocketRunner).to receive(:new) do |options|
@@ -58,7 +58,7 @@ describe ::Protobuf::CLI do
     end
 
     context 'threads option' do
-      let(:test_args) { [ '--threads=500' ] }
+      let(:test_args) { ['--threads=500'] }
 
       it 'sends the threads option to the runner' do
         expect(::Protobuf::Rpc::SocketRunner).to receive(:new) do |options|
@@ -69,7 +69,7 @@ describe ::Protobuf::CLI do
     end
 
     context 'backlog option' do
-      let(:test_args) { [ '--backlog=500' ] }
+      let(:test_args) { ['--backlog=500'] }
 
       it 'sends the backlog option to the runner' do
         expect(::Protobuf::Rpc::SocketRunner).to receive(:new) do |options|
@@ -80,7 +80,7 @@ describe ::Protobuf::CLI do
     end
 
     context 'threshold option' do
-      let(:test_args) { [ '--threshold=500' ] }
+      let(:test_args) { ['--threshold=500'] }
 
       it 'sends the backlog option to the runner' do
         expect(::Protobuf::Rpc::SocketRunner).to receive(:new) do |options|
@@ -91,7 +91,7 @@ describe ::Protobuf::CLI do
     end
 
     context 'log options' do
-      let(:test_args) { [ '--log=mylog.log', '--level=0' ] }
+      let(:test_args) { ['--log=mylog.log', '--level=0'] }
 
       it 'sends the log file and level options to the runner' do
         expect(::Protobuf::Logging).to receive(:initialize_logger) do |file, level|
@@ -115,7 +115,7 @@ describe ::Protobuf::CLI do
 
       unless defined?(JRUBY_VERSION)
         context 'request pausing' do
-          let(:test_args) { [ '--gc_pause_request' ] }
+          let(:test_args) { ['--gc_pause_request'] }
 
           it 'sets the configuration option to GC pause server request' do
             described_class.start(args)
@@ -150,7 +150,7 @@ describe ::Protobuf::CLI do
       end
 
       context 'when enabled' do
-        let(:test_args) { [ '--print_deprecation_warnings' ] }
+        let(:test_args) { ['--print_deprecation_warnings'] }
 
         it 'sets the deprecation warning flag to true' do
           described_class.start(args)
@@ -159,7 +159,7 @@ describe ::Protobuf::CLI do
       end
 
       context 'when disabled' do
-        let(:test_args) { [ '--no-print_deprecation_warnings' ] }
+        let(:test_args) { ['--no-print_deprecation_warnings'] }
 
         it 'sets the deprecation warning flag to false' do
           described_class.start(args)
@@ -171,7 +171,7 @@ describe ::Protobuf::CLI do
     context 'run modes' do
 
       context 'socket' do
-        let(:test_args) { [ '--socket' ] }
+        let(:test_args) { ['--socket'] }
         let(:runner) { ::Protobuf::Rpc::SocketRunner }
 
         before do
@@ -197,7 +197,7 @@ describe ::Protobuf::CLI do
       end
 
       context 'zmq workers only' do
-        let(:test_args) { [ '--workers_only', '--zmq' ] }
+        let(:test_args) { ['--workers_only', '--zmq'] }
         let(:runner) { ::Protobuf::Rpc::ZmqRunner }
 
         before do
@@ -224,7 +224,7 @@ describe ::Protobuf::CLI do
       end
 
       context 'zmq worker port' do
-        let(:test_args) { [ '--worker_port=1234', '--zmq' ] }
+        let(:test_args) { ['--worker_port=1234', '--zmq'] }
         let(:runner) { ::Protobuf::Rpc::ZmqRunner }
 
         before do
@@ -241,7 +241,7 @@ describe ::Protobuf::CLI do
       end
 
       context 'zmq' do
-        let(:test_args) { [ '--zmq' ] }
+        let(:test_args) { ['--zmq'] }
         let(:runner) { ::Protobuf::Rpc::ZmqRunner }
 
         before do

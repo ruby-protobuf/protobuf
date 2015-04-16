@@ -1,5 +1,5 @@
-$: << ::File.expand_path('../', __FILE__)
-$: << ::File.expand_path('../spec', __FILE__)
+$LOAD_PATH << ::File.expand_path('../', __FILE__)
+$LOAD_PATH << ::File.expand_path('../spec', __FILE__)
 
 require 'fileutils'
 require 'rubygems'
@@ -8,11 +8,12 @@ require 'bundler/gem_tasks'
 require 'benchmark/tasks'
 
 require 'rspec/core/rake_task'
-
-desc 'Default: run specs.'
-task :default => :spec
+require 'rubocop/rake_task'
 
 RSpec::Core::RakeTask.new(:spec)
+RuboCop::RakeTask.new
+
+task :default => ['compile:spec', 'compile:descriptors', :spec, :rubocop]
 
 desc 'Run both the spec and descriptors compilation tasks'
 task :compile => [ 'compile:spec', 'compile:descriptors' ]
@@ -54,15 +55,14 @@ namespace :compile do
     command = command.join(' ')
 
     puts command
-    fork { exec(command) }
-    Process.waitpid
+    system(command)
 
     if $?.success?
       files = {
         'tmp/rpc/dynamic_discovery.pb.rb'               => 'lib/protobuf/rpc',
         'tmp/rpc/rpc.pb.rb'                             => 'lib/protobuf/rpc',
         'tmp/rpc/google/protobuf/descriptor.pb.rb'      => 'lib/protobuf/descriptors/google/protobuf',
-        'tmp/rpc/google/protobuf/compiler/plugin.pb.rb' => 'lib/protobuf/descriptors/google/protobuf/compiler'
+        'tmp/rpc/google/protobuf/compiler/plugin.pb.rb' => 'lib/protobuf/descriptors/google/protobuf/compiler',
       }
 
       files.each_pair do |source_file, destination_dir|

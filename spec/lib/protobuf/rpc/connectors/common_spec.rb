@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/rpc/service'
 
-describe Protobuf::Rpc::Connectors::Common do
+RSpec.describe Protobuf::Rpc::Connectors::Common do
   let(:common_class) do
     Class.new(Protobuf::Rpc::Connectors::Base) do
       include Protobuf::Rpc::Connectors::Common
@@ -19,7 +19,7 @@ describe Protobuf::Rpc::Connectors::Common do
     specify { expect(subject.respond_to?(:request_caller)).to be true }
     specify { expect(subject.respond_to?(:data_callback)).to be true }
     specify { expect(subject.respond_to?(:error)).to be true }
-    specify { expect(subject.respond_to?(:fail)).to be true }
+    specify { expect(subject.respond_to?(:failure)).to be true }
     specify { expect(subject.respond_to?(:complete)).to be true }
     specify { expect(subject.respond_to?(:parse_response)).to be true }
     specify { expect(subject.respond_to?(:verify_options!)).to be true }
@@ -74,18 +74,26 @@ describe Protobuf::Rpc::Connectors::Common do
     let(:method) { :find }
     let(:request) { '' }
     let(:client_host) { 'myhost.myservice.com' }
-    let(:subject_options) { { :service => service,
-                              :method => method,
-                              :request => request,
-                              :client_host => client_host } }
+    let(:subject_options) do
+      {
+        :service => service,
+        :method => method,
+        :request => request,
+        :client_host => client_host,
+      }
+    end
 
-    let(:expected) { ::Protobuf::Socketrpc::Request.new({ :service_name => service.name,
-                                                          :method_name => 'find',
-                                                          :request_proto => '',
-                                                          :caller => client_host }) }
+    let(:expected) do
+      ::Protobuf::Socketrpc::Request.new(
+        :service_name => service.name,
+        :method_name => 'find',
+        :request_proto => '',
+        :caller => client_host,
+      )
+    end
 
     before { allow(subject).to receive(:validate_request_type!).and_return(true) }
-    before { expect(subject).not_to receive(:fail) }
+    before { expect(subject).not_to receive(:failure) }
 
     specify { expect(subject.request_bytes).to eq expected.encode }
   end
@@ -103,7 +111,7 @@ describe Protobuf::Rpc::Connectors::Common do
     end
 
     it "doesn't set @failure_cb when already defined" do
-      set_cb = lambda{ true }
+      set_cb = -> { true }
       subject.instance_variable_set(:@failure_cb, set_cb)
       subject.verify_callbacks
       expect(subject.instance_variable_get(:@failure_cb)).to eq(set_cb)
@@ -111,7 +119,7 @@ describe Protobuf::Rpc::Connectors::Common do
     end
 
     it "doesn't set @success_cb when already defined" do
-      set_cb = lambda{ true }
+      set_cb = -> { true }
       subject.instance_variable_set(:@success_cb, set_cb)
       subject.verify_callbacks
       expect(subject.instance_variable_get(:@success_cb)).to eq(set_cb)
@@ -133,10 +141,10 @@ describe Protobuf::Rpc::Connectors::Common do
       stats = double("Object")
       allow(stats).to receive(:stop).and_return(true)
       subject.stats = stats
-      _cb = double("Object")
+      some_cb = double("Object")
 
-      subject.instance_variable_set("@#{cb}", _cb)
-      expect(_cb).to receive(:call).and_return(true)
+      subject.instance_variable_set("@#{cb}", some_cb)
+      expect(some_cb).to receive(:call).and_return(true)
       subject.method(meth).call(*args)
     end
 
@@ -153,8 +161,8 @@ describe Protobuf::Rpc::Connectors::Common do
 
   end
 
-  it_behaves_like("a ConnectorDisposition", :fail, "failure_cb", "code", "message")
-  it_behaves_like("a ConnectorDisposition", :fail, "complete_cb", "code", "message")
+  it_behaves_like("a ConnectorDisposition", :failure, "failure_cb", "code", "message")
+  it_behaves_like("a ConnectorDisposition", :failure, "complete_cb", "code", "message")
   it_behaves_like("a ConnectorDisposition", :succeed, "complete_cb", "response")
   it_behaves_like("a ConnectorDisposition", :succeed, "success_cb", "response")
   it_behaves_like("a ConnectorDisposition", :complete, "complete_cb")

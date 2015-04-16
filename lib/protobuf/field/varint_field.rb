@@ -37,9 +37,15 @@ module Protobuf
       #
 
       def acceptable?(val)
-        (val > self.class.min || val < self.class.max)
+        int_val = coerce!(val)
+        int_val >= self.class.min && int_val <= self.class.max
       rescue
         false
+      end
+
+      def coerce!(val)
+        return val.to_i if val.is_a?(Numeric)
+        Integer(val, 10)
       end
 
       def decode(value)
@@ -65,4 +71,3 @@ module Protobuf
     end
   end
 end
-

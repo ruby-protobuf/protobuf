@@ -8,9 +8,7 @@ module Protobuf
         attr_reader :error
 
         def any_callbacks?
-          return [@complete_cb, @failure_cb, @success_cb].inject(false) do |reduction, cb|
-            reduction = (reduction || !cb.nil?)
-          end
+          [@complete_cb, @failure_cb, @success_cb].any?
         end
 
         def request_caller
@@ -38,7 +36,7 @@ module Protobuf
         #
         # @param [Symbol] code The code we're using (see ::Protobuf::Socketrpc::ErrorReason)
         # @param [String] message The error message
-        def fail(code, message)
+        def failure(code, message)
           @error =  ClientError.new
           @error.code = Protobuf::Socketrpc::ErrorReason.fetch(code)
           @error.message = message
@@ -54,13 +52,13 @@ module Protobuf
         end
 
         def initialize_stats
-          @stats = Protobuf::Rpc::Stat.new(:CLIENT)
+          @stats = ::Protobuf::Rpc::Stat.new(:CLIENT)
           @stats.server = [@options[:port], @options[:host]]
           @stats.service = @options[:service].name
           @stats.method_name = @options[:method].to_s
         rescue => ex
           log_exception(ex)
-          fail(:RPC_ERROR, "Invalid stats configuration. #{ex.message}")
+          failure(:RPC_ERROR, "Invalid stats configuration. #{ex.message}")
         end
 
         def log_signature
@@ -78,20 +76,20 @@ module Protobuf
           response_wrapper = Protobuf::Socketrpc::Response.decode(@response_data)
 
           # Determine success or failure based on parsed data
-          if response_wrapper.has_field?(:error_reason)
+          if response_wrapper.field?(:error_reason)
             logger.debug { sign_message("Error response parsed") }
 
             # fail the call if we already know the client is failed
             # (don't try to parse out the response payload)
-            fail(response_wrapper.error_reason, response_wrapper.error)
+            failure(response_wrapper.error_reason, response_wrapper.error)
           else
             logger.debug { sign_message("Successful response parsed") }
 
             # Ensure client_response is an instance
             parsed = @options[:response_type].decode(response_wrapper.response_proto.to_s)
 
-            if parsed.nil? and not response_wrapper.has_field?(:error_reason)
-              fail(:BAD_RESPONSE_PROTO, 'Unable to parse response from server')
+            if parsed.nil? && !response_wrapper.field?(:error_reason)
+              failure(:BAD_RESPONSE_PROTO, 'Unable to parse response from server')
             else
               verify_callbacks
               succeed(parsed)
@@ -103,7 +101,7 @@ module Protobuf
         def post_init
           send_data unless error?
         rescue => e
-          fail(:RPC_ERROR, "Connection error: #{e.message}")
+          failure(:RPC_ERROR, "Connection error: #{e.message}")
         end
 
         def request_bytes
@@ -115,7 +113,7 @@ module Protobuf
 
           return ::Protobuf::Socketrpc::Request.encode(fields)
         rescue => e
-          fail(:INVALID_REQUEST_PROTO, "Could not set request proto: #{e.message}")
+          failure(:INVALID_REQUEST_PROTO, "Could not set request proto: #{e.message}")
         end
 
         def setup_connection
@@ -130,38 +128,46 @@ module Protobuf
         rescue => e
           logger.error { sign_message("Success callback error encountered") }
           log_exception(e)
-          fail(:RPC_ERROR, "An exception occurred while calling on_success: #{e.message}")
+          failure(:RPC_ERROR, "An exception occurred while calling on_success: #{e.message}")
         ensure
           complete
+        end
+
+        def timeout
+          if options[:timeout]
+            options[:timeout]
+          else
+            300 # seconds
+          end
         end
 
         # Wrap the given block in a timeout of the configured number of seconds.
         #
         def timeout_wrap(&block)
-          ::Timeout.timeout(options[:timeout], &block)
+          ::Timeout.timeout(timeout, &block)
         rescue ::Timeout::Error
-          fail(:RPC_FAILED, "The server took longer than #{options[:timeout]} seconds to respond")
+          failure(:RPC_FAILED, "The server took longer than #{timeout} seconds to respond")
         end
 
         def validate_request_type!
           unless @options[:request].class == @options[:request_type]
             expected = @options[:request_type].name
             actual = @options[:request].class.name
-            fail(:INVALID_REQUEST_PROTO, "Expected request type to be type of #{expected}, got #{actual} instead")
+            failure(:INVALID_REQUEST_PROTO, "Expected request type to be type of #{expected}, got #{actual} instead")
           end
         end
 
         def verify_callbacks
           unless any_callbacks?
             logger.debug { sign_message("No callbacks set, using data_callback") }
-            @success_cb = @failure_cb = self.method(:data_callback)
+            @success_cb = @failure_cb = method(:data_callback)
           end
         end
 
         def verify_options!
           # Verify the options that are necessary and merge them in
           [:service, :method, :host, :port].each do |opt|
-            fail(:RPC_ERROR, "Invalid client connection configuration. #{opt} must be a defined option.") if @options[opt].nil?
+            failure(:RPC_ERROR, "Invalid client connection configuration. #{opt} must be a defined option.") if @options[opt].nil?
           end
         end
       end

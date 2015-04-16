@@ -2,48 +2,48 @@ require 'spec_helper'
 
 require 'protobuf/rpc/service_directory'
 
-describe ::Protobuf::Rpc::ServiceDirectory do
+RSpec.describe ::Protobuf::Rpc::ServiceDirectory do
   subject { described_class.instance }
 
-  let(:echo_server) {
+  let(:echo_server) do
     ::Protobuf::Rpc::DynamicDiscovery::Server.new(
       :uuid => 'echo',
       :address => '127.0.0.1',
       :port => '1111',
       :ttl => 10,
-      :services => %w[EchoService]
+      :services => %w(EchoService),
     )
-  }
+  end
 
-  let(:hello_server) {
+  let(:hello_server) do
     ::Protobuf::Rpc::DynamicDiscovery::Server.new(
       :uuid => "hello",
       :address => '127.0.0.1',
       :port => "1112",
       :ttl => 10,
-      :services => %w[HelloService]
+      :services => %w(HelloService),
     )
-  }
+  end
 
-  let(:hello_server_with_short_ttl) {
+  let(:hello_server_with_short_ttl) do
     ::Protobuf::Rpc::DynamicDiscovery::Server.new(
       :uuid => "hello_server_with_short_ttl",
       :address => '127.0.0.1',
       :port => '1113',
       :ttl => 1,
-      :services => %w[HelloService]
+      :services => %w(HelloService),
     )
-  }
+  end
 
-  let(:combo_server) {
+  let(:combo_server) do
     ::Protobuf::Rpc::DynamicDiscovery::Server.new(
       :uuid => "combo",
       :address => '127.0.0.1',
       :port => '1114',
       :ttl => 10,
-      :services => %w[HelloService EchoService]
+      :services => %w(HelloService EchoService),
     )
-  }
+  end
 
   before(:all) do
     @address = "127.0.0.1"
@@ -57,15 +57,14 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
   def expect_event_trigger(event)
     expect(::ActiveSupport::Notifications).to receive(:instrument)
-                                                .with(event, hash_including(:listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing)))
-                                                .once
+      .with(event, hash_including(:listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing))).once
   end
 
   def send_beacon(type, server)
     type = type.to_s.upcase
     beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
       :server => server,
-      :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType.fetch(type)
+      :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType.fetch(type),
     )
 
     @socket.send(beacon.encode, 0, @address, @port)
@@ -175,9 +174,9 @@ describe ::Protobuf::Rpc::ServiceDirectory do
         send_beacon(:heartbeat, echo_server)
         send_beacon(:heartbeat, combo_server)
 
-        expect { |block|
+        expect do |block|
           subject.each_listing(&block)
-        }.to yield_control.exactly(3).times
+        end.to yield_control.exactly(3).times
       end
     end
 
@@ -198,7 +197,7 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
       it "should not return expired listings" do
         send_beacon(:heartbeat, hello_server_with_short_ttl)
-        sleep 1
+        sleep 5
         expect(subject.lookup("HelloService")).to be_nil
       end
 
@@ -259,17 +258,17 @@ describe ::Protobuf::Rpc::ServiceDirectory do
 
   if ENV.key?("BENCH")
     context "performance" do
-      let(:servers) {
-        100.times.collect do |x|
+      let(:servers) do
+        100.times.map do |x|
           ::Protobuf::Rpc::DynamicDiscovery::Server.new(
             :uuid => "performance_server#{x + 1}",
             :address => '127.0.0.1',
             :port => (5555 + x).to_s,
             :ttl => rand(1..5),
-            :services => 10.times.collect { |y| "PerformanceService#{y}" }
+            :services => 10.times.map { |y| "PerformanceService#{y}" },
           )
         end
-      }
+      end
 
       before do
         require 'benchmark'

@@ -6,7 +6,7 @@ module Protobuf
     CodeGeneratorFatalError = Class.new(RuntimeError)
 
     def self.fatal(message)
-      raise CodeGeneratorFatalError, message
+      fail CodeGeneratorFatalError, message
     end
 
     def self.print_tag_warning_suppress
@@ -18,24 +18,27 @@ module Protobuf
       STDERR.puts("[WARN] #{message}")
     end
 
+    private
+
+    attr_accessor :request
+
+    public
+
     def initialize(request_bytes)
-      @request = ::Google::Protobuf::Compiler::CodeGeneratorRequest.decode(request_bytes)
-      @generated_files = []
+      self.request = ::Google::Protobuf::Compiler::CodeGeneratorRequest.decode(request_bytes)
     end
 
     def generate_file(file_descriptor)
-      file_generator = ::Protobuf::Generators::FileGenerator.new(file_descriptor)
-      @generated_files << file_generator.generate_output_file
+      ::Protobuf::Generators::FileGenerator.new(file_descriptor).generate_output_file
     end
 
     def response_bytes
-      @request.proto_file.each do |file_descriptor|
+      generated_files = request.proto_file.map do |file_descriptor|
         generate_file(file_descriptor)
       end
 
-      return ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => @generated_files)
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => generated_files)
     end
 
   end
 end
-

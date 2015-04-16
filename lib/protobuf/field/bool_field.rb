@@ -12,13 +12,22 @@ module Protobuf
         false
       end
 
-
       ##
       # Public Instance Methods
       # #
 
       def acceptable?(val)
-        [true, false].include?(val)
+        [true, false].include?(val) || %w(true false).include?(val)
+      end
+
+      def coerce!(val)
+        if val == 'true'
+          true
+        elsif val == 'false'
+          false
+        else
+          val
+        end
       end
 
       def decode(value)
@@ -39,15 +48,12 @@ module Protobuf
         super
 
         field = self
+
         message_class.class_eval do
-          define_method("#{field.getter}?") do
-            field.warn_if_deprecated
-            @values.fetch(field.name, field.default_value)
-          end
+          alias_method "#{field.getter}?", field.getter
         end
       end
 
     end
   end
 end
-

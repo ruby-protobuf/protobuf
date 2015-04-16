@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/optionable'
 
-describe 'Optionable' do
+RSpec.describe 'Optionable' do
 
   describe '.set_option' do
     before(:all) do
@@ -13,9 +13,9 @@ describe 'Optionable' do
     it 'stores the given option and value' do
       expect(OptionableSetOptionTest).to respond_to(:set_option)
       expect(OptionableSetOptionTest.method(:set_option).arity).to eq(-2)
-      expect {
+      expect do
         OptionableSetOptionTest.set_option(:foo, :bar)
-      }.to_not raise_error
+      end.to_not raise_error
     end
 
     it 'defaults the value to true' do

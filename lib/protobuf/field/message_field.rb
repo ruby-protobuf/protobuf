@@ -9,8 +9,8 @@ module Protobuf
       #
 
       def acceptable?(value)
-        unless value.instance_of?(type_class) || value.respond_to?(:to_hash)
-          raise TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{value.class}'"
+        unless value.is_a?(type_class) || value.respond_to?(:to_hash)
+          fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{value.class}'"
         end
 
         true
@@ -57,7 +57,7 @@ module Protobuf
               clear_oneof_group(field.oneof_name) if field.oneof?
               @values[field.name] = field.type_class.new(value.to_hash)
             else
-              raise TypeError, "Expected value of type '#{field.type_class}' for field #{field.name}, but got '#{value.class}'"
+              fail TypeError, "Expected value of type '#{field.type_class}' for field #{field.name}, but got '#{value.class}'"
             end
           end
         end
@@ -66,4 +66,3 @@ module Protobuf
     end
   end
 end
-

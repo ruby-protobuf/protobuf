@@ -1,10 +1,10 @@
 require 'spec_helper'
 require 'protobuf'
 
-describe ::Protobuf do
+RSpec.describe ::Protobuf do
 
   describe '.client_host' do
-    after { ::Protobuf.instance_variable_set(:@_client_host, nil) }
+    after { ::Protobuf.client_host = nil }
 
     subject { ::Protobuf.client_host }
 
@@ -20,7 +20,7 @@ describe ::Protobuf do
   end
 
   describe '.connector_type' do
-    before { described_class.instance_variable_set(:@_connector_type, nil) }
+    before { described_class.instance_variable_set(:@connector_type, nil) }
 
     it 'defaults to socket' do
       expect(described_class.connector_type).to eq :socket
@@ -35,15 +35,15 @@ describe ::Protobuf do
 
     it 'does not accept other types' do
       [:hello, :world, :evented].each do |type|
-        expect {
+        expect do
           described_class.connector_type = type
-        }.to raise_error(ArgumentError)
+        end.to raise_error(ArgumentError)
       end
     end
   end
 
   describe '.gc_pause_server_request?' do
-    before { described_class.instance_variable_set(:@_gc_pause_server_request, nil) }
+    before { described_class.instance_variable_set(:@gc_pause_server_request, nil) }
 
     it 'defaults to a false value' do
       expect(described_class.gc_pause_server_request?).to be false
@@ -56,7 +56,7 @@ describe ::Protobuf do
   end
 
   describe '.print_deprecation_warnings?' do
-    before { described_class.instance_variable_set(:@_print_deprecation_warnings, nil) }
+    before { described_class.instance_variable_set(:@print_deprecation_warnings, nil) }
 
     it 'defaults to a true value' do
       expect(described_class.print_deprecation_warnings?).to be true
@@ -87,9 +87,9 @@ describe ::Protobuf do
     end
 
     it 'is settable' do
-      expect {
+      expect do
         described_class.ignore_unknown_fields = false
-      }.to change {
+      end.to change {
         described_class.ignore_unknown_fields?
       }.from(true).to(false)
     end

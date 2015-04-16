@@ -8,12 +8,16 @@ module Protobuf
 
       module ClassMethods
         def decode(bytes)
-          self.new.decode(bytes)
+          new.decode(bytes)
+        end
+
+        def decode_from(stream)
+          new.decode_from(stream)
         end
 
         # Create a new object with the given values and return the encoded bytes.
         def encode(fields = {})
-          self.new(fields).encode
+          new(fields).encode
         end
       end
 
@@ -44,8 +48,10 @@ module Protobuf
       # Encode this message
       #
       def encode
-        stream = ::StringIO.new.set_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
-        encode_to(stream).string
+        stream = ::StringIO.new
+        stream.set_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+        encode_to(stream)
+        stream.string
       end
 
       # Encode this message to the given stream.
@@ -81,4 +87,3 @@ module Protobuf
     end
   end
 end
-

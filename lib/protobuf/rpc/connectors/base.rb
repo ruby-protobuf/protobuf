@@ -17,9 +17,9 @@ module Protobuf
         :request                 => nil,         # The request object sent by the client
         :request_type            => nil,         # The request type expected by the client
         :response_type           => nil,         # The response type expected by the client
-        :timeout                 => 300,         # The default timeout for the request, also handled by client.rb
+        :timeout                 => nil,         # The timeout for the request, also handled by client.rb
         :client_host             => nil,         # The hostname or address of this client
-        :first_alive_load_balance => false,       # Do we want to use check_avail frames before request
+        :first_alive_load_balance => false,      # Do we want to use check_avail frames before request
       }
 
       class Base
@@ -30,15 +30,16 @@ module Protobuf
 
         def initialize(options)
           @options = DEFAULT_OPTIONS.merge(options)
+          @stats = ::Protobuf::Rpc::Stat.new(:CLIENT)
         end
 
         def first_alive_load_balance?
-          ENV.has_key?("PB_FIRST_ALIVE_LOAD_BALANCE") ||
+          ENV.key?("PB_FIRST_ALIVE_LOAD_BALANCE") ||
             options[:first_alive_load_balance]
         end
 
         def send_request
-          raise 'If you inherit a Connector from Base you must implement send_request'
+          fail 'If you inherit a Connector from Base you must implement send_request'
         end
 
         def ping_port
@@ -46,7 +47,7 @@ module Protobuf
         end
 
         def ping_port_enabled?
-          ENV.has_key?("PB_RPC_PING_PORT")
+          ENV.key?("PB_RPC_PING_PORT")
         end
       end
     end

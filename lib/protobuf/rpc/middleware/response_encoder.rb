@@ -22,7 +22,7 @@ module Protobuf
           env.log_signature || super
         end
 
-      private
+        private
 
         # Encode the response wrapper to return to the client
         #
@@ -35,7 +35,7 @@ module Protobuf
 
           # Rescue encoding exceptions, re-wrap them as generic protobuf errors,
           # and re-raise them
-          raise PbError.new(exception.message)
+          raise PbError, exception.message
         end
 
         # Prod the object to see if we can produce a proto object as a response
@@ -66,7 +66,7 @@ module Protobuf
           expected = env.response_type
 
           if expected != actual
-            raise BadResponseProto.new("Expected response to be of type #{expected.name} but was #{actual.name}")
+            fail BadResponseProto, "Expected response to be of type #{expected.name} but was #{actual.name}"
           end
 
           candidate

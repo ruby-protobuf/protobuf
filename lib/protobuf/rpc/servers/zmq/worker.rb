@@ -12,8 +12,9 @@ module Protobuf
         ##
         # Constructor
         #
-        def initialize(server)
+        def initialize(server, broker)
           @server = server
+          @broker = broker
 
           init_zmq_context
           init_backend_socket
@@ -31,7 +32,7 @@ module Protobuf
 
           gc_pause do
             encoded_response = handle_request(data)
-            write_to_backend([client_address, "", encoded_response])
+            write_to_backend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
           end
         end
 
@@ -46,13 +47,11 @@ module Protobuf
           loop do
             rc = poller.poll(500)
 
-            # The server was shutdown and no requests are pending
-            break if rc == 0 && !running?
-
-            # Something went wrong
-            break if rc == -1
-
-            if rc > 0
+            if rc == 0 && !running?
+              break # The server was shutdown and no requests are pending
+            elsif rc == -1
+              break # Something went wrong
+            elsif rc > 0
               ::Thread.current[:busy] = true
               process_request
               ::Thread.current[:busy] = false
@@ -63,7 +62,7 @@ module Protobuf
         end
 
         def running?
-          @server.running?
+          @broker.running? && @server.running?
         end
 
         private
@@ -93,7 +92,7 @@ module Protobuf
 
         def teardown
           @backend_socket.try(:close)
-          @zmq_context.try(:terminate)
+          @zmq_context.try(:terminate) unless inproc?
         end
 
         def write_to_backend(frames)

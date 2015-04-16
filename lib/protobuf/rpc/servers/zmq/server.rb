@@ -62,15 +62,10 @@ module Protobuf
         end
 
         def beacon_port
-          unless @beacon_port
-            unless port = options[:beacon_port]
-              port = ::Protobuf::Rpc::ServiceDirectory.port
-            end
-
-            @beacon_port = port.to_i
-          end
-
-          @beacon_port
+          @beacon_port ||= options.fetch(
+            :beacon_port,
+            ::Protobuf::Rpc::ServiceDirectory.port,
+          ).to_i
         end
 
         def beacon_uri
@@ -81,10 +76,14 @@ module Protobuf
           !brokerless? && options[:broadcast_beacons]
         end
 
+        def broadcast_busy?
+          broadcast_beacons? && options[:broadcast_busy]
+        end
+
         def broadcast_flatline
           flatline = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::FLATLINE,
-            :server => self.to_proto
+            :server => to_proto,
           )
 
           @beacon_socket.send(flatline.encode, 0)
@@ -95,7 +94,7 @@ module Protobuf
 
           heartbeat = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
             :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType::HEARTBEAT,
-            :server => self.to_proto
+            :server => to_proto,
           )
 
           @beacon_socket.send(heartbeat.encode, 0)
@@ -129,7 +128,7 @@ module Protobuf
         end
 
         def inproc?
-          !!self.options[:zmq_inproc]
+          !!options[:zmq_inproc]
         end
 
         def maintenance_timeout
@@ -167,7 +166,7 @@ module Protobuf
           @last_reaping = Time.now.to_i
 
           @workers.keep_if do |worker|
-            worker.alive? or worker.join && false
+            worker.alive? || worker.join && false
           end
         end
 
@@ -181,15 +180,11 @@ module Protobuf
 
         def run
           @running = true
-
-          start_broker unless brokerless?
-          start_missing_workers
-
           yield if block_given? # runs on startup
           wait_for_shutdown_signal
           broadcast_flatline if broadcast_beacons?
           Thread.pass until reap_dead_workers.empty?
-          @broker.join unless brokerless?
+          @broker_thread.join unless brokerless?
         ensure
           @running = false
           teardown
@@ -221,10 +216,6 @@ module Protobuf
           @last_reaping = @last_beacon = @timeout = nil
         end
 
-        def total_workers
-          @total_workers ||= [@options[:threads].to_i, 1].max
-        end
-
         def timeout
           if @timeout.nil?
             @timeout = 0
@@ -233,13 +224,17 @@ module Protobuf
           end
         end
 
+        def total_workers
+          @total_workers ||= [@options[:threads].to_i, 1].max
+        end
+
         def to_proto
           @proto ||= ::Protobuf::Rpc::DynamicDiscovery::Server.new(
             :uuid => uuid,
             :address => frontend_ip,
             :port => frontend_port.to_s,
             :ttl => (beacon_interval * 1.5).ceil,
-            :services => ::Protobuf::Rpc::Service.implemented_services
+            :services => ::Protobuf::Rpc::Service.implemented_services,
           )
         end
 
@@ -251,19 +246,17 @@ module Protobuf
           loop do
             break if IO.select([@shutdown_r], nil, nil, timeout)
 
-            if reap_dead_workers?
-              reap_dead_workers
-              start_missing_workers
-            end
+            start_broker unless brokerless?
+            reap_dead_workers if reap_dead_workers?
+            start_missing_workers
 
-            if broadcast_heartbeat?
-              if all_workers_busy? && options[:broadcast_busy]
-                broadcast_flatline
-              else
-                broadcast_heartbeat
-              end
-            end
+            next unless broadcast_heartbeat?
 
+            if broadcast_busy? && all_workers_busy?
+              broadcast_flatline
+            else
+              broadcast_heartbeat
+            end
           end
         end
 
@@ -291,17 +284,31 @@ module Protobuf
         end
 
         def start_broker
-          @broker = Thread.new(self) do |server|
-            ::Protobuf::Rpc::Zmq::Broker.new(server).run
+          return if @broker && @broker.running? && !@broker_thread.stop?
+          if @broker && !@broker.running?
+            broadcast_flatline if broadcast_busy?
+            @broker_thread.join if @broker_thread
+            init_zmq_context # need a new context to restart the broker
+          end
+
+          @broker = ::Protobuf::Rpc::Zmq::Broker.new(self)
+          @broker_thread = Thread.new(@broker) do |broker|
+            begin
+              broker.run
+            rescue => e
+              message = "Broker failed: #{e.inspect}\n #{e.backtrace.join($INPUT_RECORD_SEPARATOR)}"
+              $stderr.puts(message)
+              logger.error { message }
+            end
           end
         end
 
         def start_worker
-          @workers << Thread.new(self) do |server|
+          @workers << Thread.new(self, @broker) do |server, broker|
             begin
-              ::Protobuf::Rpc::Zmq::Worker.new(server).run
+              ::Protobuf::Rpc::Zmq::Worker.new(server, broker).run
             rescue => e
-              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($/)}"
+              message = "Worker failed: #{e.inspect}\n #{e.backtrace.join($INPUT_RECORD_SEPARATOR)}"
               $stderr.puts(message)
               logger.error { message }
             end

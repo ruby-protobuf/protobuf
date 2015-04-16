@@ -17,9 +17,7 @@ module Protobuf
         start
       end
 
-      def client=(client_host)
-        @client = client_host
-      end
+      attr_writer :client
 
       def client
         @client || nil
@@ -34,7 +32,7 @@ module Protobuf
       end
 
       def server=(peer)
-        @server = {:port => peer[0], :ip => peer[1]}
+        @server = { :port => peer[0], :ip => peer[1] }
       end
 
       def server
@@ -63,7 +61,7 @@ module Protobuf
       end
 
       def stopped?
-        ! end_time.nil?
+        !end_time.nil?
       end
 
       def rpc
@@ -86,7 +84,7 @@ module Protobuf
           rpc,
           sizes,
           elapsed_time,
-          @end_time.try(:iso8601)
+          @end_time.try(:iso8601),
         ].compact.join(' - ')
       end
 
@@ -97,4 +95,3 @@ module Protobuf
     end
   end
 end
-

@@ -7,7 +7,7 @@ module Protobuf
 
       attr_reader :env
 
-      def initialize(app)
+      def initialize(_app)
         # End of the line...
       end
 
@@ -22,12 +22,12 @@ module Protobuf
         @rpc_service ||= env.rpc_service.new(env)
       end
 
-    private
+      private
 
       # Call the given service method.
       def dispatch_rpc_request
         unless rpc_service.respond_to?(method_name)
-          raise MethodNotFound.new("#{service_name}##{method_name} is not a publicly defined method.")
+          fail MethodNotFound, "#{service_name}##{method_name} is not a publicly defined method."
         end
 
         rpc_service.callable_rpc_method(method_name).call

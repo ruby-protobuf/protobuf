@@ -1,8 +1,9 @@
 # encoding: utf-8
 
+require 'stringio'
 require 'spec_helper'
 
-describe Protobuf::Message do
+RSpec.describe Protobuf::Message do
 
   describe '.decode' do
     let(:message) { ::Test::Resource.new(:name => "Jim") }
@@ -54,67 +55,76 @@ describe Protobuf::Message do
 
       context 'with a repeated field' do
         it 'treats the field as if it was unset when decoding' do
-          newer = newer_message.new(:enum_list => [ :HOORAY ]).serialize
+          newer = newer_message.new(:enum_list => [:HOORAY]).serialize
 
           expect(older_message.decode(newer).enum_list).to eq([])
         end
 
         it 'rejects an unknown value when using the constructor' do
-          expect { older_message.new(:enum_list => [ :HOORAY ]) }.to raise_error
+          expect { older_message.new(:enum_list => [:HOORAY]) }.to raise_error
         end
 
         it 'rejects an unknown value when the setter' do
           older = older_message.new
-          expect { older.enum_field = [ :HOORAY ] }.to raise_error
+          expect { older.enum_field = [:HOORAY] }.to raise_error
         end
       end
+    end
+  end
+
+  describe '.decode_from' do
+    let(:message) { ::Test::Resource.new(:name => "Jim") }
+
+    it 'creates a new message object decoded from the given byte stream' do
+      stream = ::StringIO.new(message.encode)
+      expect(::Test::Resource.decode_from(stream)).to eq message
     end
   end
 
   describe 'defining a new field' do
     context 'when defining a field with a tag that has already been used' do
       it 'raises a TagCollisionError' do
-        expect {
+        expect do
           Class.new(Protobuf::Message) do
             optional ::Protobuf::Field::Int32Field, :foo, 1
             optional ::Protobuf::Field::Int32Field, :bar, 1
           end
-        }.to raise_error(Protobuf::TagCollisionError, /Field number 1 has already been used/)
+        end.to raise_error(Protobuf::TagCollisionError, /Field number 1 has already been used/)
       end
     end
 
     context 'when defining an extension field with a tag that has already been used' do
       it 'raises a TagCollisionError' do
-        expect {
+        expect do
           Class.new(Protobuf::Message) do
             extensions 100...110
             optional ::Protobuf::Field::Int32Field, :foo, 100
             optional ::Protobuf::Field::Int32Field, :bar, 100, :extension => true
           end
-        }.to raise_error(Protobuf::TagCollisionError, /Field number 100 has already been used/)
+        end.to raise_error(Protobuf::TagCollisionError, /Field number 100 has already been used/)
       end
     end
 
     context 'when defining a field with a name that has already been used' do
       it 'raises a DuplicateFieldNameError' do
-        expect {
+        expect do
           Class.new(Protobuf::Message) do
             optional ::Protobuf::Field::Int32Field, :foo, 1
             optional ::Protobuf::Field::Int32Field, :foo, 2
           end
-        }.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
+        end.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
       end
     end
 
     context 'when defining an extension field with a name that has already been used' do
       it 'raises a DuplicateFieldNameError' do
-        expect {
+        expect do
           Class.new(Protobuf::Message) do
             extensions 100...110
             optional ::Protobuf::Field::Int32Field, :foo, 1
             optional ::Protobuf::Field::Int32Field, :foo, 100, :extension => true
           end
-        }.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
+        end.to raise_error(Protobuf::DuplicateFieldNameError, /Field name foo has already been used/)
       end
     end
   end
@@ -162,6 +172,11 @@ describe Protobuf::Message do
     it "initializes with an object that responds to #to_hash" do
       hashie_object = OpenStruct.new(:to_hash => { :non_default_enum => 2 })
       test_enum = Test::EnumTestMessage.new(hashie_object)
+      expect(test_enum.non_default_enum).to eq(2)
+    end
+
+    it "initializes with an object with a block" do
+      test_enum = Test::EnumTestMessage.new { |p| p.non_default_enum = 2 }
       expect(test_enum.non_default_enum).to eq(2)
     end
 
@@ -246,9 +261,9 @@ describe Protobuf::Message do
       let(:message) { ::Test::ResourceWithRequiredField.new }
 
       it "raises a 'message not initialized' error" do
-        expect {
+        expect do
           message.encode
-        }.to raise_error(Protobuf::SerializationError, /required/i)
+        end.to raise_error(Protobuf::SerializationError, /required/i)
       end
     end
 
@@ -256,10 +271,10 @@ describe Protobuf::Message do
       let(:message) { ::Test::Resource.new(:name => "something") }
 
       it "does not raise an error when repeated fields are []" do
-        expect {
+        expect do
           message.repeated_enum = []
           message.encode
-        }.to_not raise_error
+        end.to_not raise_error
       end
 
       it "sets the value to nil when empty array is passed" do
@@ -280,9 +295,9 @@ describe Protobuf::Message do
       end
 
       it "raises TypeError when a non-array replaces it" do
-        expect {
+        expect do
           message.repeated_enum = 2
-        }.to raise_error(/value of type/)
+        end.to raise_error(/value of type/)
       end
     end
   end
@@ -359,46 +374,74 @@ describe Protobuf::Message do
 
   end
 
+  describe '#inspect' do
+    let(:klass) do
+      Class.new(Protobuf::Message) do |klass|
+        enum_class = Class.new(Protobuf::Enum) do
+          define :YAY, 1
+        end
+
+        klass.const_set(:EnumKlass, enum_class)
+
+        optional :string, :name, 1
+        repeated :int32, :counts, 2
+        optional enum_class, :enum, 3
+      end
+    end
+
+    before { stub_const('MyMessage', klass) }
+
+    it 'lists the fields' do
+      proto = klass.new(:name => 'wooo', :counts => [1, 2, 3], :enum => klass::EnumKlass::YAY)
+      expect(proto.inspect).to eq('#<MyMessage name="wooo" counts=[1, 2, 3] enum=#<Protobuf::Enum(MyMessage::EnumKlass)::YAY=1>>')
+    end
+  end
+
   describe '#to_hash' do
     context 'generating values for an ENUM field' do
       it 'converts the enum to its tag representation' do
         hash = Test::EnumTestMessage.new(:non_default_enum => :TWO).to_hash
-        expect(hash).to eq({ :non_default_enum => 2 })
+        expect(hash).to eq(:non_default_enum => 2)
       end
 
       it 'does not populate default values' do
         hash = Test::EnumTestMessage.new.to_hash
-        expect(hash).to eq(Hash.new)
+        expect(hash).to eq({})
       end
 
       it 'converts repeated enum fields to an array of the tags' do
-        hash = Test::EnumTestMessage.new(:repeated_enums => [ :ONE, :TWO, :TWO, :ONE ]).to_hash
-        expect(hash).to eq({ :repeated_enums => [ 1, 2, 2, 1 ] })
+        hash = Test::EnumTestMessage.new(:repeated_enums => [:ONE, :TWO, :TWO, :ONE]).to_hash
+        expect(hash).to eq(:repeated_enums => [1, 2, 2, 1])
       end
     end
 
     context 'generating values for a Message field' do
       it 'recursively hashes field messages' do
-        hash = Test::Nested.new({ :resource => { :name => 'Nested' } }).to_hash
-        expect(hash).to eq({ :resource => { :name => 'Nested' } })
+        hash = Test::Nested.new(:resource => { :name => 'Nested' }).to_hash
+        expect(hash).to eq(:resource => { :name => 'Nested' })
       end
 
       it 'recursively hashes a repeated set of messages' do
-        proto = Test::Nested.new(:multiple_resources => [
-          Test::Resource.new(:name => 'Resource 1'),
-          Test::Resource.new(:name => 'Resource 2')
-        ])
+        proto = Test::Nested.new(
+          :multiple_resources => [
+            Test::Resource.new(:name => 'Resource 1'),
+            Test::Resource.new(:name => 'Resource 2'),
+          ],
+        )
 
-        expect(proto.to_hash).to eq({ :multiple_resources => [ { :name => 'Resource 1' },
-                                                           { :name => 'Resource 2' } ] })
-
+        expect(proto.to_hash).to eq(
+          :multiple_resources => [
+            { :name => 'Resource 1' },
+            { :name => 'Resource 2' },
+          ],
+        )
       end
     end
   end
 
   describe '#to_json' do
     subject do
-      ::Test::ResourceFindRequest.new({ :name => 'Test Name', :active => false })
+      ::Test::ResourceFindRequest.new(:name => 'Test Name', :active => false)
     end
 
     specify { expect(subject.to_json).to eq '{"name":"Test Name","active":false}' }
@@ -406,11 +449,11 @@ describe Protobuf::Message do
 
   describe '.to_json' do
     it 'returns the class name of the message for use in json encoding' do
-      expect {
+      expect do
         ::Timeout.timeout(0.1) do
           expect(::Test::Resource.to_json).to eq("Test::Resource")
         end
-      }.not_to raise_error
+      end.not_to raise_error
     end
   end
 
@@ -422,7 +465,7 @@ describe Protobuf::Message do
     end
 
     it "does not allow string fields to be set to Numeric" do
-      expect { subject.name = 1}.to raise_error(/name/)
+      expect { subject.name = 1 }.to raise_error(/name/)
     end
   end
 

@@ -19,7 +19,7 @@ module Protobuf
         @comments = {}
         @handlers = {}
         @indent_level = indent_level
-        @order = [ :enum, :message_declaration, :message, :extended_message, :service ]
+        @order = [:enum, :message_declaration, :message, :extended_message, :service]
         init_printer(indent_level)
       end
 
@@ -87,25 +87,25 @@ module Protobuf
       def compile
         @order.each do |type|
           items = @groups[type]
-          if items.count > 0
-            item_handler = @handlers[type]
+          next if items.empty?
 
-            item_header = @headers[type]
-            header(item_header) if item_header
+          item_handler = @handlers[type]
 
-            item_comment = @comments[type]
-            comment(item_comment) if item_comment
+          item_header = @headers[type]
+          header(item_header) if item_header
 
-            items.each do |item|
-              if item_handler
-                puts item_handler.call(item)
-              else
-                print item.to_s
-              end
+          item_comment = @comments[type]
+          comment(item_comment) if item_comment
+
+          items.each do |item|
+            if item_handler
+              puts item_handler.call(item)
+            else
+              print item.to_s
             end
-
-            puts if type == :message_declaration
           end
+
+          puts if type == :message_declaration
         end
       end
 
@@ -117,4 +117,3 @@ module Protobuf
     end
   end
 end
-

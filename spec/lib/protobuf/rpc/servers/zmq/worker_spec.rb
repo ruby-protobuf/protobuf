@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Protobuf::Rpc::Zmq::Worker do
+RSpec.describe ::Protobuf::Rpc::Zmq::Worker do
   before(:each) do
     load 'protobuf/zmq.rb'
 
@@ -14,7 +14,7 @@ describe ::Protobuf::Rpc::Zmq::Worker do
   end
 
   subject do
-    described_class.new({ :host => '127.0.0.1', :port => 9400 })
+    described_class.new(:host => '127.0.0.1', :port => 9400)
   end
 
   describe '#run' do

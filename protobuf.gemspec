@@ -1,5 +1,5 @@
 # encoding: UTF-8
-$:.push ::File.expand_path("../lib", __FILE__)
+$LOAD_PATH.push ::File.expand_path("../lib", __FILE__)
 require "protobuf/version"
 
 ::Gem::Specification.new do |s|
@@ -22,13 +22,30 @@ require "protobuf/version"
   s.add_dependency 'activesupport', '>= 3.2'
   s.add_dependency 'middleware'
   s.add_dependency 'thor'
+  s.add_dependency 'thread_safe'
 
   s.add_development_dependency 'ffi-rzmq'
-  s.add_development_dependency 'pry-nav'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '>= 3.0'
+  s.add_development_dependency 'rubocop'
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'yard'
   s.add_development_dependency 'timecop'
-  s.add_development_dependency 'perftools.rb'
+  s.add_development_dependency 'yard'
+
+  # debuggers only work in MRI
+  if RUBY_ENGINE.to_sym == :ruby
+    # we don't support MRI < 1.9.3
+    pry_debugger = if RUBY_VERSION < '2.0.0'
+      'pry-debugger'
+    else
+      'pry-byebug'
+    end
+
+    s.add_development_dependency pry_debugger
+    s.add_development_dependency 'pry-stack_explorer'
+  else
+    s.add_development_dependency 'pry'
+  end
+
+  s.add_development_dependency 'ruby-prof' if RUBY_ENGINE.to_sym == :ruby
 end

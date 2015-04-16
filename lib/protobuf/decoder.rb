@@ -24,14 +24,14 @@ module Protobuf
               when ::Protobuf::WireType::FIXED32 then
                 read_fixed32(stream)
               when ::Protobuf::WireType::START_GROUP then
-                raise NotImplementedError, 'Group is deprecated.'
+                fail NotImplementedError, 'Group is deprecated.'
               when ::Protobuf::WireType::END_GROUP then
-                raise NotImplementedError, 'Group is deprecated.'
+                fail NotImplementedError, 'Group is deprecated.'
               else
-                raise InvalidWireType, wire_type
+                fail InvalidWireType, wire_type
               end
 
-      return tag, bytes
+      [tag, bytes]
     end
 
     # Read 32-bit string value from +stream+.
@@ -71,4 +71,3 @@ module Protobuf
 
   end
 end
-

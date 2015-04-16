@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'protobuf/field'
 
-describe ::Protobuf::Field do
+RSpec.describe ::Protobuf::Field do
 
   describe '.build' do
     pending
@@ -148,7 +148,6 @@ describe ::Protobuf::Field do
       end
     end
 
-
     context 'when type is a string field class or symbol' do
       it 'returns that class' do
         expected_field = ::Protobuf::Field::StringField
@@ -159,7 +158,6 @@ describe ::Protobuf::Field do
       end
     end
 
-
     context 'when type is a bytes field class or symbol' do
       it 'returns that class' do
         expected_field = ::Protobuf::Field::BytesField
@@ -169,7 +167,6 @@ describe ::Protobuf::Field do
         expect(subject.field_type(:bytes)).to eq(expected_field)
       end
     end
-
 
     context 'when type is a bool field class or symbol' do
       it 'returns that class' do
@@ -183,9 +180,9 @@ describe ::Protobuf::Field do
 
     context 'when type is not mapped' do
       it 'raises an ArgumentError' do
-        expect {
+        expect do
           subject.field_class("boom")
-        }.to raise_error
+        end.to raise_error
       end
     end
 

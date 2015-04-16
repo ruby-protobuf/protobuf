@@ -3,7 +3,7 @@ require 'spec/support/test/resource_service'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/socket'
 
-describe Protobuf::Rpc::Socket::Server do
+RSpec.describe Protobuf::Rpc::Socket::Server do
   before(:each) do
     load 'protobuf/socket.rb'
   end

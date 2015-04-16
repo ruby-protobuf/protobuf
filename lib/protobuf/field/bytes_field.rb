@@ -53,10 +53,11 @@ module Protobuf
 
       def define_setter
         field = self
+        method_name = field.setter
+
         message_class.class_eval do
-          define_method(field.setter) do |val|
+          define_method(method_name) do |val|
             begin
-              field.warn_if_deprecated
               val = "#{val}" if val.is_a?(Symbol)
 
               if val.nil?
@@ -65,7 +66,7 @@ module Protobuf
                 clear_oneof_group(field.oneof_name) if field.oneof?
                 @values[field.name] = val.dup
               else
-                raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+                fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
               end
             rescue NoMethodError => ex
               logger.error { ex.message }
@@ -74,9 +75,9 @@ module Protobuf
             end
           end
         end
-      end
 
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
+      end
     end
   end
 end
-

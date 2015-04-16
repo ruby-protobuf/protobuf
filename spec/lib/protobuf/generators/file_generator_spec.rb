@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'protobuf/generators/file_generator'
 
-describe ::Protobuf::Generators::FileGenerator do
+RSpec.describe ::Protobuf::Generators::FileGenerator do
 
   let(:base_descriptor_fields) { { :name => 'test/foo.proto' } }
   let(:descriptor_fields) { base_descriptor_fields }
@@ -13,8 +13,12 @@ describe ::Protobuf::Generators::FileGenerator do
 
   describe '#print_import_requires' do
     let(:descriptor_fields) do
-      base_descriptor_fields.merge!({ :dependency => [ 'test/bar.proto',
-                                                       'test/baz.proto' ] })
+      base_descriptor_fields.merge(
+        :dependency => [
+          'test/bar.proto',
+          'test/baz.proto',
+        ],
+      )
     end
 
     it 'prints a ruby require for each dependency' do
@@ -26,4 +30,3 @@ describe ::Protobuf::Generators::FileGenerator do
   end
 
 end
-

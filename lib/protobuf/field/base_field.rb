@@ -14,7 +14,7 @@ module Protobuf
       PACKED_TYPES = [
         ::Protobuf::WireType::VARINT,
         ::Protobuf::WireType::FIXED32,
-        ::Protobuf::WireType::FIXED64
+        ::Protobuf::WireType::FIXED64,
       ].freeze
 
       ##
@@ -51,7 +51,7 @@ module Protobuf
       # Public Instance Methods
       #
 
-      def acceptable?(value)
+      def acceptable?(_value)
         true
       end
 
@@ -59,8 +59,8 @@ module Protobuf
         value
       end
 
-      def decode(bytes)
-        raise NotImplementedError, "#{self.class.name}\#decode"
+      def decode(_bytes)
+        fail NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
       def default
@@ -79,8 +79,8 @@ module Protobuf
         options.key?(:deprecated)
       end
 
-      def encode(value)
-        raise NotImplementedError, "#{self.class.name}\#encode"
+      def encode(_value)
+        fail NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
       def extension?
@@ -127,7 +127,7 @@ module Protobuf
         rule == :required
       end
 
-      # FIXME need to cleanup (rename) this warthog of a method.
+      # FIXME: need to cleanup (rename) this warthog of a method.
       def set(message_instance, bytes)
         if packed?
           array = message_instance.__send__(getter)
@@ -156,21 +156,12 @@ module Protobuf
         @setter ||= "#{name}="
       end
 
-      # FIXME add packed, deprecated, extension options to to_s output
+      # FIXME: add packed, deprecated, extension options to to_s output
       def to_s
         "#{rule} #{type_class} #{name} = #{tag} #{default ? "[default=#{default.inspect}]" : ''}"
       end
 
-      def type
-        $stderr.puts("[DEPRECATED] #{self.class.name}#type usage is deprecated.\nPlease use #type_class instead.")
-        type_class
-      end
-
-      def warn_if_deprecated
-        if ::Protobuf.print_deprecation_warnings? && deprecated?
-          $stderr.puts("[WARNING] #{message_class.name}##{name} field usage is deprecated.")
-        end
-      end
+      ::Protobuf.deprecator.define_deprecated_methods(self, :type => :type_class)
 
       def wire_type
         ::Protobuf::WireType::VARINT
@@ -194,25 +185,28 @@ module Protobuf
 
       def define_array_getter
         field = self
+        method_name = field.getter
+
         message_class.class_eval do
-          define_method(field.getter) do
-            field.warn_if_deprecated
+          define_method(method_name) do
             @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
           end
         end
+
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
       def define_array_setter
         field = self
-        message_class.class_eval do
-          define_method(field.setter) do |val|
-            field.warn_if_deprecated
+        method_name = field.setter
 
+        message_class.class_eval do
+          define_method(method_name) do |val|
             if val.is_a?(Array)
               val = val.dup
               val.compact!
             else
-              raise TypeError, <<-TYPE_ERROR
+              fail TypeError, <<-TYPE_ERROR
                 Expected repeated value of type '#{field.type_class}'
                 Got '#{val.class}' for repeated protobuf field #{field.name}
               TYPE_ERROR
@@ -227,24 +221,29 @@ module Protobuf
             end
           end
         end
+
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
       def define_getter
         field = self
+        method_name = field.getter
+
         message_class.class_eval do
-          define_method(field.getter) do
-            field.warn_if_deprecated
+          define_method(method_name) do
             @values.fetch(field.name, field.default_value)
           end
         end
+
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
       def define_setter
         field = self
-        message_class.class_eval do
-          define_method(field.setter) do |val|
-            field.warn_if_deprecated
+        method_name = field.setter
 
+        message_class.class_eval do
+          define_method(method_name) do |val|
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
               @values.delete(field.name)
             elsif field.acceptable?(val)
@@ -252,10 +251,12 @@ module Protobuf
               clear_oneof_group(field.oneof_name) if field.oneof?
               @values[field.name] = coerced_value
             else
-              raise TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+              fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
           end
         end
+
+        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
       def typed_default_value
@@ -268,11 +269,10 @@ module Protobuf
 
       def validate_packed_field
         if packed? && ! ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
-          raise "Can't use packed encoding for '#{type_class}' type"
+          fail "Can't use packed encoding for '#{type_class}' type"
         end
       end
 
     end
   end
 end
-

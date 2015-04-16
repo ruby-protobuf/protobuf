@@ -22,8 +22,7 @@ module Protobuf
 
       def compile
         run_once(:compile) do
-          map_extensions(descriptor, [ descriptor.package ])
-          extract_dangling_extensions
+          map_extensions(descriptor, [descriptor.package])
 
           print_file_comment
           print_generic_requires
@@ -31,10 +30,10 @@ module Protobuf
 
           print_package do
             group = GroupGenerator.new(current_indent)
-            group.add_enums(descriptor.enum_type, :namespace => [ descriptor.package ])
+            group.add_enums(descriptor.enum_type, :namespace => [descriptor.package])
             group.add_message_declarations(descriptor.message_type)
-            group.add_messages(descriptor.message_type, :extension_fields => @extension_fields, :namespace => [ descriptor.package ])
-            group.add_extended_messages(@unknown_extensions)
+            group.add_messages(descriptor.message_type, :extension_fields => @extension_fields, :namespace => [descriptor.package])
+            group.add_extended_messages(unknown_extensions)
             group.add_services(descriptor.service)
 
             group.add_header(:enum, 'Enum Classes')
@@ -48,9 +47,9 @@ module Protobuf
         end
       end
 
-      def extract_dangling_extensions
-        @unknown_extensions = @extension_fields.select do |k, v|
-          ! @known_messages.include?(k)
+      def unknown_extensions
+        @unknown_extensions ||= @extension_fields.reject do |k, _|
+          @known_messages.include?(k)
         end
       end
 
@@ -79,20 +78,18 @@ module Protobuf
           @extension_fields[field_descriptor.extendee] << field_descriptor
         end
 
-        if descriptor.respond_to_has_and_present?(:message_type)
-          descriptor.message_type.each do |message_descriptor|
-            map_extensions(message_descriptor, (namespaces + [ message_descriptor.name ]))
-          end
-        end
+        [:message_type, :nested_type].each do |type|
+          next unless descriptor.respond_to_has_and_present?(type)
 
-        if descriptor.respond_to_has_and_present?(:nested_type)
-          descriptor.nested_type.each do |nested_descriptor|
-            map_extensions(nested_descriptor, (namespaces + [ nested_descriptor.name ]))
+          descriptor.public_send(type).each do |type_descriptor|
+            map_extensions(type_descriptor, (namespaces + [type_descriptor.name]))
           end
         end
       end
 
       def print_file_comment
+        puts "# encoding: utf-8"
+        puts
         puts "##"
         puts "# This file is auto-generated. DO NOT EDIT!"
         puts "#"
@@ -105,23 +102,22 @@ module Protobuf
       end
 
       def print_import_requires
-        if descriptor.dependency.count > 0
-          header "Imports"
+        return if descriptor.dependency.empty?
 
-          descriptor.dependency.each do |dependency|
-            print_require(convert_filename(dependency))
-          end
+        header "Imports"
 
-          puts
+        descriptor.dependency.each do |dependency|
+          print_require(convert_filename(dependency))
         end
+
+        puts
       end
 
       def print_package(&block)
-        final = lambda { block.call }
         namespaces = descriptor.package.split('.')
-        namespaces.reverse.inject(final) { |previous, namespace|
-          lambda { print_module(namespace, &previous) }
-        }.call
+        namespaces.reverse.reduce(block) do |previous, namespace|
+          -> { print_module(namespace, &previous) }
+        end.call
       end
 
       private
@@ -137,4 +133,3 @@ module Protobuf
     end
   end
 end
-

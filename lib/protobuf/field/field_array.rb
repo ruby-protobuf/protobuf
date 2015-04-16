@@ -41,7 +41,7 @@ module Protobuf
       # Return a hash-representation of the given values for this field type.
       # The value in this case would be an array.
       def to_hash_value
-        self.map do |value|
+        map do |value|
           value.respond_to?(:to_hash_value) ? value.to_hash_value : value
         end
       end
@@ -62,10 +62,12 @@ module Protobuf
 
       def normalize(value)
         value = value.to_proto if value.respond_to?(:to_proto)
-        raise TypeError, "Unacceptable value #{value} for field #{field.name} of type #{field.type_class}" unless field.acceptable?(value)
+        fail TypeError, "Unacceptable value #{value} for field #{field.name} of type #{field.type_class}" unless field.acceptable?(value)
 
         if field.is_a?(::Protobuf::Field::EnumField)
           field.type_class.fetch(value)
+        elsif field.is_a?(::Protobuf::Field::MessageField) && value.is_a?(field.type_class)
+          value
         elsif field.is_a?(::Protobuf::Field::MessageField) && value.respond_to?(:to_hash)
           field.type_class.new(value.to_hash)
         else
@@ -74,7 +76,7 @@ module Protobuf
       end
 
       def raise_type_error(val)
-        raise TypeError, <<-TYPE_ERROR
+        fail TypeError, <<-TYPE_ERROR
           Expected repeated value of type '#{field.type_class}'
           Got '#{val.class}' for repeated protobuf field #{field.name}
         TYPE_ERROR
@@ -83,4 +85,3 @@ module Protobuf
     end
   end
 end
-

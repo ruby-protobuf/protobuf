@@ -2,30 +2,34 @@ require 'spec_helper'
 
 require 'protobuf/generators/service_generator'
 
-describe ::Protobuf::Generators::ServiceGenerator do
+RSpec.describe ::Protobuf::Generators::ServiceGenerator do
 
-  let(:methods) {
+  let(:methods) do
     [
       { :name => 'Search', :input_type => 'FooRequest', :output_type => 'FooResponse' },
-      { :name => 'FooBar', :input_type => '.foo.Request', :output_type => '.bar.Response' }
+      { :name => 'FooBar', :input_type => '.foo.Request', :output_type => '.bar.Response' },
     ]
-  }
-  let(:service_fields) { { :name => 'TestService',
-                           :method => methods } }
+  end
+  let(:service_fields) do
+    {
+      :name => 'TestService',
+      :method => methods,
+    }
+  end
 
   let(:service) { ::Google::Protobuf::ServiceDescriptorProto.new(service_fields) }
 
   subject { described_class.new(service) }
 
   describe '#compile' do
-    let(:compiled) {
-      %q{class TestService < ::Protobuf::Rpc::Service
+    let(:compiled) do
+      'class TestService < ::Protobuf::Rpc::Service
   rpc :search, FooRequest, FooResponse
   rpc :foo_bar, ::Foo::Request, ::Bar::Response
 end
 
-}
-    }
+'
+    end
 
     it 'compiles the service and it\'s rpc methods' do
       subject.compile
@@ -40,4 +44,3 @@ end
   end
 
 end
-

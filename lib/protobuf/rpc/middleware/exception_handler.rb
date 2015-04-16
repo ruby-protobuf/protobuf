@@ -22,7 +22,7 @@ module Protobuf
           env
         end
 
-      private
+        private
 
         # Wrap exceptions in a generic Protobuf errors unless they already are
         #

@@ -4,7 +4,7 @@ class UtilTest
   include ::Protobuf::Rpc::Zmq::Util
 end
 
-describe ::Protobuf::Rpc::Zmq::Util do
+RSpec.describe ::Protobuf::Rpc::Zmq::Util do
   before(:each) do
     load 'protobuf/zmq.rb'
   end
@@ -12,28 +12,28 @@ describe ::Protobuf::Rpc::Zmq::Util do
   subject { UtilTest.new }
   describe '#zmq_error_check' do
     it 'raises when the error code is less than 0' do
-      expect {
+      expect do
         subject.zmq_error_check(-1, :test)
-      }.to raise_error(/test/)
+      end.to raise_error(/test/)
     end
 
     it 'retrieves the error string from ZeroMQ' do
       allow(ZMQ::Util).to receive(:error_string).and_return('an error from zmq')
-      expect {
+      expect do
         subject.zmq_error_check(-1, :test)
-      }.to raise_error(RuntimeError, /an error from zmq/i)
+      end.to raise_error(RuntimeError, /an error from zmq/i)
     end
 
     it 'does nothing if the error code is > 0' do
-      expect {
+      expect do
         subject.zmq_error_check(1, :test)
-      }.to_not raise_error
+      end.to_not raise_error
     end
 
     it 'does nothing if the error code is == 0' do
-      expect {
+      expect do
         subject.zmq_error_check(0, :test)
-      }.to_not raise_error
+      end.to_not raise_error
     end
   end
 
