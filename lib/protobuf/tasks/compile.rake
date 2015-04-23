@@ -18,8 +18,7 @@ namespace :protobuf do
     command << "protoc"
     command << "--#{args[:plugin]}_out=#{args[:destination]}"
     command << "-I #{args[:source]}"
-    command << "#{args[:source]}/#{args[:package]}/*.proto"
-    command << "#{args[:source]}/#{args[:package]}/**/*.proto"
+    command << Dir["#{args[:source]}/#{args[:package]}/**/*.proto"].join(" ")
     full_command = command.join(' ')
 
     puts full_command
