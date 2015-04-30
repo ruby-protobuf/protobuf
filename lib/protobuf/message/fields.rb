@@ -41,17 +41,6 @@ module Protobuf
           define_field(:required, type_class, name, tag, options)
         end
 
-        def oneof_fields(oneof_name)
-          @oneof_name = oneof_name
-          yield
-          @oneof_name = nil
-        end
-
-        def oneof(type_class, name, tag, options = {})
-          raise "You aren't in a oneof_fields block!" if @oneof_name.nil?
-          optional(type_class, name, tag, options.merge(:oneof => @oneof_name))
-        end
-
         # Define an extension range.
         #
         def extensions(range)
