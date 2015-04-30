@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
@@ -21,7 +23,6 @@ module Test
   end
 
   class OneofTest
-    set_oneof_names :SingleIdentifier
     optional ::Test::FullName, :full_name, 1, :oneof => :SingleIdentifier
     optional :string, :email, 2, :oneof => :SingleIdentifier
     optional :string, :username, 3, :oneof => :SingleIdentifier

@@ -43,7 +43,6 @@ module Protobuf
               group = GroupGenerator.new(current_indent)
               group.add_messages(descriptor.nested_type, :extension_fields => @extension_fields, :namespace => type_namespace)
 
-              group.add_oneof_names(descriptor)
               group.add_message_fields(descriptor.field, descriptor.oneof_decl)
               self.class.validate_tags(fully_qualified_type_namespace, descriptor.field.map(&:number))
 
