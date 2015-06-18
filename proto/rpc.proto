@@ -53,6 +53,8 @@ enum ErrorReason
   METHOD_NOT_FOUND = 3;                         // Method not found on server
   RPC_ERROR = 4;                                // Rpc threw exception on server
   RPC_FAILED = 5;                               // Rpc failed on server
+  UNAUTHORIZED_REQUEST = 10;                    // Server received unauthorized request
+  FORBIDDEN_REQUEST = 11;                       // Server understood the request, but is refusing to fulfill it
 
   // Client-side errors (these are returned by the client-side code)
   INVALID_REQUEST_PROTO = 6;                    // Rpc was called with invalid request proto
