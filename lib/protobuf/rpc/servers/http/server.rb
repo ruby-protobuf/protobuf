@@ -14,6 +14,8 @@ module Protobuf
         HTTP_STATUSES = {
           Protobuf::Socketrpc::ErrorReason::BAD_REQUEST_DATA => 400,
           Protobuf::Socketrpc::ErrorReason::BAD_REQUEST_PROTO => 400,
+          Protobuf::Socketrpc::ErrorReason::UNAUTHORIZED_REQUEST => 401,
+          Protobuf::Socketrpc::ErrorReason::FORBIDDEN_REQUEST => 403,
           Protobuf::Socketrpc::ErrorReason::SERVICE_NOT_FOUND => 404,
           Protobuf::Socketrpc::ErrorReason::METHOD_NOT_FOUND => 404,
           Protobuf::Socketrpc::ErrorReason::RPC_ERROR => 500,
