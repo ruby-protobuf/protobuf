@@ -18,6 +18,7 @@ module Protobuf
           Protobuf::Socketrpc::ErrorReason::FORBIDDEN_REQUEST => 403,
           Protobuf::Socketrpc::ErrorReason::SERVICE_NOT_FOUND => 404,
           Protobuf::Socketrpc::ErrorReason::METHOD_NOT_FOUND => 404,
+          Protobuf::Socketrpc::ErrorReason::DATA_NOT_FOUND => 404,
           Protobuf::Socketrpc::ErrorReason::RPC_ERROR => 500,
           Protobuf::Socketrpc::ErrorReason::RPC_FAILED => 500,
           Protobuf::Socketrpc::ErrorReason::INVALID_REQUEST_PROTO => 500,
