@@ -55,6 +55,7 @@ enum ErrorReason
   RPC_FAILED = 5;                               // Rpc failed on server
   UNAUTHORIZED_REQUEST = 10;                    // Server received unauthorized request
   FORBIDDEN_REQUEST = 11;                       // Server understood the request, but is refusing to fulfill it
+  DATA_NOT_FOUND = 12;                          // Requested data not found
 
   // Client-side errors (these are returned by the client-side code)
   INVALID_REQUEST_PROTO = 6;                    // Rpc was called with invalid request proto

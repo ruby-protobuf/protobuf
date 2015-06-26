@@ -51,5 +51,11 @@ module Protobuf
       end
     end
 
+    class DataNotFound < PbError
+      def initialize message='Requested data not found'
+        super message, 'DATA_NOT_FOUND'
+      end
+    end
+
   end
 end
