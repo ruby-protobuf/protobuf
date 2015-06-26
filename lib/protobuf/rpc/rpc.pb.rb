@@ -18,6 +18,7 @@ module Protobuf
       define :RPC_FAILED, 5
       define :UNAUTHORIZED_REQUEST, 10
       define :FORBIDDEN_REQUEST, 11
+      define :DATA_NOT_FOUND, 12
       define :INVALID_REQUEST_PROTO, 6
       define :BAD_RESPONSE_PROTO, 7
       define :UNKNOWN_HOST, 8
