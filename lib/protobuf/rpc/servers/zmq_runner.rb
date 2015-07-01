@@ -11,7 +11,7 @@ module Protobuf
                    when options.is_a?(OpenStruct) then
                      options.marshal_dump
                    when options.respond_to?(:to_hash) then
-                     options.to_hash
+                     options.to_hash.symbolize_keys
                    else
                      fail "Cannot parser Zmq Server - server options"
                    end
