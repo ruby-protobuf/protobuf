@@ -12,8 +12,10 @@ module Protobuf
           :get_field_by_tag => :get_field,
         )
 
-        def inherited(subclass)
-          inherit_fields!(subclass)
+        other.class_eval do
+          def self.inherited(subclass)
+            inherit_fields!(subclass)
+          end
         end
       end
 

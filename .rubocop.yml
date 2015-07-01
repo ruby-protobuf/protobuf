@@ -9,6 +9,9 @@ Lint/Loop:
 Metrics/ClassLength:
   Enabled: false
 
+Metrics/ModuleLength:
+  Enabled: false
+
 Style/CaseIndentation:
   IndentWhenRelativeTo: end
 

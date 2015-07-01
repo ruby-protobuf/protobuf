@@ -118,8 +118,7 @@ module Protobuf
           :socket
         elsif options.zmq?
           :zmq
-        else # rubocop:disable Style/ElseAlignment
-          # above: https://github.com/bbatsov/rubocop/pull/1470/files
+        else
           case server_type = ENV["PB_SERVER_TYPE"]
           when nil, /socket/i
             :socket
