@@ -284,7 +284,7 @@ module Protobuf
         end
 
         def start_broker
-          return if @broker && @broker.running? && !@broker_thread.stop?
+          return if @broker && @broker.running? && @broker_thread.alive?
           if @broker && !@broker.running?
             broadcast_flatline if broadcast_busy?
             @broker_thread.join if @broker_thread
