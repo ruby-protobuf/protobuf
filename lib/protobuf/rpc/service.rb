@@ -1,3 +1,5 @@
+require 'active_support/core_ext/class'
+
 require 'protobuf/logging'
 require 'protobuf/rpc/client'
 require 'protobuf/rpc/error'

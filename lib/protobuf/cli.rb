@@ -181,7 +181,7 @@ module Protobuf
       end
 
       def runner_options
-        opt = options.symbolize_keys
+        opt = options.to_hash.symbolize_keys
 
         opt[:workers_only] = (!!ENV['PB_WORKERS_ONLY']) || options.workers_only
 
