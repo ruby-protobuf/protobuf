@@ -11,15 +11,12 @@ module Protobuf
           :get_field_by_name => :get_field,
           :get_field_by_tag => :get_field,
         )
-
-        other.class_eval do
-          def self.inherited(subclass)
-            inherit_fields!(subclass)
-          end
-        end
       end
 
       module ClassMethods
+        def inherited(subclass)
+          inherit_fields!(subclass)
+        end
 
         ##
         # Field Definition Methods
