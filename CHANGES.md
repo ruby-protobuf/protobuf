@@ -1,5 +1,11 @@
 # Stable (3.x)
 
+3.5.1
+--------
+- Adds compatibility for Rails 4.2+ as CLI options were broken
+- Fixes bug with MRI and "dead" thread in zmq broker
+- Fixes Rubocop compatability with new version
+
 3.0.4
 --------
 
