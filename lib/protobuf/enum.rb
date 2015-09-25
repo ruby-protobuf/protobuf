@@ -58,6 +58,15 @@ module Protobuf
       const_set(name, enum)
     end
 
+    # Internal: A mapping of enum number -> enums defined
+    # used for speeding up our internal enum methods.
+    def self.mapped_enums
+      @mapped_enums ||= enums.each_with_object({}) do |enum, hash|
+        list = hash[enum.to_i] ||= []
+        list << enum
+      end
+    end
+
     # Public: All defined enums.
     #
     class << self
@@ -83,9 +92,7 @@ module Protobuf
     # Returns an array with zero or more Enum objects or nil.
     #
     def self.enums_for_tag(tag)
-      enums.select do |enum|
-        enum.to_i == tag.to_i
-      end
+      mapped_enums[tag.to_i] || []
     end
 
     # Public: Get the Enum associated with the given name.
@@ -120,7 +127,8 @@ module Protobuf
     #   Enums, the first enum defined will be returned.
     #
     def self.enum_for_tag(tag)
-      enums_for_tag(tag).first
+      value = mapped_enums[tag.to_i]
+      value ? value.first : nil
     end
 
     # Public: Get an Enum by a variety of type-checking mechanisms.
@@ -198,7 +206,7 @@ module Protobuf
     # Returns a boolean.
     #
     def self.valid_tag?(tag)
-      tag.respond_to?(:to_i) && all_tags.include?(tag.to_i)
+      tag.respond_to?(:to_i) && mapped_enums.key?(tag.to_i)
     end
 
     # Public: [DEPRECATED] Return a hash of Enum objects keyed
