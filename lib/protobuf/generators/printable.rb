@@ -61,7 +61,7 @@ module Protobuf
       #
       def modulize(name)
         name = name.gsub(/\./, '::')
-        name = name.gsub(/(^(?:::)?[a-z]|::[a-z])/) { |match| match.upcase }
+        name = name.gsub(/(^(?:::)?[a-z]|::[a-z])/, &:upcase)
         name
       end
 

@@ -14,7 +14,7 @@ RSpec.describe 'Functional ZMQ Client' do
       'threshold' => 100,
       'threads' => 5,
     )
-    @server_thread = Thread.new(@runner) { |runner| runner.run }
+    @server_thread = Thread.new(@runner, &:run)
     Thread.pass until @runner.running?
   end
 

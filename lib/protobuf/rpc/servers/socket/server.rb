@@ -60,9 +60,7 @@ module Protobuf
 
         def new_worker(socket)
           Thread.new(socket) do |sock|
-            ::Protobuf::Rpc::Socket::Worker.new(sock) do |s|
-              s.close
-            end
+            ::Protobuf::Rpc::Socket::Worker.new(sock, &:close)
           end
         end
 
@@ -97,7 +95,7 @@ module Protobuf
                   else
                     unless working.include?(client)
                       working << listen_fds.delete(client)
-                      logger.debug { sign_message("Working")  }
+                      logger.debug { sign_message("Working") }
                       threads << { :thread => new_worker(client), :socket => client }
 
                       cleanup_threads if cleanup?

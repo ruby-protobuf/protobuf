@@ -24,7 +24,7 @@ module Protobuf
 
         def close_connection
           @socket.close
-          logger.debug { sign_message('Connector closed')  }
+          logger.debug { sign_message('Connector closed') }
         end
 
         def connect_to_rpc_server
@@ -35,7 +35,7 @@ module Protobuf
         # Method to determine error state, must be used with Connector api
         def error?
           return true if @error
-          logger.debug { sign_message("Error state : #{@socket.closed?}")  }
+          logger.debug { sign_message("Error state : #{@socket.closed?}") }
           @socket.closed?
         end
 

@@ -63,7 +63,7 @@ module Protobuf
       def get_data_size # rubocop:disable Style/AccessorMethodName
         if @size == 0 || @data.match(SIZE_REGEX)
           sliced_size = @data.slice!(SIZE_REGEX)
-          @size = sliced_size.gsub('-', '').to_i unless sliced_size.nil?
+          @size = sliced_size.delete('-').to_i unless sliced_size.nil?
         end
       end
 

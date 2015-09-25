@@ -283,8 +283,8 @@ RSpec.describe ::Protobuf::Rpc::ServiceDirectory do
       it "should perform lookups in constant time" do
         print "\n\n"
         Benchmark.bm(17) do |x|
-          x.report("  1_000 lookups:") {   1_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
-          x.report(" 10_000 lookups:") {  10_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
+          x.report("  1_000 lookups:") { 1_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
+          x.report(" 10_000 lookups:") { 10_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
           x.report("100_000 lookups:") { 100_000.times { subject.lookup("PerformanceService#{rand(0..9)}") } }
         end
       end
