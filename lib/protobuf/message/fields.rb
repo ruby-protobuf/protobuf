@@ -78,14 +78,12 @@ module Protobuf
         end
 
         def get_extension_field(name_or_tag)
-          name_or_tag = name_or_tag.to_sym if name_or_tag.respond_to?(:to_sym)
-          field = field_store[name_or_tag]
+          field = field_store[name_or_tag] || str_field_store[name_or_tag]
           field if field.try(:extension?) { false }
         end
 
         def get_field(name_or_tag, allow_extension = false)
-          name_or_tag = name_or_tag.to_sym if name_or_tag.respond_to?(:to_sym)
-          field = field_store[name_or_tag]
+          field = field_store[name_or_tag] || str_field_store[name_or_tag]
 
           if field && (allow_extension || !field.extension?)
             field
@@ -101,6 +99,8 @@ module Protobuf
           field = ::Protobuf::Field.build(self, rule, type_class, field_name, tag, options)
           field_store[field_name] = field
           field_store[tag] = field
+
+          str_field_store[field_name.to_s] = field
 
           define_method("#{field_name}!") do
             @values[field_name]
@@ -126,6 +126,10 @@ module Protobuf
         end
         private :inherit_fields!
 
+        def str_field_store
+          @str_field_store ||= {}
+        end
+        private :str_field_store
       end
     end
   end
