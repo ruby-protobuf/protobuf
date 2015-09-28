@@ -14,6 +14,15 @@ module Protobuf
 
         super
       end
+
+      def deprecation_warning(deprecated_method_name, message = nil, caller_backtrace = nil)
+        if ENV.key?('PB_IGNORE_DEPRECATIONS')
+          # This ensures ActiveSupport::Deprecation doesn't look for the caller, which is very costly.
+          super(deprecated_method_name, message, ["IGNORING TRACE"])
+        else
+          super(deprecated_method_name, message, caller_backtrace)
+        end
+      end
     end
 
     class Deprecation < DeprecationBase
