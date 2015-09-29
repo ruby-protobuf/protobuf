@@ -69,10 +69,10 @@ module Protobuf
 
       def default_value
         @default_value ||= case
-        when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
-        when required? then nil
-        when optional? then typed_default_value
-        end
+                           when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
+                           when required? then nil
+                           when optional? then typed_default_value
+                           end
       end
 
       def deprecated?
