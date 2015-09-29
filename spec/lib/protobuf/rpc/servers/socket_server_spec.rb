@@ -14,7 +14,7 @@ RSpec.describe Protobuf::Rpc::Socket::Server do
     @options = OpenStruct.new(:host => "127.0.0.1", :port => 9399, :backlog => 100, :threshold => 100)
     @runner = ::Protobuf::Rpc::SocketRunner.new(@options)
     @server = @runner.instance_variable_get(:@server)
-    @server_thread = Thread.new(@runner) { |runner| runner.run }
+    @server_thread = Thread.new(@runner, &:run)
     Thread.pass until @server.running?
   end
 

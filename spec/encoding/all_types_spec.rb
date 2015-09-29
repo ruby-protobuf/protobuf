@@ -96,10 +96,7 @@ RSpec.describe ::Protobuf do
     )
 
     data_file_path = File.expand_path('../../support/test/all_types.data.bin', __FILE__)
-    data = File.open(data_file_path, 'rb') do |file|
-      file.read
-    end
-
+    data = File.open(data_file_path, 'rb', &:read)
     expect(data).to eq(message.serialize_to_string)
   end
 end

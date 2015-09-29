@@ -10,13 +10,13 @@ module Protobuf
 
       def initialize(options)
         options = case
-                   when options.is_a?(OpenStruct) then
-                     options.marshal_dump
-                   when options.respond_to?(:to_hash) then
-                     options.to_hash.symbolize_keys
-                   else
-                     fail "Cannot parser Socket Server - server options"
-                   end
+                  when options.is_a?(OpenStruct) then
+                    options.marshal_dump
+                  when options.respond_to?(:to_hash) then
+                    options.to_hash.symbolize_keys
+                  else
+                    fail "Cannot parser Socket Server - server options"
+                  end
 
         self.server = ::Protobuf::Rpc::Socket::Server.new(options)
       end

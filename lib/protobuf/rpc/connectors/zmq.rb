@@ -220,9 +220,9 @@ module Protobuf
           logger.debug { sign_message("Timed out waiting for response (attempt #{attempt}, #{socket})") }
           raise RequestTimeout
         ensure
-          logger.debug { sign_message("Closing Socket")  }
+          logger.debug { sign_message("Closing Socket") }
           zmq_error_check(socket.close, :socket_close) if socket
-          logger.debug { sign_message("Socket closed")  }
+          logger.debug { sign_message("Socket closed") }
         end
 
         def server_lookup_attempts

@@ -114,21 +114,21 @@ module Protobuf
         debug_say('Configuring runner mode')
 
         self.mode = if multi_mode?
-          say('WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow)
-          :socket
-        elsif options.zmq?
-          :zmq
-        else
-          case server_type = ENV["PB_SERVER_TYPE"]
-          when nil, /socket/i
-            :socket
-          when /zmq/i
-            :zmq
-          else
-            say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
-            :socket
-          end
-        end
+                      say('WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow)
+                      :socket
+                    elsif options.zmq?
+                      :zmq
+                    else
+                      case server_type = ENV["PB_SERVER_TYPE"]
+                      when nil, /socket/i
+                        :socket
+                      when /zmq/i
+                        :zmq
+                      else
+                        say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
+                        :socket
+                      end
+                    end
       end
 
       # Configure signal traps.
@@ -153,13 +153,13 @@ module Protobuf
       def create_runner
         debug_say("Creating #{mode} runner")
         self.runner = case mode
-        when :zmq
-          create_zmq_runner
-        when :socket
-          create_socket_runner
-        else
-          say_and_exit("Unknown runner mode: #{mode}")
-        end
+                      when :zmq
+                        create_zmq_runner
+                      when :socket
+                        create_socket_runner
+                      else
+                        say_and_exit("Unknown runner mode: #{mode}")
+                      end
       end
 
       # Say something if we're in debug mode.
