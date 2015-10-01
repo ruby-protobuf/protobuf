@@ -16,7 +16,7 @@ module Protobuf
       tag, wire_type = read_key(stream)
       bytes = case wire_type
               when ::Protobuf::WireType::VARINT then
-                read_varint(stream)
+                Varint.decode(stream)
               when ::Protobuf::WireType::FIXED64 then
                 read_fixed64(stream)
               when ::Protobuf::WireType::LENGTH_DELIMITED then
@@ -60,14 +60,7 @@ module Protobuf
 
     # Read varint integer value from +stream+.
     def self.read_varint(stream)
-      value = index = 0
-      begin
-        byte = stream.readbyte
-        value |= (byte & 0x7f) << (7 * index)
-        index += 1
-      end while (byte & 0x80).nonzero?
-      value
+      Varint.decode(stream)
     end
-
   end
 end

@@ -4,6 +4,17 @@ require 'protobuf/exceptions'
 require 'protobuf/message/fields'
 require 'protobuf/message/serialization'
 
+# Under MRI, this optimizes proto decoding by around 15% in tests.
+# When unavailable, we fall to pure Ruby.
+# rubocop:disable Lint/HandleExceptions
+begin
+  require 'varint/varint'
+rescue LoadError
+end
+# rubocop:enable Lint/HandleExceptions
+
+require 'protobuf/varint'
+
 module Protobuf
   class Message
 
