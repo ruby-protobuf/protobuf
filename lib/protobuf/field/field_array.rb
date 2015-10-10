@@ -71,7 +71,7 @@ module Protobuf
         elsif field.is_a?(::Protobuf::Field::MessageField) && value.respond_to?(:to_hash)
           field.type_class.new(value.to_hash)
         else
-          value
+          field.coerce!(value)
         end
       end
 

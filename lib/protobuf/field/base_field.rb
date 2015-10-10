@@ -194,6 +194,11 @@ module Protobuf
 
         message_class.class_eval do
           define_method(method_name) do |val|
+            if val.nil? || (val.respond_to?(:empty?) && val.empty?)
+              @values.delete(field.name)
+              return
+            end
+
             if val.is_a?(Array)
               val = val.dup
               val.compact!
@@ -204,12 +209,8 @@ module Protobuf
               TYPE_ERROR
             end
 
-            if val.nil? || (val.respond_to?(:empty?) && val.empty?)
-              @values.delete(field.name)
-            else
-              @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
-              @values[field.name].replace(val)
-            end
+            @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
+            @values[field.name].replace(val)
           end
         end
 
