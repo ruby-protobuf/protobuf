@@ -17,6 +17,7 @@ RSpec.describe Protobuf::Field::FieldArray do
     optional :string, :some_string, 1
     repeated :string, :multiple_strings, 2
     repeated SomeBasicMessage, :multiple_basic_msgs, 3
+    repeated :int64, :multiple_integers, 4
   end
 
   let(:instance) { SomeRepeatMessage.new }
@@ -62,6 +63,24 @@ RSpec.describe Protobuf::Field::FieldArray do
           instance.multiple_basic_msgs.send(method, basic_msg1)
           expect(instance.multiple_basic_msgs).to eq([basic_msg1])
           expect(instance.multiple_basic_msgs.first).to be_a(MoreComplexMessage)
+        end
+      end
+
+      context 'when applied to an Integer field array' do
+        it 'does conversion if adding a string' do
+          expect(instance.multiple_integers).to be_empty
+          instance.multiple_integers.send(method, '1')
+          expect(instance.multiple_integers).to eq([1])
+        end
+      end
+    end
+
+    describe 'assign' do
+      context 'nil to an array' do
+        it 'empties the array' do
+          instance.multiple_strings = ['string 1']
+          instance.multiple_strings = nil
+          expect(instance.multiple_strings).to be_empty
         end
       end
     end
