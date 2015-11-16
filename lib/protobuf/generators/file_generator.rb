@@ -107,7 +107,8 @@ module Protobuf
         header "Imports"
 
         descriptor.dependency.each do |dependency|
-          print_require(convert_filename(dependency))
+          #print_require(convert_filename(dependency))
+          puts "'require_relative #{convert_filename(dependency)}'"
         end
 
         puts
@@ -122,7 +123,7 @@ module Protobuf
 
       private
 
-      def convert_filename(filename, for_require = true)
+      def convert_filename(filename, for_require = false)
         filename.sub(/\.proto/, (for_require ? '.pb' : '.pb.rb'))
       end
 
