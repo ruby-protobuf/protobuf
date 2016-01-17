@@ -93,24 +93,17 @@ RSpec.describe ::Protobuf::Rpc::Connectors::Zmq do
 
     context "when the PB_RPC_PING_PORT is set" do
       before do
-        ENV["PB_RPC_PING_PORT"] = "3307"
+        ::ENV["PB_RPC_PING_PORT"] = "3307"
       end
 
       it "returns true when the connection succeeds" do
-        expect(TCPSocket).to receive(:new).with("huzzah.com", 3307).and_return(double(:close => nil, :setsockopt => nil))
-        expect(subject.send(:host_alive?, "huzzah.com")).to be true
+        allow_any_instance_of(::Protobuf::Rpc::Connectors::Ping).to receive(:online?).and_return(true)
+        expect(subject.send(:host_alive?, "huzzah1.com")).to eq(true)
       end
 
       it "returns false when the connection fails" do
-        expect(TCPSocket).to receive(:new).with("hayoob.com", 3307).and_raise(Errno::ECONNREFUSED)
-        expect(subject.send(:host_alive?, "hayoob.com")).to be false
-      end
-
-      it "closes the socket" do
-        socket = double("TCPSocket", :setsockopt => nil)
-        expect(socket).to receive(:close)
-        expect(TCPSocket).to receive(:new).with("absorbalof.com", 3307).and_return(socket)
-        expect(subject.send(:host_alive?, "absorbalof.com")).to be true
+        allow_any_instance_of(::Protobuf::Rpc::Connectors::Ping).to receive(:online?).and_return(false)
+        expect(subject.send(:host_alive?, "huzzah2.com")).to eq(false)
       end
     end
   end
