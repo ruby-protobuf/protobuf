@@ -75,6 +75,9 @@ module Protobuf
         end
 
         descriptor.extension.each do |field_descriptor|
+          unless field_descriptor.name.start_with?(namespaces.first)
+            field_descriptor.name = "#{namespaces.join('.')}.#{field_descriptor.name}"
+          end
           @extension_fields[field_descriptor.extendee] << field_descriptor
         end
 

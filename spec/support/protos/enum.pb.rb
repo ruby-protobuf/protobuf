@@ -54,7 +54,7 @@ module Test
   # Extended Message Fields
   #
   class ::Test::Resource < ::Protobuf::Message
-    optional :int32, :ext_other_file_defined_field, 200, :extension => true
+    optional :int32, :'test.ext_other_file_defined_field', 200, :extension => true
   end
 
 end

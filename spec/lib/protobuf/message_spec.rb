@@ -476,13 +476,13 @@ RSpec.describe Protobuf::Message do
       field = ::Test::Resource.get_extension_field(100)
       expect(field).to be_a(::Protobuf::Field::BoolField)
       expect(field.tag).to eq(100)
-      expect(field.name).to eq(:ext_is_searchable)
+      expect(field.name).to eq(:'test.Searchable.ext_is_searchable')
       expect(field).to be_extension
     end
 
     it 'fetches an extension field by its symbolized name' do
-      expect(::Test::Resource.get_extension_field(:ext_is_searchable)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_extension_field('ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_extension_field(:'test.Searchable.ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_extension_field('test.Searchable.ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
     end
 
     it 'returns nil when attempting to get a non-extension field' do
@@ -511,8 +511,8 @@ RSpec.describe Protobuf::Message do
 
     it 'fetches an extension field when forced' do
       expect(::Test::Resource.get_field(100, true)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_field(:ext_is_searchable, true)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_field('ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_field(:'test.Searchable.ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_field('test.Searchable.ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
     end
 
     it 'returns nil when attempting to get an extension field' do

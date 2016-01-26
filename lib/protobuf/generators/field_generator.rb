@@ -64,7 +64,11 @@ module Protobuf
       end
 
       def name
-        @name ||= ":#{descriptor.name}"
+        @name ||= if descriptor.name.include?('.')
+                    ":'#{descriptor.name}'"
+                  else
+                    ":#{descriptor.name}"
+                  end
       end
 
       def number
@@ -78,6 +82,14 @@ module Protobuf
                              opts[:packed] = 'true' if packed?
                              opts[:deprecated] = 'true' if deprecated?
                              opts[:extension] = 'true' if extension?
+                             if descriptor.options
+                               descriptor.options.each_field do |field_option|
+                                 next unless field_option.extension?
+                                 default_option_value = descriptor.options.send(field_option.name)
+                                 next if default_option_value == field_option.default_value
+                                 opts[field_option.name] = serialize_value(default_option_value)
+                               end
+                             end
                              opts
                            end
       end

@@ -18,7 +18,7 @@ module Test
     # Extended Message Fields
     #
     class ::Google::Protobuf::FieldOptions < ::Protobuf::Message
-      optional :bool, :boom, 1001, :extension => true
+      optional :bool, :'test.pkg.boom', 1001, :extension => true
     end
 
   end

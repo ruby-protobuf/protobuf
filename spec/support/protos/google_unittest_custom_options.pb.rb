@@ -109,8 +109,8 @@ module Protobuf_unittest
     repeated :int32, :foo4, 4
     # Extension Fields
     extensions 100...536870912
-    optional :int32, :quux, 7663707, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType3, :corge, 7663442, :extension => true
+    optional :int32, :'protobuf_unittest.quux', 7663707, :extension => true
+    optional ::Protobuf_unittest::ComplexOptionType3, :'protobuf_unittest.corge', 7663442, :extension => true
   end
 
   class ComplexOptionType2
@@ -124,8 +124,8 @@ module Protobuf_unittest
     repeated ::Protobuf_unittest::ComplexOptionType2::ComplexOptionType4, :barney, 4
     # Extension Fields
     extensions 100...536870912
-    optional :int32, :grault, 7650927, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType1, :garply, 7649992, :extension => true
+    optional :int32, :'protobuf_unittest.grault', 7650927, :extension => true
+    optional ::Protobuf_unittest::ComplexOptionType1, :'protobuf_unittest.garply', 7649992, :extension => true
   end
 
   class ComplexOptionType3
@@ -135,7 +135,7 @@ module Protobuf_unittest
   class AggregateMessageSet
     # Extension Fields
     extensions 4...2147483647
-    optional ::Protobuf_unittest::AggregateMessageSetElement, :message_set_extension, 15447542, :extension => true
+    optional ::Protobuf_unittest::AggregateMessageSetElement, :'protobuf_unittest.AggregateMessageSetElement.message_set_extension', 15447542, :extension => true
   end
 
   class AggregateMessageSetElement
@@ -174,63 +174,63 @@ module Protobuf_unittest
   # Extended Message Fields
   #
   class ::Google::Protobuf::FileOptions < ::Protobuf::Message
-    optional :uint64, :file_opt1, 7736974, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :fileopt, 15478479, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :nested, 15476903, :extension => true
-    optional :int32, :nested_extension, 7912573, :extension => true
+    optional :uint64, :'protobuf_unittest.file_opt1', 7736974, :extension => true
+    optional ::Protobuf_unittest::Aggregate, :'protobuf_unittest.fileopt', 15478479, :extension => true
+    optional ::Protobuf_unittest::Aggregate, :'protobuf_unittest.Aggregate.nested', 15476903, :extension => true
+    optional :int32, :'protobuf_unittest.NestedOptionType.nested_extension', 7912573, :extension => true
   end
 
   class ::Google::Protobuf::MessageOptions < ::Protobuf::Message
-    optional :int32, :message_opt1, 7739036, :extension => true
-    optional :bool, :bool_opt, 7706090, :extension => true
-    optional :int32, :int32_opt, 7705709, :extension => true
-    optional :int64, :int64_opt, 7705542, :extension => true
-    optional :uint32, :uint32_opt, 7704880, :extension => true
-    optional :uint64, :uint64_opt, 7702367, :extension => true
-    optional :sint32, :sint32_opt, 7701568, :extension => true
-    optional :sint64, :sint64_opt, 7700863, :extension => true
-    optional :fixed32, :fixed32_opt, 7700307, :extension => true
-    optional :fixed64, :fixed64_opt, 7700194, :extension => true
-    optional :sfixed32, :sfixed32_opt, 7698645, :extension => true
-    optional :sfixed64, :sfixed64_opt, 7685475, :extension => true
-    optional :float, :float_opt, 7675390, :extension => true
-    optional :double, :double_opt, 7673293, :extension => true
-    optional :string, :string_opt, 7673285, :extension => true
-    optional :bytes, :bytes_opt, 7673238, :extension => true
-    optional ::Protobuf_unittest::DummyMessageContainingEnum::TestEnumType, :enum_opt, 7673233, :extension => true
-    optional ::Protobuf_unittest::DummyMessageInvalidAsOptionType, :message_type_opt, 7665967, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType1, :complex_opt1, 7646756, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType2, :complex_opt2, 7636949, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType3, :complex_opt3, 7636463, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :msgopt, 15480088, :extension => true
-    optional ::Protobuf_unittest::OldOptionType, :required_enum_opt, 106161807, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType2::ComplexOptionType4, :complex_opt4, 7633546, :extension => true
+    optional :int32, :'protobuf_unittest.message_opt1', 7739036, :extension => true
+    optional :bool, :'protobuf_unittest.bool_opt', 7706090, :extension => true
+    optional :int32, :'protobuf_unittest.int32_opt', 7705709, :extension => true
+    optional :int64, :'protobuf_unittest.int64_opt', 7705542, :extension => true
+    optional :uint32, :'protobuf_unittest.uint32_opt', 7704880, :extension => true
+    optional :uint64, :'protobuf_unittest.uint64_opt', 7702367, :extension => true
+    optional :sint32, :'protobuf_unittest.sint32_opt', 7701568, :extension => true
+    optional :sint64, :'protobuf_unittest.sint64_opt', 7700863, :extension => true
+    optional :fixed32, :'protobuf_unittest.fixed32_opt', 7700307, :extension => true
+    optional :fixed64, :'protobuf_unittest.fixed64_opt', 7700194, :extension => true
+    optional :sfixed32, :'protobuf_unittest.sfixed32_opt', 7698645, :extension => true
+    optional :sfixed64, :'protobuf_unittest.sfixed64_opt', 7685475, :extension => true
+    optional :float, :'protobuf_unittest.float_opt', 7675390, :extension => true
+    optional :double, :'protobuf_unittest.double_opt', 7673293, :extension => true
+    optional :string, :'protobuf_unittest.string_opt', 7673285, :extension => true
+    optional :bytes, :'protobuf_unittest.bytes_opt', 7673238, :extension => true
+    optional ::Protobuf_unittest::DummyMessageContainingEnum::TestEnumType, :'protobuf_unittest.enum_opt', 7673233, :extension => true
+    optional ::Protobuf_unittest::DummyMessageInvalidAsOptionType, :'protobuf_unittest.message_type_opt', 7665967, :extension => true
+    optional ::Protobuf_unittest::ComplexOptionType1, :'protobuf_unittest.complex_opt1', 7646756, :extension => true
+    optional ::Protobuf_unittest::ComplexOptionType2, :'protobuf_unittest.complex_opt2', 7636949, :extension => true
+    optional ::Protobuf_unittest::ComplexOptionType3, :'protobuf_unittest.complex_opt3', 7636463, :extension => true
+    optional ::Protobuf_unittest::Aggregate, :'protobuf_unittest.msgopt', 15480088, :extension => true
+    optional ::Protobuf_unittest::OldOptionType, :'protobuf_unittest.required_enum_opt', 106161807, :extension => true
+    optional ::Protobuf_unittest::ComplexOptionType2::ComplexOptionType4, :'protobuf_unittest.ComplexOptionType2.ComplexOptionType4.complex_opt4', 7633546, :extension => true
   end
 
   class ::Google::Protobuf::FieldOptions < ::Protobuf::Message
-    optional :fixed64, :field_opt1, 7740936, :extension => true
-    optional :int32, :field_opt2, 7753913, :default => 42, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :fieldopt, 15481374, :extension => true
+    optional :fixed64, :'protobuf_unittest.field_opt1', 7740936, :extension => true
+    optional :int32, :'protobuf_unittest.field_opt2', 7753913, :default => 42, :extension => true
+    optional ::Protobuf_unittest::Aggregate, :'protobuf_unittest.fieldopt', 15481374, :extension => true
   end
 
   class ::Google::Protobuf::EnumOptions < ::Protobuf::Message
-    optional :sfixed32, :enum_opt1, 7753576, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :enumopt, 15483218, :extension => true
+    optional :sfixed32, :'protobuf_unittest.enum_opt1', 7753576, :extension => true
+    optional ::Protobuf_unittest::Aggregate, :'protobuf_unittest.enumopt', 15483218, :extension => true
   end
 
   class ::Google::Protobuf::EnumValueOptions < ::Protobuf::Message
-    optional :int32, :enum_value_opt1, 1560678, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :enumvalopt, 15486921, :extension => true
+    optional :int32, :'protobuf_unittest.enum_value_opt1', 1560678, :extension => true
+    optional ::Protobuf_unittest::Aggregate, :'protobuf_unittest.enumvalopt', 15486921, :extension => true
   end
 
   class ::Google::Protobuf::ServiceOptions < ::Protobuf::Message
-    optional :sint64, :service_opt1, 7887650, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :serviceopt, 15497145, :extension => true
+    optional :sint64, :'protobuf_unittest.service_opt1', 7887650, :extension => true
+    optional ::Protobuf_unittest::Aggregate, :'protobuf_unittest.serviceopt', 15497145, :extension => true
   end
 
   class ::Google::Protobuf::MethodOptions < ::Protobuf::Message
-    optional ::Protobuf_unittest::MethodOpt1, :method_opt1, 7890860, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :methodopt, 15512713, :extension => true
+    optional ::Protobuf_unittest::MethodOpt1, :'protobuf_unittest.method_opt1', 7890860, :extension => true
+    optional ::Protobuf_unittest::Aggregate, :'protobuf_unittest.methodopt', 15512713, :extension => true
   end
 
 
