@@ -13,6 +13,7 @@ $LOAD_PATH << SUPPORT_PATH
 require 'protobuf'
 require 'protobuf/rpc/server'
 require SUPPORT_PATH.join('all')
+require SUPPORT_PATH.join('monkey_patches')
 
 $LOAD_PATH << ::File.expand_path("../../lib/protobuf/descriptors", __FILE__)
 require 'google/protobuf/compiler/plugin.pb'

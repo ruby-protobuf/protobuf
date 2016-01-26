@@ -183,7 +183,12 @@ RSpec.describe Protobuf::Message do
     end
 
     context 'ignoring unknown fields' do
-      before { ::Protobuf.ignore_unknown_fields = true }
+      around do |example|
+        orig = ::Protobuf.ignore_unknown_fields?
+        ::Protobuf.ignore_unknown_fields = true
+        example.call
+        ::Protobuf.ignore_unknown_fields = orig
+      end
 
       context 'with valid fields' do
         let(:values) { { :name => "Jim" } }
@@ -203,8 +208,12 @@ RSpec.describe Protobuf::Message do
     end
 
     context 'not ignoring unknown fields' do
-      before { ::Protobuf.ignore_unknown_fields = false }
-      after { ::Protobuf.ignore_unknown_fields = true }
+      around do |example|
+        orig = ::Protobuf.ignore_unknown_fields?
+        ::Protobuf.ignore_unknown_fields = false
+        example.call
+        ::Protobuf.ignore_unknown_fields = orig
+      end
 
       context 'with valid fields' do
         let(:values) { { :name => "Jim" } }

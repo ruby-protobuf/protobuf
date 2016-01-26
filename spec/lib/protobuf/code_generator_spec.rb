@@ -40,6 +40,7 @@ RSpec.describe ::Protobuf::CodeGenerator do
 
   describe 'patch Protobuf::Message::Serialization#decode when CodeGenerator is loaded' do
     let(:input_file) do
+      Google::Protobuf::FieldOptions.reset_cached_variables!
       DESCRIPTOR::FileDescriptorProto.new(
         :name => 'test/boom.proto',
         :package => 'test.pkg.code_generator_spec',
