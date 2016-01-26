@@ -69,7 +69,7 @@ RSpec.describe ::Protobuf::Rpc::Connectors::Zmq do
       it "raises an error" do
         allow(service_directory).to receive(:all_listings_for).and_return(listings)
         allow(subject).to receive(:host_alive?).and_return(false)
-        expect { subject.send(:lookup_server_uri) }.to raise_error
+        expect { subject.send(:lookup_server_uri) }.to raise_error(RuntimeError)
       end
     end
 

@@ -27,13 +27,40 @@ RSpec.describe ::Protobuf::CodeGenerator do
     end
 
     before do
-      expect(::Protobuf::Generators::FileGenerator).to receive(:new).with(input_file1).and_return(file_generator1)
-      expect(::Protobuf::Generators::FileGenerator).to receive(:new).with(input_file2).and_return(file_generator2)
+      expect(::Protobuf::Generators::FileGenerator).to receive(:new).with(input_file1).and_return(file_generator1, file_generator1)
+      expect(::Protobuf::Generators::FileGenerator).to receive(:new).with(input_file2).and_return(file_generator2, file_generator2)
     end
 
     it 'returns the serialized CodeGeneratorResponse which contains the generated file contents' do
       generator = described_class.new(request_bytes)
       expect(generator.response_bytes).to eq expected_response_bytes
+    end
+
+  end
+
+  describe 'patch Protobuf::Message::Serialization#decode when CodeGenerator is loaded' do
+    let(:input_file) do
+      Google::Protobuf::FieldOptions.reset_cached_variables!
+      DESCRIPTOR::FileDescriptorProto.new(
+        :name => 'test/boom.proto',
+        :package => 'test.pkg.code_generator_spec',
+        :extension => [{
+          :name => 'boom',
+          :number => 20100,
+          :label => Google::Protobuf::FieldDescriptorProto::Label::LABEL_OPTIONAL,
+          :type => Google::Protobuf::FieldDescriptorProto::Type::TYPE_STRING,
+          :extendee => '.google.protobuf.FieldOptions',
+        }],
+      )
+    end
+    let(:request_bytes) { COMPILER::CodeGeneratorRequest.encode(:proto_file => [input_file]) }
+
+    it 'evals files as they are generated' do
+      described_class.new(request_bytes).response_bytes
+      added_extension = Google::Protobuf::FieldOptions.extension_fields.detect { |f| f.name == :'test.pkg.code_generator_spec.boom' }
+      expect(added_extension.rule).to eq(:optional)
+      expect(added_extension.type_class).to eq(::Protobuf::Field::StringField)
+      expect(added_extension.tag).to eq(20100)
     end
   end
 

@@ -1,9 +1,0 @@
-package test;
-
-message Defaults {
-  optional bytes escaped_bytes = 1 [default = "\0\001\a\b\f\n\r\t\v\\\'\"\xfe"];
-  optional double infinity_default = 2 [default = inf];
-  optional float neg_infinity_default = 3 [default = -inf];
-  optional double nan_default = 4 [default = nan];
-}
-

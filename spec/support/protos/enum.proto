@@ -1,5 +1,7 @@
+syntax = "proto2";
+
 package test;
-import 'test/resource.proto';
+import 'protos/resource.proto';
 
 // Test extending another message from an imported file.
 

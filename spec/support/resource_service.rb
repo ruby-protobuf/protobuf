@@ -1,4 +1,4 @@
-require ::File.expand_path('../resource.pb', __FILE__)
+require PROTOS_PATH.join('resource.pb')
 
 Test::ResourceService.class_eval do
   # request -> Test::ResourceFindRequest

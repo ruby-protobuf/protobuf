@@ -2,6 +2,8 @@
 
 require 'stringio'
 require 'spec_helper'
+require PROTOS_PATH.join('resource.pb')
+require PROTOS_PATH.join('enum.pb')
 
 RSpec.describe Protobuf::Message do
 
@@ -44,12 +46,12 @@ RSpec.describe Protobuf::Message do
         end
 
         it 'rejects an unknown value when using the constructor' do
-          expect { older_message.new(:enum_field => :HOORAY) }.to raise_error
+          expect { older_message.new(:enum_field => :HOORAY) }.to raise_error(TypeError)
         end
 
         it 'rejects an unknown value when the setter' do
           older = older_message.new
-          expect { older.enum_field = :HOORAY }.to raise_error
+          expect { older.enum_field = :HOORAY }.to raise_error(TypeError)
         end
       end
 
@@ -61,12 +63,12 @@ RSpec.describe Protobuf::Message do
         end
 
         it 'rejects an unknown value when using the constructor' do
-          expect { older_message.new(:enum_list => [:HOORAY]) }.to raise_error
+          expect { older_message.new(:enum_list => [:HOORAY]) }.to raise_error(TypeError)
         end
 
         it 'rejects an unknown value when the setter' do
           older = older_message.new
-          expect { older.enum_field = [:HOORAY] }.to raise_error
+          expect { older.enum_field = [:HOORAY] }.to raise_error(TypeError)
         end
       end
     end
@@ -181,7 +183,12 @@ RSpec.describe Protobuf::Message do
     end
 
     context 'ignoring unknown fields' do
-      before { ::Protobuf.ignore_unknown_fields = true }
+      around do |example|
+        orig = ::Protobuf.ignore_unknown_fields?
+        ::Protobuf.ignore_unknown_fields = true
+        example.call
+        ::Protobuf.ignore_unknown_fields = orig
+      end
 
       context 'with valid fields' do
         let(:values) { { :name => "Jim" } }
@@ -201,8 +208,12 @@ RSpec.describe Protobuf::Message do
     end
 
     context 'not ignoring unknown fields' do
-      before { ::Protobuf.ignore_unknown_fields = false }
-      after { ::Protobuf.ignore_unknown_fields = true }
+      around do |example|
+        orig = ::Protobuf.ignore_unknown_fields?
+        ::Protobuf.ignore_unknown_fields = false
+        example.call
+        ::Protobuf.ignore_unknown_fields = orig
+      end
 
       context 'with valid fields' do
         let(:values) { { :name => "Jim" } }
@@ -474,13 +485,13 @@ RSpec.describe Protobuf::Message do
       field = ::Test::Resource.get_extension_field(100)
       expect(field).to be_a(::Protobuf::Field::BoolField)
       expect(field.tag).to eq(100)
-      expect(field.name).to eq(:ext_is_searchable)
+      expect(field.name).to eq(:'test.Searchable.ext_is_searchable')
       expect(field).to be_extension
     end
 
     it 'fetches an extension field by its symbolized name' do
-      expect(::Test::Resource.get_extension_field(:ext_is_searchable)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_extension_field('ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_extension_field(:'test.Searchable.ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_extension_field('test.Searchable.ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
     end
 
     it 'returns nil when attempting to get a non-extension field' do
@@ -509,8 +520,8 @@ RSpec.describe Protobuf::Message do
 
     it 'fetches an extension field when forced' do
       expect(::Test::Resource.get_field(100, true)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_field(:ext_is_searchable, true)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_field('ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_field(:'test.Searchable.ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_field('test.Searchable.ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
     end
 
     it 'returns nil when attempting to get an extension field' do

@@ -65,6 +65,18 @@ module Protobuf
         @type_namespace ||= @namespace + [descriptor.name]
       end
 
+      def serialize_value(value)
+        if value.is_a?(Message)
+          '{ ' + value.to_hash.map { |k, v| ":#{k} => #{serialize_value(v)}" }.join(", ") + ' }'
+        elsif value.is_a?(Enum)
+          "::#{value.parent_class}::#{value.name}"
+        elsif value.is_a?(String)
+          "\"#{value}\""
+        else
+          value
+        end
+      end
+
     end
   end
 end

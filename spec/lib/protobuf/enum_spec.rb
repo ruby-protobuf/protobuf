@@ -1,4 +1,5 @@
 require 'spec_helper'
+require PROTOS_PATH.join('enum.pb')
 
 RSpec.describe Protobuf::Enum do
 
@@ -9,6 +10,7 @@ RSpec.describe Protobuf::Enum do
     before(:all) do
       Test::EnumTestType.define(:MINUS_ONE, -1)
       Test::EnumTestType.define(:THREE, 3)
+      Test::EnumTestType.reset_cached_variables!
     end
 
     before(:all) do
