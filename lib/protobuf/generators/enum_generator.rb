@@ -32,6 +32,7 @@ module Protobuf
 
       def build_value(enum_value_descriptor)
         name = enum_value_descriptor.name
+        name.upcase! if ENV.fetch('PB_ENUM_UPCASE', '') != ''
         number = enum_value_descriptor.number
         "define :#{name}, #{number}"
       end
