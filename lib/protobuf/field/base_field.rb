@@ -1,3 +1,4 @@
+require 'protobuf/deprecation'
 require 'protobuf/field/field_array'
 require 'protobuf/logging'
 require 'protobuf/wire_type'
