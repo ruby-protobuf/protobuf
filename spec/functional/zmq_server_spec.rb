@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-require 'spec/support/test/resource_service'
 require 'protobuf/rpc/service_directory'
+require SUPPORT_PATH.join('resource_service')
 
 RSpec.describe 'Functional ZMQ Client' do
   before(:all) do

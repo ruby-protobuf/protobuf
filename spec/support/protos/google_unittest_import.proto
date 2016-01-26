@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// http://code.google.com/p/protobuf/
+// https://developers.google.com/protocol-buffers/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -34,23 +34,25 @@
 //
 // A proto file which is imported by unittest.proto to test importing.
 
+syntax = "proto2";
 
 // We don't put this in a package within proto2 because we need to make sure
 // that the generated code doesn't depend on being in the proto2 namespace.
 // In test_util.h we do
 // "using namespace unittest_import = protobuf_unittest_import".
-package googleUnittestImport;
+package protobuf_unittest_import;
 
-//############################## Test public import
-// TODO: This will be supported in the next release of the 
-// compiler
-// import public "test/google_unittest_import_public.proto";
+option optimize_for = SPEED;
+option cc_enable_arenas = true;
 
-message PublicImportMessage {
-  optional int32 e = 1;
-}
+// Exercise the java_package option.
+option java_package = "com.google.protobuf.test";
 
-//###############################
+// Do not set a java_outer_classname here to verify that Proto2 works without
+// one.
+
+// Test public import
+import public "protos/google_unittest_import_public.proto";
 
 message ImportMessage {
   optional int32 d = 1;
@@ -62,3 +64,10 @@ enum ImportEnum {
   IMPORT_BAZ = 9;
 }
 
+
+// To use an enum in a map, it must has the first value as 0.
+enum ImportEnumForMap {
+  UNKNOWN = 0;
+  FOO = 1;
+  BAR = 2;
+}
