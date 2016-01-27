@@ -9,7 +9,7 @@ require 'protobuf/message'
 ##
 # Imports
 #
-require 'test/resource.pb'
+require 'protos/resource.pb'
 
 module Test
 

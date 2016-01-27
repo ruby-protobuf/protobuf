@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'spec/support/test/resource_service'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/socket'
+require SUPPORT_PATH.join('resource_service')
 
 RSpec.describe Protobuf::Rpc::Socket::Server do
   before(:each) do
