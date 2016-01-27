@@ -74,6 +74,8 @@ RSpec.describe ::Protobuf::Generators::Base do
 
     context 'when tags are missing in the range' do
       it 'prints a warning' do
+        allow(ENV).to receive(:key?).and_call_original
+        allow(ENV).to receive(:key?).with("PB_NO_TAG_WARNINGS").and_return(false)
         expect(::Protobuf::CodeGenerator).to receive(:print_tag_warning_suppress)
         expect(::Protobuf::CodeGenerator).to receive(:warn).with(/FooBar object should have 5 tags \(1\.\.5\), but found 4 tags/)
         described_class.validate_tags("FooBar", [1, 2, 4, 5])
