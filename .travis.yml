@@ -2,6 +2,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y libzmq3-dev
   - sudo -E ./install-protobuf.sh
+  - gem update bundler
 language: ruby
 rvm:
   - 1.9.3
