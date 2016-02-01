@@ -1,4 +1,5 @@
 require 'delegate'
+require 'protobuf/deprecation'
 require 'protobuf/optionable'
 
 ##

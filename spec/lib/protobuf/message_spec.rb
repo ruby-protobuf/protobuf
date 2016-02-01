@@ -44,12 +44,12 @@ RSpec.describe Protobuf::Message do
         end
 
         it 'rejects an unknown value when using the constructor' do
-          expect { older_message.new(:enum_field => :HOORAY) }.to raise_error
+          expect { older_message.new(:enum_field => :HOORAY) }.to raise_error(TypeError)
         end
 
         it 'rejects an unknown value when the setter' do
           older = older_message.new
-          expect { older.enum_field = :HOORAY }.to raise_error
+          expect { older.enum_field = :HOORAY }.to raise_error(TypeError)
         end
       end
 
@@ -61,12 +61,12 @@ RSpec.describe Protobuf::Message do
         end
 
         it 'rejects an unknown value when using the constructor' do
-          expect { older_message.new(:enum_list => [:HOORAY]) }.to raise_error
+          expect { older_message.new(:enum_list => [:HOORAY]) }.to raise_error(TypeError)
         end
 
         it 'rejects an unknown value when the setter' do
           older = older_message.new
-          expect { older.enum_field = [:HOORAY] }.to raise_error
+          expect { older.enum_field = [:HOORAY] }.to raise_error(TypeError)
         end
       end
     end

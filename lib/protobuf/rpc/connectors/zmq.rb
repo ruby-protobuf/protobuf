@@ -1,6 +1,7 @@
-require 'thread_safe'
-require 'protobuf/rpc/connectors/base'
-require 'protobuf/rpc/service_directory'
+require "thread_safe"
+require "protobuf/rpc/connectors/base"
+require "protobuf/rpc/connectors/ping"
+require "protobuf/rpc/service_directory"
 
 module Protobuf
   module Rpc
@@ -161,19 +162,7 @@ module Protobuf
         end
 
         def ping_port_open?(host)
-          socket = TCPSocket.new(host, ping_port.to_i)
-          socket.setsockopt(::Socket::IPPROTO_TCP, ::Socket::TCP_NODELAY, 1)
-          socket.setsockopt(::Socket::SOL_SOCKET, ::Socket::SO_LINGER, [1, 0].pack('ii'))
-
-          true
-        rescue
-          false
-        ensure
-          begin
-            socket && socket.close
-          rescue IOError
-            nil
-          end
+          Ping.new(host, ping_port.to_i).online?
         end
 
         def rcv_timeout

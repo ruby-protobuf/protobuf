@@ -1,4 +1,5 @@
 require 'protobuf/field'
+require 'protobuf/deprecation'
 require 'protobuf/enum'
 require 'protobuf/exceptions'
 require 'protobuf/message/fields'
@@ -73,6 +74,8 @@ module Protobuf
     # Iterate over every field, invoking the given block
     #
     def each_field
+      return to_enum(:each_field) unless block_given?
+
       self.class.all_fields.each do |field|
         value = __send__(field.getter)
         yield(field, value)

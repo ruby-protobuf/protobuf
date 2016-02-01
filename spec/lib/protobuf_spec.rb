@@ -9,7 +9,7 @@ RSpec.describe ::Protobuf do
     subject { ::Protobuf.client_host }
 
     context 'when client_host is not pre-configured' do
-      it { is_expected.to eq `hostname`.chomp }
+      it { is_expected.to eq ::Socket.gethostname }
     end
 
     context 'when client_host is pre-configured' do

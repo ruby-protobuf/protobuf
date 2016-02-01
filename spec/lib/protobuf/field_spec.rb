@@ -182,7 +182,7 @@ RSpec.describe ::Protobuf::Field do
       it 'raises an ArgumentError' do
         expect do
           subject.field_class("boom")
-        end.to raise_error
+        end.to raise_error(ArgumentError)
       end
     end
 
