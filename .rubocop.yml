@@ -19,6 +19,10 @@ Style/ClassAndModuleChildren:
   Exclude:
     - '**/*.pb.rb'
 
+Style/ClassAndModuleCamelCase:
+  Exclude:
+    - '**/*.pb.rb'
+
 Style/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true
 
