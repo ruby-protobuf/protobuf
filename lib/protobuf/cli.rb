@@ -39,7 +39,7 @@ module Protobuf
     option :broadcast_beacons,          :type => :boolean, :desc => 'Broadcast beacons for dynamic discovery (Currently only available with ZeroMQ).'
     option :broadcast_busy,             :type => :boolean, :default => false, :desc => 'Remove busy nodes from cluster when all workers are busy (Currently only available with ZeroMQ).'
     option :debug,                      :type => :boolean, :default => false, :aliases => %w(-d), :desc => 'Debug Mode. Override log level to DEBUG.'
-    option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'Enable/Disable GC pause during request.'
+    option :gc_pause_request,           :type => :boolean, :default => false, :desc => 'DEPRECATED: Enable/Disable GC pause during request.'
     option :print_deprecation_warnings, :type => :boolean, :default => nil, :desc => 'Cause use of deprecated fields to be printed or ignored.'
     option :workers_only,               :type => :boolean, :default => false, :desc => "Starts process with only workers (no broker/frontend is started) only relevant for Zmq Server"
     option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
@@ -80,6 +80,8 @@ module Protobuf
 
       # If we pause during request we don't need to pause in serialization
       def configure_gc
+        say "DEPRECATED: The gc_pause_request option is deprecated and will be removed in 4.0." if options.gc_pause_request?
+
         debug_say('Configuring gc')
 
         if defined?(JRUBY_VERSION)
