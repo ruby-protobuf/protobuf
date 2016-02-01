@@ -1,5 +1,21 @@
 # Stable (3.x)
 
+3.5.5
+--------
+- Add native Varint for MRI.
+
+3.5.4
+--------
+- Ensures ActiveSupport::Deprecation does not get a stack trace when deprecations are disabled.
+
+3.5.3
+--------
+- Optimized get_extension_field and get_field calls.
+
+3.5.2
+--------
+- Optimized valid_tag?, enums_for_tag and enums_for_tags
+
 3.5.1
 --------
 - Adds compatibility for Rails 4.2+ as CLI options were broken
