@@ -15,6 +15,10 @@ Metrics/ModuleLength:
 Style/CaseIndentation:
   IndentWhenRelativeTo: end
 
+Style/ClassAndModuleCamelCase:
+  Exclude:
+    - '**/*.pb.rb'
+
 Style/ClassAndModuleChildren:
   Exclude:
     - '**/*.pb.rb'
