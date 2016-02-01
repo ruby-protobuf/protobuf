@@ -75,10 +75,6 @@ module Protobuf
 
       private
 
-      def field_must_be_serialized?(field)
-        field.required? || ! @values[field.name].nil?
-      end
-
       def set_field_bytes(tag, bytes)
         field = self.class.get_field(tag, true)
         field.set(self, bytes) if field
