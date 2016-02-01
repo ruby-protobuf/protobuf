@@ -8,7 +8,7 @@ require 'protobuf/rpc/servers/socket/server'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq/server'
 require 'protobuf/rpc/servers/zmq_runner'
-require 'spec/support/test/resource_service'
+require SUPPORT_PATH.join('resource_service')
 
 # Want to abort if server dies?
 Thread.abort_on_exception = true

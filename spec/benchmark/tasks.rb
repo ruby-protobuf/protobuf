@@ -1,7 +1,7 @@
 require 'benchmark'
 require 'protobuf/socket'
 require 'support/all'
-require 'support/test/resource_service'
+require SUPPORT_PATH.join('resource_service')
 
 case RUBY_ENGINE.to_sym
 when :ruby
