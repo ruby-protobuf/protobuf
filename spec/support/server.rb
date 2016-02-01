@@ -2,6 +2,7 @@ require 'ostruct'
 
 require 'active_support/core_ext/hash/reverse_merge'
 
+require 'spec_helper'
 require 'protobuf/logging'
 require 'protobuf/rpc/server'
 require 'protobuf/rpc/servers/socket/server'

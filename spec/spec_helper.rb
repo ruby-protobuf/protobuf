@@ -28,8 +28,6 @@ end
 # Get rid of the deprecation env var if present (messes with specs).
 ENV.delete("PB_IGNORE_DEPRECATIONS")
 
-RSpec.configure(&:disable_monkey_patching!)
-
 ::Protobuf::Rpc::Client.class_eval do
   def ==(other)
     connector.options == other.options && \
