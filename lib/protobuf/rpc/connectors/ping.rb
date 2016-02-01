@@ -43,6 +43,7 @@ module Protobuf
           socket = ::Socket.new(family, ::Socket::SOCK_STREAM, 0)
           socket.setsockopt(::Socket::IPPROTO_TCP, ::Socket::TCP_NODELAY, 1)
           socket.connect_nonblock(sockaddr)
+          socket
         rescue ::IO::WaitWritable
           # IO.select will block until the socket is writable or the timeout
           # is exceeded - whichever comes first.
@@ -50,6 +51,7 @@ module Protobuf
             begin
               # Verify there is now a good connection
               socket.connect_nonblock(sockaddr)
+              socket
             rescue ::Errno::EISCONN
               # Socket is connected.
               socket
