@@ -21,10 +21,13 @@ module Protobuf
       end
 
       def coerce!(val)
-        if val == 'true'
-          true
-        elsif val == 'false'
-          false
+        case val
+        when String then
+          if val == 'true'
+            true
+          elsif val == 'false'
+            false
+          end
         else
           val
         end

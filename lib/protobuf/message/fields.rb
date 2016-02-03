@@ -78,12 +78,12 @@ module Protobuf
         end
 
         def get_extension_field(name_or_tag)
-          field = field_store[name_or_tag] || str_field_store[name_or_tag]
+          field = field_store[name_or_tag]
           field if field.try(:extension?) { false }
         end
 
         def get_field(name_or_tag, allow_extension = false)
-          field = field_store[name_or_tag] || str_field_store[name_or_tag]
+          field = field_store[name_or_tag]
 
           if field && (allow_extension || !field.extension?)
             field
@@ -97,18 +97,22 @@ module Protobuf
           raise_if_name_collision(field_name)
 
           field = ::Protobuf::Field.build(self, rule, type_class, field_name, tag, options)
-          field_store[field_name] = field
           field_store[tag] = field
+          field_store[field_name] = field
+          field_store[field_name.to_s] = field
           # defining a new field for the message will cause cached @all_fields, @extension_fields,
           # and @fields to be incorrect; reset them
           @all_fields = @extension_fields = @fields = nil
-
-          str_field_store[field_name.to_s] = field
 
           define_method("#{field_name}!") do
             @values[field_name]
           end
         end
+
+        def field_name_store
+          @field_name_store ||= {}
+        end
+        private :field_name_store
 
         def raise_if_tag_collision(tag, field_name)
           if get_field(tag, true)
@@ -129,10 +133,6 @@ module Protobuf
         end
         private :inherit_fields!
 
-        def str_field_store
-          @str_field_store ||= {}
-        end
-        private :str_field_store
       end
     end
   end

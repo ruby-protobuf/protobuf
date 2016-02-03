@@ -40,7 +40,7 @@ module Protobuf
 
     def initialize(fields = {})
       @values = {}
-      fields.to_hash.each_pair do |name, value|
+      fields.to_hash.each do |name, value|
         self[name] = value
       end
 

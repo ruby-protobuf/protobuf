@@ -9,11 +9,7 @@ module Protobuf
       #
 
       def acceptable?(val)
-        unless val.is_a?(type_class) || val.respond_to?(:to_hash)
-          fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
-        end
-
-        true
+        val.is_a?(type_class) || val.respond_to?(:to_hash)
       end
 
       def decode(bytes)

@@ -107,7 +107,9 @@ namespace :benchmark do
     case RUBY_ENGINE.to_sym
     when :ruby
       profile_data = RubyProf.profile(&block)
-      RubyProf::FlatPrinter.new(profile_data).print(:path => output)
+      ::File.open(output, "w") do |output_file|
+        RubyProf::FlatPrinter.new(profile_data).print(output_file)
+      end
     when :rbx
       profiler = Rubinius::Profiler::Instrumenter.new
       profiler.profile(false, &block)
