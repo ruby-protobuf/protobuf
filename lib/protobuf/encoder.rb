@@ -12,7 +12,7 @@ module Protobuf
           else
             value.each do |val|
               key = (field.tag << 3) | field.wire_type
-              stream << "#{::Protobuf::Field::VarintField.encode(key)}#{field.encode(value)}"
+              stream << "#{::Protobuf::Field::VarintField.encode(key)}#{field.encode(val)}"
             end
           end
         else
