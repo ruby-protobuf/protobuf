@@ -56,9 +56,15 @@ RSpec.describe ::Protobuf do
   end
 
   describe '.print_deprecation_warnings?' do
-    before { described_class.instance_variable_set(:@print_deprecation_warnings, nil) }
+    around do |example|
+      orig = described_class.print_deprecation_warnings?
+      example.call
+      described_class.print_deprecation_warnings = orig
+    end
 
     it 'defaults to a true value' do
+      allow(ENV).to receive(:key?).with('PB_IGNORE_DEPRECATIONS').and_return(false)
+      described_class.instance_variable_set('@field_deprecator', nil)
       expect(described_class.print_deprecation_warnings?).to be true
     end
 
@@ -69,20 +75,24 @@ RSpec.describe ::Protobuf do
 
     context 'when ENV["PB_IGNORE_DEPRECATIONS"] present' do
       it 'defaults to a false value' do
-        ENV['PB_IGNORE_DEPRECATIONS'] = '1'
+        allow(ENV).to receive(:key?).with('PB_IGNORE_DEPRECATIONS').and_return(true)
+        described_class.instance_variable_set('@field_deprecator', nil)
         expect(described_class.print_deprecation_warnings?).to be false
       end
     end
   end
 
   describe '.ignore_unknown_fields?' do
-    before do
-      if described_class.instance_variable_defined?(:@_ignore_unknown_fields)
-        described_class.send(:remove_instance_variable, :@_ignore_unknown_fields)
-      end
+    around do |example|
+      orig = described_class.ignore_unknown_fields?
+      example.call
+      described_class.ignore_unknown_fields = orig
     end
 
     it 'defaults to a true value' do
+      if described_class.instance_variable_defined?('@ignore_unknown_fields')
+        described_class.send(:remove_instance_variable, '@ignore_unknown_fields')
+      end
       expect(described_class.ignore_unknown_fields?).to be true
     end
 

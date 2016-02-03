@@ -56,6 +56,9 @@ module Protobuf
       enum = new(self, name, tag)
       @enums ||= []
       @enums << enum
+      # defining a new field for the enum will cause cached @values and @mapped_enums
+      # to be incorrect; reset them
+      @mapped_enums = @values = nil
       const_set(name, enum)
     end
 

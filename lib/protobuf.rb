@@ -19,18 +19,18 @@ module Protobuf
   # Default is Socket as it has no external dependencies.
   DEFAULT_CONNECTOR = :socket
 
-  module_function
-
   class << self
     # Client Host
     #
     # Default: `hostname` of the system
     #
     # The name or address of the host to use during client RPC calls.
-    attr_accessor :client_host
+    attr_writer :client_host
   end
 
-  self.client_host = Socket.gethostname
+  def self.client_host
+    @client_host ||= Socket.gethostname
+  end
 
   # Connector Type
   #
