@@ -99,6 +99,9 @@ module Protobuf
           field = ::Protobuf::Field.build(self, rule, type_class, field_name, tag, options)
           field_store[field_name] = field
           field_store[tag] = field
+          # defining a new field for the message will cause cached @all_fields, @extension_fields,
+          # and @fields to be incorrect; reset them
+          @all_fields = @extension_fields = @fields = nil
 
           str_field_store[field_name.to_s] = field
 

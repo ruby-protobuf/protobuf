@@ -56,5 +56,4 @@ RSpec.describe ::Protobuf::CodeGenerator do
       end
     end
   end
-
 end

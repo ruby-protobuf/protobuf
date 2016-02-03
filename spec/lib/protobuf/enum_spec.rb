@@ -1,4 +1,5 @@
 require 'spec_helper'
+require PROTOS_PATH.join('enum.pb')
 
 RSpec.describe Protobuf::Enum do
 
