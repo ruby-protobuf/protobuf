@@ -59,11 +59,11 @@ module Protobuf
           define_method(method_name) do |val|
             begin
               case val
-              when String, Symbol then
+              when String, Symbol
                 @values[field.name] = "#{val}"
-              when NilClass then
+              when NilClass
                 @values.delete(field.name)
-              when ::Protobuf::Message then
+              when ::Protobuf::Message
                 @values[field.name] = val.dup
               else
                 fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"

@@ -24,12 +24,8 @@ module Protobuf
 
       def coerce!(val)
         case val
-        when String then
-          if val == TRUE_STRING
-            true
-          else # acceptable? is called before coerce, so we don't need to check for now
-            false
-          end
+        when String
+          val == TRUE_STRING
         else
           val
         end

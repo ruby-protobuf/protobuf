@@ -27,11 +27,11 @@ module Protobuf
         @default_value ||= begin
                              if defaulted?
                                case descriptor.type.name
-                               when :TYPE_ENUM then
+                               when :TYPE_ENUM
                                  enum_default_value
-                               when :TYPE_STRING, :TYPE_BYTES then
+                               when :TYPE_STRING, :TYPE_BYTES
                                  string_default_value
-                               when :TYPE_FLOAT, :TYPE_DOUBLE then
+                               when :TYPE_FLOAT, :TYPE_DOUBLE
                                  float_double_default_value
                                else
                                  verbatim_default_value
