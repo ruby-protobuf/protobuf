@@ -109,11 +109,6 @@ module Protobuf
           end
         end
 
-        def field_name_store
-          @field_name_store ||= {}
-        end
-        private :field_name_store
-
         def raise_if_tag_collision(tag, field_name)
           if get_field(tag, true)
             fail TagCollisionError, %(Field number #{tag} has already been used in "#{name}" by field "#{field_name}".)
