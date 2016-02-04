@@ -3,6 +3,8 @@ require 'protobuf/field/varint_field'
 module Protobuf
   module Field
     class BoolField < VarintField
+      FALSE_STRING = "false".freeze
+      TRUE_STRING = "true".freeze
 
       ##
       # Class Methods
@@ -21,10 +23,9 @@ module Protobuf
       end
 
       def coerce!(val)
-        if val == 'true'
-          true
-        elsif val == 'false'
-          false
+        case val
+        when String
+          val == TRUE_STRING
         else
           val
         end

@@ -23,7 +23,7 @@ module Protobuf
       #
 
       def acceptable?(val)
-        val.nil? || val.is_a?(String) || val.is_a?(Symbol) || val.is_a?(::Protobuf::Message)
+        val.is_a?(String) || val.nil? || val.is_a?(Symbol) || val.is_a?(::Protobuf::Message)
       end
 
       def decode(bytes)
@@ -58,11 +58,12 @@ module Protobuf
         message_class.class_eval do
           define_method(method_name) do |val|
             begin
-              val = "#{val}" if val.is_a?(Symbol)
-
-              if val.nil?
+              case val
+              when String, Symbol
+                @values[field.name] = "#{val}"
+              when NilClass
                 @values.delete(field.name)
-              elsif field.acceptable?(val)
+              when ::Protobuf::Message
                 @values[field.name] = val.dup
               else
                 fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"

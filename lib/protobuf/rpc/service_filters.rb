@@ -122,7 +122,7 @@ module Protobuf
         def invoke_via_if?(_rpc_method, filter)
           if_check = filter.fetch(:if) { ->(_service) { return true } }
           do_invoke = case
-                      when if_check.nil? then
+                      when if_check.nil?
                         true
                       else
                         call_or_send(if_check)
@@ -152,7 +152,7 @@ module Protobuf
         def invoke_via_unless?(_rpc_method, filter)
           unless_check = filter.fetch(:unless) { ->(_service) { return false } }
           skip_invoke = case
-                        when unless_check.nil? then
+                        when unless_check.nil?
                           false
                         else
                           call_or_send(unless_check)
@@ -254,9 +254,9 @@ module Protobuf
         #
         def call_or_send(callable, *args, &block)
           return_value = case
-                         when callable.respond_to?(:call) then
+                         when callable.respond_to?(:call)
                            callable.call(self, *args, &block)
-                         when respond_to?(callable, true) then
+                         when respond_to?(callable, true)
                            __send__(callable, *args, &block)
                          else
                            fail "Object #{callable} is not callable"

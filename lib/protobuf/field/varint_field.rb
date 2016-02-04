@@ -8,7 +8,7 @@ module Protobuf
       # Constants
       #
 
-      CACHE_LIMIT = 1024
+      CACHE_LIMIT = 2048
       INT32_MAX  =  2**31 - 1
       INT32_MIN  = -2**31
       INT64_MAX  =  2**63 - 1
@@ -43,7 +43,7 @@ module Protobuf
       end
 
       # Load the cache of VarInts on load of file
-      (0..CACHE_LIMIT).to_a.each do |cached_value|
+      (0..CACHE_LIMIT).each do |cached_value|
         cached_varint(cached_value)
       end
 
@@ -68,15 +68,7 @@ module Protobuf
       end
 
       def encode(value)
-        return [value].pack('C') if value < 128
-
-        bytes = []
-        until value == 0
-          bytes << (0x80 | (value & 0x7f))
-          value >>= 7
-        end
-        bytes[-1] &= 0x7f
-        bytes.pack('C*')
+        ::Protobuf::Field::VarintField.encode(value)
       end
 
       def wire_type

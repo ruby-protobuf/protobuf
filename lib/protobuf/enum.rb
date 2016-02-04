@@ -131,8 +131,7 @@ module Protobuf
     #   Enums, the first enum defined will be returned.
     #
     def self.enum_for_tag(tag)
-      value = mapped_enums[tag.to_i]
-      value ? value.first : nil
+      (mapped_enums[tag.to_i] || []).first
     end
 
     # Public: Get an Enum by a variety of type-checking mechanisms.
@@ -157,11 +156,11 @@ module Protobuf
     #
     def self.fetch(candidate)
       case candidate
-      when self then
+      when self
         candidate
-      when ::Numeric then
+      when ::Numeric
         enum_for_tag(candidate.to_i)
-      when ::String, ::Symbol then
+      when ::String, ::Symbol
         enum_for_name(candidate)
       else
         nil
@@ -280,9 +279,9 @@ module Protobuf
 
     def to_s(format = :tag)
       case format
-      when :tag then
+      when :tag
         to_i.to_s
-      when :name then
+      when :name
         name.to_s
       else
         to_i.to_s

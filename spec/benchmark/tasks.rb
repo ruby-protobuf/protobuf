@@ -97,7 +97,7 @@ namespace :benchmark do
     args.with_defaults(:number => 1000, :profile_output => "/tmp/profiler_new_#{Time.now.to_i}")
     create_params = { :name => "The name that we set", :date_created => Time.now.to_i, :status => 2 }
     profile_code(args[:profile_output]) do
-      Integer(args[:number]).times { Test::Resource.new(create_params).serialize }
+      Integer(args[:number]).times { Test::Resource.decode(Test::Resource.new(create_params).serialize) }
     end
 
     puts args[:profile_output]
@@ -107,7 +107,9 @@ namespace :benchmark do
     case RUBY_ENGINE.to_sym
     when :ruby
       profile_data = RubyProf.profile(&block)
-      RubyProf::FlatPrinter.new(profile_data).print(:path => output)
+      ::File.open(output, "w") do |output_file|
+        RubyProf::FlatPrinter.new(profile_data).print(output_file)
+      end
     when :rbx
       profiler = Rubinius::Profiler::Instrumenter.new
       profiler.profile(false, &block)
