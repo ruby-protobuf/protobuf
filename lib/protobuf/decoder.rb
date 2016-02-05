@@ -5,10 +5,10 @@ module Protobuf
   class Decoder
 
     # Read bytes from +stream+ and pass to +message+ object.
-    def self.decode_each_field(stream, &block)
+    def self.decode_each_field(stream)
       until stream.eof?
         tag, bytes = read_field(stream)
-        block.call(tag, bytes)
+        yield(tag, bytes)
       end
     end
 
