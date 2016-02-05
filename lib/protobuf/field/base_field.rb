@@ -21,6 +21,7 @@ module Protobuf
       ##
       # Attributes
       #
+      attr_accessor :memoized_encoded
       attr_reader :message_class, :name, :options, :rule, :tag, :type_class
 
       ##
