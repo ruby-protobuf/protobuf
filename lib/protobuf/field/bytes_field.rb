@@ -57,7 +57,7 @@ module Protobuf
 
         message_class.class_eval do
           define_method(method_name) do |val|
-            @memoized_encoded = nil
+            @encode = nil
             begin
               case val
               when String, Symbol

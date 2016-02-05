@@ -40,7 +40,7 @@ module Protobuf
         field = self
         message_class.class_eval do
           define_method("#{field.name}=") do |val|
-            @memoized_encoded = nil
+            @encode = nil
             case
             when val.nil?
               @values.delete(field.name)

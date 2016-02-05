@@ -272,9 +272,9 @@ RSpec.describe Protobuf::Message do
       it "should memoize enum message" do
         test_enum = Test::EnumTestMessage.new
         test_enum.encode
-        expect(test_enum.instance_variable_get(:@memoized_encoded)).to eq("")
+        expect(test_enum.instance_variable_get(:@encode)).to eq("")
         test_enum.non_default_enum = 2
-        expect(test_enum.instance_variable_get(:@memoized_encoded)).to be_nil
+        expect(test_enum.instance_variable_get(:@encode)).to be_nil
       end
 
       context "boolean fields" do
@@ -283,9 +283,9 @@ RSpec.describe Protobuf::Message do
 
         it "should memoize after bool values change " do
           test_resource.encode
-          expect(test_resource.instance_variable_get(:@memoized_encoded)).to eq(test_resource.encode)
+          expect(test_resource.instance_variable_get(:@encode)).to eq(test_resource.encode)
           test_resource.ext_is_searchable = false
-          expect(test_resource.instance_variable_get(:@memoized_encoded)).to be_nil
+          expect(test_resource.instance_variable_get(:@encode)).to be_nil
         end
       end
 
@@ -295,9 +295,9 @@ RSpec.describe Protobuf::Message do
 
         it "should memoize after bool values change " do
           test_resource.encode
-          expect(test_resource.instance_variable_get(:@memoized_encoded)).to eq(test_resource.encode)
+          expect(test_resource.instance_variable_get(:@encode)).to eq(test_resource.encode)
           test_resource.name = "MVP"
-          expect(test_resource.instance_variable_get(:@memoized_encoded)).to be_nil
+          expect(test_resource.instance_variable_get(:@encode)).to be_nil
         end
       end
 
@@ -307,9 +307,9 @@ RSpec.describe Protobuf::Message do
 
         it "should memoize after string values change " do
           test_resource.encode
-          expect(test_resource.instance_variable_get(:@memoized_encoded)).to eq(test_resource.encode)
+          expect(test_resource.instance_variable_get(:@encode)).to eq(test_resource.encode)
           test_resource.name = "MVP"
-          expect(test_resource.instance_variable_get(:@memoized_encoded)).to be_nil
+          expect(test_resource.instance_variable_get(:@encode)).to be_nil
         end
       end
 
@@ -319,9 +319,9 @@ RSpec.describe Protobuf::Message do
 
         it "should memoize after Int64 values change " do
           test_resource.encode
-          expect(test_resource.instance_variable_get(:@memoized_encoded)).to eq(test_resource.encode)
+          expect(test_resource.instance_variable_get(:@encode)).to eq(test_resource.encode)
           test_resource.date_created =  5554712127
-          expect(test_resource.instance_variable_get(:@memoized_encoded)).to be_nil
+          expect(test_resource.instance_variable_get(:@encode)).to be_nil
         end
       end
     end

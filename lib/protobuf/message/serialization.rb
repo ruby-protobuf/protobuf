@@ -48,7 +48,7 @@ module Protobuf
       # Encode this message
       #
       def encode
-        @memoized_encoded ||= begin
+        @encode ||= begin
           stream = ::StringIO.new
           stream.set_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
           encode_to(stream)
