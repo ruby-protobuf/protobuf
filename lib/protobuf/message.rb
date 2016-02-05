@@ -27,6 +27,11 @@ module Protobuf
     include ::Protobuf::Message::Serialization
 
     ##
+    # Attributes
+    #
+    attr_accessor :memoized_encoded
+
+    ##
     # Class Methods
     #
 
