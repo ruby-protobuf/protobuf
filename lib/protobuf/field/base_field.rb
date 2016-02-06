@@ -153,9 +153,9 @@ module Protobuf
         @tag_encoded ||= begin
                            case
                            when repeated? && packed?
-                             ::Protobuf::Field::VarintField.encode((self.tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED)
+                             ::Protobuf::Field::VarintField.encode((tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED)
                            else
-                             ::Protobuf::Field::VarintField.encode((self.tag << 3) | self.wire_type)
+                             ::Protobuf::Field::VarintField.encode((tag << 3) | wire_type)
                            end
                          end
       end
