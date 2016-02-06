@@ -48,10 +48,12 @@ module Protobuf
       # Encode this message
       #
       def encode
-        stream = ::StringIO.new
-        stream.set_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
-        encode_to(stream)
-        stream.string
+        @encode ||= begin
+          stream = ::StringIO.new
+          stream.set_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+          encode_to(stream)
+          stream.string
+        end
       end
 
       # Encode this message to the given stream.

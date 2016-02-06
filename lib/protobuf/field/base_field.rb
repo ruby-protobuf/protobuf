@@ -21,7 +21,6 @@ module Protobuf
       ##
       # Attributes
       #
-
       attr_reader :message_class, :name, :options, :rule, :tag, :type_class
 
       ##
@@ -195,6 +194,7 @@ module Protobuf
 
         message_class.class_eval do
           define_method(method_name) do |val|
+            @encode = nil
             if val.is_a?(Array)
               val = val.dup
               val.compact!
@@ -236,6 +236,7 @@ module Protobuf
 
         message_class.class_eval do
           define_method(method_name) do |val|
+            @encode = nil
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
               @values.delete(field.name)
             elsif field.acceptable?(val)
