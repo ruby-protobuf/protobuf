@@ -320,7 +320,7 @@ RSpec.describe Protobuf::Message do
         it "should memoize after Int64 values change " do
           test_resource.encode
           expect(test_resource.instance_variable_get(:@encode)).to eq(test_resource.encode)
-          test_resource.date_created =  5554712127
+          test_resource.date_created = 5554712127
           expect(test_resource.instance_variable_get(:@encode)).to be_nil
         end
       end
