@@ -118,10 +118,10 @@ module Protobuf
     def to_hash
       result = {}
 
-      @values.keys.each do |field_name|
+      @values.each_key do |field_name|
         value = __send__(field_name)
         hashed_value = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
-        result.merge!(field_name => hashed_value)
+        result[field_name] = hashed_value
       end
 
       result

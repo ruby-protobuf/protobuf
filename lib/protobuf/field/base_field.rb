@@ -45,6 +45,7 @@ module Protobuf
 
         validate_packed_field if packed?
         define_accessor
+        tag_encoded
       end
 
       ##
@@ -146,6 +147,17 @@ module Protobuf
 
       def setter
         @setter ||= "#{name}="
+      end
+
+      def tag_encoded
+        @tag_encoded ||= begin
+                           case
+                           when repeated? && packed?
+                             ::Protobuf::Field::VarintField.encode((tag << 3) | ::Protobuf::WireType::LENGTH_DELIMITED)
+                           else
+                             ::Protobuf::Field::VarintField.encode((tag << 3) | wire_type)
+                           end
+                         end
       end
 
       # FIXME: add packed, deprecated, extension options to to_s output

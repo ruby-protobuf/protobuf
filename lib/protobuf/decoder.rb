@@ -17,10 +17,10 @@ module Protobuf
       bytes = case wire_type
               when ::Protobuf::WireType::VARINT
                 Varint.decode(stream)
-              when ::Protobuf::WireType::FIXED64
-                read_fixed64(stream)
               when ::Protobuf::WireType::LENGTH_DELIMITED
                 read_length_delimited(stream)
+              when ::Protobuf::WireType::FIXED64
+                read_fixed64(stream)
               when ::Protobuf::WireType::FIXED32
                 read_fixed32(stream)
               when ::Protobuf::WireType::START_GROUP
