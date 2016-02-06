@@ -1,12 +1,12 @@
 module Protobuf
   class Lifecycle
     class << self
-      def register(event_name, &blk)
+      def register(event_name)
         fail "Lifecycle register must have a block" unless block_given?
         event_name = normalized_event_name(event_name)
 
         ::ActiveSupport::Notifications.subscribe(event_name) do |_name, _start, _finish, _id, args|
-          blk.call(*args)
+          yield(*args)
         end
       end
       alias_method :on, :register
