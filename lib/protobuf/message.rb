@@ -85,8 +85,10 @@ module Protobuf
     def each_field_for_serialization
       self.class.all_fields.each do |field|
         value = @values[field.getter]
-        fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value." if value.nil? && field.required?
-        next if value.nil?
+        if value.nil?
+          fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value." if field.required?
+          next
+        end
 
         yield(field, value)
       end
