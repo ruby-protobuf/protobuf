@@ -70,9 +70,9 @@ module Protobuf
 
       def default_value
         @default_value ||= case
+                           when optional? then typed_default_value
                            when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
                            when required? then nil
-                           when optional? then typed_default_value
                            end
       end
 
@@ -122,26 +122,18 @@ module Protobuf
 
       # FIXME: need to cleanup (rename) this warthog of a method.
       def set(message_instance, bytes)
-        if packed?
-          array = message_instance.__send__(getter)
-          method = \
-            case wire_type
-            when ::Protobuf::WireType::FIXED32 then :read_fixed32
-            when ::Protobuf::WireType::FIXED64 then :read_fixed64
-            when ::Protobuf::WireType::VARINT  then :read_varint
-            end
-          stream = StringIO.new(bytes)
+        return message_instance.__send__(setter, decode(bytes)) unless repeated?
+        return message_instance.__send__(getter) << decode(bytes) unless packed?
 
-          until stream.eof?
-            array << decode(::Protobuf::Decoder.__send__(method, stream))
-          end
-        else
-          value = decode(bytes)
-          if repeated?
-            message_instance.__send__(getter) << value
-          else
-            message_instance.__send__(setter, value)
-          end
+        array = message_instance.__send__(getter)
+        stream = StringIO.new(bytes)
+
+        if wire_type == ::Protobuf::WireType::VARINT
+          array << Varint.decode(stream) until stream.eof?
+        elsif wire_type == ::Protobuf::WireType::FIXED64
+          array << stream.read(8) until stream.eof?
+        elsif wire_type == ::Protobuf::WireType::FIXED32
+          array << stream.read(4) until stream.eof?
         end
       end
 

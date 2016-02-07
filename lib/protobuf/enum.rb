@@ -155,6 +155,8 @@ module Protobuf
     # Returns an Enum object or nil.
     #
     def self.fetch(candidate)
+      return enum_for_tag(candidate) if candidate.is_a?(::Integer)
+
       case candidate
       when self
         candidate
