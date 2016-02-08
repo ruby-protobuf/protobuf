@@ -66,12 +66,13 @@ module Protobuf
 
       def define_decode_setter
         field = self
+        field_name = field.name
         name_method_name = "_protobuf_decode_setter_#{field.name}"
         tag_method_name = "_protobuf_decode_setter_#{field.tag}"
 
         message_class.class_eval do
           define_method(name_method_name) do |val|
-            @values[field.name] = val
+            @values[field_name] = val
           end
 
           alias_method tag_method_name, name_method_name

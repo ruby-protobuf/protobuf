@@ -40,12 +40,13 @@ module Protobuf
 
       def define_decode_setter
         field = self
+        field_name = field.name
         name_method_name = "_protobuf_decode_setter_#{field.name}"
         tag_method_name = "_protobuf_decode_setter_#{field.tag}"
 
         message_class.class_eval do
           define_method(name_method_name) do |val|
-            @values[field.name] = field.decode(val)
+            @values[field_name] = field.decode(val)
           end
 
           alias_method tag_method_name, name_method_name
@@ -54,17 +55,20 @@ module Protobuf
 
       def define_setter
         field = self
+        field_name = field.name
+        field_type_class = field.type_class
+
         message_class.class_eval do
-          define_method("#{field.name}=") do |value|
+          define_method("#{field_name}=") do |value|
             @encode = nil
             orig_value = value
             if value.nil?
-              @values.delete(field.name)
+              @values.delete(field_name)
             else
-              value = field.type_class.fetch(value)
+              value = field_type_class.fetch(value)
               fail TypeError, "Invalid Enum value: #{orig_value.inspect} for #{field.name}" unless value
 
-              @values[field.name] = value
+              @values[field_name] = value
             end
           end
         end

@@ -58,13 +58,14 @@ module Protobuf
 
       def define_decode_setter
         field = self
+        field_name = field.name
         name_method_name = "_protobuf_decode_setter_#{field.name}"
         tag_method_name = "_protobuf_decode_setter_#{field.tag}"
 
         message_class.class_eval do
           define_method(name_method_name) do |val|
             @encode = nil
-            @values[field.name] = field.decode(val)
+            @values[field_name] = field.decode(val)
           end
 
           alias_method tag_method_name, name_method_name
@@ -73,6 +74,7 @@ module Protobuf
 
       def define_setter
         field = self
+        field_name = field.name
         method_name = field.setter
 
         message_class.class_eval do
@@ -80,11 +82,11 @@ module Protobuf
             @encode = nil
             case val
             when String, Symbol
-              @values[field.name] = "#{val}"
+              @values[field_name] = "#{val}"
             when NilClass
-              @values.delete(field.name)
+              @values.delete(field_name)
             when ::Protobuf::Message
-              @values[field.name] = val.dup
+              @values[field_name] = val.dup
             else
               fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end
