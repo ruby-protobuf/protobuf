@@ -52,6 +52,7 @@ module Protobuf
       #
 
       def acceptable?(val)
+        return true if val.is_a?(Integer) && val >= 0 && val < INT32_MAX
         int_val = coerce!(val)
         int_val >= self.class.min && int_val <= self.class.max
       rescue
