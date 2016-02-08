@@ -227,7 +227,7 @@ module Protobuf
 
         message_class.class_eval do
           define_method(method_name) do
-            @values.fetch(field.name, field.default_value)
+            @values[field.name] || field.default_value
           end
         end
 
