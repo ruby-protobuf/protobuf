@@ -11,7 +11,7 @@ module Protobuf
       def decode(bytes)
         values = bytes.unpack('VV') # 'Q' is machine-dependent, don't use
         value  = values[0] + (values[1] << 32)
-        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000).nonzero?
+        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000) != 0
         value
       end
 

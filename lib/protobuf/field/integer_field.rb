@@ -9,7 +9,7 @@ module Protobuf
       #
 
       def decode(value)
-        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000).nonzero?
+        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000) != 0
         value
       end
 
