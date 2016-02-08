@@ -4,6 +4,7 @@ RSpec.describe Protobuf::Field::Int32Field do
 
   class SomeBoolMessage < ::Protobuf::Message
     optional :bool, :some_bool, 1
+    required :bool, :required_bool, 2
   end
 
   let(:instance) { SomeBoolMessage.new }
@@ -48,4 +49,13 @@ RSpec.describe Protobuf::Field::Int32Field do
     end
   end
 
+  describe '#define_getter' do
+    context 'when required bool field is set to false' do
+      subject { instance.required_bool = false; instance.required_bool }
+
+      it 'returns false' do
+        expect(subject).to eq(false)
+      end
+    end
+  end
 end
