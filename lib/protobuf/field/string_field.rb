@@ -20,6 +20,21 @@ module Protobuf
         bytes_to_decode
       end
 
+      def define_decode_setter
+        field = self
+        name_method_name = "_protobuf_decode_setter_#{field.name}"
+        tag_method_name = "_protobuf_decode_setter_#{field.tag}"
+
+        message_class.class_eval do
+          define_method(name_method_name) do |val|
+            val.force_encoding(::Protobuf::Field::StringField::ENCODING)
+            @values[field.name] = val
+          end
+
+          alias_method tag_method_name, name_method_name
+        end
+      end
+
       def encode(value)
         value_to_encode = value.dup
         value_to_encode.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")

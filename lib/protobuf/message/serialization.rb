@@ -78,6 +78,9 @@ module Protobuf
       private
 
       def set_field_bytes(tag, bytes)
+        tag_setter_name = "_protobuf_decode_setter_#{tag}"
+        return __send__(tag_setter_name, bytes) if respond_to?(tag_setter_name)
+
         field = self.class.get_field(tag, true)
         field.set(self, bytes) if field
       end

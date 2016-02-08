@@ -77,8 +77,7 @@ module Protobuf
       return to_enum(:each_field) unless block_given?
 
       self.class.all_fields.each do |field|
-        value = __send__(field.getter)
-        yield(field, value)
+        yield(field, __send__(field.getter))
       end
     end
 

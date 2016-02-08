@@ -176,6 +176,7 @@ module Protobuf
         else
           define_getter
           define_setter
+          define_decode_setter
         end
       end
 
@@ -232,6 +233,10 @@ module Protobuf
         end
 
         ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
+      end
+
+      def define_decode_setter
+        # empty for now
       end
 
       def define_setter

@@ -17,9 +17,7 @@ module Protobuf
       end
 
       def encode(value)
-        bytes = value.encode
-        result = ::Protobuf::Field::VarintField.encode(bytes.size)
-        result << bytes
+        "#{::Protobuf::Field::VarintField.encode(value.encode.size)}#{value.encode}"
       end
 
       def message?
