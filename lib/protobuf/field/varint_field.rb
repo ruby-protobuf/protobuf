@@ -52,6 +52,7 @@ module Protobuf
       #
 
       def acceptable?(val)
+        return true if val.is_a?(Integer) && val >= 0 && val < INT32_MAX
         int_val = coerce!(val)
         int_val >= self.class.min && int_val <= self.class.max
       rescue
@@ -61,6 +62,19 @@ module Protobuf
       def coerce!(val)
         return val.to_i if val.is_a?(Numeric)
         Integer(val, 10)
+      end
+
+      def define_decode_setter
+        field = self
+        field_name = field.name
+        tag_method_name = "_protobuf_decode_setter_#{field.tag}"
+
+        message_class.class_eval do
+          define_method(tag_method_name) do |val|
+            @encode = nil
+            @values[field_name] = val
+          end
+        end
       end
 
       def decode(value)

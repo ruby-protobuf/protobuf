@@ -176,16 +176,18 @@ module Protobuf
         else
           define_getter
           define_setter
+          define_decode_setter
         end
       end
 
       def define_array_getter
         field = self
+        field_name = field.name
         method_name = field.getter
 
         message_class.class_eval do
           define_method(method_name) do
-            @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
+            @values[field_name] ||= ::Protobuf::Field::FieldArray.new(field)
           end
         end
 
@@ -194,6 +196,7 @@ module Protobuf
 
       def define_array_setter
         field = self
+        field_name = field.name
         method_name = field.setter
 
         message_class.class_eval do
@@ -205,15 +208,15 @@ module Protobuf
             else
               fail TypeError, <<-TYPE_ERROR
                 Expected repeated value of type '#{field.type_class}'
-                Got '#{val.class}' for repeated protobuf field #{field.name}
+                Got '#{val.class}' for repeated protobuf field #{field_name}
               TYPE_ERROR
             end
 
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
-              @values.delete(field.name)
+              @values.delete(field_name)
             else
-              @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
-              @values[field.name].replace(val)
+              @values[field_name] ||= ::Protobuf::Field::FieldArray.new(field)
+              @values[field_name].replace(val)
             end
           end
         end
@@ -234,17 +237,22 @@ module Protobuf
         ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
+      def define_decode_setter
+        # empty for now
+      end
+
       def define_setter
         field = self
+        field_name = field.name
         method_name = field.setter
 
         message_class.class_eval do
           define_method(method_name) do |val|
             @encode = nil
             if val.nil? || (val.respond_to?(:empty?) && val.empty?)
-              @values.delete(field.name)
+              @values.delete(field_name)
             elsif field.acceptable?(val)
-              @values[field.name] = field.coerce!(val)
+              @values[field_name] = field.coerce!(val)
             else
               fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
             end

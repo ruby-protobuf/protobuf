@@ -77,14 +77,13 @@ module Protobuf
       return to_enum(:each_field) unless block_given?
 
       self.class.all_fields.each do |field|
-        value = __send__(field.getter)
-        yield(field, value)
+        yield(field, __send__(field.getter))
       end
     end
 
     def each_field_for_serialization
       self.class.all_fields.each do |field|
-        value = @values[field.getter]
+        value = @values[field.name]
         if value.nil?
           fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value." if field.required?
           next
@@ -146,18 +145,16 @@ module Protobuf
     end
 
     def [](name)
-      if (field = self.class.get_field(name, true))
-        __send__(field.getter)
-      end
+      __send__(name) if respond_to?(name)
     end
 
     def []=(name, value)
-      if (field = self.class.get_field(name, true))
-        __send__(field.setter, value) unless value.nil?
+      setter = "#{name}="
+
+      if respond_to?(setter)
+        __send__(setter, value) unless value.nil?
       else
-        unless ::Protobuf.ignore_unknown_fields?
-          fail ::Protobuf::FieldNotDefinedError, name
-        end
+        fail ::Protobuf::FieldNotDefinedError, name unless ::Protobuf.ignore_unknown_fields?
       end
     end
 

@@ -9,8 +9,21 @@ module Protobuf
       #
 
       def decode(value)
-        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000).nonzero?
+        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000) != 0
         value
+      end
+
+      def define_decode_setter
+        field = self
+        field_name = field.name
+        tag_method_name = "_protobuf_decode_setter_#{field.tag}"
+
+        message_class.class_eval do
+          define_method(tag_method_name) do |val|
+            @encode = nil
+            @values[field_name] = field.decode(val)
+          end
+        end
       end
 
       def encode(value)

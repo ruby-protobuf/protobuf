@@ -38,19 +38,36 @@ module Protobuf
       # Private Instance Methods
       #
 
+      def define_decode_setter
+        field = self
+        field_name = field.name
+        field_type_class = field.type_class
+        tag_method_name = "_protobuf_decode_setter_#{field.tag}"
+
+        message_class.class_eval do
+          define_method(tag_method_name) do |val|
+            @encode = nil
+            @values[field_name] = field_type_class.fetch(val)
+          end
+        end
+      end
+
       def define_setter
         field = self
+        field_name = field.name
+        field_type_class = field.type_class
+
         message_class.class_eval do
-          define_method("#{field.name}=") do |value|
+          define_method("#{field_name}=") do |value|
             @encode = nil
             orig_value = value
             if value.nil?
-              @values.delete(field.name)
+              @values.delete(field_name)
             else
-              value = field.type_class.fetch(value)
+              value = field_type_class.fetch(value)
               fail TypeError, "Invalid Enum value: #{orig_value.inspect} for #{field.name}" unless value
 
-              @values[field.name] = value
+              @values[field_name] = value
             end
           end
         end

@@ -56,8 +56,23 @@ module Protobuf
       # Private Instance Methods
       #
 
+      def define_decode_setter
+        field = self
+        field_name = field.name
+        tag_method_name = "_protobuf_decode_setter_#{field.tag}"
+
+        message_class.class_eval do
+          define_method(tag_method_name) do |val|
+            @encode = nil
+            @values[field_name] = field.decode(val)
+          end
+        end
+      end
+
       def define_setter
         field = self
+        field_name = field.name
+        field_type_class = field.type_class
         method_name = field.setter
 
         message_class.class_eval do
@@ -65,13 +80,13 @@ module Protobuf
             @encode = nil
             case val
             when String, Symbol
-              @values[field.name] = "#{val}"
+              @values[field_name] = "#{val}"
             when NilClass
-              @values.delete(field.name)
+              @values.delete(field_name)
             when ::Protobuf::Message
-              @values[field.name] = val.dup
+              @values[field_name] = val.dup
             else
-              fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+              fail TypeError, "Unacceptable value #{val} for field #{field_name} of type #{field_type_class}"
             end
           end
         end

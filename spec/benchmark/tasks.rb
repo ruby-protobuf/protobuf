@@ -119,7 +119,7 @@ namespace :benchmark do
     when :jruby
       profile_data = JRuby::Profiler.profile(&block)
       File.open(output, 'w') do |f|
-        JRuby::Profiler::FlatProfilePrinter.new(profile_data).printProfile(f)
+        JRuby::Profiler::GraphProfilePrinter.new(profile_data).printProfile(f)
       end
     end
   end
