@@ -75,6 +75,7 @@ module Protobuf
       def define_setter
         field = self
         field_name = field.name
+        field_type_class = field.type_class
         method_name = field.setter
 
         message_class.class_eval do
@@ -88,7 +89,7 @@ module Protobuf
             when ::Protobuf::Message
               @values[field_name] = val.dup
             else
-              fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
+              fail TypeError, "Unacceptable value #{val} for field #{field_name} of type #{field_type_class}"
             end
           end
         end
