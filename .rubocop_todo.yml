@@ -16,7 +16,7 @@ Metrics/BlockNesting:
 
 # Offense count: 6
 Metrics/CyclomaticComplexity:
-  Max: 10
+  Max: 12
 
 # Offense count: 493
 # Configuration parameters: AllowURI, URISchemes.
@@ -31,11 +31,11 @@ Metrics/MethodLength:
 # Offense count: 2
 # Configuration parameters: CountKeywordArgs.
 Metrics/ParameterLists:
-  Max: 6
+  Max: 7
 
 # Offense count: 6
 Metrics/PerceivedComplexity:
-  Max: 11
+  Max: 17
 
 # Offense count: 1
 # Cop supports --auto-correct.

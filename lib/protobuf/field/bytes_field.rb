@@ -33,7 +33,6 @@ module Protobuf
       end
 
       def encode(value)
-        value_to_encode = ""
         if value.is_a?(::Protobuf::Message)
           value_to_encode = value.encode
         else
@@ -50,32 +49,17 @@ module Protobuf
         ::Protobuf::WireType::LENGTH_DELIMITED
       end
 
-      private
-
-      ##
-      # Private Instance Methods
-      #
-
-      def define_setter
-        field = self
-        method_name = field.setter
-
-        message_class.class_eval do
-          define_method(method_name) do |val|
-            case val
-            when String, Symbol
-              @values[field.name] = "#{val}"
-            when NilClass
-              @values.delete(field.name)
-            when ::Protobuf::Message
-              @values[field.name] = val.dup
-            else
-              fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
-            end
-          end
+      def coerce!(value)
+        case value
+        when String, Symbol
+          "#{value}"
+        when NilClass
+          nil
+        when ::Protobuf::Message
+          value.dup
+        else
+          fail TypeError, "Unacceptable value #{value} for field #{name} of type #{type_class}"
         end
-
-        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
     end
   end

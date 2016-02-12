@@ -10,7 +10,7 @@ RSpec.describe Protobuf::Field::Int32Field do
 
   let(:instance) { SomeInt32Message.new }
 
-  describe '#define_setter' do
+  describe 'setting and getting a field' do
     subject { instance.some_int = value; instance.some_int }
 
     context 'when set with an int' do
@@ -82,6 +82,37 @@ RSpec.describe Protobuf::Field::Int32Field do
 
       it 'throws an error' do
         expect { subject }.to raise_error(TypeError)
+      end
+    end
+  end
+
+  describe '#default_value' do
+    context 'optional and required fields' do
+      it 'returns the class default' do
+        expect(SomeInt32Message.get_field('some_int').default).to be nil
+        expect(::Protobuf::Field::Int32Field.default).to eq 0
+        expect(instance.some_int).to eq 0
+      end
+
+      context 'with field default' do
+        class AnotherIntMessage < ::Protobuf::Message
+          optional :int32, :set_int, 1, :default => 3
+        end
+
+        it 'returns the set default' do
+          expect(AnotherIntMessage.get_field('set_int').default).to eq 3
+          expect(AnotherIntMessage.new.set_int).to eq 3
+        end
+      end
+    end
+
+    context 'repeated field' do
+      class RepeatedIntMessage < ::Protobuf::Message
+        repeated :int32, :repeated_int, 1
+      end
+
+      it 'returns the set default' do
+        expect(RepeatedIntMessage.new.repeated_int).to eq []
       end
     end
   end

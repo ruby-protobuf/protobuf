@@ -30,29 +30,17 @@ module Protobuf
         ::Protobuf::WireType::LENGTH_DELIMITED
       end
 
-      private
-
-      ##
-      # Private Instance Methods
-      #
-
-      def define_setter
-        field = self
-        message_class.class_eval do
-          define_method("#{field.name}=") do |val|
-            case
-            when val.nil?
-              @values.delete(field.name)
-            when val.is_a?(field.type_class)
-              @values[field.name] = val
-            when val.respond_to?(:to_proto)
-              @values[field.name] = val.to_proto
-            when val.respond_to?(:to_hash)
-              @values[field.name] = field.type_class.new(val.to_hash)
-            else
-              fail TypeError, "Expected value of type '#{field.type_class}' for field #{field.name}, but got '#{val.class}'"
-            end
-          end
+      def coerce!(value)
+        if value.nil?
+          nil
+        elsif value.is_a?(type_class)
+          value
+        elsif value.respond_to?(:to_proto)
+          value.to_proto
+        elsif value.respond_to?(:to_hash)
+          type_class.new(value.to_hash)
+        else
+          fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{value.class}'"
         end
       end
 
