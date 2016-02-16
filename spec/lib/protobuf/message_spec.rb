@@ -468,7 +468,7 @@ RSpec.describe Protobuf::Message do
     end
   end
 
-  describe "#define_setter" do
+  describe "#define_accessor" do
     subject { ::Test::Resource.new }
 
     it "allows string fields to be set to nil" do
@@ -485,13 +485,13 @@ RSpec.describe Protobuf::Message do
       field = ::Test::Resource.get_extension_field(100)
       expect(field).to be_a(::Protobuf::Field::BoolField)
       expect(field.tag).to eq(100)
-      expect(field.name).to eq(:ext_is_searchable)
+      expect(field.name).to eq(:'.test.Searchable.ext_is_searchable')
       expect(field).to be_extension
     end
 
     it 'fetches an extension field by its symbolized name' do
-      expect(::Test::Resource.get_extension_field(:ext_is_searchable)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_extension_field('ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_extension_field(:'.test.Searchable.ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_extension_field('.test.Searchable.ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
     end
 
     it 'returns nil when attempting to get a non-extension field' do
@@ -520,8 +520,8 @@ RSpec.describe Protobuf::Message do
 
     it 'fetches an extension field when forced' do
       expect(::Test::Resource.get_field(100, true)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_field(:ext_is_searchable, true)).to be_a(::Protobuf::Field::BoolField)
-      expect(::Test::Resource.get_field('ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_field(:'.test.Searchable.ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_field('.test.Searchable.ext_is_searchable', true)).to be_a(::Protobuf::Field::BoolField)
     end
 
     it 'returns nil when attempting to get an extension field' do
@@ -534,4 +534,67 @@ RSpec.describe Protobuf::Message do
     end
   end
 
+  describe 'defining a field' do
+    context 'single base field' do
+      let(:klass) do
+        Class.new(Protobuf::Message) do
+          optional :string, :foo, 1
+        end
+      end
+
+      it 'has an accessor for foo' do
+        message = klass.new(:foo => 'bar')
+        expect(message.foo).to eq('bar')
+        expect(message[:foo]).to eq('bar')
+      end
+    end
+
+    context 'base field and extension field name collision' do
+      let(:klass) do
+        Class.new(Protobuf::Message) do
+          optional :string, :foo, 1
+          optional :string, :".boom.foo", 2, :extension => true
+        end
+      end
+
+      it 'has an accessor for foo that refers to the base field' do
+        message = klass.new(:foo => 'bar', '.boom.foo' => 'bam')
+        expect(message.foo).to eq('bar')
+        expect(message[:foo]).to eq('bar')
+        expect(message[:'.boom.foo']).to eq('bam')
+      end
+    end
+
+    context 'no base field with an extension field' do
+      let(:klass) do
+        Class.new(Protobuf::Message) do
+          optional :string, :".boom.foo", 2, :extension => true
+        end
+      end
+
+      it 'has an accessor for foo that refers to the extension field' do
+        message = klass.new('.boom.foo' => 'bam')
+        expect(message.foo).to eq('bam')
+        expect { message[:foo] }.to raise_error(ArgumentError)
+        expect(message[:'.boom.foo']).to eq('bam')
+      end
+    end
+
+    context 'no base field with extension fields with name collision' do
+      let(:klass) do
+        Class.new(Protobuf::Message) do
+          optional :string, :".boom.foo", 2, :extension => true
+          optional :string, :".goat.foo", 3, :extension => true
+        end
+      end
+
+      it 'has an accessor for foo that refers to the extension field' do
+        message = klass.new('.boom.foo' => 'bam', '.goat.foo' => 'red')
+        expect { message.foo }.to raise_error(NoMethodError)
+        expect { message[:foo] }.to raise_error(ArgumentError)
+        expect(message[:'.boom.foo']).to eq('bam')
+        expect(message[:'.goat.foo']).to eq('red')
+      end
+    end
+  end
 end

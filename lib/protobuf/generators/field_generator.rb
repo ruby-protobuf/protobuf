@@ -20,7 +20,7 @@ module Protobuf
       attr_reader :field_options
 
       def applicable_options
-        @applicable_options ||= field_options.map { |k, v| ":#{k} => #{v}" }
+        @applicable_options ||= field_options.map { |k, v| "#{k.inspect} => #{v}" }
       end
 
       def default_value
@@ -64,7 +64,11 @@ module Protobuf
       end
 
       def name
-        @name ||= ":#{descriptor.name}"
+        @name ||= if descriptor.name.include?('.')
+                    ":#{descriptor.name.inspect}"
+                  else
+                    ":#{descriptor.name}"
+                  end
       end
 
       def number

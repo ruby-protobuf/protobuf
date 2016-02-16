@@ -67,11 +67,11 @@ module Test
     repeated ::Test::StatusType, :repeated_enum, 4
     # Extension Fields
     extensions 100...536870912
-    optional :bool, :ext_is_searchable, 100, :extension => true
-    optional :bool, :ext_is_hidden, 101, :extension => true
-    optional ::Test::Searchable::SearchType, :ext_search_type, 102, :default => ::Test::Searchable::SearchType::FLAT, :extension => true
-    optional :bool, :ext_nested_in_level_one, 105, :extension => true
-    optional :bool, :ext_dup_field, 106, :extension => true
+    optional :bool, :".test.Searchable.ext_is_searchable", 100, :extension => true
+    optional :bool, :".test.Searchable.ext_is_hidden", 101, :extension => true
+    optional ::Test::Searchable::SearchType, :".test.Searchable.ext_search_type", 102, :default => ::Test::Searchable::SearchType::FLAT, :extension => true
+    optional :bool, :".test.Nested.NestedLevelOne.ext_nested_in_level_one", 105, :extension => true
+    optional :bool, :".test.Nested.NestedLevelOne.ext_dup_field", 106, :extension => true
   end
 
   class ResourceWithRequiredField
@@ -90,8 +90,8 @@ module Test
       optional :bool, :level_one, 1, :default => true
       # Extension Fields
       extensions 100...102
-      optional :bool, :ext_nested_level_one_outer, 101, :extension => true
-      optional :bool, :ext_nested_level_one, 100, :extension => true
+      optional :bool, :".test.ext_nested_level_one_outer", 101, :extension => true
+      optional :bool, :".test.Nested.ext_nested_level_one", 100, :extension => true
     end
 
     optional :string, :name, 1
@@ -100,8 +100,8 @@ module Test
     optional ::Test::StatusType, :status, 4
     # Extension Fields
     extensions 100...111
-    optional :string, :foo, 100, :extension => true
-    optional :int64, :bar, 101, :extension => true
+    optional :string, :".test.foo", 100, :extension => true
+    optional :int64, :".test.bar", 101, :extension => true
   end
 
 
