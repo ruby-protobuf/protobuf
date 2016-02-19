@@ -62,7 +62,6 @@ module Protobuf
 
         message_class.class_eval do
           define_method(method_name) do |val|
-            @encode = nil
             case val
             when String, Symbol
               @values[field.name] = "#{val}"

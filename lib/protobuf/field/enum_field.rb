@@ -42,7 +42,6 @@ module Protobuf
         field = self
         message_class.class_eval do
           define_method("#{field.name}=") do |value|
-            @encode = nil
             orig_value = value
             if value.nil?
               @values.delete(field.name)
