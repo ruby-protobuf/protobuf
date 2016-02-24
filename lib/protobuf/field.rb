@@ -41,8 +41,8 @@ module Protobuf
       :bool     => ::Protobuf::Field::BoolField,
     }.freeze
 
-    def self.build(message_class, rule, type, name, tag, options = {})
-      field_class(type).new(message_class, rule, field_type(type), name, tag, options)
+    def self.build(message_class, rule, type, name, tag, simple_name, options = {})
+      field_class(type).new(message_class, rule, field_type(type), name, tag, simple_name, options)
     end
 
     # Returns the field class for primitives,

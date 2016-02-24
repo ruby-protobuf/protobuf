@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'protobuf/field'
+require PROTOS_PATH.join('resource.pb')
 
 RSpec.describe ::Protobuf::Field do
 

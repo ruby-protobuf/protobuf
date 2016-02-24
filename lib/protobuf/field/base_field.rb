@@ -35,7 +35,7 @@ module Protobuf
       # Constructor
       #
 
-      def initialize(message_class, rule, type_class, name, tag, options)
+      def initialize(message_class, rule, type_class, name, tag, simple_name, options)
         @message_class = message_class
         @name          = name
         @rule          = rule
@@ -44,7 +44,7 @@ module Protobuf
         @options       = options
 
         validate_packed_field if packed?
-        define_accessor
+        define_accessor(simple_name, name) if simple_name
         tag_encoded
       end
 
@@ -69,10 +69,12 @@ module Protobuf
       end
 
       def default_value
-        @default_value ||= case
-                           when optional? then typed_default_value
-                           when repeated? then ::Protobuf::Field::FieldArray.new(self).freeze
-                           when required? then nil
+        @default_value ||= if optional? || required?
+                             typed_default_value
+                           elsif repeated?
+                             ::Protobuf::Field::FieldArray.new(self).freeze
+                           else
+                             fail "Unknown field label -- something went very wrong"
                            end
       end
 
@@ -122,10 +124,10 @@ module Protobuf
 
       # FIXME: need to cleanup (rename) this warthog of a method.
       def set(message_instance, bytes)
-        return message_instance.__send__(setter, decode(bytes)) unless repeated?
-        return message_instance.__send__(getter) << decode(bytes) unless packed?
+        return message_instance[name] = decode(bytes) unless repeated?
+        return message_instance[name] << decode(bytes) unless packed?
 
-        array = message_instance.__send__(getter)
+        array = message_instance[name]
         stream = StringIO.new(bytes)
 
         if wire_type == ::Protobuf::WireType::VARINT
@@ -169,87 +171,23 @@ module Protobuf
       # Private Instance Methods
       #
 
-      def define_accessor
-        if repeated?
-          define_array_getter
-          define_array_setter
-        else
-          define_getter
-          define_setter
-        end
-      end
-
-      def define_array_getter
-        field = self
-        method_name = field.getter
-
+      def define_accessor(simple_field_name, fully_qualified_field_name)
         message_class.class_eval do
-          define_method(method_name) do
-            @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
+          define_method("#{simple_field_name}!") do
+            @values[fully_qualified_field_name]
           end
         end
 
-        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
-      end
-
-      def define_array_setter
-        field = self
-        method_name = field.setter
-
         message_class.class_eval do
-          define_method(method_name) do |val|
-            if val.is_a?(Array)
-              val = val.dup
-              val.compact!
-            else
-              fail TypeError, <<-TYPE_ERROR
-                Expected repeated value of type '#{field.type_class}'
-                Got '#{val.class}' for repeated protobuf field #{field.name}
-              TYPE_ERROR
-            end
-
-            if val.nil? || (val.respond_to?(:empty?) && val.empty?)
-              @values.delete(field.name)
-            else
-              @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
-              @values[field.name].replace(val)
-            end
-          end
+          define_method(simple_field_name) { self[fully_qualified_field_name] }
+          define_method("#{simple_field_name}=") { |v| self[fully_qualified_field_name] = v }
         end
 
-        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
-      end
+        return unless deprecated?
 
-      def define_getter
-        field = self
-        method_name = field.getter
-
-        message_class.class_eval do
-          define_method(method_name) do
-            @values[field.name] || field.default_value
-          end
-        end
-
-        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
-      end
-
-      def define_setter
-        field = self
-        method_name = field.setter
-
-        message_class.class_eval do
-          define_method(method_name) do |val|
-            if val.nil? || (val.respond_to?(:empty?) && val.empty?)
-              @values.delete(field.name)
-            elsif field.acceptable?(val)
-              @values[field.name] = field.coerce!(val)
-            else
-              fail TypeError, "Unacceptable value #{val} for field #{field.name} of type #{field.type_class}"
-            end
-          end
-        end
-
-        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
+        ::Protobuf.field_deprecator.deprecate_method(message_class, simple_field_name)
+        ::Protobuf.field_deprecator.deprecate_method(message_class, "#{simple_field_name}!")
+        ::Protobuf.field_deprecator.deprecate_method(message_class, "#{simple_field_name}=")
       end
 
       def typed_default_value

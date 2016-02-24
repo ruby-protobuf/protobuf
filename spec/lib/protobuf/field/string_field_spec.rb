@@ -42,4 +42,38 @@ RSpec.describe ::Protobuf::Field::StringField do
     end
   end
 
+  describe '#default_value' do
+    context 'optional and required fields' do
+      it 'returns the class default' do
+        class SomeStringMessage < ::Protobuf::Message
+          optional :string, :some_string, 1
+        end
+        expect(SomeStringMessage.get_field('some_string').default).to be nil
+        expect(::Protobuf::Field::StringField.default).to eq ""
+        expect(SomeStringMessage.new.some_string).to eq ""
+      end
+
+      context 'with field default' do
+        class AnotherStringMessage < ::Protobuf::Message
+          optional :string, :set_string, 1, :default => "default value this is"
+        end
+
+        it 'returns the set default' do
+          expect(AnotherStringMessage.get_field('set_string').default).to eq "default value this is"
+          expect(AnotherStringMessage.new.set_string).to eq "default value this is"
+        end
+      end
+    end
+
+    context 'repeated field' do
+      class RepeatedStringMessage < ::Protobuf::Message
+        repeated :string, :repeated_string, 1
+      end
+
+      it 'returns the set default' do
+        expect(RepeatedStringMessage.new.repeated_string).to eq []
+      end
+    end
+  end
+
 end

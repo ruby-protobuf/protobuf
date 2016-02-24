@@ -32,28 +32,17 @@ module Protobuf
         true
       end
 
+      def coerce!(value)
+        enum_value = type_class.fetch(value)
+        fail TypeError, "Invalid Enum value: #{value.inspect} for #{name}" unless enum_value
+        enum_value
+      end
+
       private
 
       ##
       # Private Instance Methods
       #
-
-      def define_setter
-        field = self
-        message_class.class_eval do
-          define_method("#{field.name}=") do |value|
-            orig_value = value
-            if value.nil?
-              @values.delete(field.name)
-            else
-              value = field.type_class.fetch(value)
-              fail TypeError, "Invalid Enum value: #{orig_value.inspect} for #{field.name}" unless value
-
-              @values[field.name] = value
-            end
-          end
-        end
-      end
 
       def typed_default_value
         if default.is_a?(Symbol)

@@ -77,7 +77,7 @@ module Protobuf
       return to_enum(:each_field) unless block_given?
 
       self.class.all_fields.each do |field|
-        value = __send__(field.getter)
+        value = self[field.name]
         yield(field, value)
       end
     end
@@ -101,7 +101,7 @@ module Protobuf
 
     def inspect
       attrs = self.class.fields.map do |field|
-        [field.name, send(field.name).inspect].join('=')
+        [field.name, self[field.name].inspect].join('=')
       end.join(' ')
 
       "#<#{self.class} #{attrs}>"
@@ -113,7 +113,7 @@ module Protobuf
 
     def respond_to_has_and_present?(key)
       respond_to_has?(key) &&
-        (__send__(key).present? || [true, false].include?(__send__(key)))
+        (self[key].present? || [true, false].include?(self[key]))
     end
 
     # Return a hash-representation of the given fields for this message type.
@@ -121,7 +121,7 @@ module Protobuf
       result = {}
 
       @values.each_key do |field_name|
-        value = __send__(field_name)
+        value = self[field_name]
         hashed_value = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
         result[field_name] = hashed_value
       end
@@ -140,20 +140,52 @@ module Protobuf
     def ==(other)
       return false unless other.is_a?(self.class)
       each_field do |field, value|
-        return false unless value == other.__send__(field.name)
+        return false unless value == other[field.name]
       end
       true
     end
 
     def [](name)
       if (field = self.class.get_field(name, true))
-        __send__(field.getter)
+        if field.repeated?
+          @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
+        elsif @values.key?(field.name)
+          @values[field.name]
+        else
+          field.default_value
+        end
+      else
+        fail ArgumentError, "invalid field name=#{name.inspect}"
       end
     end
 
     def []=(name, value)
       if (field = self.class.get_field(name, true))
-        __send__(field.setter, value) unless value.nil?
+        if field.repeated?
+          if value.is_a?(Array)
+            value = value.compact
+          else
+            fail TypeError, <<-TYPE_ERROR
+                Expected repeated value of type '#{field.type_class}'
+                Got '#{value.class}' for repeated protobuf field #{field.name}
+            TYPE_ERROR
+          end
+
+          if value.empty?
+            @values.delete(field.name)
+          else
+            @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
+            @values[field.name].replace(value)
+          end
+        else
+          if value.nil? || (value.respond_to?(:empty?) && value.empty?)
+            @values.delete(field.name)
+          elsif field.acceptable?(value)
+            @values[field.name] = field.coerce!(value)
+          else
+            fail TypeError, "Unacceptable value #{value} for field #{field.name} of type #{field.type_class}"
+          end
+        end
       else
         unless ::Protobuf.ignore_unknown_fields?
           fail ::Protobuf::FieldNotDefinedError, name
@@ -193,9 +225,9 @@ module Protobuf
       object.__send__(:initialize)
       @values.each do |name, value|
         if value.is_a?(::Protobuf::Field::FieldArray)
-          object.__send__(name).replace(value.map { |v| duplicate.call(v) })
+          object[name].replace(value.map { |v| duplicate.call(v) })
         else
-          object.__send__("#{name}=", duplicate.call(value))
+          object[name] = duplicate.call(value)
         end
       end
       object

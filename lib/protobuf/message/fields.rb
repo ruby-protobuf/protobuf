@@ -1,6 +1,10 @@
+require "set"
+
 module Protobuf
   class Message
     module Fields
+
+      ACCESSOR_SUFFIXES = ["", "=", "!", "?"].freeze
 
       def self.extended(other)
         other.extend(ClassMethods)
@@ -92,20 +96,64 @@ module Protobuf
           end
         end
 
+        def extension_shortcuts
+          @extension_shortcuts ||= Set.new
+        end
+
         def define_field(rule, type_class, field_name, tag, options)
           raise_if_tag_collision(tag, field_name)
           raise_if_name_collision(field_name)
 
-          field = ::Protobuf::Field.build(self, rule, type_class, field_name, tag, options)
+          # Determine appropirate accessor for fields depending on name collisions via extensions:
+
+          # Case 1: Base field = "string_field" and no extensions of the same name
+          # Result: message.string_field #=> @values["string_field"]
+
+          # Case 2: Base field = "string_field" and extension 1 = ".my_package.string_field", extension N = ".package_N.string_field"...
+          # Result: message.string_field #=> @values["string_field"]
+
+          # Case 3: No base field, extension 1 = ".my_package.string_field", extension 2 = ".other_package.string_field", extension N...
+          # Result: message.string_field #=> raise NoMethodError (no simple accessor allowed)
+
+          # Case 4: No base field, extension = ".my_package.string_field", no other extensions
+          # Result: message.string_field #=> @values[".my_package.string_field"]
+
+          if options[:extension]
+            base_name = field_name.to_s.split('.').last
+            # Case 2
+            if field_store[base_name]
+              simple_name = nil
+            # Case 3
+            elsif extension_shortcuts.include?(base_name)
+              remove_existing_accessors(base_name)
+              simple_name = nil
+            # Case 4
+            else
+              extension_shortcuts << base_name
+              simple_name = base_name
+            end
+          else
+            # Case 1
+            simple_name = field_name
+          end
+
+          field = ::Protobuf::Field.build(self, rule, type_class, field_name, tag, simple_name, options)
           field_store[tag] = field
           field_store[field_name] = field
           field_store[field_name.to_s] = field
           # defining a new field for the message will cause cached @all_fields, @extension_fields,
           # and @fields to be incorrect; reset them
           @all_fields = @extension_fields = @fields = nil
+        end
 
-          define_method("#{field_name}!") do
-            @values[field_name]
+        def remove_existing_accessors(accessor)
+          ACCESSOR_SUFFIXES.each do |modifier|
+            begin
+              remove_method("#{accessor}#{modifier}")
+            # rubocop: disable Lint/HandleExceptions
+            rescue NameError
+              # Do not remove the method
+            end
           end
         end
 

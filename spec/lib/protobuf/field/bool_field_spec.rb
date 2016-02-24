@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Protobuf::Field::Int32Field do
+RSpec.describe Protobuf::Field::BoolField do
 
   class SomeBoolMessage < ::Protobuf::Message
     optional :bool, :some_bool, 1
@@ -9,7 +9,7 @@ RSpec.describe Protobuf::Field::Int32Field do
 
   let(:instance) { SomeBoolMessage.new }
 
-  describe '#define_setter' do
+  describe 'setting and getting field' do
     subject { instance.some_bool = value; instance.some_bool }
 
     [true, false].each do |val|
@@ -49,12 +49,38 @@ RSpec.describe Protobuf::Field::Int32Field do
     end
   end
 
-  describe '#define_getter' do
-    context 'when required bool field is set to false' do
-      subject { instance.required_bool = false; instance.required_bool }
+  it 'defines ? method' do
+    instance.required_bool = false
+    expect(instance.required_bool?).to be(false)
+  end
 
-      it 'returns false' do
-        expect(subject).to eq(false)
+  describe '#default_value' do
+    context 'optional and required fields' do
+      it 'returns the class default' do
+        expect(SomeBoolMessage.get_field('some_bool').default).to be nil
+        expect(::Protobuf::Field::BoolField.default).to be false
+        expect(instance.some_bool).to be false
+      end
+
+      context 'with field default' do
+        class AnotherBoolMessage < ::Protobuf::Message
+          optional :bool, :set_bool, 1, :default => true
+        end
+
+        it 'returns the set default' do
+          expect(AnotherBoolMessage.get_field('set_bool').default).to be true
+          expect(AnotherBoolMessage.new.set_bool).to be true
+        end
+      end
+    end
+
+    context 'repeated field' do
+      class RepeatedBoolMessage < ::Protobuf::Message
+        repeated :bool, :repeated_bool, 1
+      end
+
+      it 'returns the set default' do
+        expect(RepeatedBoolMessage.new.repeated_bool).to eq []
       end
     end
   end

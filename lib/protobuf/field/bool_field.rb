@@ -45,21 +45,11 @@ module Protobuf
       # Private Instance Methods
       #
 
-      def define_getter
-        field = self
-        method_name = field.getter
-
+      def define_accessor(simple_field_name, _fully_qualified_field_name)
+        super
         message_class.class_eval do
-          define_method(method_name) do
-            @values.fetch(field.name, field.default_value)
-          end
+          alias_method "#{simple_field_name}?", simple_field_name
         end
-
-        message_class.class_eval do
-          alias_method "#{method_name}?", method_name
-        end
-
-        ::Protobuf.field_deprecator.deprecate_method(message_class, method_name) if field.deprecated?
       end
 
     end
