@@ -485,11 +485,14 @@ RSpec.describe Protobuf::Message do
       field = ::Test::Resource.get_extension_field(100)
       expect(field).to be_a(::Protobuf::Field::BoolField)
       expect(field.tag).to eq(100)
-      expect(field.name).to eq(:'.test.Searchable.ext_is_searchable')
+      expect(field.name).to eq(:ext_is_searchable)
+      expect(field.fully_qualified_name).to eq(:'.test.Searchable.ext_is_searchable')
       expect(field).to be_extension
     end
 
     it 'fetches an extension field by its symbolized name' do
+      expect(::Test::Resource.get_extension_field(:ext_is_searchable)).to be_a(::Protobuf::Field::BoolField)
+      expect(::Test::Resource.get_extension_field('ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
       expect(::Test::Resource.get_extension_field(:'.test.Searchable.ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
       expect(::Test::Resource.get_extension_field('.test.Searchable.ext_is_searchable')).to be_a(::Protobuf::Field::BoolField)
     end
@@ -510,6 +513,7 @@ RSpec.describe Protobuf::Message do
       expect(field).to be_a(::Protobuf::Field::StringField)
       expect(field.tag).to eq(1)
       expect(field.name).to eq(:name)
+      expect(field.fully_qualified_name).to eq(:name)
       expect(field).not_to be_extension
     end
 
@@ -535,6 +539,7 @@ RSpec.describe Protobuf::Message do
   end
 
   describe 'defining a field' do
+    # Case 1
     context 'single base field' do
       let(:klass) do
         Class.new(Protobuf::Message) do
@@ -546,9 +551,11 @@ RSpec.describe Protobuf::Message do
         message = klass.new(:foo => 'bar')
         expect(message.foo).to eq('bar')
         expect(message[:foo]).to eq('bar')
+        expect(message['foo']).to eq('bar')
       end
     end
 
+    # Case 2
     context 'base field and extension field name collision' do
       let(:klass) do
         Class.new(Protobuf::Message) do
@@ -561,25 +568,13 @@ RSpec.describe Protobuf::Message do
         message = klass.new(:foo => 'bar', '.boom.foo' => 'bam')
         expect(message.foo).to eq('bar')
         expect(message[:foo]).to eq('bar')
+        expect(message['foo']).to eq('bar')
         expect(message[:'.boom.foo']).to eq('bam')
+        expect(message['.boom.foo']).to eq('bam')
       end
     end
 
-    context 'no base field with an extension field' do
-      let(:klass) do
-        Class.new(Protobuf::Message) do
-          optional :string, :".boom.foo", 2, :extension => true
-        end
-      end
-
-      it 'has an accessor for foo that refers to the extension field' do
-        message = klass.new('.boom.foo' => 'bam')
-        expect(message.foo).to eq('bam')
-        expect { message[:foo] }.to raise_error(ArgumentError)
-        expect(message[:'.boom.foo']).to eq('bam')
-      end
-    end
-
+    # Case 3
     context 'no base field with extension fields with name collision' do
       let(:klass) do
         Class.new(Protobuf::Message) do
@@ -592,8 +587,29 @@ RSpec.describe Protobuf::Message do
         message = klass.new('.boom.foo' => 'bam', '.goat.foo' => 'red')
         expect { message.foo }.to raise_error(NoMethodError)
         expect { message[:foo] }.to raise_error(ArgumentError)
+        expect { message['foo'] }.to raise_error(ArgumentError)
         expect(message[:'.boom.foo']).to eq('bam')
+        expect(message['.boom.foo']).to eq('bam')
         expect(message[:'.goat.foo']).to eq('red')
+        expect(message['.goat.foo']).to eq('red')
+      end
+    end
+
+    # Case 4
+    context 'no base field with an extension field' do
+      let(:klass) do
+        Class.new(Protobuf::Message) do
+          optional :string, :".boom.foo", 2, :extension => true
+        end
+      end
+
+      it 'has an accessor for foo that refers to the extension field' do
+        message = klass.new('.boom.foo' => 'bam')
+        expect(message.foo).to eq('bam')
+        expect(message[:foo]).to eq('bam')
+        expect(message['foo']).to eq('bam')
+        expect(message[:'.boom.foo']).to eq('bam')
+        expect(message['.boom.foo']).to eq('bam')
       end
     end
   end
