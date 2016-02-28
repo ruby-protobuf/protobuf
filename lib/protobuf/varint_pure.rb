@@ -1,12 +1,12 @@
 module Protobuf
   module VarintPure
     def decode(stream)
-      value = index = 0
+      value = shift = 0
       begin
         byte = stream.readbyte
-        value |= (byte & 0x7f) << (7 * index)
-        index += 1
-      end while (byte & 0x80).nonzero?
+        value |= (byte & 127) << shift
+        shift += 7
+      end while byte > 127
       value
     end
   end
