@@ -31,6 +31,7 @@ require "protobuf/version"
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'timecop'
   s.add_development_dependency 'yard'
+  s.add_development_dependency 'benchmark-ips'
 
   # debuggers only work in MRI
   if RUBY_ENGINE.to_sym == :ruby
