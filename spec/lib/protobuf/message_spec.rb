@@ -181,64 +181,6 @@ RSpec.describe Protobuf::Message do
       test_enum = Test::EnumTestMessage.new { |p| p.non_default_enum = 2 }
       expect(test_enum.non_default_enum).to eq(2)
     end
-
-    context 'ignoring unknown fields' do
-      around do |example|
-        orig = ::Protobuf.ignore_unknown_fields?
-        ::Protobuf.ignore_unknown_fields = true
-        example.call
-        ::Protobuf.ignore_unknown_fields = orig
-      end
-
-      context 'with valid fields' do
-        let(:values) { { :name => "Jim" } }
-
-        it "does not raise an error" do
-          expect { ::Test::Resource.new(values) }.to_not raise_error
-        end
-      end
-
-      context 'with non-existent field' do
-        let(:values) { { :name => "Jim", :othername => "invalid" } }
-
-        it "does not raise an error" do
-          expect { ::Test::Resource.new(values) }.to_not raise_error
-        end
-      end
-    end
-
-    context 'not ignoring unknown fields' do
-      around do |example|
-        orig = ::Protobuf.ignore_unknown_fields?
-        ::Protobuf.ignore_unknown_fields = false
-        example.call
-        ::Protobuf.ignore_unknown_fields = orig
-      end
-
-      context 'with valid fields' do
-        let(:values) { { :name => "Jim" } }
-
-        it "does not raise an error" do
-          expect { ::Test::Resource.new(values) }.to_not raise_error
-        end
-      end
-
-      context 'with non-existent field' do
-        let(:values) { { :name => "Jim", :othername => "invalid" } }
-
-        it "raises an error and mentions the erroneous field" do
-          expect { ::Test::Resource.new(values) }.to raise_error(::Protobuf::FieldNotDefinedError, /othername/)
-        end
-
-        context 'with a nil value' do
-          let(:values) { { :name => "Jim", :othername => nil } }
-
-          it "raises an error and mentions the erroneous field" do
-            expect { ::Test::Resource.new(values) }.to raise_error(::Protobuf::FieldNotDefinedError, /othername/)
-          end
-        end
-      end
-    end
   end
 
   describe '#encode' do
@@ -610,6 +552,145 @@ RSpec.describe Protobuf::Message do
         expect(message['foo']).to eq('bam')
         expect(message[:'.boom.foo']).to eq('bam')
         expect(message['.boom.foo']).to eq('bam')
+      end
+    end
+  end
+
+  describe '.[]=' do
+    context 'clearing fields' do
+      it 'clears repeated fields with an empty array' do
+        instance = ::Test::Resource.new(:repeated_enum => [::Test::StatusType::ENABLED])
+        expect(instance.field?(:repeated_enum)).to be(true)
+        instance[:repeated_enum] = []
+        expect(instance.field?(:repeated_enum)).to be(false)
+      end
+
+      it 'clears optional fields with nil' do
+        instance = ::Test::Resource.new(:name => "Joe")
+        expect(instance.field?(:name)).to be(true)
+        instance[:name] = nil
+        expect(instance.field?(:name)).to be(false)
+      end
+
+      it 'clears optional extenstion fields with nil' do
+        instance = ::Test::Resource.new(:ext_is_searchable => true)
+        expect(instance.field?(:ext_is_searchable)).to be(true)
+        instance[:ext_is_searchable] = nil
+        expect(instance.field?(:ext_is_searchable)).to be(false)
+      end
+    end
+
+    context 'setting fields' do
+      let(:instance) { ::Test::Resource.new }
+
+      it 'sets and replaces repeated fields' do
+        initial = [::Test::StatusType::ENABLED, ::Test::StatusType::DISABLED]
+        instance[:repeated_enum] = initial
+        expect(instance[:repeated_enum]).to eq(initial)
+        replacement = [::Test::StatusType::DELETED]
+        instance[:repeated_enum] = replacement
+        expect(instance[:repeated_enum]).to eq(replacement)
+      end
+
+      it 'sets acceptable optional field values' do
+        instance[:name] = "Joe"
+        expect(instance[:name]).to eq("Joe")
+        instance[1] = "Tom"
+        expect(instance[:name]).to eq("Tom")
+      end
+
+      it 'sets acceptable empty string field values' do
+        instance[:name] = ""
+        expect(instance.name!).to eq("")
+      end
+
+      it 'sets acceptable empty message field values' do
+        instance = ::Test::Nested.new
+        instance[:resource] = {}
+        expect(instance.resource!).to eq(::Test::Resource.new)
+      end
+
+      it 'sets acceptable extension field values' do
+        instance[:ext_is_searchable] = true
+        expect(instance[:ext_is_searchable]).to eq(true)
+        instance[:".test.Searchable.ext_is_searchable"] = false
+        expect(instance[:ext_is_searchable]).to eq(false)
+        instance[100] = true
+        expect(instance[:ext_is_searchable]).to eq(true)
+      end
+    end
+
+    context 'throwing TypeError' do
+      let(:instance) { ::Test::Resource.new }
+
+      it 'throws when a repeated value is set with a non array' do
+        expect { instance[:repeated_enum] = "string" }.to raise_error(TypeError)
+      end
+
+      it 'throws when a repeated value is set with an array of the wrong type' do
+        expect { instance[:repeated_enum] = [true, false] }.to raise_error(TypeError)
+      end
+
+      it 'throws when an optional value is not #acceptable?' do
+        expect { instance[:name] = 1 }.to raise_error(TypeError)
+      end
+    end
+
+    context 'ignoring unknown fields' do
+      around do |example|
+        orig = ::Protobuf.ignore_unknown_fields?
+        ::Protobuf.ignore_unknown_fields = true
+        example.call
+        ::Protobuf.ignore_unknown_fields = orig
+      end
+
+      context 'with valid fields' do
+        let(:values) { { :name => "Jim" } }
+
+        it "does not raise an error" do
+          expect { ::Test::Resource.new(values) }.to_not raise_error
+        end
+      end
+
+      context 'with non-existent field' do
+        let(:values) { { :name => "Jim", :othername => "invalid" } }
+
+        it "does not raise an error" do
+          expect { ::Test::Resource.new(values) }.to_not raise_error
+        end
+      end
+    end
+
+    context 'not ignoring unknown fields' do
+      around do |example|
+        orig = ::Protobuf.ignore_unknown_fields?
+        ::Protobuf.ignore_unknown_fields = false
+        example.call
+        ::Protobuf.ignore_unknown_fields = orig
+      end
+
+      context 'with valid fields' do
+        let(:values) { { :name => "Jim" } }
+
+        it "does not raise an error" do
+          expect { ::Test::Resource.new(values) }.to_not raise_error
+        end
+      end
+
+      context 'with non-existent field' do
+        let(:values) { { :name => "Jim", :othername => "invalid" } }
+
+        it "raises an error and mentions the erroneous field" do
+          expect { ::Test::Resource.new(values) }.to raise_error(::Protobuf::FieldNotDefinedError, /othername/)
+        end
+
+        context 'with a nil value' do
+          let(:values) { { :name => "Jim", :othername => nil } }
+
+          it "raises an error and mentions the erroneous field" do
+            expect { ::Test::Resource.new(values) }.to raise_error(::Protobuf::FieldNotDefinedError, /othername/)
+          end
+        end
       end
     end
   end

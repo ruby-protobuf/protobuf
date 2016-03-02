@@ -178,7 +178,7 @@ module Protobuf
             @values[field.name].replace(value)
           end
         else
-          if value.nil? || (value.respond_to?(:empty?) && value.empty?)
+          if value.nil?
             @values.delete(field.name)
           elsif field.acceptable?(value)
             @values[field.name] = field.coerce!(value)
