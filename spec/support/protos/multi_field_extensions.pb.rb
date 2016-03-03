@@ -37,7 +37,7 @@ module Test
     required ::Test::Header::Type, :type, 1
     # Extension Fields
     extensions 100...536870912
-    optional ::Test::PayloadA, :payload, 100, :extension => true
+    optional ::Test::PayloadA, :".test.PayloadA.payload", 100, :extension => true
   end
 
   class PayloadA
