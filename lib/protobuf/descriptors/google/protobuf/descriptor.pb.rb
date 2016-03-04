@@ -15,6 +15,7 @@ module Google
     class FileDescriptorProto < ::Protobuf::Message; end
     class DescriptorProto < ::Protobuf::Message
       class ExtensionRange < ::Protobuf::Message; end
+      class ReservedRange < ::Protobuf::Message; end
 
     end
 
@@ -48,6 +49,7 @@ module Google
 
     end
 
+    class OneofDescriptorProto < ::Protobuf::Message; end
     class EnumDescriptorProto < ::Protobuf::Message; end
     class EnumValueDescriptorProto < ::Protobuf::Message; end
     class ServiceDescriptorProto < ::Protobuf::Message; end
@@ -67,6 +69,12 @@ module Google
         define :STRING, 0
         define :CORD, 1
         define :STRING_PIECE, 2
+      end
+
+      class JSType < ::Protobuf::Enum
+        define :JS_NORMAL, 0
+        define :JS_STRING, 1
+        define :JS_NUMBER, 2
       end
 
     end
@@ -106,10 +114,16 @@ module Google
       repeated ::Google::Protobuf::FieldDescriptorProto, :extension, 7
       optional ::Google::Protobuf::FileOptions, :options, 8
       optional ::Google::Protobuf::SourceCodeInfo, :source_code_info, 9
+      optional :string, :syntax, 12
     end
 
     class DescriptorProto
       class ExtensionRange
+        optional :int32, :start, 1
+        optional :int32, :end, 2
+      end
+
+      class ReservedRange
         optional :int32, :start, 1
         optional :int32, :end, 2
       end
@@ -120,7 +134,10 @@ module Google
       repeated ::Google::Protobuf::DescriptorProto, :nested_type, 3
       repeated ::Google::Protobuf::EnumDescriptorProto, :enum_type, 4
       repeated ::Google::Protobuf::DescriptorProto::ExtensionRange, :extension_range, 5
+      repeated ::Google::Protobuf::OneofDescriptorProto, :oneof_decl, 8
       optional ::Google::Protobuf::MessageOptions, :options, 7
+      repeated ::Google::Protobuf::DescriptorProto::ReservedRange, :reserved_range, 9
+      repeated :string, :reserved_name, 10
     end
 
     class FieldDescriptorProto
@@ -131,7 +148,12 @@ module Google
       optional :string, :type_name, 6
       optional :string, :extendee, 2
       optional :string, :default_value, 7
+      optional :int32, :oneof_index, 9
       optional ::Google::Protobuf::FieldOptions, :options, 8
+    end
+
+    class OneofDescriptorProto
+      optional :string, :name, 1
     end
 
     class EnumDescriptorProto
@@ -157,6 +179,8 @@ module Google
       optional :string, :input_type, 2
       optional :string, :output_type, 3
       optional ::Google::Protobuf::MethodOptions, :options, 4
+      optional :bool, :client_streaming, 5, :default => false
+      optional :bool, :server_streaming, 6, :default => false
     end
 
     class FileOptions
@@ -164,11 +188,17 @@ module Google
       optional :string, :java_outer_classname, 8
       optional :bool, :java_multiple_files, 10, :default => false
       optional :bool, :java_generate_equals_and_hash, 20, :default => false
+      optional :bool, :java_string_check_utf8, 27, :default => false
       optional ::Google::Protobuf::FileOptions::OptimizeMode, :optimize_for, 9, :default => ::Google::Protobuf::FileOptions::OptimizeMode::SPEED
       optional :string, :go_package, 11
       optional :bool, :cc_generic_services, 16, :default => false
       optional :bool, :java_generic_services, 17, :default => false
       optional :bool, :py_generic_services, 18, :default => false
+      optional :bool, :deprecated, 23, :default => false
+      optional :bool, :cc_enable_arenas, 31, :default => false
+      optional :string, :objc_class_prefix, 36
+      optional :string, :csharp_namespace, 37
+      optional :bool, :javanano_use_deprecated_package, 38
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
@@ -177,6 +207,8 @@ module Google
     class MessageOptions
       optional :bool, :message_set_wire_format, 1, :default => false
       optional :bool, :no_standard_descriptor_accessor, 2, :default => false
+      optional :bool, :deprecated, 3, :default => false
+      optional :bool, :map_entry, 7
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
@@ -185,9 +217,9 @@ module Google
     class FieldOptions
       optional ::Google::Protobuf::FieldOptions::CType, :ctype, 1, :default => ::Google::Protobuf::FieldOptions::CType::STRING
       optional :bool, :packed, 2
+      optional ::Google::Protobuf::FieldOptions::JSType, :jstype, 6, :default => ::Google::Protobuf::FieldOptions::JSType::JS_NORMAL
       optional :bool, :lazy, 5, :default => false
       optional :bool, :deprecated, 3, :default => false
-      optional :string, :experimental_map_key, 9
       optional :bool, :weak, 10, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
@@ -195,25 +227,29 @@ module Google
     end
 
     class EnumOptions
-      optional :bool, :allow_alias, 2, :default => true
+      optional :bool, :allow_alias, 2
+      optional :bool, :deprecated, 3, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
     end
 
     class EnumValueOptions
+      optional :bool, :deprecated, 1, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
     end
 
     class ServiceOptions
+      optional :bool, :deprecated, 33, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
     end
 
     class MethodOptions
+      optional :bool, :deprecated, 33, :default => false
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
@@ -240,6 +276,7 @@ module Google
         repeated :int32, :span, 2, :packed => true
         optional :string, :leading_comments, 3
         optional :string, :trailing_comments, 4
+        repeated :string, :leading_detached_comments, 6
       end
 
       repeated ::Google::Protobuf::SourceCodeInfo::Location, :location, 1
