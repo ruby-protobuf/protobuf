@@ -123,6 +123,9 @@ module Protobuf
 
       def print_package(&block)
         namespaces = descriptor.package.split('.')
+        if namespaces.empty? && ENV.key?('PB_ALLOW_DEFAULT_PACKAGE_NAME')
+          namespaces = [File.basename(descriptor.name).sub('.proto', '')]
+        end
         namespaces.reverse.reduce(block) do |previous, namespace|
           -> { print_module(namespace, &previous) }
         end.call
