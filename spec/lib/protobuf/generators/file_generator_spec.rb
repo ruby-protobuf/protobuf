@@ -56,10 +56,10 @@ EOF
 require 'protobuf'
 
 module Foo
+  ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 end
 
 EOF
     end
   end
-
 end

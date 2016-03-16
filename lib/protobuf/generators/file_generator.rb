@@ -29,6 +29,7 @@ module Protobuf
           print_import_requires
 
           print_package do
+            inject_optionable
             group = GroupGenerator.new(current_indent)
             group.add_enums(descriptor.enum_type, :namespace => [descriptor.package])
             group.add_message_declarations(descriptor.message_type)
@@ -141,6 +142,10 @@ module Protobuf
         token[0] == '.'
       end
 
+      def inject_optionable
+        return if descriptor.package.empty? && !ENV.key?('PB_ALLOW_DEFAULT_PACKAGE_NAME')
+        puts "::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }"
+      end
     end
   end
 end

@@ -3,6 +3,7 @@ module Protobuf
   module Field
     class BaseField
       include ::Protobuf::Logging
+      ::Protobuf::Optionable.inject(self, false) { ::Google::Protobuf::FieldOptions }
 
       ##
       # Constants

@@ -10,7 +10,7 @@ require 'delegate'
 module Protobuf
   class Enum < SimpleDelegator
     # Public: Allows setting Options on the Enum class.
-    include ::Protobuf::Optionable
+    ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::EnumOptions }
 
     def self.aliases_allowed?
       get_option(:allow_alias)

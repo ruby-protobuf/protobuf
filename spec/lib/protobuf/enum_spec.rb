@@ -22,8 +22,8 @@ RSpec.describe Protobuf::Enum do
     end
 
     describe '.aliases_allowed?' do
-      it 'is nil when the option is not set' do
-        expect(Test::EnumTestType.aliases_allowed?).to be nil
+      it 'is false when the option is not set' do
+        expect(Test::EnumTestType.aliases_allowed?).to be false
       end
     end
 

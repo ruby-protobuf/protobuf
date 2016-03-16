@@ -12,6 +12,7 @@ require 'protobuf'
 require 'protos/resource.pb'
 
 module Test
+  ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##
   # Enum Classes

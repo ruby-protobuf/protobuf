@@ -1,6 +1,5 @@
-require 'active_support/core_ext/class'
-
 require 'protobuf/logging'
+require 'protobuf/message'
 require 'protobuf/rpc/client'
 require 'protobuf/rpc/error'
 require 'protobuf/rpc/service_filters'
@@ -14,6 +13,7 @@ module Protobuf
     class Service
       include ::Protobuf::Logging
       include ::Protobuf::Rpc::ServiceFilters
+      ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::ServiceOptions }
 
       DEFAULT_HOST = '127.0.0.1'.freeze
       DEFAULT_PORT = 9399

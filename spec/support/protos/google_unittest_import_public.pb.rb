@@ -6,6 +6,7 @@
 require 'protobuf'
 
 module Protobuf_unittest_import
+  ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##
   # Message Classes
