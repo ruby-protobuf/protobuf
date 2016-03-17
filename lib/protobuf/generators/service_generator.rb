@@ -15,10 +15,10 @@ module Protobuf
       end
 
       def build_method(method_descriptor)
-        name = method_descriptor.name
         request_klass = modulize(method_descriptor.input_type)
         response_klass = modulize(method_descriptor.output_type)
-        "rpc :#{name.underscore}, #{request_klass}, #{response_klass}"
+        name = ENV.key?('PB_USE_RAW_RPC_NAMES') ? method_descriptor.name : method_descriptor.name.underscore
+        "rpc :#{name}, #{request_klass}, #{response_klass}"
       end
 
     end
