@@ -9,7 +9,7 @@ module Protobuf
       #
 
       def acceptable?(val)
-        val.is_a?(type_class) || val.respond_to?(:to_hash)
+        val.is_a?(type_class) || val.respond_to?(:to_hash) || val.respond_to?(:to_proto)
       end
 
       def decode(bytes)
@@ -31,17 +31,19 @@ module Protobuf
       end
 
       def coerce!(value)
-        if value.nil?
-          nil
-        elsif value.is_a?(type_class)
-          value
-        elsif value.respond_to?(:to_proto)
-          value.to_proto
-        elsif value.respond_to?(:to_hash)
-          type_class.new(value.to_hash)
-        else
-          fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{value.class}'"
-        end
+        return nil if value.nil?
+
+        coerced_value = if value.respond_to?(:to_proto)
+                          value.to_proto
+                        elsif value.respond_to?(:to_hash)
+                          type_class.new(value.to_hash)
+                        else
+                          value
+                        end
+
+        return coerced_value if coerced_value.is_a?(type_class)
+
+        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{value.class}'"
       end
 
     end
