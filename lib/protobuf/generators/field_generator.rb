@@ -20,7 +20,13 @@ module Protobuf
       attr_reader :field_options
 
       def applicable_options
-        @applicable_options ||= field_options.map { |k, v| ":#{k} => #{v}" }
+        # Note on the strange use of `#inspect`:
+        #   :boom.inspect #=> ":boom"
+        #   :".boom.foo".inspect #=> ":\".boom.foo\""
+        # An alternative to `#inspect` would be always adding double quotes,
+        # but the generatated code looks un-idiomatic:
+        #   ":\"#{:boom}\"" #=> ":\"boom\"" <-- Note the unnecessary double quotes
+        @applicable_options ||= field_options.map { |k, v| "#{k.inspect} => #{v}" }
       end
 
       def default_value
@@ -64,7 +70,7 @@ module Protobuf
       end
 
       def name
-        @name ||= ":#{descriptor.name}"
+        @name ||= descriptor.name.to_sym.inspect
       end
 
       def number

@@ -21,7 +21,7 @@ module Protobuf
       ##
       # Attributes
       #
-      attr_reader :message_class, :name, :options, :rule, :tag, :type_class
+      attr_reader :message_class, :name, :fully_qualified_name, :options, :rule, :tag, :type_class
 
       ##
       # Class Methods
@@ -35,16 +35,17 @@ module Protobuf
       # Constructor
       #
 
-      def initialize(message_class, rule, type_class, name, tag, simple_name, options)
+      def initialize(message_class, rule, type_class, fully_qualified_name, tag, simple_name, options)
         @message_class = message_class
-        @name          = name
+        @name = simple_name || fully_qualified_name
+        @fully_qualified_name = fully_qualified_name
         @rule          = rule
         @tag           = tag
         @type_class    = type_class
         @options       = options
 
         validate_packed_field if packed?
-        define_accessor(simple_name, name) if simple_name
+        define_accessor(simple_name, fully_qualified_name) if simple_name
         tag_encoded
       end
 
@@ -163,6 +164,10 @@ module Protobuf
 
       def wire_type
         ::Protobuf::WireType::VARINT
+      end
+
+      def fully_qualified_name_only!
+        @name = @fully_qualified_name
       end
 
       private

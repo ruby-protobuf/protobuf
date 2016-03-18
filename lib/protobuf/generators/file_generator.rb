@@ -64,6 +64,11 @@ module Protobuf
       # the value is an array of field descriptors.
       #
       def map_extensions(descriptor, namespaces)
+        if fully_qualified_token?(descriptor.name)
+          fully_qualified_namespace = descriptor.name
+        elsif !(namespace = namespaces.reject(&:empty?).join(".")).empty?
+          fully_qualified_namespace = ".#{namespace}"
+        end
         # Record all the message descriptor name's we encounter (should be the whole tree).
         if descriptor.is_a?(::Google::Protobuf::DescriptorProto)
           if fully_qualified_token?(descriptor.name)
@@ -75,6 +80,9 @@ module Protobuf
         end
 
         descriptor.extension.each do |field_descriptor|
+          unless fully_qualified_token?(field_descriptor.name) && fully_qualified_namespace
+            field_descriptor.name = "#{fully_qualified_namespace}.#{field_descriptor.name}"
+          end
           @extension_fields[field_descriptor.extendee] << field_descriptor
         end
 
