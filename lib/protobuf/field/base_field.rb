@@ -179,15 +179,15 @@ module Protobuf
       def define_accessor(simple_field_name, fully_qualified_field_name)
         message_class.class_eval <<-ruby, __FILE__, __LINE__
           def #{simple_field_name}!
-            @values[:#{fully_qualified_field_name}]
+            @values[:"#{fully_qualified_field_name}"]
           end
 
           def #{simple_field_name}
-            self[:#{fully_qualified_field_name}]
+            self[:"#{fully_qualified_field_name}"]
           end
 
           def #{simple_field_name}=(value)
-            self[:#{fully_qualified_field_name}] = value
+            self[:"#{fully_qualified_field_name}"] = value
           end
         ruby
 
