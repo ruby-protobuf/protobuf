@@ -390,6 +390,29 @@ RSpec.describe Protobuf::Message do
         )
       end
     end
+
+    it 'uses simple field names as keys when possible and fully qualified names otherwise' do
+      message = Class.new(::Protobuf::Message) do
+        optional :int32, :field, 1
+        optional :int32, :colliding_field, 2
+        extensions 100...200
+        optional :int32, :".ext.normal_ext_field", 100, :extension => true
+        optional :int32, :".ext.colliding_field", 101, :extension => true
+        optional :int32, :".ext.colliding_field2", 102, :extension => true
+        optional :int32, :".ext2.colliding_field2", 103, :extension => true
+      end
+
+      hash = {
+        :field => 1,
+        :colliding_field => 2,
+        :normal_ext_field => 3,
+        :".ext.colliding_field" => 4,
+        :".ext.colliding_field2" => 5,
+        :".ext2.colliding_field2" => 6,
+      }
+      instance = message.new(hash)
+      expect(instance.to_hash).to eq(hash)
+    end
   end
 
   describe '#to_json' do
@@ -413,12 +436,36 @@ RSpec.describe Protobuf::Message do
   describe "#define_accessor" do
     subject { ::Test::Resource.new }
 
-    it "allows string fields to be set to nil" do
+    it 'allows string fields to be set to nil' do
       expect { subject.name = nil }.to_not raise_error
     end
 
-    it "does not allow string fields to be set to Numeric" do
+    it 'does not allow string fields to be set to Numeric' do
       expect { subject.name = 1 }.to raise_error(/name/)
+    end
+
+    context '#{simple_field_name}!' do
+      it 'returns value of set field' do
+        expect(::Test::Resource.new(:name => "Joe").name!).to eq("Joe")
+      end
+
+      it 'returns value of set field with default' do
+        expect(::Test::Resource.new(:name => "").name!).to eq("")
+      end
+
+      it 'returns nil if extension field is unset' do
+        expect(subject.ext_is_searchable!).to be_nil
+      end
+
+      it 'returns value of set extension field' do
+        message = ::Test::Resource.new(:ext_is_searchable => true)
+        expect(message.ext_is_searchable!).to be(true)
+      end
+
+      it 'returns value of set extension field with default' do
+        message = ::Test::Resource.new(:ext_is_searchable => false)
+        expect(message.ext_is_searchable!).to be(false)
+      end
     end
   end
 
@@ -446,6 +493,64 @@ RSpec.describe Protobuf::Message do
     it 'returns nil when field is not found' do
       expect(::Test::Resource.get_extension_field(-1)).to be_nil
       expect(::Test::Resource.get_extension_field(nil)).to be_nil
+    end
+  end
+
+  describe '#field?' do
+    it 'returns false for non-existent field' do
+      expect(::Test::Resource.get_field('doesnotexist')).to be_nil
+      expect(::Test::Resource.new.field?('doesnotexist')).to be(false)
+    end
+
+    it 'returns false for unset field' do
+      expect(::Test::Resource.get_field('name')).to be
+      expect(::Test::Resource.new.field?('name')).to be(false)
+    end
+
+    it 'returns false for unset field from tag' do
+      expect(::Test::Resource.get_field(1)).to be
+      expect(::Test::Resource.new.field?(1)).to be(false)
+    end
+
+    it 'returns true for set field' do
+      expect(::Test::Resource.new(:name => "Joe").field?('name')).to be(true)
+    end
+
+    it 'returns true for set field with default' do
+      expect(::Test::Resource.new(:name => "").field?('name')).to be(true)
+    end
+
+    it 'returns true from field tag value' do
+      expect(::Test::Resource.new(:name => "Joe").field?(1)).to be(true)
+    end
+
+    it 'returns false for unset extension field' do
+      ext_field = :".test.Searchable.ext_is_searchable"
+      expect(::Test::Resource.get_extension_field(ext_field)).to be
+      expect(::Test::Resource.new.field?(ext_field)).to be(false)
+    end
+
+    it 'returns false for unset extension field from tag' do
+      expect(::Test::Resource.get_extension_field(100)).to be
+      expect(::Test::Resource.new.field?(100)).to be(false)
+    end
+
+    it 'returns true for set extension field' do
+      ext_field = :".test.Searchable.ext_is_searchable"
+      message = ::Test::Resource.new(ext_field => true)
+      expect(message.field?(ext_field)).to be(true)
+    end
+
+    it 'returns true for set extension field with default' do
+      ext_field = :".test.Searchable.ext_is_searchable"
+      message = ::Test::Resource.new(ext_field => false)
+      expect(message.field?(ext_field)).to be(true)
+    end
+
+    it 'returns true for set extension field from tag' do
+      ext_field = :".test.Searchable.ext_is_searchable"
+      message = ::Test::Resource.new(ext_field => false)
+      expect(message.field?(100)).to be(true)
     end
   end
 

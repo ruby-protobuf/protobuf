@@ -84,7 +84,7 @@ module Protobuf
 
     def each_field_for_serialization
       self.class.all_fields.each do |field|
-        value = @values[field.getter]
+        value = @values[field.fully_qualified_name]
         if value.nil?
           fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value." if field.required?
           next
@@ -95,7 +95,9 @@ module Protobuf
     end
 
     def field?(name)
-      @values.key?(name)
+      field = self.class.get_field(name, true)
+      return false if field.nil?
+      @values.key?(field.fully_qualified_name)
     end
     ::Protobuf.deprecator.define_deprecated_methods(self, :has_field? => :field?)
 
@@ -122,8 +124,9 @@ module Protobuf
 
       @values.each_key do |field_name|
         value = self[field_name]
+        field = self.class.get_field(field_name, true)
         hashed_value = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
-        result[field_name] = hashed_value
+        result[field.name] = hashed_value
       end
 
       result
@@ -148,9 +151,9 @@ module Protobuf
     def [](name)
       if (field = self.class.get_field(name, true))
         if field.repeated?
-          @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
-        elsif @values.key?(field.name)
-          @values[field.name]
+          @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field)
+        elsif @values.key?(field.fully_qualified_name)
+          @values[field.fully_qualified_name]
         else
           field.default_value
         end
@@ -172,16 +175,16 @@ module Protobuf
           end
 
           if value.empty?
-            @values.delete(field.name)
+            @values.delete(field.fully_qualified_name)
           else
-            @values[field.name] ||= ::Protobuf::Field::FieldArray.new(field)
-            @values[field.name].replace(value)
+            @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field)
+            @values[field.fully_qualified_name].replace(value)
           end
         else
           if value.nil?
-            @values.delete(field.name)
+            @values.delete(field.fully_qualified_name)
           elsif field.acceptable?(value)
-            @values[field.name] = field.coerce!(value)
+            @values[field.fully_qualified_name] = field.coerce!(value)
           else
             fail TypeError, "Unacceptable value #{value} for field #{field.name} of type #{field.type_class}"
           end
