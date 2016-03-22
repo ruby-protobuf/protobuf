@@ -94,7 +94,11 @@ module Protobuf
     def field?(name)
       field = self.class.get_field(name, true)
       return false if field.nil?
-      @values.key?(field.fully_qualified_name)
+      if field.repeated?
+        @values.key?(field.fully_qualified_name) && @values[field.fully_qualified_name].present?
+      else
+        @values.key?(field.fully_qualified_name)
+      end
     end
     ::Protobuf.deprecator.define_deprecated_methods(self, :has_field? => :field?)
 

@@ -476,6 +476,25 @@ RSpec.describe Protobuf::Message do
         message = ::Test::Resource.new(:ext_is_searchable => false)
         expect(message.ext_is_searchable!).to be(false)
       end
+
+      it 'returns nil for an unset repeated field that has only be read' do
+        message = ::Test::Resource.new
+        expect(message.repeated_enum!).to be_nil
+        message.repeated_enum
+        expect(message.repeated_enum!).to be_nil
+      end
+
+      it 'returns value for an unset repeated field has been read and appended to' do
+        message = ::Test::Resource.new
+        message.repeated_enum << 1
+        expect(message.repeated_enum!).to eq([1])
+      end
+
+      it 'returns value for an unset repeated field has been explicitly set' do
+        message = ::Test::Resource.new
+        message.repeated_enum = [1]
+        expect(message.repeated_enum!).to eq([1])
+      end
     end
   end
 
@@ -561,6 +580,31 @@ RSpec.describe Protobuf::Message do
       ext_field = :".test.Searchable.ext_is_searchable"
       message = ::Test::Resource.new(ext_field => false)
       expect(message.field?(100)).to be(true)
+    end
+
+    it 'returns false for repeated field that has been read from' do
+      message = ::Test::Resource.new
+      expect(message.field?(:repeated_enum)).to be(false)
+      message.repeated_enum
+      expect(message.field?(:repeated_enum)).to be(false)
+    end
+
+    it 'returns true for a repeated field that has been read from and appended to' do
+      message = ::Test::Resource.new
+      message.repeated_enum << 1
+      expect(message.field?(:repeated_enum)).to be(true)
+    end
+
+    it 'returns true for a repeated field that has been set with the setter' do
+      message = ::Test::Resource.new
+      message.repeated_enum = [1]
+      expect(message.field?(:repeated_enum)).to be(true)
+    end
+
+    it 'returns false for a repeated field that has been replaced with []' do
+      message = ::Test::Resource.new
+      message.repeated_enum.replace([])
+      expect(message.field?(:repeated_enum)).to be(false)
     end
   end
 
