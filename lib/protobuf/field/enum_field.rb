@@ -1,8 +1,8 @@
-require 'protobuf/field/varint_field'
+require 'protobuf/field/integer_field'
 
 module Protobuf
   module Field
-    class EnumField < VarintField
+    class EnumField < IntegerField
 
       ##
       # Class Methods
@@ -25,7 +25,8 @@ module Protobuf
       end
 
       def decode(value)
-        value if acceptable?(value)
+        decoded = super(value)
+        decoded if acceptable?(decoded)
       end
 
       def enum?
