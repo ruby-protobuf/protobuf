@@ -1,5 +1,20 @@
 # Stable (3.x)
 
+3.7.0 (pre0)
+-----------
+- Add `PB_USE_RAW_RPC_NAMES` option to preserve raw RPC name (since #underscore can be lossy).
+- Add `PB_ENUM_UPCASE` option to generate enum values as upcased.
+- Clean up dynamic code generation in prep for extension namespacing.
+- Namespace extension fields.
+- Field values should be stored via their fully qualified names
+- Refresh google/protobuf/descriptor.{proto,pb.rb}
+- Properly encode and decode negative enum values.
+
+3.6.7
+-----
+- An issue was reported with the encode memoization added in #293 with using any array modification
+method on repeated fields. Remove memoization on encode (#305) until we can find a better solution.
+
 3.5.5
 --------
 - Add native Varint for MRI.
