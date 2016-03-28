@@ -41,6 +41,15 @@ end
     it 'returns a string identifying the given method descriptor' do
       expect(subject.build_method(service.method.first)).to eq("rpc :search, FooRequest, FooResponse")
     end
+
+    context 'with PB_USE_RAW_RPC_NAMES in the environemnt' do
+      before { allow(ENV).to receive(:key?).with('PB_USE_RAW_RPC_NAMES').and_return(true) }
+
+      it 'uses the raw RPC name and does not underscore it' do
+        expect(subject.build_method(service.method.first)).to eq("rpc :Search, FooRequest, FooResponse")
+        expect(subject.build_method(service.method.last)).to eq("rpc :FooBar, ::Foo::Request, ::Bar::Response")
+      end
+    end
   end
 
 end
