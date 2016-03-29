@@ -31,7 +31,7 @@ class StubServer
         :worker_port => 9400,
         :delay => 0,
         :server => Protobuf::Rpc::Socket::Server,
-      ),
+      )
     )
 
     start

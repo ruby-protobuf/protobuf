@@ -27,7 +27,8 @@ require "protobuf/version"
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '>= 3.0'
-  s.add_development_dependency 'rubocop', '0.34.2'
+  s.add_development_dependency "rubocop", "~> 0.35.0"
+  s.add_development_dependency "parser", "2.3.0.6" # Locked this down since 2.3.0.7 causes issues. https://github.com/bbatsov/rubocop/pull/2984
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'timecop'
   s.add_development_dependency 'yard'
