@@ -57,7 +57,7 @@ RSpec.describe Protobuf::Enum do
             Test::EnumTestType::TWO,
             Test::EnumTestType::MINUS_ONE,
             Test::EnumTestType::THREE,
-          ],
+          ]
         )
       end
 
@@ -68,7 +68,7 @@ RSpec.describe Protobuf::Enum do
               EnumAliasTest::FOO,
               EnumAliasTest::BAR,
               EnumAliasTest::BAZ,
-            ],
+            ]
           )
         end
       end
