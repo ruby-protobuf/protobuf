@@ -32,8 +32,9 @@ module Protobuf
         @comments[type] = message
       end
 
-      def add_extended_messages(extended_messages)
+      def add_extended_messages(extended_messages, skip_empty_fields = true)
         extended_messages.each do |message_type, field_descriptors|
+          next if skip_empty_fields && field_descriptors.empty?
           @groups[:extended_message] << ExtensionGenerator.new(message_type, field_descriptors, indent_level)
         end
       end
