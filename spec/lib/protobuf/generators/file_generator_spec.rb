@@ -29,4 +29,37 @@ RSpec.describe ::Protobuf::Generators::FileGenerator do
 
   end
 
+  describe '#compile' do
+    it 'generates the file contents' do
+      subject.compile
+      expect(subject.to_s).to eq <<EOF
+# encoding: utf-8
+
+##
+# This file is auto-generated. DO NOT EDIT!
+#
+require 'protobuf/message'
+
+EOF
+    end
+
+    it 'generates the file contents using default package name' do
+      allow(ENV).to receive(:key?).with('PB_ALLOW_DEFAULT_PACKAGE_NAME')
+        .and_return(true)
+      subject.compile
+      expect(subject.to_s).to eq <<EOF
+# encoding: utf-8
+
+##
+# This file is auto-generated. DO NOT EDIT!
+#
+require 'protobuf/message'
+
+module Foo
+end
+
+EOF
+    end
+  end
+
 end
