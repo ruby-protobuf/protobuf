@@ -9,7 +9,7 @@ module Protobuf
       #
 
       def decode(value)
-        if (value & 1).zero?
+        if (value & 1) == 0
           value >> 1   # positive value
         else
           ~value >> 1  # negative value

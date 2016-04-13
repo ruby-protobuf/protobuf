@@ -24,6 +24,7 @@ require "protobuf/version"
   s.add_dependency 'thor'
   s.add_dependency 'thread_safe'
 
+  s.add_development_dependency 'benchmark-ips'
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '>= 3.0'
