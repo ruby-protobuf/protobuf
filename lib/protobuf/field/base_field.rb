@@ -185,7 +185,7 @@ module Protobuf
 
         message_class.class_eval do
           define_method(simple_field_name) { self[fully_qualified_field_name] }
-          define_method("#{simple_field_name}=") { |v| self[fully_qualified_field_name] = v }
+          define_method("#{simple_field_name}=") { |v| set_field(fully_qualified_field_name, v, false) }
         end
 
         return unless deprecated?
