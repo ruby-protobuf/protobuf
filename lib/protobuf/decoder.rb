@@ -1,6 +1,3 @@
-require 'protobuf/wire_type'
-require 'protobuf/exceptions'
-
 module Protobuf
   class Decoder
 

@@ -104,7 +104,7 @@ module Protobuf
       end
 
       def print_generic_requires
-        print_require("protobuf/message")
+        print_require("protobuf")
         print_require("protobuf/rpc/service") if descriptor.service.count > 0
         puts
       end

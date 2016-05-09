@@ -1,7 +1,3 @@
-require 'protobuf/field'
-require 'protobuf/deprecation'
-require 'protobuf/enum'
-require 'protobuf/exceptions'
 require 'protobuf/message/fields'
 require 'protobuf/message/serialization'
 

@@ -1,5 +1,3 @@
-require 'protobuf/varint_pure'
-
 module Protobuf
   class Varint
     if defined?(::Varint)

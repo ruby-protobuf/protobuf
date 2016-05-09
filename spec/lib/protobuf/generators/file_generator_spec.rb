@@ -38,7 +38,7 @@ RSpec.describe ::Protobuf::Generators::FileGenerator do
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 EOF
     end
@@ -53,7 +53,7 @@ EOF
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 module Foo
 end
