@@ -44,6 +44,19 @@ module Protobuf
           define_field(:required, type_class, name, tag, options)
         end
 
+        # Define a map field.
+        #
+        def map(key_type_class, value_type_class, name, tag, options = {})
+          # manufacture a message that represents the map entry, used for
+          # serialization and deserialization
+          entry_type = Class.new(::Protobuf::Message) do
+            set_option :map_entry, true
+            optional key_type_class, :key, 1
+            optional value_type_class, :value, 2
+          end
+          define_field(:repeated, entry_type, name, tag, options)
+        end
+
         # Define an extension range.
         #
         def extensions(range)

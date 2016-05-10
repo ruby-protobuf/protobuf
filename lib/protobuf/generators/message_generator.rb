@@ -44,7 +44,7 @@ module Protobuf
               group.add_messages(descriptor.nested_type, :extension_fields => @extension_fields, :namespace => type_namespace)
               group.add_comment(:options, 'Message Options')
               group.add_options(descriptor.options) if options?
-              group.add_message_fields(descriptor.field)
+              group.add_message_fields(descriptor.field, descriptor)
               self.class.validate_tags(fully_qualified_type_namespace, descriptor.field.map(&:number))
 
               group.add_comment(:extension_range, 'Extension Fields')
