@@ -226,7 +226,7 @@ module Protobuf
 
         # Alias for ::Protobuf::Rpc::ServiceDirectory.instance
         def service_directory
-          ::Protobuf::Rpc::ServiceDirectory.instance
+          ::Protobuf::Rpc.service_directory
         end
 
         def snd_timeout
