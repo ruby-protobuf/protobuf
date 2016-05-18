@@ -1,5 +1,11 @@
 # Stable (3.x)
 
+3.7.0 (pre1)
+-----------
+- BUG: Revert to old behavior for setting repeated fields to nil
+- BUG: Set binmode for protoc-gen-ruby STDIN and STDOUT to compile proto files on Windows
+- Make all things Optionable and fix requires
+
 3.7.0 (pre0)
 -----------
 - Add `PB_USE_RAW_RPC_NAMES` option to preserve raw RPC name (since #underscore can be lossy).
