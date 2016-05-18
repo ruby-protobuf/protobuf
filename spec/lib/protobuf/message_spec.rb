@@ -181,6 +181,12 @@ RSpec.describe Protobuf::Message do
       test_enum = Test::EnumTestMessage.new { |p| p.non_default_enum = 2 }
       expect(test_enum.non_default_enum).to eq(2)
     end
+
+    # to be deprecated
+    it "allows you to pass nil to repeated fields" do
+      test = Test::Resource.new(:repeated_enum => nil)
+      expect(test.repeated_enum).to eq([])
+    end
   end
 
   describe '#encode' do
@@ -442,6 +448,10 @@ RSpec.describe Protobuf::Message do
 
     it 'does not allow string fields to be set to Numeric' do
       expect { subject.name = 1 }.to raise_error(/name/)
+    end
+
+    it 'does not allow a repeated field is set to nil' do
+      expect { subject.repeated_enum = nil }.to raise_error(TypeError)
     end
 
     context '#{simple_field_name}!' do
@@ -722,6 +732,17 @@ RSpec.describe Protobuf::Message do
         expect(instance[:ext_is_searchable]).to eq(false)
         instance[100] = true
         expect(instance[:ext_is_searchable]).to eq(true)
+      end
+
+      # to be deprecated
+      it 'does nothing when sent an empty array' do
+        instance[:repeated_enum] = nil
+        expect(instance[:repeated_enum]).to eq([])
+        instance[:repeated_enum] = [1, 2]
+        expect(instance[:repeated_enum]).to eq([1, 2])
+        instance[:repeated_enum] = nil
+        # Yes this is very silly, but backwards compatible
+        expect(instance[:repeated_enum]).to eq([1, 2])
       end
     end
 

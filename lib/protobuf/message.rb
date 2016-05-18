@@ -38,7 +38,7 @@ module Protobuf
     def initialize(fields = {})
       @values = {}
       fields.to_hash.each do |name, value|
-        self[name] = value
+        set_field(name, value, true)
       end
 
       yield self if block_given?
@@ -160,8 +160,37 @@ module Protobuf
     end
 
     def []=(name, value)
+      set_field(name, value, true)
+    end
+
+    ##
+    # Instance Aliases
+    #
+    alias_method :to_hash_value, :to_hash
+    alias_method :to_proto_hash, :to_hash
+    alias_method :responds_to_has?, :respond_to_has?
+    alias_method :respond_to_and_has?, :respond_to_has?
+    alias_method :responds_to_and_has?, :respond_to_has?
+    alias_method :respond_to_has_present?, :respond_to_has_and_present?
+    alias_method :respond_to_and_has_present?, :respond_to_has_and_present?
+    alias_method :respond_to_and_has_and_present?, :respond_to_has_and_present?
+    alias_method :responds_to_has_present?, :respond_to_has_and_present?
+    alias_method :responds_to_and_has_present?, :respond_to_has_and_present?
+    alias_method :responds_to_and_has_and_present?, :respond_to_has_and_present?
+
+    ##
+    # Private Instance Methods
+    #
+
+    private
+
+    def set_field(name, value, ignore_nil_for_repeated)
       if (field = self.class.get_field(name, true))
         if field.repeated?
+          if value.nil? && ignore_nil_for_repeated
+            ::Protobuf.deprecator.deprecation_warning("#{self.class}#[#{name}]=nil", "use an empty array instead of nil")
+            return
+          end
           if value.is_a?(Array)
             value = value.compact
           else
@@ -192,27 +221,6 @@ module Protobuf
         end
       end
     end
-
-    ##
-    # Instance Aliases
-    #
-    alias_method :to_hash_value, :to_hash
-    alias_method :to_proto_hash, :to_hash
-    alias_method :responds_to_has?, :respond_to_has?
-    alias_method :respond_to_and_has?, :respond_to_has?
-    alias_method :responds_to_and_has?, :respond_to_has?
-    alias_method :respond_to_has_present?, :respond_to_has_and_present?
-    alias_method :respond_to_and_has_present?, :respond_to_has_and_present?
-    alias_method :respond_to_and_has_and_present?, :respond_to_has_and_present?
-    alias_method :responds_to_has_present?, :respond_to_has_and_present?
-    alias_method :responds_to_and_has_present?, :respond_to_has_and_present?
-    alias_method :responds_to_and_has_and_present?, :respond_to_has_and_present?
-
-    ##
-    # Private Instance Methods
-    #
-
-    private
 
     def copy_to(object, method)
       duplicate = proc do |obj|
