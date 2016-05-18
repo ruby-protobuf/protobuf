@@ -49,6 +49,9 @@ Style/IndentHash:
 Style/Semicolon:
   AllowAsExpressionSeparator: true
 
+Style/SingleLineBlockParams:
+  Enabled: false
+
 Style/TrailingBlankLines:
   Exclude:
     - '**/*.pb.rb'

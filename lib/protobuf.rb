@@ -9,7 +9,24 @@ require 'active_support/inflector'
 require 'active_support/json'
 require 'active_support/notifications'
 
+# All top-level run time code requires, ordered by necessity
+require 'protobuf/wire_type'
+
+require 'protobuf/varint_pure'
+require 'protobuf/varint'
+
+require 'protobuf/exceptions'
 require 'protobuf/deprecation'
+require 'protobuf/logging'
+
+require 'protobuf/encoder'
+require 'protobuf/decoder'
+
+require 'protobuf/optionable'
+require 'protobuf/field'
+require 'protobuf/enum'
+require 'protobuf/message'
+require 'protobuf/descriptors'
 
 module Protobuf
 

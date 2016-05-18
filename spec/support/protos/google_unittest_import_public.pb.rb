@@ -3,9 +3,10 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 module Protobuf_unittest_import
+  ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##
   # Message Classes

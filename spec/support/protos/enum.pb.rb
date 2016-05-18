@@ -3,7 +3,7 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 
 ##
@@ -12,6 +12,7 @@ require 'protobuf/message'
 require 'protos/resource.pb'
 
 module Test
+  ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##
   # Enum Classes

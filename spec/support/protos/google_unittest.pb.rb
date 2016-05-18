@@ -3,7 +3,7 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 require 'protobuf/rpc/service'
 
 
@@ -13,6 +13,7 @@ require 'protobuf/rpc/service'
 require 'protos/google_unittest_import.pb'
 
 module Protobuf_unittest
+  ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##
   # Enum Classes
