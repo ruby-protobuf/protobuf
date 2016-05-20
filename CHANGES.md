@@ -1,5 +1,9 @@
 # Stable (3.x)
 
+3.6.8
+--------
+- Make protobuf serivce directory pluggable.
+
 3.5.5
 --------
 - Add native Varint for MRI.
