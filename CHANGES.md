@@ -1,6 +1,6 @@
 # Stable (3.x)
 
-3.6.8
+3.6.9
 --------
 - Make protobuf serivce directory pluggable.
 
