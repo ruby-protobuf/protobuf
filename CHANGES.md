@@ -16,6 +16,10 @@
 - Refresh google/protobuf/descriptor.{proto,pb.rb}
 - Properly encode and decode negative enum values.
 
+3.6.9
+--------
+- Make protobuf serivce directory pluggable.
+
 3.6.7
 -----
 - An issue was reported with the encode memoization added in #293 with using any array modification

@@ -9,6 +9,14 @@ require 'protobuf/rpc/dynamic_discovery.pb'
 
 module Protobuf
   module Rpc
+    def self.service_directory
+      @service_directory ||= ::Protobuf::Rpc::ServiceDirectory.instance
+    end
+
+    def self.service_directory=(directory)
+      @service_directory = directory
+    end
+
     class ServiceDirectory
       include ::Singleton
       include ::Protobuf::Logging
