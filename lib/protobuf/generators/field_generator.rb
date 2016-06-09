@@ -108,7 +108,13 @@ module Protobuf
       private
 
       def enum_default_value
-        "#{type_name}::#{verbatim_default_value}"
+        optionally_upcased_default =
+          if ENV.key?('PB_UPCASE_ENUMS')
+            verbatim_default_value.upcase
+          else
+            verbatim_default_value
+          end
+        "#{type_name}::#{optionally_upcased_default}"
       end
 
       def float_double_default_value
