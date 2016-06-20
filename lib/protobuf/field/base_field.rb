@@ -176,7 +176,7 @@ module Protobuf
       def define_accessor(simple_field_name, fully_qualified_field_name)
         message_class.class_eval do
           define_method("#{simple_field_name}!") do
-            @values[fully_qualified_field_name]
+            @values[fully_qualified_field_name] if field?(fully_qualified_field_name)
           end
         end
 
