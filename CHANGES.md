@@ -1,5 +1,9 @@
 # Stable (3.x)
 
+3.7.0 (pre2)
+-----------
+- BUG: Track if a repeated field has been deliberately set (#325)
+
 3.7.0 (pre1)
 -----------
 - BUG: Revert to old behavior for setting repeated fields to nil
