@@ -29,9 +29,9 @@ module Protobuf
         def timeout
           @timeout ||= begin
             if ::ENV.key?("PB_RPC_PING_PORT_TIMEOUT")
-              ::ENV["PB_RPC_PING_PORT_TIMEOUT"].to_i
+              ::ENV["PB_RPC_PING_PORT_TIMEOUT"].to_f / 1000
             else
-              5 # 5 seconds
+              0.2 # 200 ms
             end
           end
         end
