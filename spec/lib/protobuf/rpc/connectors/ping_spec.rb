@@ -55,14 +55,14 @@ require "protobuf/zmq"
 
   describe "#timeout" do
     it "uses the default value" do
-      expect(subject.timeout).to eq(5)
+      expect(subject.timeout).to eq(0.2)
     end
 
     context "when environment variable is set" do
-      before { ::ENV["PB_RPC_PING_PORT_TIMEOUT"] = "1" }
+      before { ::ENV["PB_RPC_PING_PORT_TIMEOUT"] = "100" }
 
       it "uses the environmet variable" do
-        expect(subject.timeout).to eq(1)
+        expect(subject.timeout).to eq(0.1)
       end
     end
   end
