@@ -57,11 +57,11 @@ module Protobuf
         #
         def request_wrapper
           @request_wrapper ||= begin
-            logger.debug { sign_message("Decoding request: #{env.encoded_request}") }
+            logger.debug { sign_message("Decoding request: #{env.encoded_request.inspect}") }
             Socketrpc::Request.decode(env.encoded_request)
           end
         rescue => exception
-          raise BadRequestData, "Unable to decode request: #{exception.message}"
+          raise BadRequestData, "Unable to decode request: #{exception.class} - #{exception.message}"
         end
 
         def rpc_method

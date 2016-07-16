@@ -23,6 +23,7 @@ require "protobuf/version"
   s.add_dependency 'middleware'
   s.add_dependency 'thor'
   s.add_dependency 'thread_safe'
+  s.add_dependency 'puma'
 
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'rake'
