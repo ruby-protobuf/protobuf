@@ -5,6 +5,7 @@ require 'protobuf/version'
 require 'protobuf/logging'
 require 'protobuf/rpc/servers/socket_runner'
 require 'protobuf/rpc/servers/zmq_runner'
+require 'protobuf/rpc/servers/http'
 
 module Protobuf
   class CLI < ::Thor
@@ -33,6 +34,7 @@ module Protobuf
 
     option :socket,                     :type => :boolean, :aliases => %w(-s), :desc => 'Socket Mode for server and client connections.'
     option :zmq,                        :type => :boolean, :aliases => %w(-z), :desc => 'ZeroMQ Socket Mode for server and client connections.'
+    option :http,                       :type => :boolean, :desc => 'HTTP Mode for server and client connections.'
 
     option :beacon_interval,            :type => :numeric, :desc => 'Broadcast beacons every N seconds. (default: 5)'
     option :beacon_port,                :type => :numeric, :desc => 'Broadcast beacons to this port (default: value of ServiceDirectory.port)'
@@ -118,10 +120,14 @@ module Protobuf
         self.mode = if multi_mode?
                       say('WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow)
                       :socket
+                    elsif options.http?
+                      :http
                     elsif options.zmq?
                       :zmq
                     else
                       case server_type = ENV["PB_SERVER_TYPE"]
+                      when /http/i
+                        :http
                       when nil, /socket/i
                         :socket
                       when /zmq/i
@@ -157,6 +163,8 @@ module Protobuf
         self.runner = case mode
                       when :zmq
                         create_zmq_runner
+                      when :http
+                        create_http_runner
                       when :socket
                         create_socket_runner
                       else
@@ -204,6 +212,12 @@ module Protobuf
         end
 
         exit(1)
+      end
+
+      def create_http_runner
+        require 'protobuf/http'
+
+        self.runner = ::Protobuf::Rpc::HTTPRunner.new(runner_options)
       end
 
       def create_socket_runner
