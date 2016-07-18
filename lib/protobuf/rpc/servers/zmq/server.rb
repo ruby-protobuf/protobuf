@@ -114,6 +114,13 @@ module Protobuf
           workers.count { |thread| !!thread[:busy] }
         end
 
+        def check_to_start_additional_workers
+          return if @total_workers - busy_worker_count > 2
+          return if @total_workers >= worker_maximum
+
+          start_worker
+        end
+
         def frontend_ip
           @frontend_ip ||= resolve_ip(options[:host])
         end
@@ -195,7 +202,7 @@ module Protobuf
         end
 
         def start_missing_workers
-          missing_workers = total_workers - @workers.size
+          missing_workers = [worker_minimum - @workers.size, total_workers - @workers.size].max
 
           if missing_workers > 0
             missing_workers.times { start_worker }
@@ -249,6 +256,7 @@ module Protobuf
             start_broker unless brokerless?
             reap_dead_workers if reap_dead_workers?
             start_missing_workers
+            check_to_start_additional_workers if all_workers_busy?
 
             next unless broadcast_heartbeat?
 
@@ -313,6 +321,14 @@ module Protobuf
               logger.error { message }
             end
           end
+        end
+
+        def worker_maximum
+          @worker_maximum ||= [ENV["PB_ZMQ_SERVER_WORKER_MAX"].to_i, total_workers, 1].max
+        end
+
+        def worker_minimum
+          @worker_minimum ||= [ENV["PB_ZMQ_SERVER_WORKER_MIN"].to_i, 1].max
         end
       end
     end
