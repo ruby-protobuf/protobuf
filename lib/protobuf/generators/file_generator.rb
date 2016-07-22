@@ -243,10 +243,11 @@ module Protobuf
         @io.rewind
       end
 
-      def create_ruby_namespace_heiarchy(name)
-        i = name.size
-        while (i = name[0...i].rindex(".")) && i > 0
-          eval_dependencies(name[0...i])
+      def create_ruby_namespace_heiarchy(namespace)
+        loop do
+          namespace, _match, _tail = namespace.rpartition(".")
+          break if namespace.empty?
+          eval_dependencies(namespace)
         end
       end
 
