@@ -15,11 +15,7 @@ module Protobuf
 
       def handle
         response = handle_request(body)
-        headers = {
-          "Accept" => "application/x-protobuf",
-          "Content-Type" => "application/x-protobuf",
-        }
-        [200, headers, [response]]
+        [200, {}, [response]]
       end
 
       def body
@@ -38,17 +34,26 @@ module Protobuf
 
       def initialize(options)
         @options = options.to_hash.symbolize_keys
+        @should_stop = false
       end
 
       def run
-        args = [
-          "--port", "#{options.fetch(:port)}",
-          # "--bind", "tcp://#{options.fetch(:host)}",
-          "/Users/garrettthornburg/Development/RubyDevelopment/protobuf/lib/protobuf/rpc/servers/http/rackup.ru"
-        ]
+        app = lambda { |env|
+          request = ::Protobuf::Rpc::HTTPRequest.new(env)
+          request.handle
+        }
 
-        cli = Puma::CLI.new(args)
-        cli.run
+        server = ::Puma::Server.new(app)
+        server.add_tcp_listener(options.fetch(:host), options.fetch(:port))
+        server.max_threads = options.fetch(:threads)
+        server.min_threads = options.fetch(:threads)
+        server.run
+
+        yield if block_given?
+
+        sleep 0.1 until @should_stop
+
+        server.stop(true)
       end
     end
   end
