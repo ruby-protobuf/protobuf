@@ -20,28 +20,28 @@ module Protobuf
           # no-op
         end
 
-        def continute_timeout
-          return @continute_timeout_value if @continute_timeout
-          @continute_timeout_value ||= begin
+        def continue_timeout
+          return @continue_timeout_value if @continue_timeout
+          @continue_timeout_value = begin
             case
-            when options[:timeout]
-              options[:timeout]
-            when ENV.key?("PB_HTTP_CLIENT_CONTINUTE_TIMEOUT")
-              ENV["PB_HTTP_CLIENT_CONTINUTE_TIMEOUT"].to_f / 1000
+            when options[:continue_timeout]
+              options[:continue_timeout]
+            when ENV.key?("PB_HTTP_CLIENT_CONTINUE_TIMEOUT")
+              ENV["PB_HTTP_CLIENT_CONTINUE_TIMEOUT"].to_f / 1000
             else
               # Ruby socket will default this to nil.
               nil
             end
           end
-          @continute_timeout = true
-          @continute_timeout_value
+          @continue_timeout = true
+          @continue_timeout_value
         end
 
         def open_timeout
           @open_timeout ||= begin
             case
-            when options[:timeout]
-              options[:timeout]
+            when options[:open_timeout]
+              options[:open_timeout]
             when ENV.key?("PB_HTTP_CLIENT_OPEN_TIMEOUT")
               ENV["PB_HTTP_CLIENT_OPEN_TIMEOUT"].to_f / 1000
             else
@@ -53,9 +53,9 @@ module Protobuf
         def read_timeout
           @read_timeout ||= begin
             case
-            when options[:timeout] then
-              options[:timeout]
-            when ENV.key?("PB_HTTP_CLIENT_READ_TIMEOUT") then
+            when options[:read_timeout]
+              options[:read_timeout]
+            when ENV.key?("PB_HTTP_CLIENT_READ_TIMEOUT")
               ENV["PB_HTTP_CLIENT_READ_TIMEOUT"].to_f / 1000
             else
               300
