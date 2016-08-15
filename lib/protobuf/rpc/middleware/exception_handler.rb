@@ -11,6 +11,10 @@ module Protobuf
         end
 
         def call(env)
+          dup._call(env)
+        end
+
+        def _call(env)
           app.call(env)
         rescue => exception
           log_exception(exception)

@@ -11,8 +11,13 @@ module Protobuf
         end
 
         def call(env)
+          dup._call(env)
+        end
+
+        def _call(env)
           @env = env
 
+          logger.debug { sign_message("Decoding request: #{env.encoded_request}") }
           env.service_name = service_name
           env.method_name = method_name
           env.request = request
@@ -33,22 +38,15 @@ module Protobuf
         private
 
         def method_name
-          @method_name ||= begin
-            method_name = request_wrapper.method_name.underscore.to_sym
+          return @method_name unless @method_name.nil?
 
-            unless service.rpc_method?(method_name)
-              fail MethodNotFound, "#{service.name}##{method_name} is not a defined RPC method."
-            end
-
-            method_name
-          end
+          @method_name = request_wrapper.method_name.underscore.to_sym
+          fail MethodNotFound, "#{service.name}##{@method_name} is not a defined RPC method." unless service.rpc_method?(@method_name)
+          @method_name
         end
 
         def request
-          @request ||= begin
-            data = request_wrapper.request_proto
-            rpc_method.request_type.decode(data)
-          end
+          @request ||= rpc_method.request_type.decode(request_wrapper.request_proto)
         rescue => exception
           raise BadRequestData, "Unable to decode request: #{exception.message}"
         end
@@ -56,10 +54,7 @@ module Protobuf
         # Decode the incoming request object into our expected request object
         #
         def request_wrapper
-          @request_wrapper ||= begin
-            logger.debug { sign_message("Decoding request: #{env.encoded_request}") }
-            Socketrpc::Request.decode(env.encoded_request)
-          end
+          @request_wrapper ||= Socketrpc::Request.decode(env.encoded_request)
         rescue => exception
           raise BadRequestData, "Unable to decode request: #{exception.message}"
         end
