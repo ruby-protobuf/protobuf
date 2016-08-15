@@ -8,6 +8,10 @@ module Protobuf
 
         # TODO: Figure out how to control when logs are flushed
         def call(env)
+          dup._call(env)
+        end
+
+        def _call(env)
           instrumenter.start
           instrumenter.flush(env) # Log request stats
 
