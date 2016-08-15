@@ -119,16 +119,8 @@ module Protobuf
         rpcs.key?(name)
       end
 
-      ##
-      # Instance Methods
-      #
-      # Get a callable object that will be used by the dispatcher
-      # to invoke the specified rpc method. Facilitates callback dispatch.
-      # The returned lambda is expected to be called at a later time (which
-      # is why we wrap the method call).
-      #
-      def callable_rpc_method(method_name)
-        -> { run_filters(method_name) }
+      def call(method_name)
+        run_filters(method_name)
       end
 
       # Response object for this rpc cycle. Not assignable.
