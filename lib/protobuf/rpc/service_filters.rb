@@ -242,7 +242,7 @@ module Protobuf
         #
         def call_or_send(callable, *args, &block)
           return callable.call(self, *args, &block) if callable.respond_to?(:call)
-          return __send__(callable, *args, &block)
+          __send__(callable, *args, &block)
         end
       end
     end

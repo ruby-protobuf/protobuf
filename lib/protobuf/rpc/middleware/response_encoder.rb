@@ -52,7 +52,8 @@ module Protobuf
           return @response = validate!(candidate.to_proto) if candidate.respond_to?(:to_proto)
           return @response = env.response_type.new(candidate.to_hash) if candidate.respond_to?(:to_hash)
           return @response = candidate if candidate.is_a?(PbError)
-          return @response = validate!(candidate)
+
+          @response = validate!(candidate)
         end
 
         # Ensure that the response candidate we've been given is of the type

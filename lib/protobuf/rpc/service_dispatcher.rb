@@ -33,7 +33,7 @@ module Protobuf
         rpc_service.call(method_name)
         rpc_service.response
       rescue NoMethodError
-        fail MethodNotFound, "#{service_name}##{method_name} is not a defined RPC method."
+        raise MethodNotFound, "#{service_name}##{method_name} is not a defined RPC method."
       end
 
       def method_name
