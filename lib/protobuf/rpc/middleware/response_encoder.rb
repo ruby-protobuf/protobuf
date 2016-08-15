@@ -41,32 +41,22 @@ module Protobuf
         # Prod the object to see if we can produce a proto object as a response
         # candidate. Validate the candidate protos.
         def response
-          @response ||= begin
-                          candidate = env.response
-                          case
-                          when candidate.is_a?(Message) then
-                            validate!(candidate)
-                          when candidate.respond_to?(:to_proto) then
-                            validate!(candidate.to_proto)
-                          when candidate.respond_to?(:to_hash) then
-                            env.response_type.new(candidate.to_hash)
-                          when candidate.is_a?(PbError) then
-                            candidate
-                          else
-                            validate!(candidate)
-                          end
-                        end
+          return @response unless @response.nil?
+
+          candidate = env.response
+          return @response = validate!(candidate) if candidate.is_a?(Message)
+          return @response = validate!(candidate.to_proto) if candidate.respond_to?(:to_proto)
+          return @response = env.response_type.new(candidate.to_hash) if candidate.respond_to?(:to_hash)
+          return @response = candidate if candidate.is_a?(PbError)
+          return @response = validate!(candidate)
         end
 
         # Ensure that the response candidate we've been given is of the type
         # we expect so that deserialization on the client side works.
         #
         def validate!(candidate)
-          actual = candidate.class
-          expected = env.response_type
-
-          if expected != actual
-            fail BadResponseProto, "Expected response to be of type #{expected.name} but was #{actual.name}"
+          if candidate.class != env.response_type
+            fail BadResponseProto, "Expected response to be of type #{env.response_type.name} but was #{candidate.class.name}"
           end
 
           candidate

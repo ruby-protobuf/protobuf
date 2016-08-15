@@ -26,12 +26,10 @@ module Protobuf
 
       # Call the given service method.
       def dispatch_rpc_request
-        unless rpc_service.respond_to?(method_name)
-          fail MethodNotFound, "#{service_name}##{method_name} is not a publicly defined method."
-        end
-
-        rpc_service.callable_rpc_method(method_name).call
+        rpc_service.call(method_name)
         rpc_service.response
+      rescue NoMethodError
+        fail MethodNotFound, "#{service_name}##{method_name} is not a defined RPC method."
       end
 
       def method_name
