@@ -11,6 +11,10 @@ module Protobuf
         end
 
         def call(env)
+          dup._call(env)
+        end
+
+        def _call(env)
           @env = env
 
           logger.debug { sign_message("Decoding request: #{env.encoded_request}") }

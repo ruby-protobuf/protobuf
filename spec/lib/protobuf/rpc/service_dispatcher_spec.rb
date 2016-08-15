@@ -29,7 +29,7 @@ RSpec.describe Protobuf::Rpc::ServiceDispatcher do
     before { allow(rpc_service).to receive(:response).and_return(response) }
 
     it "dispatches the request" do
-      stack_env = subject.call(env)
+      stack_env = subject._call(env)
       expect(stack_env.response).to eq response
     end
 

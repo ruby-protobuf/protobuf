@@ -11,6 +11,10 @@ module Protobuf
         end
 
         def call(env)
+          dup._call(env)
+        end
+
+        def _call(env)
           @env = app.call(env)
 
           env.response = response
