@@ -119,7 +119,7 @@ module Protobuf
         def setup_connection
           initialize_stats
           @request_data = request_bytes
-          @stats.request_size = request_bytes.size
+          @stats.request_size = @request_data.size
         end
 
         def succeed(response)

@@ -29,7 +29,7 @@ RSpec.describe Protobuf::Rpc::ServiceDispatcher do
     before { allow(rpc_service).to receive(:response).and_return(response) }
 
     it "dispatches the request" do
-      stack_env = subject.call(env)
+      stack_env = subject._call(env)
       expect(stack_env.response).to eq response
     end
 
@@ -42,10 +42,10 @@ RSpec.describe Protobuf::Rpc::ServiceDispatcher do
     end
 
     context "when the given RPC method is implemented and a NoMethodError is raised" do
-      before { allow(rpc_service).to receive(:callable_rpc_method).and_return(-> { rpc_service.__send__(:foo) }) }
+      before { allow(rpc_service).to receive(:call).and_raise(NoMethodError) }
 
       it "raises the exeception" do
-        expect { subject.call(env) }.to raise_exception(NoMethodError)
+        expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::MethodNotFound)
       end
     end
   end
