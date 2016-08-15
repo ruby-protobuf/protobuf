@@ -49,7 +49,7 @@ RSpec.describe ::Protobuf::Rpc::Zmq::Util do
     end
 
     it 'resolves non ips' do
-      expect(subject.resolve_ip('localhost')).to eq('127.0.0.1')
+      expect(['127.0.0.1', '127.0.1.1']).to include(subject.resolve_ip('localhost'))
     end
   end
 end
