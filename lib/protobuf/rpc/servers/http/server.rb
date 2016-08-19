@@ -56,7 +56,7 @@ module Protobuf
           encoded_request = rpc_request.encode()
 
           begin
-            encoded_response = handle_request(encoded_request)
+            encoded_response = handle_request(encoded_request, env)
           rescue Exception => e
             return protobuf_http_response 500,
               :error => "Handle request failed: #{e.to_s}",

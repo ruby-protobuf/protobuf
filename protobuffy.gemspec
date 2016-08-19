@@ -19,12 +19,18 @@ require "protobuf/version"
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency 'activesupport', '>= 3.2'
-  s.add_dependency 'middleware'
-  s.add_dependency 'multi_json'
-  s.add_dependency 'thor'
+  if RUBY_VERSION =~ /^2/
+    s.add_dependency 'activesupport'
+  else
+    s.add_dependency 'activesupport', '< 5'
+  end
 
-  s.add_development_dependency 'rack'
+  s.add_dependency 'middleware'
+  s.add_dependency 'multi_json', '~> 1.0'
+  s.add_dependency 'thor'
+  s.add_dependency 'json', '< 2.0'
+
+  s.add_development_dependency 'rack', '~> 1.0'
   s.add_development_dependency 'faraday'
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'pry-nav'

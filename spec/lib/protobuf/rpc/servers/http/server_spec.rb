@@ -11,11 +11,14 @@ module ReverseModule
   end
   class ReverseResponse < ::Protobuf::Message
     required :string, :reversed, 1
+    optional :string, :some_header, 2
   end
   class ReverseService < ::Protobuf::Rpc::Service
     rpc :reverse, ReverseRequest, ReverseResponse
     def reverse
-      respond_with :reversed => request.input.reverse
+      respond_with :reversed => request.input.reverse,
+                   :some_reversed_header => env.parent_env.has_key?('X-SOME-HEADER') ?
+                                            env.parent_env['X-SOME-HEADER'].reverse : nil
     end
   end
 end
@@ -36,6 +39,18 @@ describe Protobuf::Rpc::Http::Server do
       response.headers['x-protobuf-error'].should be_nil
       response.headers['x-protobuf-error-reason'].should be_nil
       response.body.should eq ReverseModule::ReverseResponse.new(:reversed => "hello world".reverse).encode()
+    end
+
+    it 'should return the correct response for ReverseModule::ReverseService.reverse when some header is passed' do
+      response = client.post "/ReverseModule%3A%3AReverseService/reverse",
+                             :input => ReverseModule::ReverseRequest.new(:input => "hello world").encode(),
+                             "X-SOME-HEADER" => "yes i am"
+      response.status.should eq 200
+      response.headers['content-type'].should eq "application/x-protobuf"
+      response.headers['x-protobuf-error'].should be_nil
+      response.headers['x-protobuf-error-reason'].should be_nil
+      response.body.should eq ReverseModule::ReverseResponse.new(:reversed => "hello world".reverse,
+                                                                 :some_reversed_header => "yes i am".reverse).encode()
     end
 
     it 'should return METHOD_NOT_FOUND for ReverseModule::ReverseService.bobloblaw' do

@@ -39,6 +39,7 @@ module Protobuf
                     :encoded_response,
                     :log_signature,
                     :method_name,
+                    :parent_env,
                     :request,
                     :request_type,
                     :response,

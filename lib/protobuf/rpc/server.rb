@@ -20,10 +20,12 @@ module Protobuf
 
       # Invoke the service method dictated by the proto wrapper request object
       #
-      def handle_request(request_data)
+      def handle_request(request_data, parent_env = nil)
         # Create an env object that holds different parts of the environment and
         # is available to all of the middlewares
-        env = Env.new('encoded_request' => request_data, 'log_signature' => log_signature)
+        env = Env.new('encoded_request' => request_data,
+                      'log_signature' => log_signature,
+                      'parent_env' => parent_env)
 
         # Invoke the middleware stack, the last of which is the service dispatcher
         env = Rpc.middleware.call(env)
