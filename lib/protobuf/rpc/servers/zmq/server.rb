@@ -185,6 +185,19 @@ module Protobuf
           broadcast_flatline if broadcast_beacons?
           Thread.pass until reap_dead_workers.empty?
           @broker_thread.join unless brokerless?
+        rescue => error
+          logger.error { sign_message(error) }
+
+          if error.respond_to?(:backtrace)
+            backtrace = [error.backtrace].flatten
+            backtrace.each do |line|
+              logger.error { sign_message(line) }
+            end
+          else
+            logger.error { sign_message("No backtrace was provided with this error") }
+          end
+
+          raise error
         ensure
           @running = false
           teardown
