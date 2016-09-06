@@ -19,7 +19,7 @@ require "protobuf/version"
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency 'activesupport', '>= 3.2'
+  s.add_dependency 'activesupport', '>= 3.2', '< 5'
   s.add_dependency 'middleware'
   s.add_dependency 'thor'
   s.add_dependency 'thread_safe'
