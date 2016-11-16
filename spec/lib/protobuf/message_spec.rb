@@ -74,6 +74,22 @@ RSpec.describe Protobuf::Message do
     end
   end
 
+  describe 'delimited input/output' do
+    let(:message1) { ::Test::Resource.new(:name => "Jim") }
+    let(:message2) { ::Test::Resource.new(:name => "Kirk") }
+
+    it 'writes two delimited messages to stream and then reads them' do
+      stream = ::StringIO.new
+      message1.encode_delimited_to(stream)
+      message2.encode_delimited_to(stream)
+      stream.rewind
+      readed_message1 = ::Test::Resource.decode_delimited_from(stream)
+      readed_message2 = ::Test::Resource.decode_delimited_from(stream)
+      expect(readed_message1).to eq message1
+      expect(readed_message2).to eq message2
+    end
+  end
+
   describe '.decode_from' do
     let(:message) { ::Test::Resource.new(:name => "Jim") }
 

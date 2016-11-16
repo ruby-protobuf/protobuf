@@ -14,6 +14,10 @@ module Protobuf
         def decode_from(stream)
           new.decode_from(stream)
         end
+        
+        def decode_delimited_from(stream)
+          new.decode_delimited_from(stream)
+        end
 
         # Create a new object with the given values and return the encoded bytes.
         def encode(fields = {})
@@ -33,6 +37,14 @@ module Protobuf
       #
       def decode(bytes)
         decode_from(::StringIO.new(bytes))
+      end
+
+      # Decode message from delimited stream (same as parseDelimitedFrom from Java)
+      #
+      def decode_delimited_from(stream)
+        length = ::Protobuf::Varint.decode(stream)
+        byte_data = stream.read(length)
+        decode(byte_data)
       end
 
       # Decode the given stream into this message.
@@ -58,6 +70,14 @@ module Protobuf
       #
       def encode_to(stream)
         ::Protobuf::Encoder.encode(self, stream)
+      end
+
+      # Encode this message to the given stream with length prefix
+      # (same as writeDelimitedTo from java)
+      #
+      def encode_delimited_to(stream)
+        byte_data = encode
+        stream << "#{::Protobuf::Field::VarintField.encode(byte_data.size)}#{byte_data}"
       end
 
       ##
