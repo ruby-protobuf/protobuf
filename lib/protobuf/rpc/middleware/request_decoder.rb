@@ -54,7 +54,7 @@ module Protobuf
         # Decode the incoming request object into our expected request object
         #
         def request_wrapper
-          @request_wrapper ||= Socketrpc::Request.decode(env.encoded_request)
+          @request_wrapper ||= ::Protobuf::Socketrpc::Request.decode(env.encoded_request)
         rescue => exception
           raise BadRequestData, "Unable to decode request: #{exception.message}"
         end
