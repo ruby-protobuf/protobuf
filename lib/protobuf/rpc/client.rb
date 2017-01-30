@@ -28,7 +28,7 @@ module Protobuf
       #
       def initialize(options = {})
         fail "Invalid client configuration. Service must be defined." if options[:service].nil?
-        @connector = Connector.connector_for_client.new(options)
+        @connector = ::Protobuf.connector_type_class.new(options)
         logger.debug { sign_message("Initialized with options: #{options.inspect}") }
       end
 
