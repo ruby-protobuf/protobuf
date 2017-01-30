@@ -1,4 +1,5 @@
 require 'active_support/core_ext/hash/keys'
+require 'active_support/inflector'
 
 require 'thor'
 require 'protobuf/version'
@@ -114,6 +115,7 @@ module Protobuf
       # Configure the mode of the server and the runner class.
       def configure_runner_mode
         debug_say('Configuring runner mode')
+        server_type = ENV["PB_SERVER_TYPE"]
 
         self.mode = if multi_mode?
                       say('WARNING: You have provided multiple mode options. Defaulting to socket mode.', :yellow)
@@ -121,14 +123,19 @@ module Protobuf
                     elsif options.zmq?
                       :zmq
                     else
-                      case server_type = ENV["PB_SERVER_TYPE"]
+                      case server_type
                       when nil, /socket/i
                         :socket
                       when /zmq/i
                         :zmq
                       else
-                        say "WARNING: You have provided incorrect option 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
-                        :socket
+                        begin
+                          require "#{server_type}"
+                          server_type
+                        rescue LoadError
+                          say "WARNING: Could not load 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
+                          :socket
+                        end
                       end
                     end
       end
@@ -160,7 +167,8 @@ module Protobuf
                       when :socket
                         create_socket_runner
                       else
-                        say_and_exit("Unknown runner mode: #{mode}")
+                        say("Extension runner mode: #{mode}")
+                        create_extension_server_runner
                       end
       end
 
@@ -204,6 +212,13 @@ module Protobuf
         end
 
         exit(1)
+      end
+
+      def create_extension_server_runner
+        classified = self.mode.classify
+        extension_server_class = classified.constantize
+
+        self.runner = extension_server_class.new(runner_options)
       end
 
       def create_socket_runner
