@@ -32,13 +32,11 @@ RSpec.describe ::Protobuf do
         expect(described_class.connector_type).to eq type
       end
     end
+  end
 
-    it 'does not accept other types' do
-      [:hello, :world, :evented].each do |type|
-        expect do
-          described_class.connector_type = type
-        end.to raise_error(ArgumentError)
-      end
+  describe '.connector_type_class' do
+    it "defaults to Socket" do
+      expect(described_class.connector_type_class).to eq(::Protobuf::Rpc::Connectors::Socket)
     end
   end
 
