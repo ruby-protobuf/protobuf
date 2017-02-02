@@ -218,7 +218,7 @@ module Protobuf
           eval_enum_code(enum, namespace[0..-2].join("."))
           @evaled_dependencies << name
         else
-          raise "Error loading unknown dependencies, could not find message or enum #{name.inspect}"
+          fail "Error loading unknown dependencies, could not find message or enum #{name.inspect}"
         end
       end
 

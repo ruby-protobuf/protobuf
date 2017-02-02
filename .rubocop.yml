@@ -56,11 +56,8 @@ Style/TrailingBlankLines:
   Exclude:
     - '**/*.pb.rb'
 
-Style/TrailingCommaInLiteral:
+Style/TrailingComma:
   EnforcedStyleForMultiline: comma
-
-Style/TrailingCommaInArguments:
-  EnforcedStyleForMultiline: no_comma
 
 Style/TrivialAccessors:
   AllowDSLWriters: true
