@@ -2,6 +2,9 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y libzmq3-dev
   - sudo -E ./install-protobuf.sh
+  - java -Xmx1g -version
+  - javac -J-Xmx1g -version
+  - export JRUBY_OPTS=-J-Xmx1g
   # Required for rainbow installation issue, https://github.com/sickill/rainbow/issues/44
   - gem update --system
   - gem update bundler

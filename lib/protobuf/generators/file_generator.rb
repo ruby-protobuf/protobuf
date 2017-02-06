@@ -140,16 +140,16 @@ module Protobuf
       end
 
       def eval_unknown_extensions!
-        @evaled_dependencies ||= Set.new
-        @all_messages ||= {}
-        @all_enums ||= {}
+        @@evaled_dependencies ||= Set.new # rubocop:disable Style/ClassVars
+        @@all_messages ||= {} # rubocop:disable Style/ClassVars
+        @@all_enums ||= {} # rubocop:disable Style/ClassVars
 
         map_extensions(descriptor, [descriptor.package])
         @known_messages.each do |name, descriptor|
-          @all_messages[name] = descriptor
+          @@all_messages[name] = descriptor
         end
         @known_enums.each do |name, descriptor|
-          @all_enums[name] = descriptor
+          @@all_enums[name] = descriptor
         end
 
         # create package namespace
@@ -183,14 +183,14 @@ module Protobuf
 
       def eval_dependencies(name, namespace = nil)
         name = "#{namespace}.#{name}" if namespace && !fully_qualified_token?(name)
-        return if name.empty? || @evaled_dependencies.include?(name) || modulize(name).safe_constantize
+        return if name.empty? || @@evaled_dependencies.include?(name) || modulize(name).safe_constantize
 
         # if name = .foo.bar.Baz look for classes / modules named ::Foo::Bar and ::Foo
         # module == pure namespace (e.g. the descriptor package name)
         # class == nested messages
         create_ruby_namespace_heiarchy(name)
 
-        if (message = @all_messages[name])
+        if (message = @@all_messages[name])
           # Create the blank namespace in case there are nested types
           eval_message_code(name)
 
@@ -204,19 +204,19 @@ module Protobuf
             eval_dependencies(enum_type.name, name)
           end
 
-          # Check @evaled_dependencies again in case there was a dependency
+          # Check @@evaled_dependencies again in case there was a dependency
           # loop that already loaded this message
-          return if @evaled_dependencies.include?(name)
+          return if @@evaled_dependencies.include?(name)
           eval_message_code(name, message.field)
-          @evaled_dependencies << name
+          @@evaled_dependencies << name
 
-        elsif (enum = @all_enums[name])
-          # Check @evaled_dependencies again in case there was a dependency
+        elsif (enum = @@all_enums[name])
+          # Check @@evaled_dependencies again in case there was a dependency
           # loop that already loaded this enum
-          return if @evaled_dependencies.include?(name)
+          return if @@evaled_dependencies.include?(name)
           namespace = name.split(".")
           eval_enum_code(enum, namespace[0..-2].join("."))
-          @evaled_dependencies << name
+          @@evaled_dependencies << name
         else
           fail "Error loading unknown dependencies, could not find message or enum #{name.inspect}"
         end
