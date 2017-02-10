@@ -19,3 +19,5 @@ require 'protobuf'
 
 require 'protobuf/rpc/servers/socket/server'
 require 'protobuf/rpc/connectors/socket'
+
+::Protobuf.connector_type_class = ::Protobuf::Rpc::Connectors::Socket

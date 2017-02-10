@@ -36,6 +36,7 @@ RSpec.describe ::Protobuf do
 
   describe '.connector_type_class' do
     it "defaults to Socket" do
+      described_class.connector_type_class = nil
       expect(described_class.connector_type_class).to eq(::Protobuf::Rpc::Connectors::Socket)
     end
   end
