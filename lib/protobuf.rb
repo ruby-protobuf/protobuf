@@ -96,7 +96,7 @@ unless ENV.key?('PB_NO_NETWORKING')
   env_connector_type = ENV.fetch('PB_CLIENT_TYPE') do
     ::Protobuf::DEFAULT_CONNECTOR
   end
-  
+
   symbolized_connector_type = env_connector_type.to_s.downcase.strip.to_sym
   if ::Protobuf::CONNECTORS.include?(symbolized_connector_type)
     require "protobuf/#{symbolized_connector_type}"

@@ -61,6 +61,10 @@ module Protobuf
   end
 end
 
-module ::Protobuf::Rpc::Servers # bad file namespacing
-  ZmqRunner = ::Protobuf::Rpc::ZmqRunner
+module Protobuf
+  module Rpc
+    module Servers # bad file namespacing
+      ZmqRunner = ::Protobuf::Rpc::ZmqRunner
+    end
+  end
 end

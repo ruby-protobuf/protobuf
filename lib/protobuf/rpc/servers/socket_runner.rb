@@ -37,6 +37,10 @@ module Protobuf
   end
 end
 
-module ::Protobuf::Rpc::Servers # bad file namespacing
-  SocketRunner = ::Protobuf::Rpc::SocketRunner
+module Protobuf
+  module Rpc
+    module Servers # bad file namespacing
+      SocketRunner = ::Protobuf::Rpc::SocketRunner
+    end
+  end
 end

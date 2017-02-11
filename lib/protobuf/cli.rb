@@ -210,7 +210,7 @@ module Protobuf
       end
 
       def create_extension_server_runner
-        classified = self.mode.classify
+        classified = mode.classify
         extension_server_class = classified.constantize
 
         self.runner = extension_server_class.new(runner_options)
