@@ -49,20 +49,6 @@ module Protobuf
     @client_host ||= Socket.gethostname
   end
 
-  # Connector Type
-  #
-  # Default: socket
-  #
-  # Symbol value which denotes the type of connector to use
-  # during client requests to an RPC server.
-  def self.connector_type
-    @connector_type ||= DEFAULT_CONNECTOR
-  end
-
-  def self.connector_type=(type)
-    @connector_type = type
-  end
-
   def self.connector_type_class
     @connector_type_class ||= ::Protobuf::Rpc::Connectors::Socket
   end
@@ -122,10 +108,6 @@ unless ENV.key?('PB_NO_NETWORKING')
       ::Protobuf.connector_type_class = ::Protobuf::Rpc::Connectors::Socket
     end
   else
-    $stderr.puts <<-WARN
-    [INFO] Attempting require on an extension connector type '#{env_connector_type}'.
-    WARN
-
     require "#{env_connector_type}"
     classified = env_connector_type.classify
     ::Protobuf.connector_type_class = classified.constantize

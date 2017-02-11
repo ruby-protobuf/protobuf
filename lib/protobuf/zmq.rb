@@ -14,8 +14,6 @@
 #   gem 'protobuf', :require => 'protobuf/zmq'
 #
 require 'protobuf'
-Protobuf.connector_type = :zmq
-
 require 'ffi-rzmq'
 require 'protobuf/rpc/servers/zmq/server'
 require 'protobuf/rpc/connectors/zmq'

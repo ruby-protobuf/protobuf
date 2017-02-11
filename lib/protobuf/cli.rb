@@ -124,18 +124,13 @@ module Protobuf
                       :zmq
                     else
                       case server_type
-                      when nil, /socket/i
+                      when nil, /\Asocket[[:space:]]*\z/i
                         :socket
-                      when /zmq/i
+                      when /\Azmq[[:space:]]*\z/i
                         :zmq
                       else
-                        begin
-                          require "#{server_type}"
-                          server_type
-                        rescue LoadError
-                          say "WARNING: Could not load 'PB_SERVER_TYPE=#{server_type}'. Defaulting to socket mode.", :yellow
-                          :socket
-                        end
+                        require "#{server_type}"
+                        server_type
                       end
                     end
       end

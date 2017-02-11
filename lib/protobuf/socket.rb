@@ -15,8 +15,6 @@
 #   gem 'protobuf', :require => 'protobuf/socket'
 #
 require 'protobuf'
-::Protobuf.connector_type = :socket
-
 require 'protobuf/rpc/servers/socket/server'
 require 'protobuf/rpc/connectors/socket'
 
