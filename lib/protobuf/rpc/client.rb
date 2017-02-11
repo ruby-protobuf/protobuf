@@ -2,7 +2,6 @@ require 'forwardable'
 require 'protobuf'
 require 'protobuf/logging'
 require 'protobuf/rpc/error'
-require 'protobuf/rpc/connector'
 
 module Protobuf
   module Rpc
