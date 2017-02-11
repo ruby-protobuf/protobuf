@@ -30,12 +30,6 @@ require 'protobuf/descriptors'
 
 module Protobuf
 
-  # See Protobuf#connector_type documentation.
-  CONNECTORS = [:socket, :zmq].freeze
-
-  # Default is Socket as it has no external dependencies.
-  DEFAULT_CONNECTOR = :socket
-
   class << self
     # Client Host
     #
@@ -94,11 +88,11 @@ unless ENV.key?('PB_NO_NETWORKING')
   require 'protobuf/rpc/service'
 
   env_connector_type = ENV.fetch('PB_CLIENT_TYPE') do
-    ::Protobuf::DEFAULT_CONNECTOR
+    :socket
   end
 
   symbolized_connector_type = env_connector_type.to_s.downcase.strip.to_sym
-  if ::Protobuf::CONNECTORS.include?(symbolized_connector_type)
+  if [:zmq, :socket].include?(symbolized_connector_type)
     require "protobuf/#{symbolized_connector_type}"
 
     case symbolized_connector_type
