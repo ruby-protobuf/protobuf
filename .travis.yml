@@ -16,7 +16,8 @@ rvm:
   - 2.2
   - 2.2.2
   - 2.3
-  - jruby
+  - jruby-1.7
+  - jruby-9.1.7.0
   - rbx-2
 env:
   - PROTOBUF_VERSION=2.6.1
