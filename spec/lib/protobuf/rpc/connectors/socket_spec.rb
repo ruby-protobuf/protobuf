@@ -18,8 +18,6 @@ RSpec.describe Protobuf::Rpc::Connectors::Socket do
 
   it_behaves_like "a Protobuf Connector"
 
-  specify { expect(described_class.include?(Protobuf::Rpc::Connectors::Common)).to be true }
-
   context "#read_response" do
     let(:data) { "New data" }
 

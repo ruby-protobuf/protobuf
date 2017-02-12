@@ -14,7 +14,6 @@ module Protobuf
         ##
         # Included Modules
         #
-        include Protobuf::Rpc::Connectors::Common
         include Protobuf::Logging
 
         ##

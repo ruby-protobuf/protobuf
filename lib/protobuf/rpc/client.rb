@@ -9,7 +9,7 @@ module Protobuf
       extend Forwardable
       include Protobuf::Logging
 
-      def_delegators :@connector, :options, :complete_cb, :success_cb, :failure_cb
+      def_delegators :@connector, :options, :complete_cb, :success_cb, :failure_cb, :send_request
       attr_reader :connector
 
       # Create a new client with default options (defined in ClientConnection)
@@ -131,33 +131,6 @@ module Protobuf
           logger.error { sign_message("#{service.name}##{method_name} not rpc method, passing to super") }
           super(method_name, *params)
         end
-      end
-
-      # Send the request to the service.
-      # This method is usually never called directly
-      # but is invoked by method_missing (see docs above).
-      #
-      #   request = WidgetFindRequest.new
-      #   client = Client.new({
-      #     :service => WidgetService,
-      #     :method => "find",
-      #     :request_type => "WidgetFindRequest",
-      #     :response_type => "WidgetList",
-      #     :request => request
-      #   })
-      #
-      #   client.on_success do |res|
-      #     res.widgets.each{|w| puts w.inspect }
-      #   end
-      #
-      #   client.on_failure do |err|
-      #     puts err.message
-      #   end
-      #
-      #   client.send_request
-      #
-      def send_request
-        @connector.send_request
       end
 
     end
