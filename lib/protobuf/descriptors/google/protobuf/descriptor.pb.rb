@@ -3,10 +3,11 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 module Google
   module Protobuf
+    ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
     ##
     # Message Classes
@@ -149,6 +150,7 @@ module Google
       optional :string, :extendee, 2
       optional :string, :default_value, 7
       optional :int32, :oneof_index, 9
+      optional :string, :json_name, 10
       optional ::Google::Protobuf::FieldOptions, :options, 8
     end
 

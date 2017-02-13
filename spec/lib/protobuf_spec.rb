@@ -19,26 +19,23 @@ RSpec.describe ::Protobuf do
     end
   end
 
-  describe '.connector_type' do
-    before { described_class.instance_variable_set(:@connector_type, nil) }
-
-    it 'defaults to socket' do
-      expect(described_class.connector_type).to eq :socket
+  describe '.connector_type_class' do
+    it "defaults to Socket" do
+      described_class.connector_type_class = nil
+      expect(described_class.connector_type_class).to eq(::Protobuf::Rpc::Connectors::Socket)
     end
 
-    it 'accepts socket or zmq' do
-      [:socket, :zmq].each do |type|
-        described_class.connector_type = type
-        expect(described_class.connector_type).to eq type
-      end
+    it 'fails if fails to load the PB_CLIENT_TYPE' do
+      ENV['PB_CLIENT_TYPE'] = "something_to_autoload"
+      expect { load 'protobuf.rb' }.to raise_error(LoadError, /something_to_autoload/)
+      ENV.delete('PB_CLIENT_TYPE')
     end
 
-    it 'does not accept other types' do
-      [:hello, :world, :evented].each do |type|
-        expect do
-          described_class.connector_type = type
-        end.to raise_error(ArgumentError)
-      end
+    it 'loads the connector type class from PB_CLIENT_TYPE' do
+      ENV['PB_CLIENT_TYPE'] = "protobuf/rpc/connectors/zmq"
+      load 'protobuf.rb'
+      expect(::Protobuf.connector_type_class).to eq(::Protobuf::Rpc::Connectors::Zmq)
+      ENV.delete('PB_CLIENT_TYPE')
     end
   end
 

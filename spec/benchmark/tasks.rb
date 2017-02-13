@@ -1,4 +1,5 @@
 require 'benchmark'
+require 'protobuf'
 require 'protobuf/socket'
 require 'support/all'
 require 'spec_helper'

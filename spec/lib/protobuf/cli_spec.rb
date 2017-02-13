@@ -170,6 +170,25 @@ RSpec.describe ::Protobuf::CLI do
 
     context 'run modes' do
 
+      context "extension" do
+        let(:runner) { ::Protobuf::Rpc::Servers::SocketRunner }
+
+        it "loads the runner specified by PB_SERVER_TYPE" do
+          ENV['PB_SERVER_TYPE'] = "protobuf/rpc/servers/socket_runner"
+          expect(runner).to receive(:new).and_return(sock_runner)
+          described_class.start(args)
+          ENV.delete('PB_SERVER_TYPE')
+        end
+
+        context "without extension loaded" do
+          it "will throw a LoadError when extension is not loaded" do
+            ENV['PB_SERVER_TYPE'] = "socket_to_load"
+            expect { described_class.start(args) }.to raise_error(LoadError, /socket_to_load/)
+            ENV.delete("PB_SERVER_TYPE")
+          end
+        end
+      end
+
       context 'socket' do
         let(:test_args) { ['--socket'] }
         let(:runner) { ::Protobuf::Rpc::SocketRunner }
@@ -188,11 +207,6 @@ RSpec.describe ::Protobuf::CLI do
           expect(runner).to receive(:new).and_return(sock_runner)
           described_class.start(args)
           ENV.delete('PB_SERVER_TYPE')
-        end
-
-        it 'configures the connector type to be socket' do
-          load "protobuf/socket.rb"
-          expect(::Protobuf.connector_type).to eq(:socket)
         end
       end
 
@@ -258,11 +272,6 @@ RSpec.describe ::Protobuf::CLI do
           expect(runner).to receive(:new)
           described_class.start(args)
           ENV.delete('PB_SERVER_TYPE')
-        end
-
-        it 'configures the connector type to be zmq' do
-          load "protobuf/zmq.rb"
-          expect(::Protobuf.connector_type).to eq(:zmq)
         end
       end
 

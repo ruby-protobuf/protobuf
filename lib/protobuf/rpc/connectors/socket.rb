@@ -4,7 +4,6 @@ module Protobuf
   module Rpc
     module Connectors
       class Socket < Base
-        include Protobuf::Rpc::Connectors::Common
         include Protobuf::Logging
 
         def send_request
@@ -37,6 +36,12 @@ module Protobuf
           return true if @error
           logger.debug { sign_message("Error state : #{@socket.closed?}") }
           @socket.closed?
+        end
+
+        def post_init
+          send_data unless error?
+        rescue => e
+          failure(:RPC_ERROR, "Connection error: #{e.message}")
         end
 
         def read_data

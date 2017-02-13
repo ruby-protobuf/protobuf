@@ -36,3 +36,11 @@ module Protobuf
     end
   end
 end
+
+module Protobuf
+  module Rpc
+    module Servers # bad file namespacing
+      SocketRunner = ::Protobuf::Rpc::SocketRunner
+    end
+  end
+end

@@ -30,12 +30,6 @@ require 'protobuf/descriptors'
 
 module Protobuf
 
-  # See Protobuf#connector_type documentation.
-  CONNECTORS = [:socket, :zmq].freeze
-
-  # Default is Socket as it has no external dependencies.
-  DEFAULT_CONNECTOR = :socket
-
   class << self
     # Client Host
     #
@@ -49,19 +43,12 @@ module Protobuf
     @client_host ||= Socket.gethostname
   end
 
-  # Connector Type
-  #
-  # Default: socket
-  #
-  # Symbol value which denotes the type of connector to use
-  # during client requests to an RPC server.
-  def self.connector_type
-    @connector_type ||= DEFAULT_CONNECTOR
+  def self.connector_type_class
+    @connector_type_class ||= ::Protobuf::Rpc::Connectors::Socket
   end
 
-  def self.connector_type=(type)
-    fail ArgumentError, 'Invalid connector type given' unless CONNECTORS.include?(type)
-    @connector_type = type
+  def self.connector_type_class=(type_class)
+    @connector_type_class = type_class
   end
 
   # GC Pause during server requests
@@ -101,17 +88,22 @@ unless ENV.key?('PB_NO_NETWORKING')
   require 'protobuf/rpc/service'
 
   env_connector_type = ENV.fetch('PB_CLIENT_TYPE') do
-    ::Protobuf::DEFAULT_CONNECTOR
-  end.to_s.downcase.strip.to_sym
+    :socket
+  end
 
-  if ::Protobuf::CONNECTORS.include?(env_connector_type)
-    require "protobuf/#{env_connector_type}"
+  symbolized_connector_type = env_connector_type.to_s.downcase.strip.to_sym
+  if [:zmq, :socket].include?(symbolized_connector_type)
+    require "protobuf/#{symbolized_connector_type}"
+
+    case symbolized_connector_type
+    when :zmq
+      ::Protobuf.connector_type_class = ::Protobuf::Rpc::Connectors::Zmq
+    else
+      ::Protobuf.connector_type_class = ::Protobuf::Rpc::Connectors::Socket
+    end
   else
-    $stderr.puts <<-WARN
-    [WARNING] Require attempted on an invalid connector type '#{env_connector_type}'.
-              Falling back to default '#{::Protobuf::DEFAULT_CONNECTOR}' connector.
-    WARN
-
-    require "protobuf/#{::Protobuf::DEFAULT_CONNECTOR}"
+    require "#{env_connector_type}"
+    classified = env_connector_type.classify
+    ::Protobuf.connector_type_class = classified.constantize
   end
 end
