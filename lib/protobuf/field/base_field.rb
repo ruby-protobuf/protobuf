@@ -129,11 +129,11 @@ module Protobuf
         stream = StringIO.new(bytes)
 
         if wire_type == ::Protobuf::WireType::VARINT
-          array << Varint.decode(stream) until stream.eof?
+          array << decode(Varint.decode(stream)) until stream.eof?
         elsif wire_type == ::Protobuf::WireType::FIXED64
-          array << stream.read(8) until stream.eof?
+          array << decode(stream.read(8)) until stream.eof?
         elsif wire_type == ::Protobuf::WireType::FIXED32
-          array << stream.read(4) until stream.eof?
+          array << decode(stream.read(4)) until stream.eof?
         end
       end
 
