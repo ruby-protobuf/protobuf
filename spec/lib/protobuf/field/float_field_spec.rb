@@ -2,6 +2,10 @@ require 'spec_helper'
 
 RSpec.describe Protobuf::Field::FloatField do
 
+  it_behaves_like :packable_field, described_class do
+    let(:value) { [1.0, 2.0, 3.0] }
+  end
+
   class SomeFloatMessage < ::Protobuf::Message
     optional :float, :some_float, 1
   end
