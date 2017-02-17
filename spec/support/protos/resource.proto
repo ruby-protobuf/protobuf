@@ -1,6 +1,15 @@
 syntax = "proto2";
 
+import "google/protobuf/descriptor.proto";
+
 package test;
+
+option cc_generic_services = true;
+option (file_option) = 9876543210;
+
+extend google.protobuf.FileOptions {
+  optional uint64 file_option = 9585869;
+}
 
 enum StatusType {
   PENDING = 0;

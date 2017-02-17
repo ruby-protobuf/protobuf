@@ -97,6 +97,16 @@ module Protobuf_unittest
 
 
   ##
+  # File Options
+  #
+  set_option :cc_generic_services, true
+  set_option :java_generic_services, true
+  set_option :py_generic_services, true
+  set_option :".protobuf_unittest.file_opt1", 9876543210
+  set_option :".protobuf_unittest.fileopt", { :i => 100, :s => "FileAnnotation", :sub => { :s => "NestedFileAnnotation" }, :file => { :".protobuf_unittest.fileopt" => { :s => "FileExtensionAnnotation" } }, :mset => { :".protobuf_unittest.AggregateMessageSetElement.message_set_extension" => { :s => "EmbeddedMessageSetElement" } } }
+
+
+  ##
   # Message Fields
   #
   class TestMessageWithCustomOptions

@@ -1,3 +1,4 @@
+require 'active_support/core_ext/module/aliasing'
 require 'protobuf/generators/file_generator'
 
 module Protobuf
@@ -48,5 +49,44 @@ module Protobuf
       ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => generated_files)
     end
 
+    Protobuf::Field::BaseField.module_eval do
+      # Sets a MessageField that is known to be an option.
+      # We must allow fields to be set one at a time, as option syntax allows us to
+      # set each field within the option using a separate "option" line.
+      def set_with_options(message_instance, bytes)
+        if message_instance[name].is_a?(::Protobuf::Message)
+          gp = Google::Protobuf
+          if message_instance.is_a?(gp::EnumOptions) || message_instance.is_a?(gp::EnumValueOptions) ||
+             message_instance.is_a?(gp::FieldOptions) || message_instance.is_a?(gp::FileOptions) ||
+             message_instance.is_a?(gp::MethodOptions) || message_instance.is_a?(gp::ServiceOptions) ||
+             message_instance.is_a?(gp::MessageOptions)
+
+            original_field = message_instance[name]
+            decoded_field = decode(bytes)
+            decoded_field.each_field do |subfield, subvalue|
+              option_set(original_field, subfield, subvalue) { decoded_field.field?(subfield.tag) }
+            end
+            return
+          end
+        end
+
+        set_without_options(message_instance, bytes)
+      end
+
+      def option_set(message_field, subfield, subvalue)
+        return unless yield
+        if subfield.repeated?
+          message_field[subfield.tag].concat(subvalue)
+        elsif message_field[subfield.tag] && subvalue.is_a?(::Protobuf::Message)
+          subvalue.each_field do |f, v|
+            option_set(message_field[subfield.tag], f, v) { subvalue.field?(f.tag) }
+          end
+        else
+          message_field[subfield.tag] = subvalue
+        end
+      end
+
+      alias_method_chain :set, :options
+    end
   end
 end

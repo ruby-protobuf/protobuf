@@ -59,6 +59,27 @@ module Protobuf
         @type_namespace ||= @namespace + [descriptor.name]
       end
 
+      def serialize_value(value)
+        case value
+        when Message
+          fields = value.each_field.map do |field, inner_value|
+            next unless value.field?(field.name)
+            serialized_inner_value = serialize_value(inner_value)
+            "#{field.fully_qualified_name.inspect} => #{serialized_inner_value}"
+          end.compact
+          "{ #{fields.join(', ')} }"
+        when Enum
+          "::#{value.parent_class}::#{value.name}"
+        when String
+          value.inspect
+        when nil
+          "nil"
+        when Array
+          '[' + value.map { |x| serialize_value(x) }.join(', ') + ']'
+        else
+          value
+        end
+      end
     end
   end
 end

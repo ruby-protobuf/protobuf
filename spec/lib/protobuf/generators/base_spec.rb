@@ -5,7 +5,7 @@ require 'protobuf/generators/base'
 
 RSpec.describe ::Protobuf::Generators::Base do
 
-  subject { described_class.new(double) }
+  subject(:generator) { described_class.new(double) }
 
   context 'namespaces' do
     let(:descriptor) { double(:name => 'Baz') }
@@ -83,4 +83,58 @@ RSpec.describe ::Protobuf::Generators::Base do
     end
   end
 
+  describe '#serialize_value' do
+    before do
+      stub_const("MyEnum", Class.new(::Protobuf::Enum) do
+        define :FOO, 1
+        define :BOO, 2
+      end)
+      stub_const("MyMessage1", Class.new(Protobuf::Message) do
+        optional :string, :foo, 1
+      end)
+      stub_const("MyMessage2", Class.new(Protobuf::Message) do
+        optional :string, :foo, 1
+        optional MyMessage1, :bar, 2
+        optional :int32, :boom, 3
+        optional MyEnum, :goat, 4
+        optional :bool, :bam, 5
+        optional :float, :fire, 6
+      end)
+      stub_const("MyMessage3", Class.new(Protobuf::Message) do
+        optional :string, :foo, 1
+        repeated MyMessage2, :bar, 2
+        optional :int32, :boom, 3
+        optional MyEnum, :goat, 4
+        optional :bool, :bam, 5
+        optional :float, :fire, 6
+      end)
+    end
+
+    it 'serializes messages' do
+      expect(generator.serialize_value(MyMessage3.new(
+                                         :foo => 'space',
+                                         :bar => [MyMessage2.new(
+                                           :foo => 'station',
+                                           :bar => MyMessage1.new(:foo => 'orbit'),
+                                           :boom => 123,
+                                           :goat => MyEnum::FOO,
+                                           :bam => false,
+                                           :fire => 3.5,
+                                         )],
+                                         :boom => 456,
+                                         :goat => MyEnum::BOO,
+                                         :bam => true,
+                                         :fire => 1.2,
+      ))).to eq(
+        '{ :foo => "space", :bar => [{ '\
+        ':foo => "station", :bar => { :foo => "orbit" }, :boom => 123, :goat => ::MyEnum::FOO, :bam => false, :fire => 3.5 '\
+        '}], :boom => 456, :goat => ::MyEnum::BOO, :bam => true, :fire => 1.2 }'
+      )
+    end
+
+    it 'serializes enums' do
+      expect(generator.serialize_value(MyEnum::FOO)).to eq("::MyEnum::FOO")
+      expect(generator.serialize_value(MyEnum::BOO)).to eq("::MyEnum::BOO")
+    end
+  end
 end

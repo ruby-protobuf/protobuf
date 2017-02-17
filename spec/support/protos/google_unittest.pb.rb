@@ -176,6 +176,17 @@ module Protobuf_unittest
 
 
   ##
+  # File Options
+  #
+  set_option :java_outer_classname, "UnittestProto"
+  set_option :optimize_for, ::Google::Protobuf::FileOptions::OptimizeMode::SPEED
+  set_option :cc_generic_services, true
+  set_option :java_generic_services, true
+  set_option :py_generic_services, true
+  set_option :cc_enable_arenas, true
+
+
+  ##
   # Message Fields
   #
   class TestAllTypes

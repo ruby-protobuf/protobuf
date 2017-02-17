@@ -32,6 +32,7 @@ module Protobuf
           print_package do
             inject_optionable
             group = GroupGenerator.new(current_indent)
+            group.add_options(descriptor.options) if descriptor.options
             group.add_enums(descriptor.enum_type, :namespace => [descriptor.package])
             group.add_message_declarations(descriptor.message_type)
             group.add_messages(descriptor.message_type, :extension_fields => @extension_fields, :namespace => [descriptor.package])
@@ -40,6 +41,7 @@ module Protobuf
 
             group.add_header(:enum, 'Enum Classes')
             group.add_header(:message_declaration, 'Message Classes')
+            group.add_header(:options, 'File Options')
             group.add_header(:message, 'Message Fields')
             group.add_header(:extended_message, 'Extended Message Fields')
             group.add_header(:service, 'Service Classes')

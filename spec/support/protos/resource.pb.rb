@@ -6,6 +6,12 @@
 require 'protobuf'
 require 'protobuf/rpc/service'
 
+
+##
+# Imports
+#
+require 'google/protobuf/descriptor.pb'
+
 module Test
   ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
@@ -45,6 +51,13 @@ module Test
 
   end
 
+
+
+  ##
+  # File Options
+  #
+  set_option :cc_generic_services, true
+  set_option :".test.file_option", 9876543210
 
 
   ##
@@ -103,6 +116,14 @@ module Test
     extensions 100...111
     optional :string, :".test.foo", 100, :extension => true
     optional :int64, :".test.bar", 101, :extension => true
+  end
+
+
+  ##
+  # Extended Message Fields
+  #
+  class ::Google::Protobuf::FileOptions < ::Protobuf::Message
+    optional :uint64, :".test.file_option", 9585869, :extension => true
   end
 
 
