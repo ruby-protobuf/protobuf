@@ -53,6 +53,7 @@ RSpec.describe Protobuf::Enum do
       it 'provides an array of defined Enums' do
         expect(Test::EnumTestType.enums).to eq(
           [
+            Test::EnumTestType::ZERO,
             Test::EnumTestType::ONE,
             Test::EnumTestType::TWO,
             Test::EnumTestType::MINUS_ONE,
@@ -76,6 +77,7 @@ RSpec.describe Protobuf::Enum do
 
     describe '.enums_for_tag' do
       it 'returns an array of Enums for the given tag, if any' do
+        expect(EnumAliasTest.enums_for_tag(nil)).to eq([])
         expect(EnumAliasTest.enums_for_tag(1)).to eq([EnumAliasTest::FOO, EnumAliasTest::BAR])
         expect(EnumAliasTest.enums_for_tag(2)).to eq([EnumAliasTest::BAZ])
         expect(EnumAliasTest.enums_for_tag(3)).to eq([])
@@ -124,6 +126,7 @@ RSpec.describe Protobuf::Enum do
       it 'gets the Enum corresponding to the given tag' do
         expect(Test::EnumTestType.enum_for_tag(tag)).to eq(Test::EnumTestType.const_get(name))
         expect(Test::EnumTestType.enum_for_tag(-5)).to be_nil
+        expect(Test::EnumTestType.enum_for_tag(nil)).to be_nil
       end
     end
 
@@ -186,6 +189,7 @@ RSpec.describe Protobuf::Enum do
       it 'provides a hash of defined Enums' do
         expect(Test::EnumTestType.values).to eq(
           :MINUS_ONE => Test::EnumTestType::MINUS_ONE,
+          :ZERO      => Test::EnumTestType::ZERO,
           :ONE       => Test::EnumTestType::ONE,
           :TWO       => Test::EnumTestType::TWO,
           :THREE     => Test::EnumTestType::THREE,
