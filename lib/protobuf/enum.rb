@@ -96,7 +96,7 @@ module Protobuf
     # Returns an array with zero or more Enum objects or nil.
     #
     def self.enums_for_tag(tag)
-      mapped_enums[tag.to_i] || []
+      tag && mapped_enums[tag.to_i] || []
     end
 
     # Public: Get the Enum associated with the given name.
@@ -131,7 +131,7 @@ module Protobuf
     #   Enums, the first enum defined will be returned.
     #
     def self.enum_for_tag(tag)
-      (mapped_enums[tag.to_i] || []).first
+      tag && (mapped_enums[tag.to_i] || []).first
     end
 
     # Public: Get an Enum by a variety of type-checking mechanisms.
