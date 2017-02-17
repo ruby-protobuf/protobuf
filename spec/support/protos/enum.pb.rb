@@ -18,6 +18,7 @@ module Test
   # Enum Classes
   #
   class EnumTestType < ::Protobuf::Enum
+    define :ZERO, 0
     define :ONE, 1
     define :TWO, 2
   end

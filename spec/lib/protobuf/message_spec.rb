@@ -142,12 +142,12 @@ RSpec.describe Protobuf::Message do
   describe '#initialize' do
     it "defaults to the first value listed in the enum's type definition" do
       test_enum = Test::EnumTestMessage.new
-      expect(test_enum.non_default_enum).to eq(1)
+      expect(test_enum.non_default_enum).to eq(Test::EnumTestType.enums.first)
     end
 
     it "defaults to a a value with a name" do
       test_enum = Test::EnumTestMessage.new
-      expect(test_enum.non_default_enum.name).to eq(:ONE)
+      expect(test_enum.non_default_enum.name).to eq(Test::EnumTestType.enums.first.name)
     end
 
     it "exposes the enum getter raw value through ! method" do
