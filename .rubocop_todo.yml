@@ -43,6 +43,9 @@ Performance/StringReplacement:
   Exclude:
     - 'lib/protobuf/rpc/buffer.rb'
 
+Performance/TimesMap:
+  Enabled: false
+
 # Offense count: 127
 # Configuration parameters: Exclude.
 Style/Documentation:
@@ -113,6 +116,9 @@ Style/ExtraSpacing:
 Style/NumericLiterals:
   MinDigits: 21
 
+Style/SignalException:
+  Enabled: false
+
 # Offense count: 473
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
@@ -136,4 +142,4 @@ Style/SymbolProc:
 # Cop supports --auto-correct.
 # Configuration parameters: WordRegex.
 Style/WordArray:
-  MinSize: 2
+  MinSize: 4

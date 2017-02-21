@@ -154,7 +154,7 @@ module Protobuf
       def respond_with(candidate)
         @response = candidate
       end
-      alias_method :return_from_whence_you_came, :respond_with
+      alias :return_from_whence_you_came respond_with
 
       def response_type
         @response_type ||= env.response_type

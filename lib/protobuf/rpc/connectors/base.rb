@@ -19,7 +19,7 @@ module Protobuf
         :timeout                 => nil,         # The timeout for the request, also handled by client.rb
         :client_host             => nil,         # The hostname or address of this client
         :first_alive_load_balance => false,      # Do we want to use check_avail frames before request
-      }
+      }.freeze
 
       class Base
         include Protobuf::Logging

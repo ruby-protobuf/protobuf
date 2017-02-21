@@ -10,11 +10,12 @@ module Protobuf
           # are accessing options correctly. We allow simple names in other places for backwards compatibility.
           fail ArgumentError, "must access option using its fully qualified name: #{option.fully_qualified_name.inspect}"
         end
-        if @_optionable_options.try(:key?, name)
-          value = @_optionable_options[name]
-        else
-          value = option.default_value
-        end
+        value =
+          if @_optionable_options.try(:key?, name)
+            @_optionable_options[name]
+          else
+            option.default_value
+          end
         if option.type_class < ::Protobuf::Message
           option.type_class.new(value)
         else
@@ -51,11 +52,10 @@ module Protobuf
         # File options are injected per module, and since a module can be defined more than once,
         # we will get a warning if we try to define optionable_descriptor_class twice.
         if base_class.respond_to?(:optionable_descriptor_class)
-          if base_class.optionable_descriptor_class != block.call
-            fail 'A class is being defined with two different descriptor classes, something is very wrong'
-          else
-            return # Don't define optionable_descriptor_class twice
-          end
+          # Don't define optionable_descriptor_class twice
+          return  if base_class.optionable_descriptor_class == block.call
+
+          fail 'A class is being defined with two different descriptor classes, something is very wrong'
         end
 
         base_class.extend(ClassMethods)

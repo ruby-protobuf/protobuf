@@ -309,6 +309,6 @@ module Protobuf
     ##
     # Instance Aliases
     #
-    alias_method :to_hash_value, :to_i
+    alias :to_hash_value to_i
   end
 end

@@ -134,25 +134,23 @@ module Protobuf
           #   message[:'.my_package.string_field'] #=> @values[".my_package.string_field"]
           #   message[:'.my_package.string_field'] #=> @values[".my_package.string_field"]
 
-          if options[:extension]
-            base_name = fully_qualified_field_name.to_s.split('.').last.to_sym
-            if field_store[base_name]
-              # Case 3
-              if field_store[base_name].extension?
-                remove_existing_accessors(base_name)
-                simple_name = nil
-              # Case 2
+          simple_name =
+            if options[:extension]
+              base_name = fully_qualified_field_name.to_s.split('.').last.to_sym
+              if field_store[base_name]
+                # Case 3
+                if field_store[base_name].extension?
+                  remove_existing_accessors(base_name)
+                end
+                nil
+              # Case 4
               else
-                simple_name = nil
+                base_name
               end
-            # Case 4
             else
-              simple_name = base_name
+              # Case 1
+              fully_qualified_field_name
             end
-          else
-            # Case 1
-            simple_name = fully_qualified_field_name
-          end
 
           field = ::Protobuf::Field.build(self, rule, type_class, fully_qualified_field_name,
                                           tag, simple_name, options)

@@ -4,12 +4,12 @@ module Protobuf
   module Rpc
     module Zmq
 
-      ADDRESS_MATCH = /\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/.freeze
-      WORKER_READY_MESSAGE = "\1"
-      CHECK_AVAILABLE_MESSAGE = "\3"
-      NO_WORKERS_AVAILABLE = "\4"
-      WORKERS_AVAILABLE = "\5"
-      EMPTY_STRING = ""
+      ADDRESS_MATCH = /\A\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/
+      WORKER_READY_MESSAGE = "\1".freeze
+      CHECK_AVAILABLE_MESSAGE = "\3".freeze
+      NO_WORKERS_AVAILABLE = "\4".freeze
+      WORKERS_AVAILABLE = "\5".freeze
+      EMPTY_STRING = "".freeze
 
       module Util
         include ::Protobuf::Logging

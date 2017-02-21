@@ -270,7 +270,7 @@ module Protobuf
         def zmq_eagain_error_check(return_code, source)
           return if ::ZMQ::Util.resultcode_ok?(return_code || -1)
 
-          if ::ZMQ::Util.errno == ::ZMQ::EAGAIN
+          if ::ZMQ::Util.errno == ::ZMQ::EAGAIN # rubocop:disable Style/GuardClause
             fail ZmqEagainError, <<-ERROR
             Last ZMQ API call to #{source} failed with "#{::ZMQ::Util.error_string}".
 

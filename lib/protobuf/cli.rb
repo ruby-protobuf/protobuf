@@ -72,11 +72,12 @@ module Protobuf
 
       # Tell protobuf how to handle the printing of deprecated field usage.
       def configure_deprecation_warnings
-        if options.print_deprecation_warnings.nil?
-          ::Protobuf.print_deprecation_warnings = !ENV.key?("PB_IGNORE_DEPRECATIONS")
-        else
-          ::Protobuf.print_deprecation_warnings = options.print_deprecation_warnings?
-        end
+        ::Protobuf.print_deprecation_warnings =
+          if options.print_deprecation_warnings.nil?
+            !ENV.key?("PB_IGNORE_DEPRECATIONS")
+          else
+            options.print_deprecation_warnings?
+          end
       end
 
       # If we pause during request we don't need to pause in serialization
@@ -85,12 +86,13 @@ module Protobuf
 
         debug_say('Configuring gc')
 
-        if defined?(JRUBY_VERSION)
-          # GC.enable/disable are noop's on Jruby
-          ::Protobuf.gc_pause_server_request = false
-        else
-          ::Protobuf.gc_pause_server_request = options.gc_pause_request?
-        end
+        ::Protobuf.gc_pause_server_request =
+          if defined?(JRUBY_VERSION)
+            # GC.enable/disable are noop's on Jruby
+            false
+          else
+            options.gc_pause_request?
+          end
       end
 
       # Setup the protobuf logger.
@@ -129,7 +131,7 @@ module Protobuf
                       when /\Azmq[[:space:]]*\z/i
                         :zmq
                       else
-                        require "#{server_type}"
+                        require server_type.to_s
                         server_type
                       end
                     end

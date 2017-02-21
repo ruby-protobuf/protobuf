@@ -7,9 +7,9 @@ module Protobuf
       ##
       # Constants
       #
-      PROTO_INFINITY_DEFAULT          = /^inf$/i.freeze
-      PROTO_NEGATIVE_INFINITY_DEFAULT = /^-inf$/i.freeze
-      PROTO_NAN_DEFAULT               = /^nan$/i.freeze
+      PROTO_INFINITY_DEFAULT          = /^inf$/i
+      PROTO_NEGATIVE_INFINITY_DEFAULT = /^-inf$/i
+      PROTO_NAN_DEFAULT               = /^nan$/i
       RUBY_INFINITY_DEFAULT           = '::Float::INFINITY'.freeze
       RUBY_NEGATIVE_INFINITY_DEFAULT  = '-::Float::INFINITY'.freeze
       RUBY_NAN_DEFAULT                = '::Float::NAN'.freeze

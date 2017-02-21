@@ -9,7 +9,7 @@ module Protobuf
           yield(*args)
         end
       end
-      alias_method :on, :register
+      alias :on register
 
       def trigger(event_name, *args)
         event_name = normalized_event_name(event_name)

@@ -63,15 +63,15 @@ module Protobuf
       ##
       # Instance Aliases
       #
-      alias_method :parse_from_string, :decode
-      alias_method :deserialize, :decode
-      alias_method :parse_from, :decode_from
-      alias_method :deserialize_from, :decode_from
-      alias_method :to_s, :encode
-      alias_method :bytes, :encode
-      alias_method :serialize, :encode
-      alias_method :serialize_to_string, :encode
-      alias_method :serialize_to, :encode_to
+      alias :parse_from_string decode
+      alias :deserialize decode
+      alias :parse_from decode_from
+      alias :deserialize_from decode_from
+      alias :to_s encode
+      alias :bytes encode
+      alias :serialize encode
+      alias :serialize_to_string encode
+      alias :serialize_to encode_to
 
       private
 

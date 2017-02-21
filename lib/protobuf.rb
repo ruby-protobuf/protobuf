@@ -95,14 +95,15 @@ unless ENV.key?('PB_NO_NETWORKING')
   if [:zmq, :socket].include?(symbolized_connector_type)
     require "protobuf/#{symbolized_connector_type}"
 
-    case symbolized_connector_type
-    when :zmq
-      ::Protobuf.connector_type_class = ::Protobuf::Rpc::Connectors::Zmq
-    else
-      ::Protobuf.connector_type_class = ::Protobuf::Rpc::Connectors::Socket
-    end
+    ::Protobuf.connector_type_class =
+      case symbolized_connector_type
+      when :zmq
+        ::Protobuf::Rpc::Connectors::Zmq
+      else
+        ::Protobuf::Rpc::Connectors::Socket
+      end
   else
-    require "#{env_connector_type}"
+    require "#{env_connector_type}" # rubocop:disable Style/UnneededInterpolation
     classified = env_connector_type.classify
     ::Protobuf.connector_type_class = classified.constantize
   end

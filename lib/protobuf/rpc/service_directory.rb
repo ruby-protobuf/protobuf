@@ -21,7 +21,7 @@ module Protobuf
       include ::Singleton
       include ::Protobuf::Logging
 
-      DEFAULT_ADDRESS = "0.0.0.0"
+      DEFAULT_ADDRESS = '0.0.0.0'.freeze
       DEFAULT_PORT = 53000
       DEFAULT_TIMEOUT = 1
 

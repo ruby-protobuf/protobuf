@@ -18,7 +18,7 @@ module Protobuf
         public
 
         attr_reader :running
-        alias_method :running?, :running
+        alias :running? running
 
         def initialize(options)
           self.running = false
@@ -38,7 +38,7 @@ module Protobuf
 
         def cleanup?
           # every `threshold` connections run a cleanup routine after closing the response
-          threads.size > 0 && threads.size % threshold == 0
+          !threads.empty? && threads.size % threshold == 0
         end
 
         def cleanup_threads
@@ -102,9 +102,9 @@ module Protobuf
                     end
                   end
                 end
-              else
+              elsif threads.size > 1
                 # Run a cleanup if select times out while waiting
-                cleanup_threads if threads.size > 1
+                cleanup_threads
               end
             end
           ensure

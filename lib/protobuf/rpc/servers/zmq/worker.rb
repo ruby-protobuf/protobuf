@@ -47,7 +47,7 @@ module Protobuf
           loop do
             rc = poller.poll(500)
 
-            if rc == 0 && !running?
+            if rc == 0 && !running? # rubocop:disable Style/GuardClause
               break # The server was shutdown and no requests are pending
             elsif rc == -1
               break # Something went wrong
@@ -68,11 +68,12 @@ module Protobuf
         private
 
         def init_zmq_context
-          if inproc?
-            @zmq_context = @server.zmq_context
-          else
-            @zmq_context = ZMQ::Context.new
-          end
+          @zmq_context =
+            if inproc?
+              @server.zmq_context
+            else
+              ZMQ::Context.new
+            end
         end
 
         def init_backend_socket

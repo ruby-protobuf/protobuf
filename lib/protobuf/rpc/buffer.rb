@@ -4,7 +4,7 @@ module Protobuf
 
       attr_accessor :mode, :data, :size
 
-      MODES = [:read, :write]
+      MODES = [:read, :write].freeze
 
       # constantize this so we don't re-initialize the regex every time we need it
       SIZE_REGEX = /^\d+-/
@@ -17,11 +17,12 @@ module Protobuf
       end
 
       def mode=(mode)
-        if MODES.include?(mode)
-          @mode = mode
-        else
-          @mode = :read
-        end
+        @mode =
+          if MODES.include?(mode)
+            mode
+          else
+            :read
+          end
       end
 
       def write(force_mode = true)
