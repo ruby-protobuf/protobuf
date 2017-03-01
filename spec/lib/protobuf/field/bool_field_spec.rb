@@ -2,6 +2,10 @@ require 'spec_helper'
 
 RSpec.describe Protobuf::Field::BoolField do
 
+  it_behaves_like :packable_field, described_class do
+    let(:value) { [true, false] }
+  end
+
   class SomeBoolMessage < ::Protobuf::Message
     optional :bool, :some_bool, 1
     required :bool, :required_bool, 2
