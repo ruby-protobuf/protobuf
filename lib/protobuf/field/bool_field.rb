@@ -3,7 +3,9 @@ require 'protobuf/field/varint_field'
 module Protobuf
   module Field
     class BoolField < VarintField
+      FALSE_ENCODE = [0].pack('C')
       FALSE_STRING = "false".freeze
+      TRUE_ENCODE = [1].pack('C')
       TRUE_STRING = "true".freeze
 
       ##
@@ -19,16 +21,16 @@ module Protobuf
       # #
 
       def acceptable?(val)
-        [true, false].include?(val) || %w(true false).include?(val)
+        val == true || val == false || val == TRUE_STRING || val == FALSE_STRING
       end
 
       def coerce!(val)
-        case val
-        when String
-          val == TRUE_STRING
-        else
-          val
-        end
+        return true if val == true
+        return false if val == false
+        return true if val == TRUE_STRING
+        return false if val == FALSE_STRING
+
+        val
       end
 
       def decode(value)
@@ -36,7 +38,7 @@ module Protobuf
       end
 
       def encode(value)
-        [value ? 1 : 0].pack('C')
+        value ? TRUE_ENCODE : FALSE_ENCODE
       end
 
       private
