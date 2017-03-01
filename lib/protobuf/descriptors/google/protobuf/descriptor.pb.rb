@@ -295,7 +295,6 @@ module Google
       repeated ::Google::Protobuf::SourceCodeInfo::Location, :location, 1
     end
 
-
   end
 
 end

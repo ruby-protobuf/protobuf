@@ -111,6 +111,24 @@ RSpec.describe ::Protobuf::Generators::Base do
     end
 
     it 'serializes messages' do
+      output_string = <<-STRING
+        { :foo => "space",
+          :bar => [{
+            :foo => "station",
+            :bar => { :foo => "orbit" },
+            :boom => 123,
+            :goat => ::MyEnum::FOO,
+            :bam => false,
+            :fire => 3.5 }],
+          :boom => 456,
+          :goat => ::MyEnum::BOO,
+          :bam => true, :fire => 1.2 }
+      STRING
+
+      output_string.lstrip!
+      output_string.rstrip!
+      output_string.delete!("\n")
+      output_string.squeeze!(" ")
       expect(generator.serialize_value(MyMessage3.new(
                                          :foo => 'space',
                                          :bar => [MyMessage2.new(
@@ -125,11 +143,7 @@ RSpec.describe ::Protobuf::Generators::Base do
                                          :goat => MyEnum::BOO,
                                          :bam => true,
                                          :fire => 1.2,
-      ))).to eq(
-        '{ :foo => "space", :bar => [{ '\
-        ':foo => "station", :bar => { :foo => "orbit" }, :boom => 123, :goat => ::MyEnum::FOO, :bam => false, :fire => 3.5 '\
-        '}], :boom => 456, :goat => ::MyEnum::BOO, :bam => true, :fire => 1.2 }'
-      )
+      ))).to eq(output_string)
     end
 
     it 'serializes enums' do

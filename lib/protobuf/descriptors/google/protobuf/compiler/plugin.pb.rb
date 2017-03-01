@@ -28,6 +28,13 @@ module Google
 
 
       ##
+      # File Options
+      #
+      set_option :java_package, "com.google.protobuf.compiler"
+      set_option :java_outer_classname, "PluginProtos"
+
+
+      ##
       # Message Fields
       #
       class CodeGeneratorRequest
