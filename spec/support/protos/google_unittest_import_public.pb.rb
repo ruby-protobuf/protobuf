@@ -15,6 +15,12 @@ module Protobuf_unittest_import
 
 
   ##
+  # File Options
+  #
+  set_option :java_package, "com.google.protobuf.test"
+
+
+  ##
   # Message Fields
   #
   class PublicImportMessage

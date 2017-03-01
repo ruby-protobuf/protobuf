@@ -37,6 +37,14 @@ module Protobuf_unittest_import
 
 
   ##
+  # File Options
+  #
+  set_option :java_package, "com.google.protobuf.test"
+  set_option :optimize_for, ::Google::Protobuf::FileOptions::OptimizeMode::SPEED
+  set_option :cc_enable_arenas, true
+
+
+  ##
   # Message Fields
   #
   class ImportMessage

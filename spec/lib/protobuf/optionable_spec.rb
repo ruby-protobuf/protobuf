@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'protobuf/optionable'
 require 'protobuf/field/message_field'
+require PROTOS_PATH.join('resource.pb')
 
 RSpec.describe 'Optionable' do
   describe '.{get,get!}_option' do
@@ -163,6 +164,23 @@ RSpec.describe 'Optionable' do
         expect { object.optionable_descriptor_class }.to raise_error(NoMethodError)
         ::Protobuf::Optionable.inject(klass, false) { ::Google::Protobuf::MessageOptions }
         expect(object.optionable_descriptor_class).to eq(::Google::Protobuf::MessageOptions)
+      end
+    end
+  end
+
+  describe 'getting options from generated code' do
+    context 'file options' do
+      it 'gets base options' do
+        expect(::Test.get_option!(:cc_generic_services)).to eq(true)
+      end
+
+      it 'gets unset options' do
+        expect(::Test.get_option!(:java_multiple_files)).to eq(nil)
+        expect(::Test.get_option(:java_multiple_files)).to eq(false)
+      end
+
+      it 'gets custom options' do
+        expect(::Test.get_option!(:".test.file_option")).to eq(9876543210)
       end
     end
   end
