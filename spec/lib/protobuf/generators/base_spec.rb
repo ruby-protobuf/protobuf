@@ -128,7 +128,7 @@ RSpec.describe ::Protobuf::Generators::Base do
       ))).to eq(
         '{ :foo => "space", :bar => [{ '\
         ':foo => "station", :bar => { :foo => "orbit" }, :boom => 123, :goat => ::MyEnum::FOO, :bam => false, :fire => 3.5 '\
-        '}], :boom => 456, :goat => ::MyEnum::BOO, :bam => true, :fire => 1.2 }'
+        '}], :boom => 456, :goat => ::MyEnum::BOO, :bam => true, :fire => 1.2 }',
       )
     end
 
