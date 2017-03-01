@@ -12,7 +12,7 @@ module Protobuf
 
     def self.print_tag_warning_suppress
       STDERR.puts "Suppress tag warning output with PB_NO_TAG_WARNINGS=1."
-      def self.print_tag_warning_suppress; end
+      def self.print_tag_warning_suppress; end # rubocop:disable Lint/DuplicateMethods, Lint/NestedMethodDefinition
     end
 
     def self.warn(message)

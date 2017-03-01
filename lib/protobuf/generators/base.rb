@@ -36,18 +36,18 @@ module Protobuf
         ".#{type_namespace.join('.')}"
       end
 
-      def run_once(label, &block)
+      def run_once(label)
         tracker_ivar = "@_#{label}_compiled"
         value_ivar = "@_#{label}_compiled_value"
 
         if instance_variable_get(tracker_ivar)
           return instance_variable_get(value_ivar)
-        else
-          return_value = block.call
-          instance_variable_set(tracker_ivar, true)
-          instance_variable_set(value_ivar, return_value)
-          return return_value
         end
+
+        return_value = yield
+        instance_variable_set(tracker_ivar, true)
+        instance_variable_set(value_ivar, return_value)
+        return_value
       end
 
       def to_s

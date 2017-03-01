@@ -93,14 +93,14 @@ module Protobuf
       # If a block is given, call the block from within an indent block.
       # Otherwise, end the block on the same line.
       #
-      def print_block(name, parent_klass, type, &block)
+      def print_block(name, parent_klass, type)
         name = modulize(name)
         block_def = "#{type} #{name}"
         block_def += " < #{parent_class(parent_klass)}" if parent_klass
 
         if block_given?
           puts block_def
-          indent { block.call }
+          indent { yield }
           puts "end"
           puts
         else

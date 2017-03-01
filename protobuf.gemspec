@@ -29,7 +29,7 @@ require "protobuf/version"
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'rake', '< 11.0' # Rake 11.0.1 removes the last_comment method which rspec-core (< 3.4.4) uses
   s.add_development_dependency 'rspec', '>= 3.0'
-  s.add_development_dependency "rubocop", "~> 0.35.0"
+  s.add_development_dependency "rubocop", "~> 0.38.0"
   s.add_development_dependency "parser", "2.3.0.6" # Locked this down since 2.3.0.7 causes issues. https://github.com/bbatsov/rubocop/pull/2984
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'timecop'

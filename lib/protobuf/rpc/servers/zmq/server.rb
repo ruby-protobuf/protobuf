@@ -16,7 +16,7 @@ module Protobuf
           :broadcast_beacons => false,
           :broadcast_busy => false,
           :zmq_inproc => true,
-        }
+        }.freeze
 
         attr_accessor :options, :workers
         attr_reader :zmq_context
@@ -117,7 +117,7 @@ module Protobuf
         def frontend_ip
           @frontend_ip ||= resolve_ip(options[:host])
         end
-        alias_method :backend_ip, :frontend_ip
+        alias :backend_ip frontend_ip
 
         def frontend_port
           options[:port]
@@ -217,11 +217,12 @@ module Protobuf
         end
 
         def timeout
-          if @timeout.nil?
-            @timeout = 0
-          else
-            @timeout = [minimum_timeout, maintenance_timeout].max
-          end
+          @timeout =
+            if @timeout.nil?
+              0
+            else
+              [minimum_timeout, maintenance_timeout].max
+            end
         end
 
         def total_workers

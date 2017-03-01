@@ -107,11 +107,12 @@ module Protobuf
         end
 
         def init_zmq_context
-          if inproc?
-            @zmq_context = @server.zmq_context
-          else
-            @zmq_context = ZMQ::Context.new
-          end
+          @zmq_context =
+            if inproc?
+              @server.zmq_context
+            else
+              ZMQ::Context.new
+            end
         end
 
         def inproc?
@@ -146,7 +147,7 @@ module Protobuf
               write_to_frontend([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, ::Protobuf::Rpc::Zmq::NO_WORKERS_AVAILABLE])
             end
           else
-            if @idle_workers.empty?
+            if @idle_workers.empty? # rubocop:disable Style/IfInsideElse
               local_queue << [address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message].concat(frames)
             else
               write_to_backend([@idle_workers.shift, ::Protobuf::Rpc::Zmq::EMPTY_STRING].concat([address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, message]).concat(frames))

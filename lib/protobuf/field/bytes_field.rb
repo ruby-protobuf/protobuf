@@ -33,11 +33,12 @@ module Protobuf
       end
 
       def encode(value)
-        if value.is_a?(::Protobuf::Message)
-          value_to_encode = value.encode
-        else
-          value_to_encode = value.dup
-        end
+        value_to_encode =
+          if value.is_a?(::Protobuf::Message)
+            value.encode
+          else
+            value.dup
+          end
 
         value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
         string_size = ::Protobuf::Field::VarintField.encode(value_to_encode.size)
@@ -52,7 +53,7 @@ module Protobuf
       def coerce!(value)
         case value
         when String, Symbol
-          "#{value}"
+          value.to_s
         when NilClass
           nil
         when ::Protobuf::Message

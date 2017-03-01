@@ -150,16 +150,16 @@ module Protobuf
     end
 
     def [](name)
-      if (field = self.class.get_field(name, true))
-        if field.repeated?
-          @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field)
-        elsif @values.key?(field.fully_qualified_name)
-          @values[field.fully_qualified_name]
-        else
-          field.default_value
-        end
+      field = self.class.get_field(name, true)
+
+      fail ArgumentError, "invalid field name=#{name.inspect}" unless field
+
+      if field.repeated?
+        @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field)
+      elsif @values.key?(field.fully_qualified_name)
+        @values[field.fully_qualified_name]
       else
-        fail ArgumentError, "invalid field name=#{name.inspect}"
+        field.default_value
       end
     end
 
@@ -170,17 +170,17 @@ module Protobuf
     ##
     # Instance Aliases
     #
-    alias_method :to_hash_value, :to_hash
-    alias_method :to_proto_hash, :to_hash
-    alias_method :responds_to_has?, :respond_to_has?
-    alias_method :respond_to_and_has?, :respond_to_has?
-    alias_method :responds_to_and_has?, :respond_to_has?
-    alias_method :respond_to_has_present?, :respond_to_has_and_present?
-    alias_method :respond_to_and_has_present?, :respond_to_has_and_present?
-    alias_method :respond_to_and_has_and_present?, :respond_to_has_and_present?
-    alias_method :responds_to_has_present?, :respond_to_has_and_present?
-    alias_method :responds_to_and_has_present?, :respond_to_has_and_present?
-    alias_method :responds_to_and_has_and_present?, :respond_to_has_and_present?
+    alias :to_hash_value to_hash
+    alias :to_proto_hash to_hash
+    alias :responds_to_has? respond_to_has?
+    alias :respond_to_and_has? respond_to_has?
+    alias :responds_to_and_has? respond_to_has?
+    alias :respond_to_has_present? respond_to_has_and_present?
+    alias :respond_to_and_has_present? respond_to_has_and_present?
+    alias :respond_to_and_has_and_present? respond_to_has_and_present?
+    alias :responds_to_has_present? respond_to_has_and_present?
+    alias :responds_to_and_has_present? respond_to_has_and_present?
+    alias :responds_to_and_has_and_present? respond_to_has_and_present?
 
     ##
     # Private Instance Methods
@@ -195,14 +195,14 @@ module Protobuf
             ::Protobuf.deprecator.deprecation_warning("#{self.class}#[#{name}]=nil", "use an empty array instead of nil")
             return
           end
-          if value.is_a?(Array)
-            value = value.compact
-          else
+          unless value.is_a?(Array)
             fail TypeError, <<-TYPE_ERROR
                 Expected repeated value of type '#{field.type_class}'
                 Got '#{value.class}' for repeated protobuf field #{field.name}
             TYPE_ERROR
           end
+
+          value = value.compact
 
           if value.empty?
             @values.delete(field.fully_qualified_name)
@@ -211,7 +211,7 @@ module Protobuf
             @values[field.fully_qualified_name].replace(value)
           end
         else
-          if value.nil?
+          if value.nil? # rubocop:disable Style/IfInsideElse
             @values.delete(field.fully_qualified_name)
           elsif field.acceptable?(value)
             @values[field.fully_qualified_name] = field.coerce!(value)

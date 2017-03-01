@@ -11,7 +11,7 @@ RSpec.describe Protobuf::Varint do
     913_389 => "7d83",
     516_192_829_912_693 => "9eyMkpivdQ==",
     9_999_999_999_999_999_999 => "//+fz8jgyOOKAQ==",
-  }
+  }.freeze
 
   [defined?(::Varint) ? ::Varint : nil, Protobuf::VarintPure].compact.each do |klass|
     context "with #{klass}" do

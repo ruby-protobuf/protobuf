@@ -362,7 +362,7 @@ RSpec.describe Protobuf::Rpc::ServiceFilters do
           :endpoint,
           :inner_around_bottom,
           :outer_around_bottom,
-        ]
+        ],
       )
     end
 
@@ -390,7 +390,7 @@ RSpec.describe Protobuf::Rpc::ServiceFilters do
             :outer_around_top,
             :inner_around,
             :outer_around_bottom,
-          ]
+          ],
         )
       end
 
