@@ -110,7 +110,7 @@ module Protobuf_unittest
   # Message Fields
   #
   class TestMessageWithCustomOptions
-    optional :string, :field1, 1
+    optional :string, :field1, 1, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD, :".protobuf_unittest.field_opt1" => 8765432109
   end
 
   class ComplexOptionType1
@@ -162,12 +162,12 @@ module Protobuf_unittest
   end
 
   class AggregateMessage
-    optional :int32, :fieldname, 1
+    optional :int32, :fieldname, 1, :".protobuf_unittest.fieldopt" => { :s => "FieldAnnotation" }
   end
 
   class NestedOptionType
     class NestedMessage
-      optional :int32, :nested_field, 1
+      optional :int32, :nested_field, 1, :".protobuf_unittest.field_opt1" => 1002
     end
 
   end
@@ -188,7 +188,7 @@ module Protobuf_unittest
     optional :uint64, :".protobuf_unittest.file_opt1", 7736974, :extension => true
     optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.fileopt", 15478479, :extension => true
     optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.Aggregate.nested", 15476903, :extension => true
-    optional :int32, :".protobuf_unittest.NestedOptionType.nested_extension", 7912573, :extension => true
+    optional :int32, :".protobuf_unittest.NestedOptionType.nested_extension", 7912573, :extension => true, :".protobuf_unittest.field_opt2" => 1005
   end
 
   class ::Google::Protobuf::MessageOptions < ::Protobuf::Message

@@ -1,3 +1,4 @@
+require 'active_support/core_ext/hash/slice'
 require 'protobuf/field/field_array'
 module Protobuf
   module Field
@@ -39,7 +40,12 @@ module Protobuf
         @rule          = rule
         @tag           = tag
         @type_class    = type_class
-        @options       = options
+        # Populate the option hash with all the original default field options, for backwards compatibility.
+        # However, both default and custom options should ideally be accessed through the Optionable .{get,get!}_option functions.
+        @options = options.slice(:ctype, :packed, :deprecated, :lazy, :jstype, :weak, :uninterpreted_option, :default, :extension)
+        options.each do |option_name, value|
+          set_option(option_name, value)
+        end
 
         validate_packed_field if packed?
         define_accessor(simple_name, fully_qualified_name) if simple_name

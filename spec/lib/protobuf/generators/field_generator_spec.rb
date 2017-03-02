@@ -97,6 +97,55 @@ RSpec.describe ::Protobuf::Generators::FieldGenerator do
 
       specify { expect(subject).to eq "optional :string, :foo_bar, 3, :deprecated => true\n" }
     end
+
+    context 'when field uses a custom option that is an extension' do
+      class ::CustomFieldEnum < ::Protobuf::Enum
+        define :BOOM, 1
+        define :BAM, 2
+      end
+
+      class ::CustomFieldMessage < ::Protobuf::Message
+        optional :string, :foo, 1
+      end
+
+      class ::Google::Protobuf::FieldOptions < ::Protobuf::Message
+        optional :string, :custom_string_option, 22000, :extension => true
+        optional :bool, :custom_bool_option, 22001, :extension => true
+        optional :int32, :custom_int32_option, 22002, :extension => true
+        optional ::CustomFieldEnum, :custom_enum_option, 22003, :extension => true
+        optional ::CustomFieldMessage, :custom_message_option, 22004, :extension => true
+      end
+
+      describe 'option has a string value' do
+        let(:field_options) { { :custom_string_option => 'boom' } }
+
+        specify { expect(subject).to eq "optional :string, :foo_bar, 3, :custom_string_option => \"boom\"\n" }
+      end
+
+      describe 'option has a bool value' do
+        let(:field_options) { { :custom_bool_option => true } }
+
+        specify { expect(subject).to eq "optional :string, :foo_bar, 3, :custom_bool_option => true\n" }
+      end
+
+      describe 'option has a int32 value' do
+        let(:field_options) { { :custom_int32_option => 123 } }
+
+        specify { expect(subject).to eq "optional :string, :foo_bar, 3, :custom_int32_option => 123\n" }
+      end
+
+      describe 'option has a message value' do
+        let(:field_options) { { :custom_message_option => CustomFieldMessage.new(:foo => 'boom') } }
+
+        specify { expect(subject).to eq "optional :string, :foo_bar, 3, :custom_message_option => { :foo => \"boom\" }\n" }
+      end
+
+      describe 'option has a enum value' do
+        let(:field_options) { { :custom_enum_option => CustomFieldEnum::BAM } }
+
+        specify { expect(subject).to eq "optional :string, :foo_bar, 3, :custom_enum_option => ::CustomFieldEnum::BAM\n" }
+      end
+    end
   end
 
 end
