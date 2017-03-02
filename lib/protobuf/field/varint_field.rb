@@ -50,9 +50,14 @@ module Protobuf
       ##
       # Public Instance Methods
       #
-
       def acceptable?(val)
-        int_val = coerce!(val)
+        int_val = if val.is_a?(Integer)
+                    return true if val >= 0 && val < INT32_MAX # return quickly for smallest integer size, hot code path
+                    val
+                  else
+                    coerce!(val)
+                  end
+
         int_val >= self.class.min && int_val <= self.class.max
       rescue
         false
