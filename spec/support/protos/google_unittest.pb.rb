@@ -25,7 +25,7 @@ module Protobuf_unittest
   end
 
   class TestEnumWithDupValue < ::Protobuf::Enum
-    set_option :allow_alias
+    set_option :allow_alias, true
 
     define :FOO1, 1
     define :BAR1, 2

@@ -19,10 +19,14 @@ module Test
   # Enum Classes
   #
   class StatusType < ::Protobuf::Enum
+    set_option :allow_alias, true
+    set_option :".test.enum_option", -789
+
     define :PENDING, 0
     define :ENABLED, 1
     define :DISABLED, 2
     define :DELETED, 3
+    define :ALIASED, 3
   end
 
 
@@ -128,6 +132,10 @@ module Test
 
   class ::Google::Protobuf::FieldOptions < ::Protobuf::Message
     optional :uint64, :".test.field_option", 858769, :extension => true
+  end
+
+  class ::Google::Protobuf::EnumOptions < ::Protobuf::Message
+    optional :int64, :".test.enum_option", 590284, :extension => true
   end
 
 

@@ -24,6 +24,8 @@ module Protobuf_unittest
   end
 
   class AggregateEnum < ::Protobuf::Enum
+    set_option :".protobuf_unittest.enumopt", { :s => "EnumAnnotation" }
+
     define :VALUE, 1
   end
 
@@ -33,6 +35,8 @@ module Protobuf_unittest
   #
   class TestMessageWithCustomOptions < ::Protobuf::Message
     class AnEnum < ::Protobuf::Enum
+      set_option :".protobuf_unittest.enum_opt1", -789
+
       define :ANENUM_VAL1, 1
       define :ANENUM_VAL2, 2
     end
@@ -71,6 +75,8 @@ module Protobuf_unittest
   class AggregateMessage < ::Protobuf::Message; end
   class NestedOptionType < ::Protobuf::Message
     class NestedEnum < ::Protobuf::Enum
+      set_option :".protobuf_unittest.enum_opt1", 1003
+
       define :NESTED_ENUM_VALUE, 1
     end
 

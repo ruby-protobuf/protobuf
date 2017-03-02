@@ -1,20 +1,17 @@
 require 'protobuf/generators/base'
+require 'protobuf/generators/option_generator'
 
 module Protobuf
   module Generators
     class EnumGenerator < Base
-
-      def allow_alias?
-        descriptor.options.try(:allow_alias!) { false }
-      end
 
       def compile
         run_once(:compile) do
           tags = []
 
           print_class(descriptor.name, :enum) do
-            if allow_alias?
-              puts "set_option :allow_alias"
+            if descriptor.options
+              print OptionGenerator.new(descriptor.options, current_indent).to_s
               puts
             end
 
@@ -24,7 +21,7 @@ module Protobuf
             end
           end
 
-          unless allow_alias?
+          unless descriptor.options.try(:allow_alias)
             self.class.validate_tags(fully_qualified_type_namespace, tags)
           end
         end

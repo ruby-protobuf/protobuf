@@ -201,5 +201,22 @@ RSpec.describe 'Optionable' do
         expect(subject.get_option!(:".test.field_option")).to eq(8765432109)
       end
     end
+
+    context 'enum options' do
+      subject { ::Test::StatusType }
+
+      it 'gets base options' do
+        expect(subject.get_option!(:allow_alias)).to eq(true)
+      end
+
+      it 'gets unset options' do
+        expect(subject.get_option!(:deprecated)).to eq(nil)
+        expect(subject.get_option(:deprecated)).to eq(false)
+      end
+
+      it 'gets custom options' do
+        expect(subject.get_option!(:".test.enum_option")).to eq(-789)
+      end
+    end
   end
 end

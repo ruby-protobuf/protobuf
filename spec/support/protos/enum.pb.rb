@@ -24,7 +24,7 @@ module Test
   end
 
   class AliasedEnum < ::Protobuf::Enum
-    set_option :allow_alias
+    set_option :allow_alias, true
 
     define :THREE, 3
     define :TRES, 3
