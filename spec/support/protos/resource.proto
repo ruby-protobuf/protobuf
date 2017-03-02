@@ -11,6 +11,10 @@ extend google.protobuf.FileOptions {
   optional uint64 file_option = 9585869;
 }
 
+extend google.protobuf.FieldOptions {
+  optional uint64 field_option = 858769;
+}
+
 enum StatusType {
   PENDING = 0;
   ENABLED = 1;
@@ -32,7 +36,7 @@ message ResourceSleepRequest {
 message Resource {
   extensions 100 to max;
 
-  required string name = 1;
+  required string name = 1 [(field_option) = 8765432109, ctype = CORD];
   optional int64 date_created = 2;
   optional StatusType status = 3;
   repeated StatusType repeated_enum = 4;

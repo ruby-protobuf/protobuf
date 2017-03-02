@@ -224,10 +224,10 @@ module Protobuf_unittest
     optional ::Protobuf_unittest::TestAllTypes::NestedEnum, :optional_nested_enum, 21
     optional ::Protobuf_unittest::ForeignEnum, :optional_foreign_enum, 22
     optional ::Protobuf_unittest_import::ImportEnum, :optional_import_enum, 23
-    optional :string, :optional_string_piece, 24
-    optional :string, :optional_cord, 25
+    optional :string, :optional_string_piece, 24, :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    optional :string, :optional_cord, 25, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
     optional ::Protobuf_unittest_import::PublicImportMessage, :optional_public_import_message, 26
-    optional ::Protobuf_unittest::TestAllTypes::NestedMessage, :optional_lazy_message, 27
+    optional ::Protobuf_unittest::TestAllTypes::NestedMessage, :optional_lazy_message, 27, :lazy => true
     repeated :int32, :repeated_int32, 31
     repeated :int64, :repeated_int64, 32
     repeated :uint32, :repeated_uint32, 33
@@ -250,9 +250,9 @@ module Protobuf_unittest
     repeated ::Protobuf_unittest::TestAllTypes::NestedEnum, :repeated_nested_enum, 51
     repeated ::Protobuf_unittest::ForeignEnum, :repeated_foreign_enum, 52
     repeated ::Protobuf_unittest_import::ImportEnum, :repeated_import_enum, 53
-    repeated :string, :repeated_string_piece, 54
-    repeated :string, :repeated_cord, 55
-    repeated ::Protobuf_unittest::TestAllTypes::NestedMessage, :repeated_lazy_message, 57
+    repeated :string, :repeated_string_piece, 54, :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    repeated :string, :repeated_cord, 55, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
+    repeated ::Protobuf_unittest::TestAllTypes::NestedMessage, :repeated_lazy_message, 57, :lazy => true
     optional :int32, :default_int32, 61, :default => 41
     optional :int64, :default_int64, 62, :default => 42
     optional :uint32, :default_uint32, 63, :default => 43
@@ -271,8 +271,8 @@ module Protobuf_unittest
     optional ::Protobuf_unittest::TestAllTypes::NestedEnum, :default_nested_enum, 81, :default => ::Protobuf_unittest::TestAllTypes::NestedEnum::BAR
     optional ::Protobuf_unittest::ForeignEnum, :default_foreign_enum, 82, :default => ::Protobuf_unittest::ForeignEnum::FOREIGN_BAR
     optional ::Protobuf_unittest_import::ImportEnum, :default_import_enum, 83, :default => ::Protobuf_unittest_import::ImportEnum::IMPORT_BAR
-    optional :string, :default_string_piece, 84, :default => "abc"
-    optional :string, :default_cord, 85, :default => "123"
+    optional :string, :default_string_piece, 84, :default => "abc", :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    optional :string, :default_cord, 85, :default => "123", :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
     optional :uint32, :oneof_uint32, 111
     optional ::Protobuf_unittest::TestAllTypes::NestedMessage, :oneof_nested_message, 112
     optional :string, :oneof_string, 113
@@ -318,10 +318,10 @@ module Protobuf_unittest
     optional ::Protobuf_unittest::TestAllTypes::NestedEnum, :".protobuf_unittest.optional_nested_enum_extension", 21, :extension => true
     optional ::Protobuf_unittest::ForeignEnum, :".protobuf_unittest.optional_foreign_enum_extension", 22, :extension => true
     optional ::Protobuf_unittest_import::ImportEnum, :".protobuf_unittest.optional_import_enum_extension", 23, :extension => true
-    optional :string, :".protobuf_unittest.optional_string_piece_extension", 24, :extension => true
-    optional :string, :".protobuf_unittest.optional_cord_extension", 25, :extension => true
+    optional :string, :".protobuf_unittest.optional_string_piece_extension", 24, :extension => true, :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    optional :string, :".protobuf_unittest.optional_cord_extension", 25, :extension => true, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
     optional ::Protobuf_unittest_import::PublicImportMessage, :".protobuf_unittest.optional_public_import_message_extension", 26, :extension => true
-    optional ::Protobuf_unittest::TestAllTypes::NestedMessage, :".protobuf_unittest.optional_lazy_message_extension", 27, :extension => true
+    optional ::Protobuf_unittest::TestAllTypes::NestedMessage, :".protobuf_unittest.optional_lazy_message_extension", 27, :extension => true, :lazy => true
     repeated :int32, :".protobuf_unittest.repeated_int32_extension", 31, :extension => true
     repeated :int64, :".protobuf_unittest.repeated_int64_extension", 32, :extension => true
     repeated :uint32, :".protobuf_unittest.repeated_uint32_extension", 33, :extension => true
@@ -344,9 +344,9 @@ module Protobuf_unittest
     repeated ::Protobuf_unittest::TestAllTypes::NestedEnum, :".protobuf_unittest.repeated_nested_enum_extension", 51, :extension => true
     repeated ::Protobuf_unittest::ForeignEnum, :".protobuf_unittest.repeated_foreign_enum_extension", 52, :extension => true
     repeated ::Protobuf_unittest_import::ImportEnum, :".protobuf_unittest.repeated_import_enum_extension", 53, :extension => true
-    repeated :string, :".protobuf_unittest.repeated_string_piece_extension", 54, :extension => true
-    repeated :string, :".protobuf_unittest.repeated_cord_extension", 55, :extension => true
-    repeated ::Protobuf_unittest::TestAllTypes::NestedMessage, :".protobuf_unittest.repeated_lazy_message_extension", 57, :extension => true
+    repeated :string, :".protobuf_unittest.repeated_string_piece_extension", 54, :extension => true, :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    repeated :string, :".protobuf_unittest.repeated_cord_extension", 55, :extension => true, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
+    repeated ::Protobuf_unittest::TestAllTypes::NestedMessage, :".protobuf_unittest.repeated_lazy_message_extension", 57, :extension => true, :lazy => true
     optional :int32, :".protobuf_unittest.default_int32_extension", 61, :default => 41, :extension => true
     optional :int64, :".protobuf_unittest.default_int64_extension", 62, :default => 42, :extension => true
     optional :uint32, :".protobuf_unittest.default_uint32_extension", 63, :default => 43, :extension => true
@@ -365,8 +365,8 @@ module Protobuf_unittest
     optional ::Protobuf_unittest::TestAllTypes::NestedEnum, :".protobuf_unittest.default_nested_enum_extension", 81, :default => ::Protobuf_unittest::TestAllTypes::NestedEnum::BAR, :extension => true
     optional ::Protobuf_unittest::ForeignEnum, :".protobuf_unittest.default_foreign_enum_extension", 82, :default => ::Protobuf_unittest::ForeignEnum::FOREIGN_BAR, :extension => true
     optional ::Protobuf_unittest_import::ImportEnum, :".protobuf_unittest.default_import_enum_extension", 83, :default => ::Protobuf_unittest_import::ImportEnum::IMPORT_BAR, :extension => true
-    optional :string, :".protobuf_unittest.default_string_piece_extension", 84, :default => "abc", :extension => true
-    optional :string, :".protobuf_unittest.default_cord_extension", 85, :default => "123", :extension => true
+    optional :string, :".protobuf_unittest.default_string_piece_extension", 84, :default => "abc", :extension => true, :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    optional :string, :".protobuf_unittest.default_cord_extension", 85, :default => "123", :extension => true, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
     optional :uint32, :".protobuf_unittest.oneof_uint32_extension", 111, :extension => true
     optional ::Protobuf_unittest::TestAllTypes::NestedMessage, :".protobuf_unittest.oneof_nested_message_extension", 112, :extension => true
     optional :string, :".protobuf_unittest.oneof_string_extension", 113, :extension => true
@@ -466,11 +466,11 @@ module Protobuf_unittest
   end
 
   class TestEagerMessage
-    optional ::Protobuf_unittest::TestAllTypes, :sub_message, 1
+    optional ::Protobuf_unittest::TestAllTypes, :sub_message, 1, :lazy => false
   end
 
   class TestLazyMessage
-    optional ::Protobuf_unittest::TestAllTypes, :sub_message, 1
+    optional ::Protobuf_unittest::TestAllTypes, :sub_message, 1, :lazy => true
   end
 
   class TestNestedMessageHasBits
@@ -487,14 +487,14 @@ module Protobuf_unittest
     optional :string, :StringField, 2
     optional ::Protobuf_unittest::ForeignEnum, :EnumField, 3
     optional ::Protobuf_unittest::ForeignMessage, :MessageField, 4
-    optional :string, :StringPieceField, 5
-    optional :string, :CordField, 6
+    optional :string, :StringPieceField, 5, :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    optional :string, :CordField, 6, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
     repeated :int32, :RepeatedPrimitiveField, 7
     repeated :string, :RepeatedStringField, 8
     repeated ::Protobuf_unittest::ForeignEnum, :RepeatedEnumField, 9
     repeated ::Protobuf_unittest::ForeignMessage, :RepeatedMessageField, 10
-    repeated :string, :RepeatedStringPieceField, 11
-    repeated :string, :RepeatedCordField, 12
+    repeated :string, :RepeatedStringPieceField, 11, :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    repeated :string, :RepeatedCordField, 12, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
   end
 
   class TestFieldOrderings
@@ -539,8 +539,8 @@ module Protobuf_unittest
     optional :string, :cpp_trigraph, 20, :default => "? ? ?? ?? ??? ??/ ??-"
     optional :string, :string_with_zero, 23, :default => "hel lo"
     optional :bytes, :bytes_with_zero, 24, :default => "wor\000ld"
-    optional :string, :string_piece_with_zero, 25, :default => "ab c"
-    optional :string, :cord_with_zero, 26, :default => "12 3"
+    optional :string, :string_piece_with_zero, 25, :default => "ab c", :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    optional :string, :cord_with_zero, 26, :default => "12 3", :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
     optional :string, :replacement_string, 27, :default => "${unknown}"
   end
 
@@ -621,17 +621,17 @@ module Protobuf_unittest
 
     optional :int32, :foo_int, 1
     optional :string, :foo_string, 2
-    optional :string, :foo_cord, 3
-    optional :string, :foo_string_piece, 4
+    optional :string, :foo_cord, 3, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
+    optional :string, :foo_string_piece, 4, :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
     optional :bytes, :foo_bytes, 5
     optional ::Protobuf_unittest::TestOneof2::NestedEnum, :foo_enum, 6
     optional ::Protobuf_unittest::TestOneof2::NestedMessage, :foo_message, 7
     optional ::Protobuf_unittest::TestOneof2::FooGroup, :foogroup, 8
-    optional ::Protobuf_unittest::TestOneof2::NestedMessage, :foo_lazy_message, 11
+    optional ::Protobuf_unittest::TestOneof2::NestedMessage, :foo_lazy_message, 11, :lazy => true
     optional :int32, :bar_int, 12, :default => 5
     optional :string, :bar_string, 13, :default => "STRING"
-    optional :string, :bar_cord, 14, :default => "CORD"
-    optional :string, :bar_string_piece, 15, :default => "SPIECE"
+    optional :string, :bar_cord, 14, :default => "CORD", :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
+    optional :string, :bar_string_piece, 15, :default => "SPIECE", :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
     optional :bytes, :bar_bytes, 16, :default => "BYTES"
     optional ::Protobuf_unittest::TestOneof2::NestedEnum, :bar_enum, 17, :default => ::Protobuf_unittest::TestOneof2::NestedEnum::BAR
     optional :int32, :baz_int, 18
@@ -666,20 +666,20 @@ module Protobuf_unittest
   end
 
   class TestUnpackedTypes
-    repeated :int32, :unpacked_int32, 90
-    repeated :int64, :unpacked_int64, 91
-    repeated :uint32, :unpacked_uint32, 92
-    repeated :uint64, :unpacked_uint64, 93
-    repeated :sint32, :unpacked_sint32, 94
-    repeated :sint64, :unpacked_sint64, 95
-    repeated :fixed32, :unpacked_fixed32, 96
-    repeated :fixed64, :unpacked_fixed64, 97
-    repeated :sfixed32, :unpacked_sfixed32, 98
-    repeated :sfixed64, :unpacked_sfixed64, 99
-    repeated :float, :unpacked_float, 100
-    repeated :double, :unpacked_double, 101
-    repeated :bool, :unpacked_bool, 102
-    repeated ::Protobuf_unittest::ForeignEnum, :unpacked_enum, 103
+    repeated :int32, :unpacked_int32, 90, :packed => false
+    repeated :int64, :unpacked_int64, 91, :packed => false
+    repeated :uint32, :unpacked_uint32, 92, :packed => false
+    repeated :uint64, :unpacked_uint64, 93, :packed => false
+    repeated :sint32, :unpacked_sint32, 94, :packed => false
+    repeated :sint64, :unpacked_sint64, 95, :packed => false
+    repeated :fixed32, :unpacked_fixed32, 96, :packed => false
+    repeated :fixed64, :unpacked_fixed64, 97, :packed => false
+    repeated :sfixed32, :unpacked_sfixed32, 98, :packed => false
+    repeated :sfixed64, :unpacked_sfixed64, 99, :packed => false
+    repeated :float, :unpacked_float, 100, :packed => false
+    repeated :double, :unpacked_double, 101, :packed => false
+    repeated :bool, :unpacked_bool, 102, :packed => false
+    repeated ::Protobuf_unittest::ForeignEnum, :unpacked_enum, 103, :packed => false
   end
 
   class TestPackedExtensions
@@ -704,20 +704,20 @@ module Protobuf_unittest
   class TestUnpackedExtensions
     # Extension Fields
     extensions 1...536870912
-    repeated :int32, :".protobuf_unittest.unpacked_int32_extension", 90, :extension => true
-    repeated :int64, :".protobuf_unittest.unpacked_int64_extension", 91, :extension => true
-    repeated :uint32, :".protobuf_unittest.unpacked_uint32_extension", 92, :extension => true
-    repeated :uint64, :".protobuf_unittest.unpacked_uint64_extension", 93, :extension => true
-    repeated :sint32, :".protobuf_unittest.unpacked_sint32_extension", 94, :extension => true
-    repeated :sint64, :".protobuf_unittest.unpacked_sint64_extension", 95, :extension => true
-    repeated :fixed32, :".protobuf_unittest.unpacked_fixed32_extension", 96, :extension => true
-    repeated :fixed64, :".protobuf_unittest.unpacked_fixed64_extension", 97, :extension => true
-    repeated :sfixed32, :".protobuf_unittest.unpacked_sfixed32_extension", 98, :extension => true
-    repeated :sfixed64, :".protobuf_unittest.unpacked_sfixed64_extension", 99, :extension => true
-    repeated :float, :".protobuf_unittest.unpacked_float_extension", 100, :extension => true
-    repeated :double, :".protobuf_unittest.unpacked_double_extension", 101, :extension => true
-    repeated :bool, :".protobuf_unittest.unpacked_bool_extension", 102, :extension => true
-    repeated ::Protobuf_unittest::ForeignEnum, :".protobuf_unittest.unpacked_enum_extension", 103, :extension => true
+    repeated :int32, :".protobuf_unittest.unpacked_int32_extension", 90, :extension => true, :packed => false
+    repeated :int64, :".protobuf_unittest.unpacked_int64_extension", 91, :extension => true, :packed => false
+    repeated :uint32, :".protobuf_unittest.unpacked_uint32_extension", 92, :extension => true, :packed => false
+    repeated :uint64, :".protobuf_unittest.unpacked_uint64_extension", 93, :extension => true, :packed => false
+    repeated :sint32, :".protobuf_unittest.unpacked_sint32_extension", 94, :extension => true, :packed => false
+    repeated :sint64, :".protobuf_unittest.unpacked_sint64_extension", 95, :extension => true, :packed => false
+    repeated :fixed32, :".protobuf_unittest.unpacked_fixed32_extension", 96, :extension => true, :packed => false
+    repeated :fixed64, :".protobuf_unittest.unpacked_fixed64_extension", 97, :extension => true, :packed => false
+    repeated :sfixed32, :".protobuf_unittest.unpacked_sfixed32_extension", 98, :extension => true, :packed => false
+    repeated :sfixed64, :".protobuf_unittest.unpacked_sfixed64_extension", 99, :extension => true, :packed => false
+    repeated :float, :".protobuf_unittest.unpacked_float_extension", 100, :extension => true, :packed => false
+    repeated :double, :".protobuf_unittest.unpacked_double_extension", 101, :extension => true, :packed => false
+    repeated :bool, :".protobuf_unittest.unpacked_bool_extension", 102, :extension => true, :packed => false
+    repeated ::Protobuf_unittest::ForeignEnum, :".protobuf_unittest.unpacked_enum_extension", 103, :extension => true, :packed => false
   end
 
   class TestDynamicExtensions

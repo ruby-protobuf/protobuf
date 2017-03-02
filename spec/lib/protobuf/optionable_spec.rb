@@ -183,5 +183,23 @@ RSpec.describe 'Optionable' do
         expect(::Test.get_option!(:".test.file_option")).to eq(9876543210)
       end
     end
+
+    context 'field options' do
+      subject { ::Test::Resource.fields[0] }
+
+      it 'gets base options' do
+        expect(subject.get_option!(:ctype))
+          .to eq(::Google::Protobuf::FieldOptions::CType::CORD)
+      end
+
+      it 'gets unset options' do
+        expect(subject.get_option!(:lazy)).to eq(nil)
+        expect(subject.get_option(:lazy)).to eq(false)
+      end
+
+      it 'gets custom options' do
+        expect(subject.get_option!(:".test.field_option")).to eq(8765432109)
+      end
+    end
   end
 end

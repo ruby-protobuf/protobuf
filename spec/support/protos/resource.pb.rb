@@ -75,7 +75,7 @@ module Test
   end
 
   class Resource
-    required :string, :name, 1
+    required :string, :name, 1, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD, :".test.field_option" => 8765432109
     optional :int64, :date_created, 2
     optional ::Test::StatusType, :status, 3
     repeated ::Test::StatusType, :repeated_enum, 4
@@ -124,6 +124,10 @@ module Test
   #
   class ::Google::Protobuf::FileOptions < ::Protobuf::Message
     optional :uint64, :".test.file_option", 9585869, :extension => true
+  end
+
+  class ::Google::Protobuf::FieldOptions < ::Protobuf::Message
+    optional :uint64, :".test.field_option", 858769, :extension => true
   end
 
 
