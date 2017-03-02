@@ -14,7 +14,7 @@ RSpec.describe Protobuf::Rpc::Middleware::RequestDecoder do
   let(:request) { request_type.new(:name => 'required') }
   let(:request_type) { rpc_method.request_type }
   let(:request_wrapper) do
-    Protobuf::Socketrpc::Request.new(
+    ::Protobuf::Socketrpc::Request.new(
       :caller => client_host,
       :service_name => service_name,
       :method_name => method_name.to_s,
@@ -75,7 +75,7 @@ RSpec.describe Protobuf::Rpc::Middleware::RequestDecoder do
     end
 
     context "when decoding fails" do
-      before { allow(Protobuf::Socketrpc::Request).to receive(:decode).and_raise(RuntimeError) }
+      before { allow(::Protobuf::Socketrpc::Request).to receive(:decode).and_raise(RuntimeError) }
 
       it "raises a bad request data exception" do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::BadRequestData)
@@ -84,7 +84,7 @@ RSpec.describe Protobuf::Rpc::Middleware::RequestDecoder do
 
     context "when the RPC service is not defined" do
       let(:request_wrapper) do
-        Protobuf::Socketrpc::Request.new(
+        ::Protobuf::Socketrpc::Request.new(
           :caller => client_host,
           :service_name => 'Foo',
           :method_name => method_name.to_s,
@@ -99,7 +99,7 @@ RSpec.describe Protobuf::Rpc::Middleware::RequestDecoder do
 
     context "when RPC method is not defined" do
       let(:request_wrapper) do
-        Protobuf::Socketrpc::Request.new(
+        ::Protobuf::Socketrpc::Request.new(
           :caller => client_host,
           :service_name => service_name,
           :method_name => 'foo',

@@ -63,7 +63,7 @@ module Protobuf
         # @param [String] message The error message
         def failure(code, message)
           @error = ClientError.new
-          @error.code = Protobuf::Socketrpc::ErrorReason.fetch(code)
+          @error.code = ::Protobuf::Socketrpc::ErrorReason.fetch(code)
           @error.message = message
           logger.debug { sign_message("Server failed request (invoking on_failure): #{@error.inspect}") }
 
@@ -103,7 +103,7 @@ module Protobuf
 
           # Parse out the raw response
           @stats.response_size = @response_data.size unless @response_data.nil?
-          response_wrapper = Protobuf::Socketrpc::Response.decode(@response_data)
+          response_wrapper = ::Protobuf::Socketrpc::Response.decode(@response_data)
 
           # Determine success or failure based on parsed data
           if response_wrapper.field?(:error_reason)

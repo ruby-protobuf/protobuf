@@ -10,7 +10,7 @@ RSpec.describe Protobuf::Rpc::Middleware::ResponseEncoder do
   end
   let(:encoded_response) { response_wrapper.encode }
   let(:response) { Test::Resource.new(:name => 'required') }
-  let(:response_wrapper) { Protobuf::Socketrpc::Response.new(:response_proto => response) }
+  let(:response_wrapper) { ::Protobuf::Socketrpc::Response.new(:response_proto => response) }
 
   subject { described_class.new(app) }
 
@@ -65,7 +65,7 @@ RSpec.describe Protobuf::Rpc::Middleware::ResponseEncoder do
     end
 
     context "when encoding fails" do
-      before { allow_any_instance_of(Protobuf::Socketrpc::Response).to receive(:encode).and_raise(RuntimeError) }
+      before { allow_any_instance_of(::Protobuf::Socketrpc::Response).to receive(:encode).and_raise(RuntimeError) }
 
       it "raises a bad request data exception" do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::PbError)

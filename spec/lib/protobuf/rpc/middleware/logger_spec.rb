@@ -21,13 +21,13 @@ RSpec.describe Protobuf::Rpc::Middleware::Logger do
   let(:request) { request_type.new(:name => 'required') }
   let(:request_type) { rpc_method.request_type }
   let(:request_wrapper) do
-    Protobuf::Socketrpc::Request.new(
+    ::Protobuf::Socketrpc::Request.new(
       :service_name => service_name,
       :method_name => method_name.to_s,
       :request_proto => request,
     )
   end
-  let(:response_wrapper) { Protobuf::Socketrpc::Response.new(:response_proto => response) }
+  let(:response_wrapper) { ::Protobuf::Socketrpc::Response.new(:response_proto => response) }
   let(:response) { rpc_method.response_type.new(:name => 'required') }
   let(:rpc_method) { service_class.rpcs[method_name] }
   let(:rpc_service) { service_class.new(env) }
