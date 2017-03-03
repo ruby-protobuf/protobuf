@@ -19,6 +19,10 @@ extend google.protobuf.EnumOptions {
   optional int64 enum_option = 590284;
 }
 
+extend google.protobuf.MessageOptions {
+  optional int64 message_option = 485969;
+}
+
 enum StatusType {
   option allow_alias = true;
   option (enum_option) = -789;
@@ -42,6 +46,9 @@ message ResourceSleepRequest {
 }
 
 message Resource {
+  option map_entry = false;
+  option (message_option) = -56;
+
   extensions 100 to max;
 
   required string name = 1 [(field_option) = 8765432109, ctype = CORD];
