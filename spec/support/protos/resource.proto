@@ -15,11 +15,19 @@ extend google.protobuf.FieldOptions {
   optional uint64 field_option = 858769;
 }
 
+extend google.protobuf.EnumOptions {
+  optional int64 enum_option = 590284;
+}
+
 enum StatusType {
+  option allow_alias = true;
+  option (enum_option) = -789;
+
   PENDING = 0;
   ENABLED = 1;
   DISABLED = 2;
   DELETED = 3;
+  ALIASED = 3;
 }
 
 message ResourceFindRequest {
