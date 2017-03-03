@@ -79,6 +79,10 @@ module Test
   end
 
   class Resource
+    # Message Options
+    set_option :map_entry, false
+    set_option :".test.message_option", -56
+
     required :string, :name, 1, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD, :".test.field_option" => 8765432109
     optional :int64, :date_created, 2
     optional ::Test::StatusType, :status, 3
@@ -136,6 +140,10 @@ module Test
 
   class ::Google::Protobuf::EnumOptions < ::Protobuf::Message
     optional :int64, :".test.enum_option", 590284, :extension => true
+  end
+
+  class ::Google::Protobuf::MessageOptions < ::Protobuf::Message
+    optional :int64, :".test.message_option", 485969, :extension => true
   end
 
 

@@ -42,6 +42,8 @@ module Protobuf
             print_class(descriptor.name, nil) do
               group = GroupGenerator.new(current_indent)
               group.add_messages(descriptor.nested_type, :extension_fields => @extension_fields, :namespace => type_namespace)
+              group.add_comment(:options, 'Message Options')
+              group.add_options(descriptor.options) if options?
               group.add_message_fields(descriptor.field)
               self.class.validate_tags(fully_qualified_type_namespace, descriptor.field.map(&:number))
 
@@ -52,7 +54,7 @@ module Protobuf
 
               group.add_extension_fields(message_extension_fields)
 
-              group.order = [:message, :field, :extension_range, :extension_field]
+              group.order = [:message, :options, :field, :extension_range, :extension_field]
               print group.to_s
             end
           end
@@ -67,6 +69,10 @@ module Protobuf
 
       def fields?
         descriptor.field.count > 0
+      end
+
+      def options?
+        descriptor.options
       end
 
       def nested_enums?
@@ -85,7 +91,7 @@ module Protobuf
         if @only_declarations
           nested_types?
         else
-          fields? || nested_messages? || extensions?
+          fields? || nested_messages? || extensions? || options?
         end
       end
 

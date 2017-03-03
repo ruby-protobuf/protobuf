@@ -218,5 +218,22 @@ RSpec.describe 'Optionable' do
         expect(subject.get_option!(:".test.enum_option")).to eq(-789)
       end
     end
+
+    context 'message options' do
+      subject { ::Test::Resource }
+
+      it 'gets base options' do
+        expect(subject.get_option!(:map_entry)).to eq(false)
+      end
+
+      it 'gets unset options' do
+        expect(subject.get_option!(:deprecated)).to eq(nil)
+        expect(subject.get_option(:deprecated)).to eq(false)
+      end
+
+      it 'gets custom options' do
+        expect(subject.get_option!(:".test.message_option")).to eq(-56)
+      end
+    end
   end
 end

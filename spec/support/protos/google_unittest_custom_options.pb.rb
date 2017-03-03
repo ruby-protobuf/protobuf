@@ -116,7 +116,68 @@ module Protobuf_unittest
   # Message Fields
   #
   class TestMessageWithCustomOptions
+    # Message Options
+    set_option :message_set_wire_format, false
+    set_option :".protobuf_unittest.message_opt1", -56
+
     optional :string, :field1, 1, :ctype => ::Google::Protobuf::FieldOptions::CType::CORD, :".protobuf_unittest.field_opt1" => 8765432109
+  end
+
+  class CustomOptionMinIntegerValues
+    # Message Options
+    set_option :".protobuf_unittest.sfixed64_opt", -9223372036854775808
+    set_option :".protobuf_unittest.sfixed32_opt", -2147483648
+    set_option :".protobuf_unittest.fixed64_opt", 0
+    set_option :".protobuf_unittest.fixed32_opt", 0
+    set_option :".protobuf_unittest.sint64_opt", -9223372036854775808
+    set_option :".protobuf_unittest.sint32_opt", -2147483648
+    set_option :".protobuf_unittest.uint64_opt", 0
+    set_option :".protobuf_unittest.uint32_opt", 0
+    set_option :".protobuf_unittest.int64_opt", -9223372036854775808
+    set_option :".protobuf_unittest.int32_opt", -2147483648
+    set_option :".protobuf_unittest.bool_opt", false
+
+  end
+
+  class CustomOptionMaxIntegerValues
+    # Message Options
+    set_option :".protobuf_unittest.sfixed64_opt", 9223372036854775807
+    set_option :".protobuf_unittest.sfixed32_opt", 2147483647
+    set_option :".protobuf_unittest.fixed64_opt", 18446744073709551615
+    set_option :".protobuf_unittest.fixed32_opt", 4294967295
+    set_option :".protobuf_unittest.sint64_opt", 9223372036854775807
+    set_option :".protobuf_unittest.sint32_opt", 2147483647
+    set_option :".protobuf_unittest.uint64_opt", 18446744073709551615
+    set_option :".protobuf_unittest.uint32_opt", 4294967295
+    set_option :".protobuf_unittest.int64_opt", 9223372036854775807
+    set_option :".protobuf_unittest.int32_opt", 2147483647
+    set_option :".protobuf_unittest.bool_opt", true
+
+  end
+
+  class CustomOptionOtherValues
+    # Message Options
+    set_option :".protobuf_unittest.enum_opt", ::Protobuf_unittest::DummyMessageContainingEnum::TestEnumType::TEST_OPTION_ENUM_TYPE2
+    set_option :".protobuf_unittest.bytes_opt", "Hello\x00World"
+    set_option :".protobuf_unittest.string_opt", "Hello, \"World\""
+    set_option :".protobuf_unittest.double_opt", 1.2345678901234567
+    set_option :".protobuf_unittest.float_opt", 12.34567928314209
+    set_option :".protobuf_unittest.int32_opt", -100
+
+  end
+
+  class SettingRealsFromPositiveInts
+    # Message Options
+    set_option :".protobuf_unittest.double_opt", 154.0
+    set_option :".protobuf_unittest.float_opt", 12.0
+
+  end
+
+  class SettingRealsFromNegativeInts
+    # Message Options
+    set_option :".protobuf_unittest.double_opt", -154.0
+    set_option :".protobuf_unittest.float_opt", -12.0
+
   end
 
   class ComplexOptionType1
@@ -149,7 +210,21 @@ module Protobuf_unittest
     optional :int32, :qux, 1
   end
 
+  class VariousComplexOptions
+    # Message Options
+    set_option :".protobuf_unittest.ComplexOptionType2.ComplexOptionType4.complex_opt4", { :waldo => 1971 }
+    set_option :".protobuf_unittest.complex_opt3", { :qux => 9 }
+    set_option :".protobuf_unittest.repeated_opt1", [1, 2]
+    set_option :".protobuf_unittest.repeated_opt2", [{ :qux => 3 }, { :qux => 4 }]
+    set_option :".protobuf_unittest.complex_opt2", { :bar => { :foo => 743, :".protobuf_unittest.corge" => { :qux => 2008 }, :".protobuf_unittest.quux" => 1999 }, :baz => 987, :fred => { :waldo => 321 }, :barney => [{ :waldo => 101 }, { :waldo => 212 }], :".protobuf_unittest.garply" => { :foo => 741, :".protobuf_unittest.corge" => { :qux => 2121 }, :".protobuf_unittest.quux" => 1998 }, :".protobuf_unittest.grault" => 654 }
+    set_option :".protobuf_unittest.complex_opt1", { :foo => 42, :foo4 => [99, 88], :".protobuf_unittest.corge" => { :qux => 876 }, :".protobuf_unittest.quux" => 324 }
+
+  end
+
   class AggregateMessageSet
+    # Message Options
+    set_option :message_set_wire_format, false
+
     # Extension Fields
     extensions 4...536870912
     optional ::Protobuf_unittest::AggregateMessageSetElement, :".protobuf_unittest.AggregateMessageSetElement.message_set_extension", 15447542, :extension => true
@@ -168,11 +243,17 @@ module Protobuf_unittest
   end
 
   class AggregateMessage
+    # Message Options
+    set_option :".protobuf_unittest.msgopt", { :i => 101, :s => "MessageAnnotation" }
+
     optional :int32, :fieldname, 1, :".protobuf_unittest.fieldopt" => { :s => "FieldAnnotation" }
   end
 
   class NestedOptionType
     class NestedMessage
+      # Message Options
+      set_option :".protobuf_unittest.message_opt1", 1001
+
       optional :int32, :nested_field, 1, :".protobuf_unittest.field_opt1" => 1002
     end
 
@@ -184,6 +265,12 @@ module Protobuf_unittest
 
   class NewOptionType
     required ::Protobuf_unittest::NewOptionType::TestEnum, :value, 1
+  end
+
+  class TestMessageWithRequiredEnumOption
+    # Message Options
+    set_option :".protobuf_unittest.required_enum_opt", { :value => ::Protobuf_unittest::OldOptionType::TestEnum::OLD_VALUE }
+
   end
 
 
