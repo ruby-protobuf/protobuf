@@ -46,6 +46,13 @@ module Protobuf
         "#{string_size}#{value_to_encode}"
       end
 
+      def encode_to_stream(value, stream)
+        value = value.encode if value.is_a?(::Protobuf::Message)
+        byte_size = ::Protobuf::Field::VarintField.encode(value.bytesize)
+
+        stream << tag_encoded << byte_size << value
+      end
+
       def wire_type
         ::Protobuf::WireType::LENGTH_DELIMITED
       end
