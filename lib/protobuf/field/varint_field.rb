@@ -54,8 +54,10 @@ module Protobuf
         int_val = if val.is_a?(Integer)
                     return true if val >= 0 && val < INT32_MAX # return quickly for smallest integer size, hot code path
                     val
+                  elsif val.is_a?(Numeric)
+                    val.to_i
                   else
-                    coerce!(val)
+                    Integer(val, 10)
                   end
 
         int_val >= self.class.min && int_val <= self.class.max
@@ -64,8 +66,11 @@ module Protobuf
       end
 
       def coerce!(val)
+        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'" unless acceptable?(val)
         return val.to_i if val.is_a?(Numeric)
         Integer(val, 10)
+      rescue
+        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
       end
 
       def decode(value)

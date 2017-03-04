@@ -151,16 +151,12 @@ module Protobuf
 
     def [](name)
       field = self.class.get_field(name, true)
+      return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field) if field.repeated?
 
-      fail ArgumentError, "invalid field name=#{name.inspect}" unless field
-
-      if field.repeated?
-        @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field)
-      elsif @values.key?(field.fully_qualified_name)
-        @values[field.fully_qualified_name]
-      else
-        field.default_value
-      end
+      @values.fetch(field.fully_qualified_name, field.default_value)
+    rescue # not having a field should be the exceptional state
+      raise if field
+      fail ArgumentError, "invalid field name=#{name.inspect}"
     end
 
     def []=(name, value)
@@ -213,10 +209,8 @@ module Protobuf
         else
           if value.nil? # rubocop:disable Style/IfInsideElse
             @values.delete(field.fully_qualified_name)
-          elsif field.acceptable?(value)
-            @values[field.fully_qualified_name] = field.coerce!(value)
           else
-            fail TypeError, "Unacceptable value #{value} for field #{field.name} of type #{field.type_class}"
+            @values[field.fully_qualified_name] = field.coerce!(value)
           end
         end
       else

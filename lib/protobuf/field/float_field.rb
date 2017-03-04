@@ -22,6 +22,8 @@ module Protobuf
 
       def coerce!(val)
         Float(val)
+      rescue
+        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
       end
 
       def decode(bytes)
