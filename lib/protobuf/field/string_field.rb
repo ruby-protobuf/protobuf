@@ -28,6 +28,16 @@ module Protobuf
         "#{::Protobuf::Field::VarintField.encode(value_to_encode.size)}#{value_to_encode}"
       end
 
+      def encode_to_stream(value, stream)
+        if value.encoding != ::Protobuf::Field::StringField::ENCODING
+          value = value.dup
+          value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+        end
+
+        byte_size = ::Protobuf::Field::VarintField.encode(value.bytesize)
+        stream << tag_encoded << byte_size << value
+      end
+
     end
   end
 end

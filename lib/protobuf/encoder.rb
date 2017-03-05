@@ -8,11 +8,11 @@ module Protobuf
             stream << "#{field.tag_encoded}#{::Protobuf::Field::VarintField.encode(packed_value.size)}#{packed_value}"
           else
             value.each do |val|
-              stream << "#{field.tag_encoded}#{field.encode(val)}"
+              field.encode_to_stream(val, stream)
             end
           end
         else
-          stream << "#{field.tag_encoded}#{field.encode(value)}"
+          field.encode_to_stream(value, stream)
         end
       end
 
