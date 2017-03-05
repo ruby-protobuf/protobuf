@@ -90,6 +90,10 @@ module Protobuf
         fail NotImplementedError, "#{self.class.name}##{__method__}"
       end
 
+      def encode_to_stream(value, stream)
+        stream << tag_encoded << encode(value)
+      end
+
       def extension?
         options.key?(:extension)
       end
