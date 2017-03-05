@@ -69,7 +69,7 @@ module Protobuf
         fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'" unless acceptable?(val)
         return val.to_i if val.is_a?(Numeric)
         Integer(val, 10)
-      rescue
+      rescue ArgumentError
         fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
       end
 

@@ -22,7 +22,7 @@ module Protobuf
 
       def coerce!(val)
         Float(val)
-      rescue
+      rescue ArgumentError
         fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
       end
 
