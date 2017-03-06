@@ -47,6 +47,13 @@ module Protobuf
           set_option(option_name, value)
         end
 
+        @extension = options.key?(:extension)
+        @deprecated = options.key?(:deprecated)
+        @required = rule == :required
+        @repeated = rule == :repeated
+        @optional = rule == :optional
+        @packed = @repeated && options.key?(:packed)
+
         validate_packed_field if packed?
         define_accessor(simple_name, fully_qualified_name) if simple_name
         tag_encoded
@@ -83,7 +90,7 @@ module Protobuf
       end
 
       def deprecated?
-        options.key?(:deprecated)
+        @deprecated
       end
 
       def encode(_value)
@@ -95,7 +102,7 @@ module Protobuf
       end
 
       def extension?
-        options.key?(:extension)
+        @extension
       end
 
       def enum?
@@ -107,15 +114,15 @@ module Protobuf
       end
 
       def optional?
-        rule == :optional
+        @optional
       end
 
       def packed?
-        repeated? && options.key?(:packed)
+        @packed
       end
 
       def repeated?
-        rule == :repeated
+        @repeated
       end
 
       def repeated_message?
@@ -123,7 +130,7 @@ module Protobuf
       end
 
       def required?
-        rule == :required
+        @required
       end
 
       # FIXME: need to cleanup (rename) this warthog of a method.
