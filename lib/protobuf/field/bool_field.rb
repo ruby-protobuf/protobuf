@@ -30,7 +30,7 @@ module Protobuf
         return true if val == TRUE_STRING
         return false if val == FALSE_STRING
 
-        val
+        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
       end
 
       def decode(value)

@@ -43,7 +43,7 @@ RSpec.describe Protobuf::Field::FloatField do
       let(:value) { "aaaa" }
 
       it 'throws an error' do
-        expect { subject }.to raise_error(ArgumentError)
+        expect { subject }.to raise_error(TypeError)
       end
     end
 
