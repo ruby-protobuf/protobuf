@@ -29,11 +29,17 @@ module Protobuf
         def process_request
           client_address, _, data = read_from_backend
           return unless data
+          logger = ::Protobuf::Logging::FlushLogger.new($stdout)
+          logger.level = ::Logger::INFO
 
-          gc_pause do
-            encoded_response = handle_request(data)
-            write_to_backend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
+          ::Protobuf::Logging.with_logger(logger) do
+            gc_pause do
+              encoded_response = handle_request(data)
+              write_to_backend([client_address, ::Protobuf::Rpc::Zmq::EMPTY_STRING, encoded_response])
+            end
           end
+        ensure
+          logger.flush! if logger
         end
 
         def run
