@@ -23,6 +23,10 @@ extend google.protobuf.MessageOptions {
   optional int64 message_option = 485969;
 }
 
+extend google.protobuf.ServiceOptions {
+  optional int64 service_option = 5869607;
+}
+
 enum StatusType {
   option allow_alias = true;
   option (enum_option) = -789;
@@ -117,6 +121,8 @@ extend Nested.NestedLevelOne {
 }
 
 service ResourceService {
+  option (service_option) = -9876543210;
+
   rpc Find (ResourceFindRequest) returns (Resource);
   rpc FindWithRpcFailed (ResourceFindRequest) returns (Resource);
   rpc FindWithSleep (ResourceSleepRequest) returns (Resource);
