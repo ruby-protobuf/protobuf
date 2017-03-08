@@ -2,13 +2,12 @@ require 'protobuf/logging'
 require 'protobuf/message'
 require 'protobuf/rpc/client'
 require 'protobuf/rpc/error'
+require 'protobuf/rpc/rpc_method'
 require 'protobuf/rpc/service_filters'
 
 module Protobuf
   module Rpc
     # Object to encapsulate the request/response types for a given service method
-    #
-    RpcMethod = Struct.new("RpcMethod", :method, :request_type, :response_type)
 
     class Service
       include ::Protobuf::Logging
@@ -103,8 +102,8 @@ module Protobuf
       # This methods is only used by the generated service definitions
       # and not useful for user code.
       #
-      def self.rpc(method, request_type, response_type)
-        rpcs[method] = RpcMethod.new(method, request_type, response_type)
+      def self.rpc(method, request_type, response_type, &options_block)
+        rpcs[method] = RpcMethod.new(method, request_type, response_type, &options_block)
       end
 
       # Hash containing the set of methods defined via `rpc`.

@@ -345,12 +345,16 @@ module Protobuf_unittest
   #
   class TestServiceWithCustomOptions < ::Protobuf::Rpc::Service
     set_option :".protobuf_unittest.service_opt1", -9876543210
-    rpc :foo, ::Protobuf_unittest::CustomOptionFooRequest, ::Protobuf_unittest::CustomOptionFooResponse
+    rpc :foo, ::Protobuf_unittest::CustomOptionFooRequest, ::Protobuf_unittest::CustomOptionFooResponse do
+      set_option :".protobuf_unittest.method_opt1", ::Protobuf_unittest::MethodOpt1::METHODOPT1_VAL2
+    end
   end
 
   class AggregateService < ::Protobuf::Rpc::Service
     set_option :".protobuf_unittest.serviceopt", { :s => "ServiceAnnotation" }
-    rpc :method, ::Protobuf_unittest::AggregateMessage, ::Protobuf_unittest::AggregateMessage
+    rpc :method, ::Protobuf_unittest::AggregateMessage, ::Protobuf_unittest::AggregateMessage do
+      set_option :".protobuf_unittest.methodopt", { :s => "MethodAnnotation" }
+    end
   end
 
 end

@@ -248,5 +248,18 @@ RSpec.describe 'Optionable' do
         expect(subject.get_option!(:".test.service_option")).to eq(-9876543210)
       end
     end
+
+    context 'method options' do
+      subject { ::Test::ResourceService.rpcs[:find] }
+
+      it 'gets unset options' do
+        expect(subject.get_option!(:deprecated)).to eq(nil)
+        expect(subject.get_option(:deprecated)).to eq(false)
+      end
+
+      it 'gets custom options' do
+        expect(subject.get_option!(:".test.method_option")).to eq(2)
+      end
+    end
   end
 end
