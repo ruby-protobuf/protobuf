@@ -1,4 +1,5 @@
 require 'protobuf/generators/base'
+require 'protobuf/generators/option_generator'
 
 module Protobuf
   module Generators
@@ -7,6 +8,7 @@ module Protobuf
       def compile
         run_once(:compile) do
           print_class(descriptor.name, :service) do
+            print OptionGenerator.new(descriptor.options, current_indent).to_s if descriptor.options
             descriptor.method.each do |method_descriptor|
               puts build_method(method_descriptor)
             end
