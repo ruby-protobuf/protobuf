@@ -53,6 +53,15 @@ RSpec.describe ::Protobuf::Generators::FieldGenerator do
         specify { expect(subject).to eq "optional ::Foo::Bar::Baz, :foo_bar, 3, :default => ::Foo::Bar::Baz::QUUX\n" }
       end
 
+      context 'when type is an enum with lowercase default value with PB_UPCASE_ENUMS set' do
+        let(:type_enum) { :TYPE_ENUM }
+        let(:type_name) { '.foo.bar.Baz' }
+        let(:default_value) { 'quux' }
+        before { allow(ENV).to receive(:key?).with('PB_UPCASE_ENUMS').and_return(true) }
+
+        specify { expect(subject).to eq "optional ::Foo::Bar::Baz, :foo_bar, 3, :default => ::Foo::Bar::Baz::QUUX\n" }
+      end
+
       context 'when the type is a string' do
         let(:type_enum) { :TYPE_STRING }
         let(:default_value) { "a default \"string\"" }
