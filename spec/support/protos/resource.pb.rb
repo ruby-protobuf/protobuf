@@ -150,13 +150,19 @@ module Test
     optional :int64, :".test.service_option", 5869607, :extension => true
   end
 
+  class ::Google::Protobuf::MethodOptions < ::Protobuf::Message
+    optional :int64, :".test.method_option", 7893233, :extension => true
+  end
+
 
   ##
   # Service Classes
   #
   class ResourceService < ::Protobuf::Rpc::Service
     set_option :".test.service_option", -9876543210
-    rpc :find, ::Test::ResourceFindRequest, ::Test::Resource
+    rpc :find, ::Test::ResourceFindRequest, ::Test::Resource do
+      set_option :".test.method_option", 2
+    end
     rpc :find_with_rpc_failed, ::Test::ResourceFindRequest, ::Test::Resource
     rpc :find_with_sleep, ::Test::ResourceSleepRequest, ::Test::Resource
     rpc :find_not_implemented, ::Test::ResourceFindRequest, ::Test::Resource
