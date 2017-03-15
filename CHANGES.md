@@ -1,4 +1,26 @@
-# Stable (3.x)
+# Beta (3.7.x)
+
+3.7.0 (pre3)
+-----------
+- Evaluate extension fields in code generation (#329)
+- Change the ping port to use ms timeout and make the default 200ms (#332)
+- Fix build failures caused by Rails 5 requirement of Ruby 2.2.2 (#343)
+- Add functional tests (#346)
+- Extract client and server (#347) (#348)
+- BUG: Fix decoding of packed fields (#349)
+- Add support for custom file options (#350)
+- BUG: enum_for_tags returns nil if tag nil (#352)
+- Update rubocop and fix cops (#353)
+- Optimization for varint (#356)
+- Add support for custom field options (#357)
+- Add support for custom enum options (#359)
+- Add support for custom message options (#360)
+- Acceptable check is not needed most places as coerce runs the same logic (#361)
+- Encode straight to stream without intermediary copies (#362)
+- Move dynamic rule checks to the initialize method (#363)
+- Add support for custom service options (#364)
+- Add support for custom method options (#365)
+- Upcase enum default (#366)
 
 3.7.0 (pre2)
 -----------
@@ -19,6 +41,8 @@
 - Field values should be stored via their fully qualified names
 - Refresh google/protobuf/descriptor.{proto,pb.rb}
 - Properly encode and decode negative enum values.
+
+# Stable (3.6.x)
 
 3.6.9
 --------
