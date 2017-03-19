@@ -93,6 +93,7 @@ module Protobuf
       end
 
       def print_file_comment
+        puts "# encoding: UTF-8\n\n"
         puts "##"
         puts "# This file is auto-generated. DO NOT EDIT!"
         puts "#"
