@@ -163,13 +163,9 @@ module Protobuf
     def [](name)
       field = self.class.get_field(name, true)
 
-      if field.map?
-        return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldHash.new(field)
-      elsif field.repeated?
-        return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field)
-      else
-        @values.fetch(field.fully_qualified_name, field.default_value)
-      end
+      return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldHash.new(field) if field.map?
+      return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field) if field.repeated?
+      @values.fetch(field.fully_qualified_name, field.default_value)
     rescue # not having a field should be the exceptional state
       raise if field
       fail ArgumentError, "invalid field name=#{name.inspect}"
@@ -200,6 +196,7 @@ module Protobuf
 
     private
 
+    # rubocop:disable Metrics/MethodLength
     def set_field(name, value, ignore_nil_for_repeated)
       if (field = self.class.get_field(name, true))
         if field.map?
