@@ -1,6 +1,12 @@
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y libzmq3-dev
+  - wget https://github.com/zeromq/libzmq/releases/download/v4.2.1/zeromq-4.2.1.tar.gz
+  - tar xvf zeromq-4.2.1.tar.gz
+  - cd zeromq-4.2.1
+  - ./configure
+  - make -j4
+  - sudo make install
+  # Retrun to project directory
+  - cd ..
   - sudo -E ./install-protobuf.sh
   - java -Xmx1g -version
   - javac -J-Xmx1g -version
