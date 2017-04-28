@@ -86,7 +86,8 @@ module Protobuf
         end
       end
 
-      alias_method_chain :set, :options
+      alias_method :set_without_options, :set
+      alias_method :set, :set_with_options
     end
   end
 end
