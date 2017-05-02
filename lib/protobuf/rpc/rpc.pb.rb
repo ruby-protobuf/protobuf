@@ -48,6 +48,7 @@ module Protobuf
       optional :string, :error, 2
       optional :bool, :callback, 3, :default => false
       optional ::Protobuf::Socketrpc::ErrorReason, :error_reason, 4
+      optional :string, :server, 5
     end
 
   end

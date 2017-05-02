@@ -38,6 +38,7 @@ message Response
   optional string error = 2;                    // Error message, if any
   optional bool callback = 3 [default = false]; // Was callback invoked (not sure what this is for)
   optional ErrorReason error_reason = 4;        // Error Reason
+  optional string server = 5;                   // Server hostname or address
 }
 
 // Possible error reasons
