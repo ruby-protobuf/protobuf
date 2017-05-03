@@ -104,6 +104,7 @@ module Protobuf
           # Parse out the raw response
           @stats.response_size = @response_data.size unless @response_data.nil?
           response_wrapper = ::Protobuf::Socketrpc::Response.decode(@response_data)
+          @stats.server = response_wrapper.server if response_wrapper.field?(:server)
 
           # Determine success or failure based on parsed data
           if response_wrapper.field?(:error_reason)

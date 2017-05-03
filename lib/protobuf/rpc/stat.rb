@@ -6,7 +6,8 @@ module Protobuf
   module Rpc
     class Stat
       attr_accessor :mode, :start_time, :end_time, :request_size, :dispatcher
-      attr_accessor :response_size, :client, :server, :service, :method_name
+      attr_accessor :response_size, :client, :service, :method_name
+      attr_reader   :server
 
       MODES = [:SERVER, :CLIENT].freeze
 
@@ -32,11 +33,12 @@ module Protobuf
       end
 
       def server=(peer)
-        @server = { :port => peer[0], :ip => peer[1] }
-      end
-
-      def server
-        @server ? "#{@server[:ip]}:#{@server[:port]}" : nil
+        case peer
+        when Array
+          @server = "#{peer[1]}:#{peer[0]}"
+        when String
+          @server = peer
+        end
       end
 
       def service
