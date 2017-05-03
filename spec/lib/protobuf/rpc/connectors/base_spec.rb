@@ -36,6 +36,13 @@ RSpec.describe Protobuf::Rpc::Connectors::Base do
       subject.parse_response
       expect(subject.stats.server).to eq("127.3.4.5:55589")
     end
+    it "does not override stats#server when response.server is nil" do
+      allow(subject).to receive(:close_connection)
+      subject.instance_variable_set(:@response_data, ::Protobuf::Socketrpc::Response.new(:server => nil).encode)
+      subject.initialize_stats
+      subject.parse_response
+      expect(subject.stats.server).to eq("127.3.4.5:55589")
+    end
   end
 
   describe "#any_callbacks?" do

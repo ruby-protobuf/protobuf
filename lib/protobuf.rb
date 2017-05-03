@@ -47,7 +47,7 @@ module Protobuf
   end
 
   def self.client_host
-    @client_host ||= Socket.gethostname
+    defined?(@client_host) ? @client_host : @client_host = Socket.gethostname
   end
 
   def self.connector_type_class
@@ -90,7 +90,7 @@ module Protobuf
   end
 
   def self.server_host
-    @server_host ||= Socket.gethostname
+    defined?(@server_host) ? @server_host : @server_host = Socket.gethostname
   end
 end
 
