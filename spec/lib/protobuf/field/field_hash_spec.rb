@@ -114,7 +114,54 @@ RSpec.describe Protobuf::Field::FieldHash do
           expect { instance.map_string_to_enum.send(method, nil, SomeEnum::FOO) }.to raise_error(TypeError)
           expect { instance.map_string_to_enum.send(method, 'foo', nil) }.to raise_error(TypeError)
         end
+      end
+    end
 
+    describe '#to_hash_value' do
+      context 'when applied to an int32->string field hash' do
+        before do
+          instance.map_int32_to_string[1] = 'string 1'
+          instance.map_int32_to_string[2] = 'string 2'
+        end
+
+        it 'converts properly' do
+          expect(instance.to_hash_value).to eq(:map_int32_to_string => {
+            1 => 'string 1',
+            2 => 'string 2',
+          })
+        end
+      end
+
+      context 'when applied to a string->MessageField field hash' do
+        before do
+          instance.map_string_to_msg['msg1'] = BasicMessage.new(:field => 'string 1')
+          instance.map_string_to_msg['msg2'] = BasicMessage.new(:field => 'string 2')
+        end
+
+        it 'converts properly' do
+          expect(instance.to_hash_value).to eq(:map_string_to_msg => {
+            'msg1' => {
+              :field => 'string 1',
+            },
+            'msg2' => {
+              :field => 'string 2',
+            },
+          })
+        end
+      end
+
+      context 'when applied to a string->EnumField field hash' do
+        before do
+          instance.map_string_to_enum['msg1'] = SomeEnum::FOO
+          instance.map_string_to_enum['msg2'] = SomeEnum::BAR
+        end
+
+        it 'converts properly' do
+          expect(instance.to_hash_value).to eq(:map_string_to_enum => {
+            'msg1' => 1,
+            'msg2' => 2,
+          })
+        end
       end
     end
   end

@@ -43,9 +43,13 @@ module Protobuf
       alias update merge!
 
       # Return a hash-representation of the given values for this field type.
-      # The value in this case would be the hash itself.
+      # The value in this case would be the hash itself, right? Unfortunately
+      # not because the values of the map could be messages themselves that we
+      # need to transform.
       def to_hash_value
-        self
+        each_with_object({}) do |(key, value), hash|
+          hash[key] = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
+        end
       end
 
       def to_s
