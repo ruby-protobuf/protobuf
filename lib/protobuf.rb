@@ -37,13 +37,6 @@ module Protobuf
     #
     # The name or address of the host to use during client RPC calls.
     attr_writer :client_host
-
-    # Server Host
-    #
-    # Default: first ipv4 address of the system
-    #
-    # The name or address of the host to use during client RPC calls.
-    attr_accessor :server_host
   end
 
   def self.client_host
