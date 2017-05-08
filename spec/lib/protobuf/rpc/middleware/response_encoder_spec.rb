@@ -10,12 +10,9 @@ RSpec.describe Protobuf::Rpc::Middleware::ResponseEncoder do
   end
   let(:encoded_response) { response_wrapper.encode }
   let(:response) { Test::Resource.new(:name => 'required') }
-  let(:response_wrapper) { ::Protobuf::Socketrpc::Response.new(:response_proto => response, :server => server_host) }
-  let(:server_host) { 'beepboopbop' }
+  let(:response_wrapper) { ::Protobuf::Socketrpc::Response.new(:response_proto => response) }
 
   subject { described_class.new(app) }
-
-  before { ::Protobuf.server_host = server_host }
 
   describe "#call" do
     it "encodes the response" do
