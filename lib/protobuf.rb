@@ -40,7 +40,7 @@ module Protobuf
   end
 
   def self.client_host
-    defined?(@client_host) ? @client_host : @client_host = Socket.gethostname
+    @client_host ||= Socket.gethostname
   end
 
   def self.connector_type_class
