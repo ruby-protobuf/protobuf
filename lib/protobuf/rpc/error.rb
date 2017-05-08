@@ -18,7 +18,7 @@ module Protobuf
       end
 
       def to_response
-        ::Protobuf::Socketrpc::Response.new(:error => message, :error_reason => error_type)
+        ::Protobuf::Socketrpc::Response.new(:error => message, :error_reason => error_type, :server => ::Protobuf.server_host)
       end
     end
   end
