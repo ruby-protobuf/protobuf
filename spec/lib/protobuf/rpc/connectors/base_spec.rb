@@ -20,6 +20,31 @@ RSpec.describe Protobuf::Rpc::Connectors::Base do
     specify { expect(subject.respond_to?(:verify_callbacks)).to be true }
   end
 
+  describe "#parse_response" do
+    let(:options) { { :response_type => Test::Resource, :port => 55589, :host => '127.3.4.5' } }
+    it "updates stats#server from the response" do
+      allow(subject).to receive(:close_connection)
+      subject.instance_variable_set(:@response_data, ::Protobuf::Socketrpc::Response.new(:server => "serverless").encode)
+      subject.initialize_stats
+      subject.parse_response
+      expect(subject.stats.server).to eq("serverless")
+    end
+    it "does not override stats#server when response.server is missing" do
+      allow(subject).to receive(:close_connection)
+      subject.instance_variable_set(:@response_data, ::Protobuf::Socketrpc::Response.new.encode)
+      subject.initialize_stats
+      subject.parse_response
+      expect(subject.stats.server).to eq("127.3.4.5:55589")
+    end
+    it "does not override stats#server when response.server is nil" do
+      allow(subject).to receive(:close_connection)
+      subject.instance_variable_set(:@response_data, ::Protobuf::Socketrpc::Response.new(:server => nil).encode)
+      subject.initialize_stats
+      subject.parse_response
+      expect(subject.stats.server).to eq("127.3.4.5:55589")
+    end
+  end
+
   describe "#any_callbacks?" do
     [:@complete_cb, :@success_cb, :@failure_cb].each do |cb|
       it "returns true if #{cb} is provided" do

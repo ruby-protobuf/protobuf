@@ -8,6 +8,20 @@ RSpec.describe ::Protobuf::Rpc::Stat do
     BarService = ::Struct.new(:method_name) unless defined?(BarService)
   end
 
+  describe '#server=' do
+    it 'understands Array' do
+      stat = ::Protobuf::Rpc::Stat.new
+      stat.server = [3333, "127.0.0.1"]
+      expect(stat.server).to eq("127.0.0.1:3333")
+    end
+
+    it 'understands String' do
+      stat = ::Protobuf::Rpc::Stat.new
+      stat.server = "thatserverthough"
+      expect(stat.server).to eq("thatserverthough")
+    end
+  end
+
   describe 'server mode' do
     it 'describes a server response to a client' do
       ::Timecop.freeze(10.minutes.ago) do
