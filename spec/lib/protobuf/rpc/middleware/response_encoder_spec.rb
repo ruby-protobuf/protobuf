@@ -71,5 +71,21 @@ RSpec.describe Protobuf::Rpc::Middleware::ResponseEncoder do
         expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::PbError)
       end
     end
+
+    context "when server exists in the env" do
+      let(:env) do
+        Protobuf::Rpc::Env.new(
+          'response_type' => Test::Resource,
+          'log_signature' => 'log_signature',
+          'server'        => 'itsaserver',
+        )
+      end
+
+      it "adds the servers to the response" do
+        expected_response = ::Protobuf::Socketrpc::Response.new(:response_proto => response, :server => 'itsaserver').encode
+        subject.call(env)
+        expect(env.encoded_response).to eq(expected_response)
+      end
+    end
   end
 end

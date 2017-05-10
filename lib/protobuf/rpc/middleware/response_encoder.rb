@@ -72,9 +72,9 @@ module Protobuf
         #
         def wrapped_response
           if response.is_a?(::Protobuf::Rpc::PbError)
-            ::Protobuf::Socketrpc::Response.new(:error => response.message, :error_reason => response.error_type)
+            ::Protobuf::Socketrpc::Response.new(:error => response.message, :error_reason => response.error_type, :server => env.server)
           else
-            ::Protobuf::Socketrpc::Response.new(:response_proto => response.encode)
+            ::Protobuf::Socketrpc::Response.new(:response_proto => response.encode, :server => env.server)
           end
         end
       end

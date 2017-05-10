@@ -45,6 +45,7 @@ module Protobuf
                     :response_type,
                     :rpc_method,
                     :rpc_service,
+                    :server,
                     :service_name,
                     :worker_id
 
