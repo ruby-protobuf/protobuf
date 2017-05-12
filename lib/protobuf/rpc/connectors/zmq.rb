@@ -88,7 +88,10 @@ module Protobuf
         # service. The LINGER is set to 0 so we can close immediately in
         # the event of a timeout
         def create_socket
+          attempt_number = 0
+
           begin
+            attempt_number += 1
             socket = zmq_context.socket(::ZMQ::REQ)
 
             if socket # Make sure the context builds the socket
@@ -97,8 +100,9 @@ module Protobuf
               zmq_error_check(socket.connect(server_uri), :socket_connect)
               socket = socket_to_available_server(socket) if first_alive_load_balance?
             end
-          end while socket.try(:socket).nil?
+          end while socket.nil? && attempt_number < socket_creation_attempts
 
+          raise RequestTimeout, "Cannot create new ZMQ client socket" if socket.nil?
           socket
         end
 
@@ -239,6 +243,10 @@ module Protobuf
               300_000 # 300 seconds
             end
           end
+        end
+
+        def socket_creation_attempts
+          @socket_creation_attempts ||= (ENV["PB_ZMQ_CLIENT_SOCKET_CREATION_ATTEMPTS"] || 5).to_i
         end
 
         def socket_to_available_server(socket)
