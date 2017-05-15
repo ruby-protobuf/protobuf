@@ -1,3 +1,3 @@
 module Protobuf
-  VERSION = '3.7.2' # rubocop:disable Style/MutableConstant
+  VERSION = '3.7.3' # rubocop:disable Style/MutableConstant
 end
