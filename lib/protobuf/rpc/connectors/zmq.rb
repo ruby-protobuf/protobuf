@@ -104,6 +104,7 @@ module Protobuf
             end
 
             if !has_reloaded_context && attempt_number == socket_creation_attempts
+              logger.info { sign_message("Reset Context: could not create socket") }
               zmq_context(true) # reload the context
               attempt_number = 0
               has_reloaded_context = true
