@@ -28,7 +28,8 @@ module Protobuf
           @ping_port_responses ||= ::ThreadSafe::Cache.new
         end
 
-        def self.zmq_context
+        def self.zmq_context(reload = false)
+          @zmq_contexts = nil if reload
           @zmq_contexts ||= Hash.new do |hash, key|
             hash[key] = ZMQ::Context.new
           end
@@ -88,7 +89,11 @@ module Protobuf
         # service. The LINGER is set to 0 so we can close immediately in
         # the event of a timeout
         def create_socket
+          has_reloaded_context = false
+          attempt_number = 0
+
           begin
+            attempt_number += 1
             socket = zmq_context.socket(::ZMQ::REQ)
 
             if socket # Make sure the context builds the socket
@@ -97,8 +102,16 @@ module Protobuf
               zmq_error_check(socket.connect(server_uri), :socket_connect)
               socket = socket_to_available_server(socket) if first_alive_load_balance?
             end
-          end while socket.try(:socket).nil?
 
+            if !has_reloaded_context && attempt_number == socket_creation_attempts
+              logger.info { sign_message("Reset Context: could not create socket") }
+              zmq_context(true) # reload the context
+              attempt_number = 0
+              has_reloaded_context = true
+            end
+          end while socket.nil? && attempt_number < socket_creation_attempts
+
+          raise RequestTimeout, "Cannot create new ZMQ client socket" if socket.nil?
           socket
         end
 
@@ -241,6 +254,10 @@ module Protobuf
           end
         end
 
+        def socket_creation_attempts
+          @socket_creation_attempts ||= (ENV["PB_ZMQ_CLIENT_SOCKET_CREATION_ATTEMPTS"] || 5).to_i
+        end
+
         def socket_to_available_server(socket)
           check_available_response = ""
           socket.setsockopt(::ZMQ::RCVTIMEO, check_available_rcv_timeout)
@@ -263,8 +280,8 @@ module Protobuf
         # If the context does not exist, create it, then register
         # an exit block to ensure the context is terminated correctly.
         #
-        def zmq_context
-          self.class.zmq_context
+        def zmq_context(reload = false)
+          self.class.zmq_context(reload)
         end
 
         def zmq_eagain_error_check(return_code, source)
