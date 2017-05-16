@@ -109,9 +109,9 @@ module Protobuf
               attempt_number = 0
               has_reloaded_context = true
             end
-          end while socket.nil? && attempt_number < socket_creation_attempts
+          end while socket.try(:socket).nil? && attempt_number < socket_creation_attempts
 
-          raise RequestTimeout, "Cannot create new ZMQ client socket" if socket.nil?
+          raise RequestTimeout, "Cannot create new ZMQ client socket" if socket.try(:socket).nil?
           socket
         end
 
