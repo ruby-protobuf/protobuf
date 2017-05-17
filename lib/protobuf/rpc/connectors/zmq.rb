@@ -89,7 +89,6 @@ module Protobuf
         # service. The LINGER is set to 0 so we can close immediately in
         # the event of a timeout
         def create_socket
-          has_reloaded_context = false
           attempt_number = 0
 
           begin
@@ -101,13 +100,6 @@ module Protobuf
               socket.setsockopt(::ZMQ::LINGER, 0)
               zmq_error_check(socket.connect(server_uri), :socket_connect)
               socket = socket_to_available_server(socket) if first_alive_load_balance?
-            end
-
-            if !has_reloaded_context && attempt_number == socket_creation_attempts
-              logger.info { sign_message("Reset Context: could not create socket") }
-              zmq_context(true) # reload the context
-              attempt_number = 0
-              has_reloaded_context = true
             end
           end while socket.try(:socket).nil? && attempt_number < socket_creation_attempts
 
