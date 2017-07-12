@@ -68,7 +68,7 @@ RSpec.describe ::Protobuf::Generators::FieldGenerator do
         let(:default_value) { 'quux' }
         before { allow(ENV).to receive(:key?).with('PB_UPCASE_ENUMS').and_return(true) }
 
-        specify { expect(subject).to eq "optional ::Foo::Bar::Baz, :foo_bar, 3, :default => ::Foo::Bar::Baz::QUUX\n" }
+        specify { expect(subject).to eq "  optional ::Foo::Bar::Baz, :foo_bar, 3, :default => ::Foo::Bar::Baz::QUUX\n" }
       end
 
       context 'when the type is a string' do

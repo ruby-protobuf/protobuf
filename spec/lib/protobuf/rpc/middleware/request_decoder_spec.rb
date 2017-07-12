@@ -86,7 +86,7 @@ RSpec.describe Protobuf::Rpc::Middleware::RequestDecoder do
       let(:request_wrapper) do
         ::Protobuf::Socketrpc::Request.new(
           :caller => client_host,
-          :service_name => 'Foo',
+          :service_name => 'NonexistantService',
           :method_name => method_name.to_s,
           :request_proto => request,
         )
