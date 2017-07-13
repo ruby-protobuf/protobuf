@@ -125,15 +125,13 @@ module Protobuf
       end
 
       def map_key_type_name
-        e = map_entry
-        return nil if e.nil?
-        determine_type_name(e.field.find { |v| v.name == 'key' && v.number == 1 })
+        return nil if map_entry.nil?
+        determine_type_name(map_entry.field.find { |v| v.name == 'key' && v.number == 1 })
       end
 
       def map_value_type_name
-        e = map_entry
-        return nil if e.nil?
-        determine_type_name(e.field.find { |v| v.name == 'value' && v.number == 2 })
+        return nil if map_entry.nil?
+        determine_type_name(map_entry.field.find { |v| v.name == 'value' && v.number == 2 })
       end
 
       private
@@ -174,7 +172,7 @@ module Protobuf
         when :TYPE_MESSAGE, :TYPE_ENUM, :TYPE_GROUP then
           modulize(descriptor.type_name)
         else
-          type_name = descriptor.type.name.to_s.downcase.sub(/type_/, '')
+          type_name = descriptor.type.name.to_s.downcase.sub(/^type_/, '')
           ":#{type_name}"
         end
       end
@@ -186,7 +184,7 @@ module Protobuf
         name_parts = descriptor.type_name.split(".")
         return nil if name_parts.size < 2 || name_parts[-2] != @enclosing_msg_descriptor.name
         nested = @enclosing_msg_descriptor.nested_type.find { |e| e.name == name_parts[-1] }
-        return nested if !nested.nil? && nested.options.try(:map_entry?) { false }
+        return nested if !nested.nil? && nested.options.try(:map_entry?)
         nil
       end
 

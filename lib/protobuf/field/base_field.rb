@@ -151,7 +151,7 @@ module Protobuf
           # decoded value could be nil for an
           # enum value that is not recognized
           hash[entry.key] = entry.value unless entry.value.nil?
-          return
+          return hash[entry.key]
         end
 
         return message_instance[name] << decode(bytes) unless packed?

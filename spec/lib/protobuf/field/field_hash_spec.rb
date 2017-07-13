@@ -40,7 +40,7 @@ RSpec.describe Protobuf::Field::FieldHash do
   let(:instance) { SomeMapMessage.new }
 
   %w([]= store).each do |method|
-    describe "\##{method}" do
+    describe "##{method}" do
       context 'when applied to an int32->string field hash' do
         it 'adds an int -> string entry' do
           expect(instance.map_int32_to_string).to be_empty

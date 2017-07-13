@@ -132,7 +132,7 @@ RSpec.describe ::Protobuf::Generators::FieldGenerator do
               :type_name => '.foo.bar.SnafuState'),
           ],
           :options => ::Google::Protobuf::MessageOptions.new(:map_entry => true)),
-      ]
+        ]
       end
 
       specify { expect(subject).to eq "  map :string, ::Foo::Bar::SnafuState, :foo_bar, 3\n" }
