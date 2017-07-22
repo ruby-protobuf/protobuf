@@ -22,11 +22,18 @@ RSpec.describe ::Protobuf::Generators::FileGenerator do
     end
 
     it 'prints a ruby require for each dependency' do
-      expect(subject).to receive(:print_require).with('test/bar.pb')
-      expect(subject).to receive(:print_require).with('test/baz.pb')
+      expect(subject).to receive(:print_require).with('test/bar.pb', false)
+      expect(subject).to receive(:print_require).with('test/baz.pb', false)
       subject.print_import_requires
     end
 
+    it 'prints a ruby require_relative for each dependency if environment variable was set' do
+      expect(subject).to receive(:print_require).with('test/bar.pb', true)
+      expect(subject).to receive(:print_require).with('test/baz.pb', true)
+      ENV['PB_REQUIRE_RELATIVE'] = 'true'
+      subject.print_import_requires
+      ENV.delete('PB_REQUIRE_RELATIVE')
+    end
   end
 
   describe '#compile' do

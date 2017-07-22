@@ -127,8 +127,8 @@ module Protobuf
       #
       #   print_require('foo/bar/baz') -> "require 'foo/bar/baz'"
       #
-      def print_require(file)
-        puts "require '#{file}'"
+      def print_require(file, relative = false)
+        puts "require#{'_relative' if relative} '#{file}'"
       end
 
       # Puts the given message prefixed by the indent level.
