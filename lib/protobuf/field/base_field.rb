@@ -118,7 +118,7 @@ module Protobuf
       end
 
       def map?
-        repeated_message? && type_class.get_option(:map_entry)
+        @is_map ||= repeated_message? && type_class.get_option(:map_entry)
       end
 
       def optional?
