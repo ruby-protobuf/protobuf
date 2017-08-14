@@ -65,7 +65,7 @@ module Protobuf
         fail TypeError, "Unacceptable value #{value} for field #{field.name} of type #{field.type_class}" unless field.acceptable?(value)
 
         if field.is_a?(::Protobuf::Field::EnumField)
-          fetch_enum(field.type_class, value)
+          field.type_class.fetch(value)
         elsif field.is_a?(::Protobuf::Field::MessageField) && value.is_a?(field.type_class)
           value
         elsif field.is_a?(::Protobuf::Field::MessageField) && value.respond_to?(:to_hash)
@@ -73,12 +73,6 @@ module Protobuf
         else
           value
         end
-      end
-
-      def fetch_enum(type, val)
-        en = type.fetch(val)
-        raise_type_error(val) if en.nil?
-        en
       end
 
       def raise_type_error(val)
