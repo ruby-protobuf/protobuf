@@ -125,7 +125,7 @@ module Protobuf
         header "Imports"
 
         descriptor.dependency.each do |dependency|
-          print_require(convert_filename(dependency))
+          print_require(convert_filename(dependency), ENV.key?('PB_REQUIRE_RELATIVE'))
         end
 
         puts
