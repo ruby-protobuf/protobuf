@@ -15,9 +15,9 @@ RSpec.describe ::Protobuf::Generators::ExtensionGenerator do
   let(:message_type) { 'FooBar' }
 
   before do
-    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[0], 1).and_return(field_descriptors[0])
-    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[1], 1).and_return(field_descriptors[1])
-    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[2], 1).and_return(field_descriptors[2])
+    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[0], nil, 1).and_return(field_descriptors[0])
+    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[1], nil, 1).and_return(field_descriptors[1])
+    expect(::Protobuf::Generators::FieldGenerator).to receive(:new).with(field_descriptors[2], nil, 1).and_return(field_descriptors[2])
   end
 
   subject { described_class.new(message_type, field_descriptors, 0) }

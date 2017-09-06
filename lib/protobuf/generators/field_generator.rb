@@ -19,6 +19,11 @@ module Protobuf
       #
       attr_reader :field_options
 
+      def initialize(field_descriptor, enclosing_msg_descriptor, indent_level)
+        super(field_descriptor, indent_level)
+        @enclosing_msg_descriptor = enclosing_msg_descriptor
+      end
+
       def applicable_options
         # Note on the strange use of `#inspect`:
         #   :boom.inspect #=> ":boom"
@@ -60,7 +65,11 @@ module Protobuf
 
       def compile
         run_once(:compile) do
-          field_definition = ["#{label} #{type_name}", name, number, applicable_options]
+          field_definition = if map?
+                               ["map #{map_key_type_name}", map_value_type_name, name, number, applicable_options]
+                             else
+                               ["#{label} #{type_name}", name, number, applicable_options]
+                             end
           puts field_definition.flatten.compact.join(', ')
         end
       end
@@ -101,15 +110,28 @@ module Protobuf
 
       # Determine the field type
       def type_name
-        @type_name ||= begin
-                         case descriptor.type.name
-                         when :TYPE_MESSAGE, :TYPE_ENUM, :TYPE_GROUP then
-                           modulize(descriptor.type_name)
-                         else
-                           type_name = descriptor.type.name.to_s.downcase.sub(/type_/, '')
-                           ":#{type_name}"
-                         end
-                       end
+        @type_name ||= determine_type_name(descriptor)
+      end
+
+      # If this field is a map field, this returns a message descriptor that
+      # represents the entries in the map. Returns nil if this field is not
+      # a map field.
+      def map_entry
+        @map_entry ||= determine_map_entry
+      end
+
+      def map?
+        !map_entry.nil?
+      end
+
+      def map_key_type_name
+        return nil if map_entry.nil?
+        determine_type_name(map_entry.field.find { |v| v.name == 'key' && v.number == 1 })
+      end
+
+      def map_value_type_name
+        return nil if map_entry.nil?
+        determine_type_name(map_entry.field.find { |v| v.name == 'value' && v.number == 2 })
       end
 
       private
@@ -143,6 +165,27 @@ module Protobuf
 
       def verbatim_default_value
         descriptor.default_value
+      end
+
+      def determine_type_name(descriptor)
+        case descriptor.type.name
+        when :TYPE_MESSAGE, :TYPE_ENUM, :TYPE_GROUP then
+          modulize(descriptor.type_name)
+        else
+          type_name = descriptor.type.name.to_s.downcase.sub(/^type_/, '')
+          ":#{type_name}"
+        end
+      end
+
+      def determine_map_entry
+        return nil if @enclosing_msg_descriptor.nil?
+        return nil unless descriptor.label.name == :LABEL_REPEATED && descriptor.type.name == :TYPE_MESSAGE
+        # find nested message type
+        name_parts = descriptor.type_name.split(".")
+        return nil if name_parts.size < 2 || name_parts[-2] != @enclosing_msg_descriptor.name
+        nested = @enclosing_msg_descriptor.nested_type.find { |e| e.name == name_parts[-1] }
+        return nested if !nested.nil? && nested.options.try(:map_entry?)
+        nil
       end
 
     end

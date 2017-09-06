@@ -46,7 +46,7 @@ module Protobuf
 
       def add_extension_fields(field_descriptors)
         field_descriptors.each do |field_descriptor|
-          @groups[:extension_field] << FieldGenerator.new(field_descriptor, indent_level)
+          @groups[:extension_field] << FieldGenerator.new(field_descriptor, nil, indent_level)
         end
       end
 
@@ -61,18 +61,22 @@ module Protobuf
 
       def add_message_declarations(descriptors)
         descriptors.each do |descriptor|
+          # elide synthetic map entry messages (we handle map fields differently)
+          next if descriptor.options.try(:map_entry?) { false }
           @groups[:message_declaration] << MessageGenerator.new(descriptor, indent_level, :declaration => true)
         end
       end
 
-      def add_message_fields(field_descriptors)
+      def add_message_fields(field_descriptors, msg_descriptor)
         field_descriptors.each do |field_descriptor|
-          @groups[:field] << FieldGenerator.new(field_descriptor, indent_level)
+          @groups[:field] << FieldGenerator.new(field_descriptor, msg_descriptor, indent_level)
         end
       end
 
       def add_messages(descriptors, options = {})
         descriptors.each do |descriptor|
+          # elide synthetic map entry message (we handle map fields differently)
+          next if descriptor.options.try(:map_entry?) { false }
           @groups[:message] << MessageGenerator.new(descriptor, indent_level, options)
         end
       end

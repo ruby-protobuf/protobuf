@@ -24,6 +24,26 @@ RSpec.describe 'code generation' do
     expect(code_generator.response_bytes).to eq(expected_output)
   end
 
+  it "generates code for map types" do
+    input_descriptor = ::Google::Protobuf::FileDescriptorSet.decode(
+      IO.read(PROTOS_PATH.join('map-test.bin'), :mode => 'rb'))
+    request = ::Google::Protobuf::Compiler::CodeGeneratorRequest.new(:file_to_generate => ['map-test.proto'],
+                                                                     :proto_file => input_descriptor.file)
+
+    file_name = "map-test.pb.rb"
+    file_content = File.open(PROTOS_PATH.join(file_name), "r:UTF-8", &:read)
+    expected_file_output =
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse::File.new(
+        :name => file_name, :content => file_content)
+
+    expected_response =
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => [expected_file_output])
+
+    code_generator = ::Protobuf::CodeGenerator.new(request.encode)
+    code_generator.eval_unknown_extensions!
+    expect(code_generator.response_bytes).to eq(expected_response)
+  end
+
   it "generates code (including service stubs) with custom field and method options" do
     expected_unittest_custom_options =
       File.open(PROTOS_PATH.join('google_unittest_custom_options.pb.rb'), "r:UTF-8", &:read)

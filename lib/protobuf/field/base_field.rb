@@ -1,5 +1,7 @@
 require 'active_support/core_ext/hash/slice'
 require 'protobuf/field/field_array'
+require 'protobuf/field/field_hash'
+
 module Protobuf
   module Field
     class BaseField
@@ -82,6 +84,8 @@ module Protobuf
       def default_value
         @default_value ||= if optional? || required?
                              typed_default_value
+                           elsif map?
+                             ::Protobuf::Field::FieldHash.new(self).freeze
                            elsif repeated?
                              ::Protobuf::Field::FieldArray.new(self).freeze
                            else
@@ -113,6 +117,10 @@ module Protobuf
         false
       end
 
+      def map?
+        @is_map ||= repeated_message? && type_class.get_option(:map_entry)
+      end
+
       def optional?
         @optional
       end
@@ -136,6 +144,16 @@ module Protobuf
       # FIXME: need to cleanup (rename) this warthog of a method.
       def set(message_instance, bytes)
         return message_instance[name] = decode(bytes) unless repeated?
+
+        if map?
+          hash = message_instance[name]
+          entry = decode(bytes)
+          # decoded value could be nil for an
+          # enum value that is not recognized
+          hash[entry.key] = entry.value unless entry.value.nil?
+          return hash[entry.key]
+        end
+
         return message_instance[name] << decode(bytes) unless packed?
 
         array = message_instance[name]

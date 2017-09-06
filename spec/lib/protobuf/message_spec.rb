@@ -715,6 +715,43 @@ RSpec.describe Protobuf::Message do
     end
   end
 
+  describe 'map fields' do
+    it 'serializes the same as equivalent non-map-field' do
+      class MessageWithMapField < ::Protobuf::Message
+        map :int32, :string, :map, 1
+      end
+
+      class MessageWithoutMapField < ::Protobuf::Message
+        class MapEntry < ::Protobuf::Message
+          optional :int32, :key, 1
+          optional :string, :value, 2
+        end
+        repeated MapEntry, :map, 1
+      end
+
+      map_msg = MessageWithMapField.new(:map =>
+        {
+          1 => 'one',
+          2 => 'two',
+          3 => 'three',
+          4 => 'four',
+        })
+      mapless_msg = MessageWithoutMapField.new(:map =>
+        [{ :key => 1, :value => 'one' },
+         { :key => 2, :value => 'two' },
+         { :key => 3, :value => 'three' },
+         { :key => 4, :value => 'four' },
+        ])
+
+      map_bytes = map_msg.encode
+      mapless_bytes = mapless_msg.encode
+      expect(map_bytes).to eq(mapless_bytes)
+
+      expect(MessageWithMapField.decode(mapless_bytes)).to eq(map_msg)
+      expect(MessageWithoutMapField.decode(map_bytes)).to eq(mapless_msg)
+    end
+  end
+
   describe '.[]=' do
     context 'clearing fields' do
       it 'clears repeated fields with an empty array' do

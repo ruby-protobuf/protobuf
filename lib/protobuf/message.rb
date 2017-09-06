@@ -50,7 +50,7 @@ module Protobuf
 
     def clear!
       @values.delete_if do |_, value|
-        if value.is_a?(::Protobuf::Field::FieldArray)
+        if value.is_a?(::Protobuf::Field::FieldArray) || value.is_a?(::Protobuf::Field::FieldHash)
           value.clear
           false
         else
@@ -85,6 +85,17 @@ module Protobuf
         if value.nil?
           fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value." if field.required?
           next
+        end
+        if field.map?
+          # on-the-wire, maps are represented like an array of entries where
+          # each entry is a message of two fields, key and value.
+          array = Array.new(value.size)
+          i = 0
+          value.each do |k, v|
+            array[i] = field.type_class.new(:key => k, :value => v)
+            i += 1
+          end
+          value = array
         end
 
         yield(field, value)
@@ -151,8 +162,9 @@ module Protobuf
 
     def [](name)
       field = self.class.get_field(name, true)
-      return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field) if field.repeated?
 
+      return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldHash.new(field) if field.map?
+      return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field) if field.repeated?
       @values.fetch(field.fully_qualified_name, field.default_value)
     rescue # not having a field should be the exceptional state
       raise if field
@@ -184,9 +196,24 @@ module Protobuf
 
     private
 
+    # rubocop:disable Metrics/MethodLength
     def set_field(name, value, ignore_nil_for_repeated)
       if (field = self.class.get_field(name, true))
-        if field.repeated?
+        if field.map?
+          unless value.is_a?(Hash)
+            fail TypeError, <<-TYPE_ERROR
+                Expected map value
+                Got '#{value.class}' for map protobuf field #{field.name}
+            TYPE_ERROR
+          end
+
+          if value.empty?
+            @values.delete(field.fully_qualified_name)
+          else
+            @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldHash.new(field)
+            @values[field.fully_qualified_name].replace(value)
+          end
+        elsif field.repeated?
           if value.nil? && ignore_nil_for_repeated
             ::Protobuf.deprecator.deprecation_warning("#{self.class}#[#{name}]=nil", "use an empty array instead of nil")
             return
