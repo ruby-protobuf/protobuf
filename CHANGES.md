@@ -1,4 +1,8 @@
-# Beta (3.7.x)
+# Stable (3.8.x)
+
+3.8.0
+-----
+- Map types now supported (#367)
 
 3.7.0 (pre3)
 -----------
