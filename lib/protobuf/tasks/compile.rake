@@ -22,7 +22,7 @@ namespace :protobuf do
     full_command = command.join(' ')
 
     puts full_command
-    exec(full_command)
+    system(full_command)
   end
 
   desc 'Clean the generated *.pb.rb files from the destination package. Pass PB_FORCE_CLEAN=1 to skip confirmation step.'
