@@ -214,7 +214,7 @@ RSpec.describe Protobuf::Enum do
   end
 
   subject { Test::EnumTestType::ONE }
-  specify { expect(subject.class).to eq(Fixnum) }
+  specify { expect(subject.class).to eq(1.class) }
   specify { expect(subject.parent_class).to eq(Test::EnumTestType) }
   specify { expect(subject.name).to eq(:ONE) }
   specify { expect(subject.tag).to eq(1) }
