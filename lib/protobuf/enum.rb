@@ -259,10 +259,16 @@ module Protobuf
       super(tag)
     end
 
-    # Overriding the class so ActiveRecord/Arel visitor will visit the enum as a Fixnum
+    # Overriding the class so ActiveRecord/Arel visitor will visit the enum as an
+    # Integer.
     #
     def class
-      Fixnum
+      # This is done for backward compatibility for < 2.4.0. This ensures that
+      # if Ruby version >= 2.4.0, this will return Integer. If below, then will
+      # return Fixnum.
+      #
+      # This prevents the constant deprecation warnings on Fixnum.
+      tag.class
     end
 
     def inspect
