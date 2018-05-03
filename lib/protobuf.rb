@@ -1,6 +1,7 @@
+require 'base64'
 require 'logger'
-require 'socket'
 require 'pp'
+require 'socket'
 require 'stringio'
 
 require 'active_support/core_ext/object/blank'

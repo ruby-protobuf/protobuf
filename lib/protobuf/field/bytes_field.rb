@@ -69,6 +69,10 @@ module Protobuf
           fail TypeError, "Unacceptable value #{value} for field #{name} of type #{type_class}"
         end
       end
+
+      def json_encode(value)
+        Base64.strict_encode64(value)
+      end
     end
   end
 end

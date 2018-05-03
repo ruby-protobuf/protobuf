@@ -427,6 +427,16 @@ RSpec.describe Protobuf::Message do
     end
 
     specify { expect(subject.to_json).to eq '{"name":"Test Name","active":false}' }
+
+    context 'for byte fields' do
+      let(:bytes) { "\x06\x8D1HP\x17:b" }
+
+      subject do
+        ::Test::ResourceFindRequest.new(:widget_bytes => [bytes])
+      end
+
+      specify { expect(subject.to_json).to eq '{"widget_bytes":["Bo0xSFAXOmI="]}' }
+    end
   end
 
   describe '.to_json' do

@@ -38,6 +38,9 @@ module Protobuf
         stream << tag_encoded << byte_size << value
       end
 
+      def json_encode(value)
+        value
+      end
     end
   end
 end

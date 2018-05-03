@@ -52,6 +52,24 @@ module Protobuf
         end
       end
 
+      # Return a hash-representation of the given values for this field type
+      # that is safe to convert to JSON.
+      #
+      # The value in this case would be the hash itself, right? Unfortunately
+      # not because the values of the map could be messages themselves that we
+      # need to transform.
+      def to_json_hash_value
+        if field.respond_to?(:json_encode)
+          each_with_object({}) do |(key, value), hash|
+            hash[key] = field.json_encode(value)
+          end
+        else
+          each_with_object({}) do |(key, value), hash|
+            hash[key] = value.respond_to?(:to_json_hash_value) ? value.to_json_hash_value : value
+          end
+        end
+      end
+
       def to_s
         "{#{field.name}}"
       end
