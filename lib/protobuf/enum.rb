@@ -283,6 +283,14 @@ module Protobuf
       tag.to_int
     end
 
+    ##
+    # This fixes a reflection bug in JrJackson RubyAnySerializer that does not
+    #     render Protobuf enums correctly because to_json is not defined.
+    #
+    def to_json
+      to_s
+    end
+
     def to_s(format = :tag)
       case format
       when :tag
