@@ -46,6 +46,21 @@ module Protobuf
         end
       end
 
+      # Return a hash-representation of the given values for this field type
+      # that is safe to convert to JSON.
+      # The value in this case would be an array.
+      def to_json_hash_value
+        if field.respond_to?(:json_encode)
+          map do |value|
+            field.json_encode(value)
+          end
+        else
+          map do |value|
+            value.respond_to?(:to_json_hash_value) ? value.to_json_hash_value : value
+          end
+        end
+      end
+
       def to_s
         "[#{field.name}]"
       end

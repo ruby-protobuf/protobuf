@@ -316,5 +316,6 @@ module Protobuf
     # Instance Aliases
     #
     alias :to_hash_value to_i
+    alias :to_json_hash_value to_i
   end
 end
