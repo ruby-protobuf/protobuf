@@ -162,7 +162,7 @@ RSpec.describe Protobuf::Enum do
 
     describe '.to_json' do
       it 'renders the enum value' do
-        expect(Test::EnumTestType::ONE.to_json).to eq("1")
+        expect(Test::EnumTestType::ONE.to_json).to eq(1)
         expect({ :value => Test::EnumTestType::ONE }.to_json).to eq(%({"value":1}))
       end
     end

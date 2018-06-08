@@ -288,7 +288,7 @@ module Protobuf
     #     render Protobuf enums correctly because to_json is not defined.
     #
     def to_json
-      to_s
+      to_i
     end
 
     def to_s(format = :tag)
