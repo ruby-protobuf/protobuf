@@ -259,6 +259,20 @@ module Protobuf
       super(tag)
     end
 
+    # Custom equality method since otherwise identical values from different
+    # enums will be considered equal by Integer's equality method (or
+    # Fixnum's on Ruby < 2.4.0).
+    #
+    def ==(other)
+      if other.is_a?(Protobuf::Enum)
+        parent_class == other.parent_class && tag == other.tag
+      elsif tag.class == other.class
+        tag == other
+      else
+        false
+      end
+    end
+
     # Overriding the class so ActiveRecord/Arel visitor will visit the enum as an
     # Integer.
     #
