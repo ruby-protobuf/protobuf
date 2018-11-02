@@ -64,7 +64,7 @@ end
 #DECODEME2 = ::Derp.encode_cache_hash(25763111)
 
 Benchmark.ips do |x|
-  x.config(:time => 50, :warmup => 10)
+  x.config(:time => 10, :warmup => 10)
 
   x.report("to_proto") do
     t = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
