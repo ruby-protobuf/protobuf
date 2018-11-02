@@ -18,6 +18,10 @@ module Protobuf
         ::Protobuf::Field::VarintField.encode(value & 0xffff_ffff_ffff_ffff)
       end
 
+      if defined?(VarintProtobufField) && $run_java
+        include VarintProtobufField
+      end
+
     end
   end
 end

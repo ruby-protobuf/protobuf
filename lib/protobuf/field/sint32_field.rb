@@ -16,6 +16,10 @@ module Protobuf
         INT32_MIN
       end
 
+      if defined?(Sint32ProtobufField) && $run_java
+        include Sint32ProtobufField
+      end
+
     end
   end
 end

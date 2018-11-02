@@ -17,9 +17,9 @@ public class Uint64ProtobufField {
   private static final long MAX = ((long)java.lang.Math.pow(2, 64) - 1);
   private static String TYPE = "Uint32";
 
-  private static boolean internal_acceptable(IRubyObject self) {
-    if (self instanceof RubyInteger || self instanceof RubyFixnum) {
-      long value = ((RubyFixnum) self).getLongValue();
+  private static boolean internal_acceptable(IRubyObject recv) {
+    if (recv instanceof RubyInteger || recv instanceof RubyFixnum) {
+      long value = ((RubyFixnum) recv).getLongValue();
       return value >= MIN && value <= MAX;
     }
 
@@ -27,10 +27,10 @@ public class Uint64ProtobufField {
   }
 
   @JRubyMethod(name = "acceptable?")
-  public static IRubyObject acceptable_p( ThreadContext context, IRubyObject self ) {
+  public static IRubyObject acceptable_p( ThreadContext context, IRubyObject self, IRubyObject recv ) {
     org.jruby.Ruby runtime = context.getRuntime();
 
-    if (internal_acceptable(self)) {
+    if (internal_acceptable(recv)) {
       return runtime.getTrue();
     }
 
@@ -38,21 +38,21 @@ public class Uint64ProtobufField {
   }
 
   @JRubyMethod(name = "coerce!")
-  public static IRubyObject coerce_bang( ThreadContext context, IRubyObject self ) {
+  public static IRubyObject coerce_bang( ThreadContext context, IRubyObject self, IRubyObject recv ) {
     org.jruby.Ruby runtime = context.getRuntime();
 
-    if (!internal_acceptable(self)) {
-      throw runtime.newTypeError("can't convert " + self.getMetaClass() + " into " + TYPE);
+    if (!internal_acceptable(recv)) {
+      throw runtime.newTypeError("can't convert " + recv.getMetaClass() + " into " + TYPE);
     }
 
-    if (self instanceof RubyInteger) {
-      return ((RubyInteger)self).to_i();
+    if (recv instanceof RubyInteger) {
+      return ((RubyInteger)recv).to_i();
     }
 
-    if (self instanceof RubyFixnum) {
-      return ((RubyFixnum)self).to_i();
+    if (recv instanceof RubyFixnum) {
+      return ((RubyFixnum)recv).to_i();
     }
 
-    return org.jruby.util.TypeConverter.convertToInteger(context, self, 10);
+    return org.jruby.util.TypeConverter.convertToInteger(context, recv, 10);
   }
 }

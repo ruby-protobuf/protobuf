@@ -1,3 +1,4 @@
+$run_java = true
 require 'base64'
 require "./lib/protobuf/varint_pure"
 require "./lib/jars/varinter.jar"
@@ -66,7 +67,14 @@ end
 Benchmark.ips do |x|
   x.config(:time => 10, :warmup => 10)
 
-  x.report("to_proto") do
+#  x.report("to_proto => false java") do
+#    t = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
+#    ss = StringIO.new
+#    ::Protobuf::Encoder.encode(t.to_proto, ss)
+#    t = ::Test::Resource.decode_from(ss)
+#  end
+
+  x.report("to_proto => true java") do
     t = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
     ss = StringIO.new
     ::Protobuf::Encoder.encode(t.to_proto, ss)

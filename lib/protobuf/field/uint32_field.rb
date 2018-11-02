@@ -16,6 +16,10 @@ module Protobuf
         0
       end
 
+      if defined?(Uint32ProtobufField) && $run_java
+        include Uint32ProtobufField
+      end
+
     end
   end
 end
