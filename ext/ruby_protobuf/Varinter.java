@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
+import java.lang.Math;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -21,6 +22,8 @@ import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 
 public class Varinter {
+  private static final long INT32_MAX = ((long)java.lang.Math.pow(2, 31) - 1);
+
   private static byte[] internal_to_varint(long value) {
     java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
 
@@ -33,9 +36,26 @@ public class Varinter {
     return bytes.toByteArray();
   }
 
+  @JRubyMethod(name = "acceptable?")
+  public static IRubyObject acceptable_p( ThreadContext context, IRubyObject self ) {
+    org.jruby.Ruby runtime = context.getRuntime();
+
+    if (self instanceof RubyInteger || self instanceof RubyFixnum) {
+      long value = ((RubyFixnum) self).getLongValue();
+
+      if (value >= 0 && value <= INT32_MAX) {
+        return runtime.getTrue();
+      } else {
+        return runtime.getFalse();
+      }
+    }
+
+    return runtime.getFalse();
+  }
+
   @JRubyMethod
   public static IRubyObject to_varint( ThreadContext context, IRubyObject self ) {
-    if (!(self instanceof RubyFixnum)) {
+    if (!(self instanceof RubyInteger || self instanceof RubyFixnum)) {
       return context.nil;
     }
 
@@ -44,27 +64,6 @@ public class Varinter {
     RubyString bit_string = runtime.newString(new ByteList(internal_to_varint(value), true));
     bit_string.force_encoding(context, runtime.getEncodingService().getEncoding(org.jcodings.specific.ASCIIEncoding.INSTANCE));
     return bit_string;
-  }
-
-  @JRubyMethod
-  public static IRubyObject to_varint2( ThreadContext context, IRubyObject self ) throws IOException {
-    if (!(self instanceof RubyFixnum)) {
-      return context.nil;
-    }
-
-    long v = ((RubyFixnum) self).getLongValue();
-    java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
-    org.jruby.Ruby runtime = context.getRuntime();
-
-    do {
-      // Encode next 7 bits + terminator bit
-      long bits = v & 0x7F;
-      v >>>= 7;
-      byte b = (byte) (bits | ((v != 0) ? 0x80 : 0));
-      bytes.write(b);
-    } while (v != 0);
-
-    return runtime.newString(bytes.toString());
   }
 
   @JRubyMethod
