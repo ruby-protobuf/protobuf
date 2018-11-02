@@ -15,7 +15,8 @@ module Protobuf
 
       def encode(value)
         # original Google's library uses 64bits integer for negative value
-        ::Protobuf::Field::VarintField.encode(value & 0xffff_ffff_ffff_ffff)
+        #::Protobuf::Field::VarintField.encode(value & 0xffff_ffff_ffff_ffff)
+        value.to_varint_64
       end
 
       if defined?(VarintProtobufField) && $run_java

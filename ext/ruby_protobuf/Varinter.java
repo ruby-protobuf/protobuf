@@ -67,6 +67,19 @@ public class Varinter {
   }
 
   @JRubyMethod
+  public static IRubyObject to_varint_64( ThreadContext context, IRubyObject self ) {
+    if (!(self instanceof RubyInteger || self instanceof RubyFixnum)) {
+      return context.nil;
+    }
+
+    long value = ((RubyFixnum) self).getLongValue();
+    org.jruby.Ruby runtime = context.getRuntime();
+    RubyString bit_string = runtime.newString(new ByteList(internal_to_varint((value << 1) ^ (value >> 63)), true));
+    bit_string.force_encoding(context, runtime.getEncodingService().getEncoding(org.jcodings.specific.ASCIIEncoding.INSTANCE));
+    return bit_string;
+  }
+
+  @JRubyMethod
   public static IRubyObject read_varint(ThreadContext context, IRubyObject self) throws IOException {
     long value = 0L;
     int index = 0;

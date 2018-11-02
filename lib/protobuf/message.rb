@@ -31,6 +31,70 @@ module Protobuf
       name
     end
 
+    def self._protobuf_message_write_map_set_method(field)
+      fully_qualified_name = field.fully_qualified_name
+
+      self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+        def _protobuf_message_set_field_#{field.name}(field, value, ignore_nil_for_repeated)
+          unless value.is_a?(Hash)
+            fail TypeError, <<-TYPE_ERROR
+                Expected map value
+                Got '\#{value.class}' for map protobuf field \#{field.name}
+            TYPE_ERROR
+          end
+
+          if value.empty?
+            @values.delete(:#{fully_qualified_name})
+          else
+            @values[:#{fully_qualified_name}] ||= ::Protobuf::Field::FieldHash.new(field)
+            @values[:#{fully_qualified_name}].replace(value)
+          end
+        end
+      RUBY
+    end
+
+    def self._protobuf_message_write_repeated_set_method(field)
+      fully_qualified_name = field.fully_qualified_name
+
+      self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+        def _protobuf_message_set_field_#{field.name}(field, value, ignore_nil_for_repeated)
+          if value.nil? && ignore_nil_for_repeated
+            ::Protobuf.deprecator.deprecation_warning("#{self.class}#[#{field.name}]=nil", "use an empty array instead of nil")
+            return
+          end
+          unless value.is_a?(Array)
+            fail TypeError, <<-TYPE_ERROR
+                Expected repeated value of type #{field.type_class}
+                Got \#{value.class} for repeated protobuf field #{field.name}
+            TYPE_ERROR
+          end
+
+          value = value.compact
+
+          if value.empty?
+            @values.delete(:#{fully_qualified_name})
+          else
+            @values[:#{fully_qualified_name}] ||= ::Protobuf::Field::FieldArray.new(field)
+            @values[:#{fully_qualified_name}].replace(value)
+          end
+        end
+      RUBY
+    end
+
+    def self._protobuf_message_write_set_method(field)
+      fully_qualified_name = field.fully_qualified_name
+
+      self.class_eval <<-RUBY , __FILE__, __LINE__ + 1
+        def _protobuf_message_set_field_#{field.name}(field, value, ignore_nil_for_repeated)
+          if value.nil? # rubocop:disable Style/IfInsideElse
+            @values.delete(:#{fully_qualified_name})
+          else
+            @values[:#{fully_qualified_name}] = field.coerce!(value)
+          end
+        end
+      RUBY
+    end
+
     ##
     # Constructor
     #
@@ -225,46 +289,21 @@ module Protobuf
     # rubocop:disable Metrics/MethodLength
     def set_field(name, value, ignore_nil_for_repeated)
       if (field = self.class.get_field(name, true))
-        if field.map?
-          unless value.is_a?(Hash)
-            fail TypeError, <<-TYPE_ERROR
-                Expected map value
-                Got '#{value.class}' for map protobuf field #{field.name}
-            TYPE_ERROR
+        begin
+          __send__("_protobuf_message_set_field_#{name}", field, value, ignore_nil_for_repeated)
+        rescue NoMethodError => error
+          raise unless error.message =~ /_protobuf_message_set_field/i
+
+          case
+            when field.map?
+              self.class._protobuf_message_write_map_set_method(field)
+            when field.repeated?
+              self.class._protobuf_message_write_repeated_set_method(field)
+            else
+              self.class._protobuf_message_write_set_method(field)
           end
 
-          if value.empty?
-            @values.delete(field.fully_qualified_name)
-          else
-            @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldHash.new(field)
-            @values[field.fully_qualified_name].replace(value)
-          end
-        elsif field.repeated?
-          if value.nil? && ignore_nil_for_repeated
-            ::Protobuf.deprecator.deprecation_warning("#{self.class}#[#{name}]=nil", "use an empty array instead of nil")
-            return
-          end
-          unless value.is_a?(Array)
-            fail TypeError, <<-TYPE_ERROR
-                Expected repeated value of type '#{field.type_class}'
-                Got '#{value.class}' for repeated protobuf field #{field.name}
-            TYPE_ERROR
-          end
-
-          value = value.compact
-
-          if value.empty?
-            @values.delete(field.fully_qualified_name)
-          else
-            @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field)
-            @values[field.fully_qualified_name].replace(value)
-          end
-        else
-          if value.nil? # rubocop:disable Style/IfInsideElse
-            @values.delete(field.fully_qualified_name)
-          else
-            @values[field.fully_qualified_name] = field.coerce!(value)
-          end
+          __send__("_protobuf_message_set_field_#{name}", field, value, ignore_nil_for_repeated)
         end
       else
         unless ::Protobuf.ignore_unknown_fields?
