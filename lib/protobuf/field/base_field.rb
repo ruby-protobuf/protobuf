@@ -58,6 +58,8 @@ module Protobuf
 
         validate_packed_field if packed?
         define_accessor(simple_name, fully_qualified_name) if simple_name
+        set_is_map!
+        set_repeated_message!
         tag_encoded
       end
 
@@ -118,7 +120,15 @@ module Protobuf
       end
 
       def map?
-        @is_map ||= repeated_message? && type_class.get_option(:map_entry)
+        @is_map
+      end
+
+      def set_is_map!
+        @is_map = repeated_message? && type_class.get_option(:map_entry)
+      end
+
+      def set_repeated_message!
+        @repeated_message = repeated? && message?
       end
 
       def optional?
@@ -134,7 +144,7 @@ module Protobuf
       end
 
       def repeated_message?
-        repeated? && message?
+        @repeated_message
       end
 
       def required?

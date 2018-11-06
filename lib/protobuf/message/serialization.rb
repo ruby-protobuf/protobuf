@@ -76,8 +76,15 @@ module Protobuf
       private
 
       def set_field_bytes(tag, bytes)
-        field = self.class.get_field(tag, true)
-        field.set(self, bytes) if field
+        begin
+          #field = self.class.get_field(tag, true)
+          #field.set(self, bytes) if field
+          __send__("_protobuf_message_set_field_#{tag}_bytes", bytes)
+        rescue NoMethodError => error
+          raise unless error.message =~ /_protobuf_message_set_field/i
+
+          self.class._protobuf_message_write_nil_method(tag)
+        end
       end
 
     end

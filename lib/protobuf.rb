@@ -10,6 +10,11 @@ require 'active_support/inflector'
 require 'active_support/json'
 require 'active_support/notifications'
 
+begin
+  require 'protobuf_java_helpers'
+rescue LoadError
+end
+
 # All top-level run time code requires, ordered by necessity
 require 'protobuf/wire_type'
 

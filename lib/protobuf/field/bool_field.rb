@@ -24,6 +24,15 @@ module Protobuf
         val == true || val == false || val == TRUE_STRING || val == FALSE_STRING
       end
 
+      def self.coerce!(val)
+        return true if val == true
+        return false if val == false
+        return true if val == TRUE_STRING
+        return false if val == FALSE_STRING
+
+        fail TypeError, "Expected value of for Bool field got '#{val.class}'"
+      end
+
       def coerce!(val)
         return true if val == true
         return false if val == false
@@ -31,6 +40,10 @@ module Protobuf
         return false if val == FALSE_STRING
 
         fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
+      end
+
+      def self.decode(value)
+        value == 1
       end
 
       def decode(value)
@@ -57,3 +70,5 @@ module Protobuf
     end
   end
 end
+
+PROTOBUF_FIELD_BOOL_FIELD = ::Protobuf::Field::BoolField

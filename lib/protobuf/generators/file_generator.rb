@@ -1,4 +1,5 @@
 require 'set'
+require 'pry'
 require 'protobuf/generators/base'
 require 'protobuf/generators/group_generator'
 

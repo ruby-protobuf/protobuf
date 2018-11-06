@@ -8,8 +8,22 @@ module Protobuf
       # Class Methods
       #
 
+      def self.coerce!(val)
+        Float(val)
+      rescue ArgumentError
+        fail TypeError, "Expected value of for FloatField got '#{val.class}'"
+      end
+
+      def self.decode(bytes)
+        bytes.unpack('e').first
+      end
+
       def self.default
         0.0
+      end
+
+      def self.encode(value)
+        [value].pack('e')
       end
 
       ##
@@ -35,9 +49,11 @@ module Protobuf
       end
 
       def wire_type
-        WireType::FIXED32
+        ::Protobuf::WireType::FIXED32
       end
 
     end
   end
 end
+
+PROTOBUF_FIELD_FLOAT_FIELD = ::Protobuf::Field::FloatField

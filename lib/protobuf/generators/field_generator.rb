@@ -71,6 +71,8 @@ module Protobuf
                                ["#{label} #{type_name}", name, number, applicable_options]
                              end
           puts field_definition.flatten.compact.join(', ')
+
+          access_methods_for_serialization
         end
       end
 
@@ -84,6 +86,21 @@ module Protobuf
 
       def number
         @number ||= descriptor.number
+      end
+
+      def number_tag_encoded
+        value = if repeated? && packed?
+                  ((number << 3) | ::Protobuf::WireType::LENGTH_DELIMITED)
+                else
+                  ((number << 3) | wire_type)
+                end
+
+        bytes = []
+        until value < 128
+          bytes << (0x80 | (value & 0x7f))
+          value >>= 7
+        end
+        (bytes << value).pack('C*')
       end
 
       def field_options
@@ -134,7 +151,131 @@ module Protobuf
         determine_type_name(map_entry.field.find { |v| v.name == 'value' && v.number == 2 })
       end
 
+      def repeated?
+        label =~ /repeated/i
+      end
+
       private
+
+      def access_methods_for_serialization
+        method_def = case
+                     when map?
+                       <<~RUBY
+
+                         def _protobuf_message_set_field_#{number}_bytes(bytes)
+                           _protobuf_message_set_field_#{number}(#{field_type_decoder}, true)
+                         end
+                         alias_method :_protobuf_message_set_field_#{descriptor.name}_bytes, :_protobuf_message_set_field_#{number}_bytes
+
+                          def _protobuf_message_set_field_#{number}(field, value, ignore_nil_for_repeated)
+                            unless value.is_a?(Hash)
+                              fail TypeError, <<-TYPE_ERROR
+                                  Expected map value
+                                  Got '\#{value.class}' for map protobuf field \#{field.name}
+                              TYPE_ERROR
+                            end
+
+                            if value.empty?
+                              @values.delete(#{name})
+                            else
+                              @values[#{name}] ||= ::Protobuf::Field::FieldHash.new(field)
+                              @values[#{name}].replace(value)
+                            end
+                          end
+                          alias_method :_protobuf_message_set_field_#{descriptor.name}, :_protobuf_message_set_field_#{number}
+
+                          def _protobuf_message_encode_#{number}_to_stream(value, stream)
+                            stream << "#{number_tag_encoded}" << #{field_type_encoder}
+                          end
+                          alias_method :_protobuf_message_encode_#{descriptor.name}_to_stream, :_protobuf_message_encode_#{number}_to_stream
+
+                      RUBY
+                     when repeated?
+                       method_defs = <<~RUBY
+
+                          def _protobuf_message_set_field_#{number}_bytes(bytes)
+                            _protobuf_message_set_field_#{number}(#{field_type_decoder}, true)
+                          end
+                          alias_method :_protobuf_message_set_field_#{descriptor.name}_bytes, :_protobuf_message_set_field_#{number}_bytes
+
+                          def _protobuf_message_set_field_#{number}(field, value, ignore_nil_for_repeated)
+                            if value.nil? && ignore_nil_for_repeated
+                              ::Protobuf.deprecator.deprecation_warning("[#{name}]=nil", "use an empty array instead of nil")
+                              return
+                            end
+                            unless value.is_a?(Array)
+                              fail TypeError, <<-TYPE_ERROR
+                                  Expected repeated value of type #{type_name}
+                                  Got \#{value.class} for repeated protobuf field #{name}
+                              TYPE_ERROR
+                            end
+ 
+                            value = value.compact
+ 
+                            if value.empty?
+                              @values.delete(#{name})
+                            else
+                              @values[#{name}] ||= ::Protobuf::Field::FieldArray.new(field)
+                              @values[#{name}].replace(value)
+                            end
+                          end
+                          alias_method :_protobuf_message_set_field_#{descriptor.name}, :_protobuf_message_set_field_#{number}
+
+                      RUBY
+
+                      if packed?
+                        method_defs << <<~RUBY
+
+                          def _protobuf_message_encode_#{number}_to_stream(_value, stream)
+                            packed_value = _value.map { |value| #{field_type_encoder} }.join
+                            stream << "#{number_tag_encoded}" << ::Protobuf::Field::VarintField.encode(packed_value.size) << packed_value
+                          end
+                          alias_method :_protobuf_message_encode_#{descriptor.name}_to_stream, :_protobuf_message_encode_#{number}_to_stream
+
+                        RUBY
+                      else
+                        method_defs << <<~RUBY
+                        
+                          def _protobuf_message_encode_#{number}_to_stream(_value, stream)
+                            _value.each do |value|
+                              stream << "#{number_tag_encoded}" << #{field_type_encoder}
+                            end
+                          end
+                          alias_method :_protobuf_message_encode_#{descriptor.name}_to_stream, :_protobuf_message_encode_#{number}_to_stream
+
+                        RUBY
+                      end
+
+                      method_defs
+                     else
+                       <<~RUBY
+
+                          def _protobuf_message_set_field_#{number}_bytes(bytes)
+                            _protobuf_message_set_field_#{number}(#{field_type_decoder}, true)
+                          end
+                          alias_method :_protobuf_message_set_field_#{descriptor.name}_bytes, :_protobuf_message_set_field_#{number}_bytes
+
+                          def _protobuf_message_set_field_#{number}(value, ignore_nil_for_repeated)
+                            if value.nil? # rubocop:disable Style/IfInsideElse
+                              @values.delete(#{name})
+                            else
+                              @values[#{name}] = #{value_coercion}
+                            end
+                          end
+                          alias_method :_protobuf_message_set_field_#{descriptor.name}, :_protobuf_message_set_field_#{number}
+
+                          def _protobuf_message_encode_#{number}_to_stream(value, stream)
+                            stream << "#{number_tag_encoded}" << #{field_type_encoder}
+                          end
+                          alias_method :_protobuf_message_encode_#{descriptor.name}_to_stream, :_protobuf_message_encode_#{number}_to_stream
+
+                       RUBY
+                     end
+
+        method_def.each_line do |line|
+          puts line
+        end
+      end
 
       def enum_default_value
         optionally_upcased_default =
@@ -186,6 +327,162 @@ module Protobuf
         nested = @enclosing_msg_descriptor.nested_type.find { |e| e.name == name_parts[-1] }
         return nested if !nested.nil? && nested.options.try(:map_entry?)
         nil
+      end
+
+      def field_type_encoder
+        case descriptor.type.name
+        when :TYPE_ENUM
+          "::Protobuf::Field::IntegerField::encode(value.to_i)"
+        when :TYPE_STRING
+          "::Protobuf::Field::StringField.encode(value)"
+        when :TYPE_BYTES
+          "::Protobuf::Field::BytesField.encode(value)"
+        when :TYPE_FLOAT
+          "::Protobuf::Field::FloatField.encode(value)"
+        when :TYPE_DOUBLE
+          "::Protobuf::Field::DoubleField.encode(value)"
+        when :TYPE_INT64
+          "::Protobuf::Field::Int64Field.encode(value)"
+        when :TYPE_UINT64
+          "::Protobuf::Field::Uint64.encode(value)"
+        when :TYPE_INT32
+          "::Protobuf::Field::Int32Field.encode(value)"
+        when :TYPE_FIXED64
+          "::Protobuf::Field::Fixed64.encode(value)"
+        when :TYPE_FIXED32
+          "::Protobuf::Field::Fixed32.encode(value)"
+        when :TYPE_BOOL
+          "::Protobuf::Field::BoolField.encode(value)"
+        when :TYPE_MESSAGE
+          "#{type_name}.encode(value)" # TODO: verify this
+        when :TYPE_UINT32
+          "::Protobuf::Field::Uint32.encode(value)"
+        when :TYPE_SFIXED32
+          "::Protobuf::Field::Sfixed32.encode(value)"
+        when :TYPE_SFIXED64
+          "::Protobuf::Field::Sfixed64.encode(value)"
+        when :TYPE_SINT32
+          "::Protobuf::Field::Sint32Field.encode(value)"
+        when :TYPE_SINT64
+          "::Protobuf::Field::Sint64Field.encode(value)"
+        end
+      end
+
+      def field_type_decoder
+        case descriptor.type.name
+        when :TYPE_ENUM
+          "#{type_name}.fetch(::Protobuf::Field::IntegerField::decode(bytes))"
+        when :TYPE_STRING
+          "::Protobuf::Field::StringField.decode(bytes)"
+        when :TYPE_BYTES
+          "::Protobuf::Field::BytesField.decode(bytes)"
+        when :TYPE_FLOAT
+          "::Protobuf::Field::FloatField.decode(bytes)"
+        when :TYPE_DOUBLE
+          "::Protobuf::Field::DoubleField.decode(bytes)"
+        when :TYPE_INT64
+          "::Protobuf::Field::Int64Field.decode(bytes)"
+        when :TYPE_UINT64
+          "::Protobuf::Field::Uint64.decode(bytes)"
+        when :TYPE_INT32
+          "::Protobuf::Field::Int32Field.decode(bytes)"
+        when :TYPE_FIXED64
+          "::Protobuf::Field::Fixed64.decode(bytes)"
+        when :TYPE_FIXED32
+          "::Protobuf::Field::Fixed32.decode(bytes)"
+        when :TYPE_BOOL
+          "::Protobuf::Field::BoolField.decode(bytes)"
+        when :TYPE_MESSAGE
+          "#{type_name}.decode(bytes)"
+        when :TYPE_UINT32
+          "::Protobuf::Field::Uint32.decode(bytes)"
+        when :TYPE_SFIXED32
+          "::Protobuf::Field::Sfixed32.decode(bytes)"
+        when :TYPE_SFIXED64
+          "::Protobuf::Field::Sfixed64.decode(bytes)"
+        when :TYPE_SINT32
+          "::Protobuf::Field::Sint32Field.decode(bytes)"
+        when :TYPE_SINT64
+          "::Protobuf::Field::Sint64Field.decode(bytes)"
+        end
+      end
+
+      def value_coercion
+        case descriptor.type.name
+        when :TYPE_ENUM
+          "value"
+        when :TYPE_STRING
+          "::Protobuf::Field::BytesField.coerce!(value)"
+        when :TYPE_BYTES
+          "::Protobuf::Field::BytesField.coerce!(value)"
+        when :TYPE_FLOAT
+          "::Protobuf::Field::FloatField.coerce!(value)"
+        when :TYPE_DOUBLE
+          "::Protobuf::Field::FloatField.coerce!(value)"
+        when :TYPE_INT64
+          "::Protobuf::Field::Int64Field.coerce!(value)"
+        when :TYPE_UINT64
+          "::Protobuf::Field::Uint64Field.coerce!(value)"
+        when :TYPE_INT32
+          "::Protobuf::Field::Int32Field.coerce!(value)"
+        when :TYPE_FIXED64
+          "::Protobuf::Field::Uint64Field.coerce!(value)"
+        when :TYPE_FIXED32
+          "::Protobuf::Field::Uint32Field.coerce!(value)"
+        when :TYPE_BOOL
+          "::Protobuf::Field::BoolField.coerce!(value)"
+        when :TYPE_MESSAGE
+          "value"
+        when :TYPE_UINT32
+          "::Protobuf::Field::Uint32Field.coerce!(value)"
+        when :TYPE_SFIXED32
+          "::Protobuf::Field::Int32Field.coerce!(value)"
+        when :TYPE_SFIXED64
+          "::Protobuf::Field::Int64Field.coerce!(value)"
+        when :TYPE_SINT32
+          "::Protobuf::Field::Sint32Field.coerce!(value)"
+        when :TYPE_SINT64
+          "::Protobuf::Field::Sint64Field.coerce!(value)"
+        end
+      end
+
+      def wire_type
+        case descriptor.type.name
+        when :TYPE_ENUM
+          ::Protobuf::WireType::VARINT
+        when :TYPE_STRING
+          ::Protobuf::WireType::LENGTH_DELIMITED
+        when :TYPE_BYTES
+          ::Protobuf::WireType::LENGTH_DELIMITED
+        when :TYPE_FLOAT
+          ::Protobuf::WireType::FIXED32
+        when :TYPE_DOUBLE
+          ::Protobuf::WireType::FIXED64
+        when :TYPE_INT64
+          ::Protobuf::WireType::VARINT
+        when :TYPE_UINT64
+          ::Protobuf::WireType::VARINT
+        when :TYPE_INT32
+          ::Protobuf::WireType::VARINT
+        when :TYPE_FIXED64
+          ::Protobuf::WireType::FIXED64
+        when :TYPE_FIXED32
+          ::Protobuf::WireType::FIXED32
+        when :TYPE_BOOL
+          ::Protobuf::WireType::VARINT
+        when :TYPE_MESSAGE
+          ::Protobuf::WireType::LENGTH_DELIMITED
+        when :TYPE_UINT32
+          ::Protobuf::WireType::VARINT
+        when :TYPE_SFIXED32
+          ::Protobuf::WireType::FIXED32
+        when :TYPE_SFIXED64
+          ::Protobuf::WireType::FIXED64
+        when :TYPE_SINT32
+          ::Protobuf::WireType::VARINT
+        when :TYPE_SINT64
+          ::Protobuf::WireType::VARINT
+        end
       end
 
     end

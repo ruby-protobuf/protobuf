@@ -5,6 +5,21 @@ module Protobuf
     class Fixed64Field < Uint64Field
 
       ##
+      # Class Methods
+      #
+
+      def self.decode(bytes)
+        # we don't use 'Q' for pack/unpack. 'Q' is machine-dependent.
+        values = bytes.unpack('VV')
+        values[0] + (values[1] << 32)
+      end
+
+      def self.encode(value)
+        # we don't use 'Q' for pack/unpack. 'Q' is machine-dependent.
+        [value & 0xffff_ffff, value >> 32].pack('VV')
+      end
+
+      ##
       # Public Instance Methods
       #
 
@@ -26,3 +41,5 @@ module Protobuf
     end
   end
 end
+
+PROTOBUF_FIELD_FIXED64_FIELD = ::Protobuf::Field::Fixed64Field

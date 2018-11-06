@@ -20,8 +20,10 @@ module Protobuf
         !type_class.fetch(val).nil?
       end
 
-      def encode(value)
-        super(value.to_i)
+      def coerce!(value)
+        enum_value = type_class.fetch(value)
+        fail TypeError, "Invalid Enum value: #{value.inspect} for #{name}" unless enum_value
+        enum_value
       end
 
       def decode(value)
@@ -29,14 +31,12 @@ module Protobuf
         decoded if acceptable?(decoded)
       end
 
-      def enum?
-        true
+      def encode(value)
+        super(value.to_i)
       end
 
-      def coerce!(value)
-        enum_value = type_class.fetch(value)
-        fail TypeError, "Invalid Enum value: #{value.inspect} for #{name}" unless enum_value
-        enum_value
+      def enum?
+        true
       end
 
       private
@@ -56,3 +56,5 @@ module Protobuf
     end
   end
 end
+
+PROTOBUF_FIELD_ENUM_FIELD = ::Protobuf::Field::EnumField

@@ -5,9 +5,19 @@ module Protobuf
     class DoubleField < FloatField
 
       ##
+      # Class Methods
+      #
+      def self.decode(bytes)
+        bytes.unpack('E').first
+      end
+
+      def self.encode(value)
+        [value].pack('E')
+      end
+
+      ##
       # Public Instance Methods
       #
-
       def decode(bytes)
         bytes.unpack('E').first
       end
@@ -17,9 +27,11 @@ module Protobuf
       end
 
       def wire_type
-        WireType::FIXED64
+        ::Protobuf::WireType::FIXED64
       end
 
     end
   end
 end
+
+PROTOBUF_FIELD_DOUBLE_FIELD = ::Protobuf::Field::DoubleField

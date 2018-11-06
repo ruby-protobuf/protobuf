@@ -24,13 +24,14 @@ module Protobuf
         0
       end
 
-      if defined?(VarintProtobufField) && $run_java
-        include VarintProtobufField
+      if defined?(::ProtobufJavaHelpers::VarintProtobufField)
+        include ::ProtobufJavaHelpers::VarintProtobufField
+        extend ::ProtobufJavaHelpers::VarintProtobufField
+        extend ::ProtobufJavaHelpers::Varinter
 
         def self.encode(value)
-          value.to_varint
+          to_varint(value)
         end
-
       else
 
         # Because all tags and enums are calculated as VarInt it is "most common" to have
@@ -83,12 +84,19 @@ module Protobuf
         end
       end
 
+
+
+
       def decode(value)
         value
       end
 
+      def self.decode(value)
+        value
+      end
+
       def encode(value)
-        ::Protobuf::Field::VarintField.encode(value)
+        ::PROTOBUF_FIELD_VARINT_FIELD.encode(value)
       end
 
       def wire_type
@@ -98,3 +106,5 @@ module Protobuf
     end
   end
 end
+
+PROTOBUF_FIELD_VARINT_FIELD = ::Protobuf::Field::VarintField

@@ -49,3 +49,5 @@ module Protobuf
     end
   end
 end
+
+PROTOBUF_FIELD_MESSAGE_FIELD = ::Protobuf::Field::MessageField

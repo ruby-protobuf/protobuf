@@ -8,6 +8,11 @@ begin
   require 'varint/varint'
 rescue LoadError
 end
+
+begin
+  require 'protobuf_java_helpers'
+rescue LoadError
+end
 # rubocop:enable Lint/HandleExceptions
 
 require 'protobuf/varint'
@@ -31,10 +36,20 @@ module Protobuf
       name
     end
 
-    def self._protobuf_message_write_map_set_method(field)
-      fully_qualified_name = field.fully_qualified_name
+    def self._protobuf_message_write_nil_method(tag)
+      self.class_eval <<-RUBY , __FILE__, __LINE__ + 1
+        def _protobuf_message_set_field_#{tag}(*args)
+          nil
+        end
 
-      self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+        def _protobuf_message_set_field_#{tag}_bytes(*args)
+          nil
+        end
+      RUBY
+    end
+
+    def self._protobuf_message_write_map_set_method(field)
+      self.class_eval <<-RUBY , __FILE__, __LINE__ + 1
         def _protobuf_message_set_field_#{field.name}(field, value, ignore_nil_for_repeated)
           unless value.is_a?(Hash)
             fail TypeError, <<-TYPE_ERROR
@@ -44,55 +59,54 @@ module Protobuf
           end
 
           if value.empty?
-            @values.delete(:#{fully_qualified_name})
+            @values.delete(:#{field.name})
           else
-            @values[:#{fully_qualified_name}] ||= ::Protobuf::Field::FieldHash.new(field)
-            @values[:#{fully_qualified_name}].replace(value)
+            @values[:#{field.name}] ||= ::Protobuf::Field::FieldHash.new(field)
+            @values[:#{field.name}].replace(value)
           end
         end
       RUBY
     end
 
     def self._protobuf_message_write_repeated_set_method(field)
-      fully_qualified_name = field.fully_qualified_name
+      method_def = <<-RUBY
+         def _protobuf_message_set_field_#{field.name}(field, value, ignore_nil_for_repeated)
+           if value.nil? && ignore_nil_for_repeated
+             ::Protobuf.deprecator.deprecation_warning("[#{field.name}]=nil", "use an empty array instead of nil")
+             return
+           end
+           unless value.is_a?(Array)
+             fail TypeError, <<-TYPE_ERROR
+                 Expected repeated value of type #{field.type_class}
+                 Got \#{value.class} for repeated protobuf field #{field.name}
+             TYPE_ERROR
+           end
 
-      self.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-        def _protobuf_message_set_field_#{field.name}(field, value, ignore_nil_for_repeated)
-          if value.nil? && ignore_nil_for_repeated
-            ::Protobuf.deprecator.deprecation_warning("#{self.class}#[#{field.name}]=nil", "use an empty array instead of nil")
-            return
-          end
-          unless value.is_a?(Array)
-            fail TypeError, <<-TYPE_ERROR
-                Expected repeated value of type #{field.type_class}
-                Got \#{value.class} for repeated protobuf field #{field.name}
-            TYPE_ERROR
-          end
+           value = value.compact
 
-          value = value.compact
-
-          if value.empty?
-            @values.delete(:#{fully_qualified_name})
-          else
-            @values[:#{fully_qualified_name}] ||= ::Protobuf::Field::FieldArray.new(field)
-            @values[:#{fully_qualified_name}].replace(value)
-          end
-        end
+           if value.empty?
+             @values.delete(:#{field.name})
+           else
+             @values[:#{field.name}] ||= ::Protobuf::Field::FieldArray.new(field)
+             @values[:#{field.name}].replace(value)
+           end
+         end
       RUBY
+
+      self.class_eval method_def, __FILE__, __LINE__ + 1
     end
 
     def self._protobuf_message_write_set_method(field)
-      fully_qualified_name = field.fully_qualified_name
-
-      self.class_eval <<-RUBY , __FILE__, __LINE__ + 1
+      method_def = <<-RUBY
         def _protobuf_message_set_field_#{field.name}(field, value, ignore_nil_for_repeated)
           if value.nil? # rubocop:disable Style/IfInsideElse
-            @values.delete(:#{fully_qualified_name})
+            @values.delete(:#{field.name})
           else
-            @values[:#{fully_qualified_name}] = field.coerce!(value)
+            @values[:#{field.name}] = field.coerce!(value)
           end
         end
       RUBY
+      self.class_eval method_def, __FILE__, __LINE__ + 1
     end
 
     ##
@@ -288,9 +302,10 @@ module Protobuf
 
     # rubocop:disable Metrics/MethodLength
     def set_field(name, value, ignore_nil_for_repeated)
-      if (field = self.class.get_field(name, true))
+      #if (field = self.class.get_field(name, true))
         begin
-          __send__("_protobuf_message_set_field_#{name}", field, value, ignore_nil_for_repeated)
+          __send__("_protobuf_message_set_field_#{name}", value, ignore_nil_for_repeated)
+          #__send__("_protobuf_message_set_field_#{name}", field, value, ignore_nil_for_repeated)
         rescue NoMethodError => error
           raise unless error.message =~ /_protobuf_message_set_field/i
 
@@ -305,11 +320,11 @@ module Protobuf
 
           __send__("_protobuf_message_set_field_#{name}", field, value, ignore_nil_for_repeated)
         end
-      else
-        unless ::Protobuf.ignore_unknown_fields?
-          fail ::Protobuf::FieldNotDefinedError, name
-        end
-      end
+#      else
+#        unless ::Protobuf.ignore_unknown_fields?
+#          fail ::Protobuf::FieldNotDefinedError, name
+#        end
+#      end
     end
 
     def copy_to(object, method)
