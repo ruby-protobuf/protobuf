@@ -90,6 +90,17 @@ module Protobuf
 
         method_def = <<~RUBY
           REQUIRED_FIELDS = #{required_field_tags}
+          NAME_TO_TAG = {
+        RUBY
+
+        descriptors.each do |descriptor|
+          method_def << <<~RUBY
+            #{descriptor.name.to_sym.inspect} => #{descriptor.number},
+          RUBY
+        end
+
+        method_def << <<~RUBY
+          }
 
           def _protobuf_message_tags_to_serialize
             @_tags_to_serialize ||= ::Set.new

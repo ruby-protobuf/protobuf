@@ -153,6 +153,9 @@ module Google
       alias_method :_protobuf_message_encode_file_to_stream, :_protobuf_message_encode_1_to_stream
       
       REQUIRED_FIELDS = [1]
+      NAME_TO_TAG = {
+      :file => 1,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -592,6 +595,20 @@ module Google
       alias_method :_protobuf_message_encode_syntax_to_stream, :_protobuf_message_encode_12_to_stream
       
       REQUIRED_FIELDS = [1, 2, 3, 10, 11, 4, 5, 6, 7, 8, 9, 12]
+      NAME_TO_TAG = {
+      :name => 1,
+      :package => 2,
+      :dependency => 3,
+      :public_dependency => 10,
+      :weak_dependency => 11,
+      :message_type => 4,
+      :enum_type => 5,
+      :service => 6,
+      :extension => 7,
+      :options => 8,
+      :source_code_info => 9,
+      :syntax => 12,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -673,6 +690,10 @@ module Google
         alias_method :_protobuf_message_encode_end_to_stream, :_protobuf_message_encode_2_to_stream
         
         REQUIRED_FIELDS = [1, 2]
+        NAME_TO_TAG = {
+        :start => 1,
+        :end => 2,
+        }
         
         def _protobuf_message_tags_to_serialize
           @_tags_to_serialize ||= ::Set.new
@@ -753,6 +774,10 @@ module Google
         alias_method :_protobuf_message_encode_end_to_stream, :_protobuf_message_encode_2_to_stream
         
         REQUIRED_FIELDS = [1, 2]
+        NAME_TO_TAG = {
+        :start => 1,
+        :end => 2,
+        }
         
         def _protobuf_message_tags_to_serialize
           @_tags_to_serialize ||= ::Set.new
@@ -1160,6 +1185,18 @@ module Google
       alias_method :_protobuf_message_encode_reserved_name_to_stream, :_protobuf_message_encode_10_to_stream
       
       REQUIRED_FIELDS = [1, 2, 6, 3, 4, 5, 8, 7, 9, 10]
+      NAME_TO_TAG = {
+      :name => 1,
+      :field => 2,
+      :extension => 6,
+      :nested_type => 3,
+      :enum_type => 4,
+      :extension_range => 5,
+      :oneof_decl => 8,
+      :options => 7,
+      :reserved_range => 9,
+      :reserved_name => 10,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -1432,6 +1469,18 @@ module Google
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_8_to_stream
       
       REQUIRED_FIELDS = [1, 3, 4, 5, 6, 2, 7, 9, 10, 8]
+      NAME_TO_TAG = {
+      :name => 1,
+      :number => 3,
+      :label => 4,
+      :type => 5,
+      :type_name => 6,
+      :extendee => 2,
+      :default_value => 7,
+      :oneof_index => 9,
+      :json_name => 10,
+      :options => 8,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -1488,6 +1537,9 @@ module Google
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
       
       REQUIRED_FIELDS = [1]
+      NAME_TO_TAG = {
+      :name => 1,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -1609,6 +1661,11 @@ module Google
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_3_to_stream
       
       REQUIRED_FIELDS = [1, 2, 3]
+      NAME_TO_TAG = {
+      :name => 1,
+      :value => 2,
+      :options => 3,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -1713,6 +1770,11 @@ module Google
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_3_to_stream
       
       REQUIRED_FIELDS = [1, 2, 3]
+      NAME_TO_TAG = {
+      :name => 1,
+      :number => 2,
+      :options => 3,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -1834,6 +1896,11 @@ module Google
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_3_to_stream
       
       REQUIRED_FIELDS = [1, 2, 3]
+      NAME_TO_TAG = {
+      :name => 1,
+      :method => 2,
+      :options => 3,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -2010,6 +2077,14 @@ module Google
       alias_method :_protobuf_message_encode_server_streaming_to_stream, :_protobuf_message_encode_6_to_stream
       
       REQUIRED_FIELDS = [1, 2, 3, 4, 5, 6]
+      NAME_TO_TAG = {
+      :name => 1,
+      :input_type => 2,
+      :output_type => 3,
+      :options => 4,
+      :client_streaming => 5,
+      :server_streaming => 6,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -2445,6 +2520,24 @@ module Google
       # Extension Fields
       extensions 1000...536870912
       REQUIRED_FIELDS = [1, 8, 10, 20, 27, 9, 11, 16, 17, 18, 23, 31, 36, 37, 38, 999]
+      NAME_TO_TAG = {
+      :java_package => 1,
+      :java_outer_classname => 8,
+      :java_multiple_files => 10,
+      :java_generate_equals_and_hash => 20,
+      :java_string_check_utf8 => 27,
+      :optimize_for => 9,
+      :go_package => 11,
+      :cc_generic_services => 16,
+      :java_generic_services => 17,
+      :py_generic_services => 18,
+      :deprecated => 23,
+      :cc_enable_arenas => 31,
+      :objc_class_prefix => 36,
+      :csharp_namespace => 37,
+      :javanano_use_deprecated_package => 38,
+      :uninterpreted_option => 999,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -2616,6 +2709,13 @@ module Google
       # Extension Fields
       extensions 1000...536870912
       REQUIRED_FIELDS = [1, 2, 3, 7, 999]
+      NAME_TO_TAG = {
+      :message_set_wire_format => 1,
+      :no_standard_descriptor_accessor => 2,
+      :deprecated => 3,
+      :map_entry => 7,
+      :uninterpreted_option => 999,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -2835,6 +2935,15 @@ module Google
       # Extension Fields
       extensions 1000...536870912
       REQUIRED_FIELDS = [1, 2, 6, 5, 3, 10, 999]
+      NAME_TO_TAG = {
+      :ctype => 1,
+      :packed => 2,
+      :jstype => 6,
+      :lazy => 5,
+      :deprecated => 3,
+      :weak => 10,
+      :uninterpreted_option => 999,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -2958,6 +3067,11 @@ module Google
       # Extension Fields
       extensions 1000...536870912
       REQUIRED_FIELDS = [2, 3, 999]
+      NAME_TO_TAG = {
+      :allow_alias => 2,
+      :deprecated => 3,
+      :uninterpreted_option => 999,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -3057,6 +3171,10 @@ module Google
       # Extension Fields
       extensions 1000...536870912
       REQUIRED_FIELDS = [1, 999]
+      NAME_TO_TAG = {
+      :deprecated => 1,
+      :uninterpreted_option => 999,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -3156,6 +3274,10 @@ module Google
       # Extension Fields
       extensions 1000...536870912
       REQUIRED_FIELDS = [33, 999]
+      NAME_TO_TAG = {
+      :deprecated => 33,
+      :uninterpreted_option => 999,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -3255,6 +3377,10 @@ module Google
       # Extension Fields
       extensions 1000...536870912
       REQUIRED_FIELDS = [33, 999]
+      NAME_TO_TAG = {
+      :deprecated => 33,
+      :uninterpreted_option => 999,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -3336,6 +3462,10 @@ module Google
         alias_method :_protobuf_message_encode_is_extension_to_stream, :_protobuf_message_encode_2_to_stream
         
         REQUIRED_FIELDS = [1, 2]
+        NAME_TO_TAG = {
+        :name_part => 1,
+        :is_extension => 2,
+        }
         
         def _protobuf_message_tags_to_serialize
           @_tags_to_serialize ||= ::Set.new
@@ -3552,6 +3682,15 @@ module Google
       alias_method :_protobuf_message_encode_aggregate_value_to_stream, :_protobuf_message_encode_8_to_stream
       
       REQUIRED_FIELDS = [2, 3, 4, 5, 6, 7, 8]
+      NAME_TO_TAG = {
+      :name => 2,
+      :identifier_value => 3,
+      :positive_int_value => 4,
+      :negative_int_value => 5,
+      :double_value => 6,
+      :string_value => 7,
+      :aggregate_value => 8,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -3754,6 +3893,13 @@ module Google
         alias_method :_protobuf_message_encode_leading_detached_comments_to_stream, :_protobuf_message_encode_6_to_stream
         
         REQUIRED_FIELDS = [1, 2, 3, 4, 6]
+        NAME_TO_TAG = {
+        :path => 1,
+        :span => 2,
+        :leading_comments => 3,
+        :trailing_comments => 4,
+        :leading_detached_comments => 6,
+        }
         
         def _protobuf_message_tags_to_serialize
           @_tags_to_serialize ||= ::Set.new
@@ -3826,6 +3972,9 @@ module Google
       alias_method :_protobuf_message_encode_location_to_stream, :_protobuf_message_encode_1_to_stream
       
       REQUIRED_FIELDS = [1]
+      NAME_TO_TAG = {
+      :location => 1,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new

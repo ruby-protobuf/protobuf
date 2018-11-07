@@ -199,6 +199,12 @@ module Test
     alias_method :_protobuf_message_encode_widget_bytes_to_stream, :_protobuf_message_encode_4_to_stream
     
     REQUIRED_FIELDS = [1, 2, 3, 4]
+    NAME_TO_TAG = {
+    :name => 1,
+    :active => 2,
+    :widgets => 3,
+    :widget_bytes => 4,
+    }
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -255,6 +261,9 @@ module Test
     alias_method :_protobuf_message_encode_sleep_to_stream, :_protobuf_message_encode_1_to_stream
     
     REQUIRED_FIELDS = [1]
+    NAME_TO_TAG = {
+    :sleep => 1,
+    }
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -526,6 +535,12 @@ module Test
     alias_method :_protobuf_message_encode__test_Nested_NestedLevelOne_ext_dup_field_to_stream, :_protobuf_message_encode_106_to_stream
     
     REQUIRED_FIELDS = [1, 2, 3, 4]
+    NAME_TO_TAG = {
+    :name => 1,
+    :date_created => 2,
+    :status => 3,
+    :repeated_enum => 4,
+    }
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -582,6 +597,9 @@ module Test
     alias_method :_protobuf_message_encode_foo_is_required_to_stream, :_protobuf_message_encode_1_to_stream
     
     REQUIRED_FIELDS = [1]
+    NAME_TO_TAG = {
+    :foo_is_required => 1,
+    }
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -639,6 +657,9 @@ module Test
       alias_method :_protobuf_message_encode_child1_to_stream, :_protobuf_message_encode_1_to_stream
       
       REQUIRED_FIELDS = [1]
+      NAME_TO_TAG = {
+      :child1 => 1,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -670,6 +691,8 @@ module Test
     end
 
     REQUIRED_FIELDS = []
+    NAME_TO_TAG = {
+    }
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -771,6 +794,9 @@ module Test
       alias_method :_protobuf_message_encode__test_Nested_ext_nested_level_one_to_stream, :_protobuf_message_encode_100_to_stream
       
       REQUIRED_FIELDS = [1]
+      NAME_TO_TAG = {
+      :level_one => 1,
+      }
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -965,6 +991,12 @@ module Test
     alias_method :_protobuf_message_encode__test_bar_to_stream, :_protobuf_message_encode_101_to_stream
     
     REQUIRED_FIELDS = [1, 2, 3, 4]
+    NAME_TO_TAG = {
+    :name => 1,
+    :resource => 2,
+    :multiple_resources => 3,
+    :status => 4,
+    }
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
