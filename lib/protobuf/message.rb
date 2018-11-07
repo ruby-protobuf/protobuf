@@ -182,13 +182,14 @@ module Protobuf
     end
 
     def field?(name)
-      field = self.class.get_field(name, true)
-      return false if field.nil?
-      if field.repeated?
-        @values.key?(field.fully_qualified_name) && @values[field.fully_qualified_name].present?
-      else
-        @values.key?(field.fully_qualified_name)
-      end
+#      field = self.class.get_field(name, true)
+#      return false if field.nil?
+#      if field.repeated?
+#        @values.key?(field.fully_qualified_name) && @values[field.fully_qualified_name].present?
+#      else
+#        @values.key?(field.fully_qualified_name)
+#      end
+      @_tags_to_serialize[NAME_TO_TAG[name]]
     end
     ::Protobuf.deprecator.define_deprecated_methods(self, :has_field? => :field?)
 
@@ -258,10 +259,7 @@ module Protobuf
 
     def ==(other)
       return false unless other.is_a?(self.class)
-      each_field do |field, value|
-        return false unless value == other[field.name]
-      end
-      true
+      @values == other.__send__(:instance_variable_get, "@values")
     end
 
     def [](name)
