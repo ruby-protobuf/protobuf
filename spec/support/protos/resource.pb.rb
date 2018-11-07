@@ -86,7 +86,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
     
-    def _protobuf_message_encode_1_to_stream(value, stream)
+    def _protobuf_message_encode_1_to_stream(stream)
+      value = @values[:name]
       stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -109,7 +110,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_active, :_protobuf_message_set_field_2
     
-    def _protobuf_message_encode_2_to_stream(value, stream)
+    def _protobuf_message_encode_2_to_stream(stream)
+      value = @values[:active]
       stream << [16].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode_active_to_stream, :_protobuf_message_encode_2_to_stream
@@ -147,7 +149,8 @@ module Test
     alias_method :_protobuf_message_set_field_widgets, :_protobuf_message_set_field_3
     
     
-    def _protobuf_message_encode_3_to_stream(_value, stream)
+    def _protobuf_message_encode_3_to_stream(stream)
+      _value = @values[:widgets]
       _value.each do |value|
         stream << [26].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
@@ -187,7 +190,8 @@ module Test
     alias_method :_protobuf_message_set_field_widget_bytes, :_protobuf_message_set_field_4
     
     
-    def _protobuf_message_encode_4_to_stream(_value, stream)
+    def _protobuf_message_encode_4_to_stream(stream)
+      _value = @values[:widget_bytes]
       _value.each do |value|
         stream << [34].pack('C*') << ::PROTOBUF_FIELD_BYTES_FIELD.encode(value)
       end
@@ -244,7 +248,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_sleep, :_protobuf_message_set_field_1
     
-    def _protobuf_message_encode_1_to_stream(value, stream)
+    def _protobuf_message_encode_1_to_stream(stream)
+      value = @values[:sleep]
       stream << [8].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode_sleep_to_stream, :_protobuf_message_encode_1_to_stream
@@ -303,7 +308,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
     
-    def _protobuf_message_encode_1_to_stream(value, stream)
+    def _protobuf_message_encode_1_to_stream(stream)
+      value = @values[:name]
       stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -326,7 +332,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_date_created, :_protobuf_message_set_field_2
     
-    def _protobuf_message_encode_2_to_stream(value, stream)
+    def _protobuf_message_encode_2_to_stream(stream)
+      value = @values[:date_created]
       stream << [16].pack('C*') << ::PROTOBUF_FIELD_INT64_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode_date_created_to_stream, :_protobuf_message_encode_2_to_stream
@@ -349,7 +356,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_status, :_protobuf_message_set_field_3
     
-    def _protobuf_message_encode_3_to_stream(value, stream)
+    def _protobuf_message_encode_3_to_stream(stream)
+      value = @values[:status]
       stream << [24].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
     end
     alias_method :_protobuf_message_encode_status_to_stream, :_protobuf_message_encode_3_to_stream
@@ -387,7 +395,8 @@ module Test
     alias_method :_protobuf_message_set_field_repeated_enum, :_protobuf_message_set_field_4
     
     
-    def _protobuf_message_encode_4_to_stream(_value, stream)
+    def _protobuf_message_encode_4_to_stream(stream)
+      _value = @values[:repeated_enum]
       _value.each do |value|
         stream << [32].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
       end
@@ -414,7 +423,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_Searchable_ext_is_searchable, :_protobuf_message_set_field_100
     
-    def _protobuf_message_encode_100_to_stream(value, stream)
+    def _protobuf_message_encode_100_to_stream(stream)
+      value = @values[:".test.Searchable.ext_is_searchable"]
       stream << [160, 6].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_Searchable_ext_is_searchable_to_stream, :_protobuf_message_encode_100_to_stream
@@ -437,7 +447,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_Searchable_ext_is_hidden, :_protobuf_message_set_field_101
     
-    def _protobuf_message_encode_101_to_stream(value, stream)
+    def _protobuf_message_encode_101_to_stream(stream)
+      value = @values[:".test.Searchable.ext_is_hidden"]
       stream << [168, 6].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_Searchable_ext_is_hidden_to_stream, :_protobuf_message_encode_101_to_stream
@@ -460,7 +471,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_Searchable_ext_search_type, :_protobuf_message_set_field_102
     
-    def _protobuf_message_encode_102_to_stream(value, stream)
+    def _protobuf_message_encode_102_to_stream(stream)
+      value = @values[:".test.Searchable.ext_search_type"]
       stream << [176, 6].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
     end
     alias_method :_protobuf_message_encode__test_Searchable_ext_search_type_to_stream, :_protobuf_message_encode_102_to_stream
@@ -483,7 +495,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_Nested_NestedLevelOne_ext_nested_in_level_one, :_protobuf_message_set_field_105
     
-    def _protobuf_message_encode_105_to_stream(value, stream)
+    def _protobuf_message_encode_105_to_stream(stream)
+      value = @values[:".test.Nested.NestedLevelOne.ext_nested_in_level_one"]
       stream << [200, 6].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_Nested_NestedLevelOne_ext_nested_in_level_one_to_stream, :_protobuf_message_encode_105_to_stream
@@ -506,7 +519,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_Nested_NestedLevelOne_ext_dup_field, :_protobuf_message_set_field_106
     
-    def _protobuf_message_encode_106_to_stream(value, stream)
+    def _protobuf_message_encode_106_to_stream(stream)
+      value = @values[:".test.Nested.NestedLevelOne.ext_dup_field"]
       stream << [208, 6].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_Nested_NestedLevelOne_ext_dup_field_to_stream, :_protobuf_message_encode_106_to_stream
@@ -561,7 +575,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_foo_is_required, :_protobuf_message_set_field_1
     
-    def _protobuf_message_encode_1_to_stream(value, stream)
+    def _protobuf_message_encode_1_to_stream(stream)
+      value = @values[:foo_is_required]
       stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode_foo_is_required_to_stream, :_protobuf_message_encode_1_to_stream
@@ -617,7 +632,8 @@ module Test
       end
       alias_method :_protobuf_message_set_field_child1, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:child1]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_child1_to_stream, :_protobuf_message_encode_1_to_stream
@@ -698,7 +714,8 @@ module Test
       end
       alias_method :_protobuf_message_set_field_level_one, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:level_one]
         stream << [8].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_level_one_to_stream, :_protobuf_message_encode_1_to_stream
@@ -723,7 +740,8 @@ module Test
       end
       alias_method :_protobuf_message_set_field__test_ext_nested_level_one_outer, :_protobuf_message_set_field_101
       
-      def _protobuf_message_encode_101_to_stream(value, stream)
+      def _protobuf_message_encode_101_to_stream(stream)
+        value = @values[:".test.ext_nested_level_one_outer"]
         stream << [168, 6].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode__test_ext_nested_level_one_outer_to_stream, :_protobuf_message_encode_101_to_stream
@@ -746,7 +764,8 @@ module Test
       end
       alias_method :_protobuf_message_set_field__test_Nested_ext_nested_level_one, :_protobuf_message_set_field_100
       
-      def _protobuf_message_encode_100_to_stream(value, stream)
+      def _protobuf_message_encode_100_to_stream(stream)
+        value = @values[:".test.Nested.ext_nested_level_one"]
         stream << [160, 6].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode__test_Nested_ext_nested_level_one_to_stream, :_protobuf_message_encode_100_to_stream
@@ -800,7 +819,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
     
-    def _protobuf_message_encode_1_to_stream(value, stream)
+    def _protobuf_message_encode_1_to_stream(stream)
+      value = @values[:name]
       stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -823,7 +843,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_resource, :_protobuf_message_set_field_2
     
-    def _protobuf_message_encode_2_to_stream(value, stream)
+    def _protobuf_message_encode_2_to_stream(stream)
+      value = @values[:resource]
       stream << [18].pack('C*') << ::Test::Resource.encode(value)
     end
     alias_method :_protobuf_message_encode_resource_to_stream, :_protobuf_message_encode_2_to_stream
@@ -861,7 +882,8 @@ module Test
     alias_method :_protobuf_message_set_field_multiple_resources, :_protobuf_message_set_field_3
     
     
-    def _protobuf_message_encode_3_to_stream(_value, stream)
+    def _protobuf_message_encode_3_to_stream(stream)
+      _value = @values[:multiple_resources]
       _value.each do |value|
         stream << [26].pack('C*') << ::Test::Resource.encode(value)
       end
@@ -886,7 +908,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field_status, :_protobuf_message_set_field_4
     
-    def _protobuf_message_encode_4_to_stream(value, stream)
+    def _protobuf_message_encode_4_to_stream(stream)
+      value = @values[:status]
       stream << [32].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
     end
     alias_method :_protobuf_message_encode_status_to_stream, :_protobuf_message_encode_4_to_stream
@@ -911,7 +934,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_foo, :_protobuf_message_set_field_100
     
-    def _protobuf_message_encode_100_to_stream(value, stream)
+    def _protobuf_message_encode_100_to_stream(stream)
+      value = @values[:".test.foo"]
       stream << [162, 6].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_foo_to_stream, :_protobuf_message_encode_100_to_stream
@@ -934,7 +958,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_bar, :_protobuf_message_set_field_101
     
-    def _protobuf_message_encode_101_to_stream(value, stream)
+    def _protobuf_message_encode_101_to_stream(stream)
+      value = @values[:".test.bar"]
       stream << [168, 6].pack('C*') << ::PROTOBUF_FIELD_INT64_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_bar_to_stream, :_protobuf_message_encode_101_to_stream
@@ -993,7 +1018,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_file_option, :_protobuf_message_set_field_9585869
     
-    def _protobuf_message_encode_9585869_to_stream(value, stream)
+    def _protobuf_message_encode_9585869_to_stream(stream)
+      value = @values[:".test.file_option"]
       stream << [232, 204, 200, 36].pack('C*') << ::PROTOBUF_FIELD_UINT64_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_file_option_to_stream, :_protobuf_message_encode_9585869_to_stream
@@ -1019,7 +1045,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_field_option, :_protobuf_message_set_field_858769
     
-    def _protobuf_message_encode_858769_to_stream(value, stream)
+    def _protobuf_message_encode_858769_to_stream(stream)
+      value = @values[:".test.field_option"]
       stream << [136, 169, 163, 3].pack('C*') << ::PROTOBUF_FIELD_UINT64_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_field_option_to_stream, :_protobuf_message_encode_858769_to_stream
@@ -1045,7 +1072,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_enum_option, :_protobuf_message_set_field_590284
     
-    def _protobuf_message_encode_590284_to_stream(value, stream)
+    def _protobuf_message_encode_590284_to_stream(stream)
+      value = @values[:".test.enum_option"]
       stream << [224, 156, 160, 2].pack('C*') << ::PROTOBUF_FIELD_INT64_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_enum_option_to_stream, :_protobuf_message_encode_590284_to_stream
@@ -1071,7 +1099,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_message_option, :_protobuf_message_set_field_485969
     
-    def _protobuf_message_encode_485969_to_stream(value, stream)
+    def _protobuf_message_encode_485969_to_stream(stream)
+      value = @values[:".test.message_option"]
       stream << [136, 165, 237, 1].pack('C*') << ::PROTOBUF_FIELD_INT64_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_message_option_to_stream, :_protobuf_message_encode_485969_to_stream
@@ -1097,7 +1126,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_service_option, :_protobuf_message_set_field_5869607
     
-    def _protobuf_message_encode_5869607_to_stream(value, stream)
+    def _protobuf_message_encode_5869607_to_stream(stream)
+      value = @values[:".test.service_option"]
       stream << [184, 130, 178, 22].pack('C*') << ::PROTOBUF_FIELD_INT64_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_service_option_to_stream, :_protobuf_message_encode_5869607_to_stream
@@ -1123,7 +1153,8 @@ module Test
     end
     alias_method :_protobuf_message_set_field__test_method_option, :_protobuf_message_set_field_7893233
     
-    def _protobuf_message_encode_7893233_to_stream(value, stream)
+    def _protobuf_message_encode_7893233_to_stream(stream)
+      value = @values[:".test.method_option"]
       stream << [136, 143, 142, 30].pack('C*') << ::PROTOBUF_FIELD_INT64_FIELD.encode(value)
     end
     alias_method :_protobuf_message_encode__test_method_option_to_stream, :_protobuf_message_encode_7893233_to_stream

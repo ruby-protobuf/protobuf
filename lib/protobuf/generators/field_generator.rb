@@ -192,7 +192,8 @@ module Protobuf
                           end
                           alias_method :_protobuf_message_set_field_#{normalized_name}, :_protobuf_message_set_field_#{number}
 
-                          def _protobuf_message_encode_#{number}_to_stream(value, stream)
+                          def _protobuf_message_encode_#{number}_to_stream(stream)
+                            value = @values[#{name}]
                             stream << #{number_tag_encoded} << #{field_type_encoder}
                           end
                           alias_method :_protobuf_message_encode_#{normalized_name}_to_stream, :_protobuf_message_encode_#{number}_to_stream
@@ -236,7 +237,8 @@ module Protobuf
                       if packed?
                         method_defs << <<~RUBY
 
-                          def _protobuf_message_encode_#{number}_to_stream(_value, stream)
+                          def _protobuf_message_encode_#{number}_to_stream(stream)
+                            _value = @values[#{name}]
                             packed_value = _value.map { |value| #{field_type_encoder} }.join
                             stream << #{number_tag_encoded} << ::Protobuf::Field::VarintField.encode(packed_value.size) << packed_value
                           end
@@ -246,7 +248,8 @@ module Protobuf
                       else
                         method_defs << <<~RUBY
                         
-                          def _protobuf_message_encode_#{number}_to_stream(_value, stream)
+                          def _protobuf_message_encode_#{number}_to_stream(stream)
+                            _value = @values[#{name}]
                             _value.each do |value|
                               stream << #{number_tag_encoded} << #{field_type_encoder}
                             end
@@ -276,7 +279,8 @@ module Protobuf
                           end
                           alias_method :_protobuf_message_set_field_#{normalized_name}, :_protobuf_message_set_field_#{number}
 
-                          def _protobuf_message_encode_#{number}_to_stream(value, stream)
+                          def _protobuf_message_encode_#{number}_to_stream(stream)
+                            value = @values[#{name}]
                             stream << #{number_tag_encoded} << #{field_type_encoder}
                           end
                           alias_method :_protobuf_message_encode_#{normalized_name}_to_stream, :_protobuf_message_encode_#{number}_to_stream

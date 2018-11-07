@@ -144,7 +144,8 @@ module Google
       alias_method :_protobuf_message_set_field_file, :_protobuf_message_set_field_1
       
       
-      def _protobuf_message_encode_1_to_stream(_value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        _value = @values[:file]
         _value.each do |value|
           stream << [10].pack('C*') << ::Google::Protobuf::FileDescriptorProto.encode(value)
         end
@@ -201,7 +202,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:name]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -224,7 +226,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_package, :_protobuf_message_set_field_2
       
-      def _protobuf_message_encode_2_to_stream(value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        value = @values[:package]
         stream << [18].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_package_to_stream, :_protobuf_message_encode_2_to_stream
@@ -262,7 +265,8 @@ module Google
       alias_method :_protobuf_message_set_field_dependency, :_protobuf_message_set_field_3
       
       
-      def _protobuf_message_encode_3_to_stream(_value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        _value = @values[:dependency]
         _value.each do |value|
           stream << [26].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
         end
@@ -302,7 +306,8 @@ module Google
       alias_method :_protobuf_message_set_field_public_dependency, :_protobuf_message_set_field_10
       
       
-      def _protobuf_message_encode_10_to_stream(_value, stream)
+      def _protobuf_message_encode_10_to_stream(stream)
+        _value = @values[:public_dependency]
         _value.each do |value|
           stream << [80].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
         end
@@ -342,7 +347,8 @@ module Google
       alias_method :_protobuf_message_set_field_weak_dependency, :_protobuf_message_set_field_11
       
       
-      def _protobuf_message_encode_11_to_stream(_value, stream)
+      def _protobuf_message_encode_11_to_stream(stream)
+        _value = @values[:weak_dependency]
         _value.each do |value|
           stream << [88].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
         end
@@ -382,7 +388,8 @@ module Google
       alias_method :_protobuf_message_set_field_message_type, :_protobuf_message_set_field_4
       
       
-      def _protobuf_message_encode_4_to_stream(_value, stream)
+      def _protobuf_message_encode_4_to_stream(stream)
+        _value = @values[:message_type]
         _value.each do |value|
           stream << [34].pack('C*') << ::Google::Protobuf::DescriptorProto.encode(value)
         end
@@ -422,7 +429,8 @@ module Google
       alias_method :_protobuf_message_set_field_enum_type, :_protobuf_message_set_field_5
       
       
-      def _protobuf_message_encode_5_to_stream(_value, stream)
+      def _protobuf_message_encode_5_to_stream(stream)
+        _value = @values[:enum_type]
         _value.each do |value|
           stream << [42].pack('C*') << ::Google::Protobuf::EnumDescriptorProto.encode(value)
         end
@@ -462,7 +470,8 @@ module Google
       alias_method :_protobuf_message_set_field_service, :_protobuf_message_set_field_6
       
       
-      def _protobuf_message_encode_6_to_stream(_value, stream)
+      def _protobuf_message_encode_6_to_stream(stream)
+        _value = @values[:service]
         _value.each do |value|
           stream << [50].pack('C*') << ::Google::Protobuf::ServiceDescriptorProto.encode(value)
         end
@@ -502,7 +511,8 @@ module Google
       alias_method :_protobuf_message_set_field_extension, :_protobuf_message_set_field_7
       
       
-      def _protobuf_message_encode_7_to_stream(_value, stream)
+      def _protobuf_message_encode_7_to_stream(stream)
+        _value = @values[:extension]
         _value.each do |value|
           stream << [58].pack('C*') << ::Google::Protobuf::FieldDescriptorProto.encode(value)
         end
@@ -527,7 +537,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_options, :_protobuf_message_set_field_8
       
-      def _protobuf_message_encode_8_to_stream(value, stream)
+      def _protobuf_message_encode_8_to_stream(stream)
+        value = @values[:options]
         stream << [66].pack('C*') << ::Google::Protobuf::FileOptions.encode(value)
       end
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_8_to_stream
@@ -550,7 +561,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_source_code_info, :_protobuf_message_set_field_9
       
-      def _protobuf_message_encode_9_to_stream(value, stream)
+      def _protobuf_message_encode_9_to_stream(stream)
+        value = @values[:source_code_info]
         stream << [74].pack('C*') << ::Google::Protobuf::SourceCodeInfo.encode(value)
       end
       alias_method :_protobuf_message_encode_source_code_info_to_stream, :_protobuf_message_encode_9_to_stream
@@ -573,7 +585,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_syntax, :_protobuf_message_set_field_12
       
-      def _protobuf_message_encode_12_to_stream(value, stream)
+      def _protobuf_message_encode_12_to_stream(stream)
+        value = @values[:syntax]
         stream << [98].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_syntax_to_stream, :_protobuf_message_encode_12_to_stream
@@ -629,7 +642,8 @@ module Google
         end
         alias_method :_protobuf_message_set_field_start, :_protobuf_message_set_field_1
         
-        def _protobuf_message_encode_1_to_stream(value, stream)
+        def _protobuf_message_encode_1_to_stream(stream)
+          value = @values[:start]
           stream << [8].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
         end
         alias_method :_protobuf_message_encode_start_to_stream, :_protobuf_message_encode_1_to_stream
@@ -652,7 +666,8 @@ module Google
         end
         alias_method :_protobuf_message_set_field_end, :_protobuf_message_set_field_2
         
-        def _protobuf_message_encode_2_to_stream(value, stream)
+        def _protobuf_message_encode_2_to_stream(stream)
+          value = @values[:end]
           stream << [16].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
         end
         alias_method :_protobuf_message_encode_end_to_stream, :_protobuf_message_encode_2_to_stream
@@ -707,7 +722,8 @@ module Google
         end
         alias_method :_protobuf_message_set_field_start, :_protobuf_message_set_field_1
         
-        def _protobuf_message_encode_1_to_stream(value, stream)
+        def _protobuf_message_encode_1_to_stream(stream)
+          value = @values[:start]
           stream << [8].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
         end
         alias_method :_protobuf_message_encode_start_to_stream, :_protobuf_message_encode_1_to_stream
@@ -730,7 +746,8 @@ module Google
         end
         alias_method :_protobuf_message_set_field_end, :_protobuf_message_set_field_2
         
-        def _protobuf_message_encode_2_to_stream(value, stream)
+        def _protobuf_message_encode_2_to_stream(stream)
+          value = @values[:end]
           stream << [16].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
         end
         alias_method :_protobuf_message_encode_end_to_stream, :_protobuf_message_encode_2_to_stream
@@ -784,7 +801,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:name]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -822,7 +840,8 @@ module Google
       alias_method :_protobuf_message_set_field_field, :_protobuf_message_set_field_2
       
       
-      def _protobuf_message_encode_2_to_stream(_value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        _value = @values[:field]
         _value.each do |value|
           stream << [18].pack('C*') << ::Google::Protobuf::FieldDescriptorProto.encode(value)
         end
@@ -862,7 +881,8 @@ module Google
       alias_method :_protobuf_message_set_field_extension, :_protobuf_message_set_field_6
       
       
-      def _protobuf_message_encode_6_to_stream(_value, stream)
+      def _protobuf_message_encode_6_to_stream(stream)
+        _value = @values[:extension]
         _value.each do |value|
           stream << [50].pack('C*') << ::Google::Protobuf::FieldDescriptorProto.encode(value)
         end
@@ -902,7 +922,8 @@ module Google
       alias_method :_protobuf_message_set_field_nested_type, :_protobuf_message_set_field_3
       
       
-      def _protobuf_message_encode_3_to_stream(_value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        _value = @values[:nested_type]
         _value.each do |value|
           stream << [26].pack('C*') << ::Google::Protobuf::DescriptorProto.encode(value)
         end
@@ -942,7 +963,8 @@ module Google
       alias_method :_protobuf_message_set_field_enum_type, :_protobuf_message_set_field_4
       
       
-      def _protobuf_message_encode_4_to_stream(_value, stream)
+      def _protobuf_message_encode_4_to_stream(stream)
+        _value = @values[:enum_type]
         _value.each do |value|
           stream << [34].pack('C*') << ::Google::Protobuf::EnumDescriptorProto.encode(value)
         end
@@ -982,7 +1004,8 @@ module Google
       alias_method :_protobuf_message_set_field_extension_range, :_protobuf_message_set_field_5
       
       
-      def _protobuf_message_encode_5_to_stream(_value, stream)
+      def _protobuf_message_encode_5_to_stream(stream)
+        _value = @values[:extension_range]
         _value.each do |value|
           stream << [42].pack('C*') << ::Google::Protobuf::DescriptorProto::ExtensionRange.encode(value)
         end
@@ -1022,7 +1045,8 @@ module Google
       alias_method :_protobuf_message_set_field_oneof_decl, :_protobuf_message_set_field_8
       
       
-      def _protobuf_message_encode_8_to_stream(_value, stream)
+      def _protobuf_message_encode_8_to_stream(stream)
+        _value = @values[:oneof_decl]
         _value.each do |value|
           stream << [66].pack('C*') << ::Google::Protobuf::OneofDescriptorProto.encode(value)
         end
@@ -1047,7 +1071,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_options, :_protobuf_message_set_field_7
       
-      def _protobuf_message_encode_7_to_stream(value, stream)
+      def _protobuf_message_encode_7_to_stream(stream)
+        value = @values[:options]
         stream << [58].pack('C*') << ::Google::Protobuf::MessageOptions.encode(value)
       end
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_7_to_stream
@@ -1085,7 +1110,8 @@ module Google
       alias_method :_protobuf_message_set_field_reserved_range, :_protobuf_message_set_field_9
       
       
-      def _protobuf_message_encode_9_to_stream(_value, stream)
+      def _protobuf_message_encode_9_to_stream(stream)
+        _value = @values[:reserved_range]
         _value.each do |value|
           stream << [74].pack('C*') << ::Google::Protobuf::DescriptorProto::ReservedRange.encode(value)
         end
@@ -1125,7 +1151,8 @@ module Google
       alias_method :_protobuf_message_set_field_reserved_name, :_protobuf_message_set_field_10
       
       
-      def _protobuf_message_encode_10_to_stream(_value, stream)
+      def _protobuf_message_encode_10_to_stream(stream)
+        _value = @values[:reserved_name]
         _value.each do |value|
           stream << [82].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
         end
@@ -1182,7 +1209,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:name]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -1205,7 +1233,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_number, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:number]
         stream << [24].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_number_to_stream, :_protobuf_message_encode_3_to_stream
@@ -1228,7 +1257,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_label, :_protobuf_message_set_field_4
       
-      def _protobuf_message_encode_4_to_stream(value, stream)
+      def _protobuf_message_encode_4_to_stream(stream)
+        value = @values[:label]
         stream << [32].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
       end
       alias_method :_protobuf_message_encode_label_to_stream, :_protobuf_message_encode_4_to_stream
@@ -1251,7 +1281,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_type, :_protobuf_message_set_field_5
       
-      def _protobuf_message_encode_5_to_stream(value, stream)
+      def _protobuf_message_encode_5_to_stream(stream)
+        value = @values[:type]
         stream << [40].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
       end
       alias_method :_protobuf_message_encode_type_to_stream, :_protobuf_message_encode_5_to_stream
@@ -1274,7 +1305,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_type_name, :_protobuf_message_set_field_6
       
-      def _protobuf_message_encode_6_to_stream(value, stream)
+      def _protobuf_message_encode_6_to_stream(stream)
+        value = @values[:type_name]
         stream << [50].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_type_name_to_stream, :_protobuf_message_encode_6_to_stream
@@ -1297,7 +1329,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_extendee, :_protobuf_message_set_field_2
       
-      def _protobuf_message_encode_2_to_stream(value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        value = @values[:extendee]
         stream << [18].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_extendee_to_stream, :_protobuf_message_encode_2_to_stream
@@ -1320,7 +1353,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_default_value, :_protobuf_message_set_field_7
       
-      def _protobuf_message_encode_7_to_stream(value, stream)
+      def _protobuf_message_encode_7_to_stream(stream)
+        value = @values[:default_value]
         stream << [58].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_default_value_to_stream, :_protobuf_message_encode_7_to_stream
@@ -1343,7 +1377,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_oneof_index, :_protobuf_message_set_field_9
       
-      def _protobuf_message_encode_9_to_stream(value, stream)
+      def _protobuf_message_encode_9_to_stream(stream)
+        value = @values[:oneof_index]
         stream << [72].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_oneof_index_to_stream, :_protobuf_message_encode_9_to_stream
@@ -1366,7 +1401,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_json_name, :_protobuf_message_set_field_10
       
-      def _protobuf_message_encode_10_to_stream(value, stream)
+      def _protobuf_message_encode_10_to_stream(stream)
+        value = @values[:json_name]
         stream << [82].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_json_name_to_stream, :_protobuf_message_encode_10_to_stream
@@ -1389,7 +1425,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_options, :_protobuf_message_set_field_8
       
-      def _protobuf_message_encode_8_to_stream(value, stream)
+      def _protobuf_message_encode_8_to_stream(stream)
+        value = @values[:options]
         stream << [66].pack('C*') << ::Google::Protobuf::FieldOptions.encode(value)
       end
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_8_to_stream
@@ -1444,7 +1481,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:name]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -1499,7 +1537,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:name]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -1537,7 +1576,8 @@ module Google
       alias_method :_protobuf_message_set_field_value, :_protobuf_message_set_field_2
       
       
-      def _protobuf_message_encode_2_to_stream(_value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        _value = @values[:value]
         _value.each do |value|
           stream << [18].pack('C*') << ::Google::Protobuf::EnumValueDescriptorProto.encode(value)
         end
@@ -1562,7 +1602,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_options, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:options]
         stream << [26].pack('C*') << ::Google::Protobuf::EnumOptions.encode(value)
       end
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_3_to_stream
@@ -1617,7 +1658,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:name]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -1640,7 +1682,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_number, :_protobuf_message_set_field_2
       
-      def _protobuf_message_encode_2_to_stream(value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        value = @values[:number]
         stream << [16].pack('C*') << ::PROTOBUF_FIELD_INT32_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_number_to_stream, :_protobuf_message_encode_2_to_stream
@@ -1663,7 +1706,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_options, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:options]
         stream << [26].pack('C*') << ::Google::Protobuf::EnumValueOptions.encode(value)
       end
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_3_to_stream
@@ -1718,7 +1762,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:name]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -1756,7 +1801,8 @@ module Google
       alias_method :_protobuf_message_set_field_method, :_protobuf_message_set_field_2
       
       
-      def _protobuf_message_encode_2_to_stream(_value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        _value = @values[:method]
         _value.each do |value|
           stream << [18].pack('C*') << ::Google::Protobuf::MethodDescriptorProto.encode(value)
         end
@@ -1781,7 +1827,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_options, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:options]
         stream << [26].pack('C*') << ::Google::Protobuf::ServiceOptions.encode(value)
       end
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_3_to_stream
@@ -1836,7 +1883,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:name]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_name_to_stream, :_protobuf_message_encode_1_to_stream
@@ -1859,7 +1907,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_input_type, :_protobuf_message_set_field_2
       
-      def _protobuf_message_encode_2_to_stream(value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        value = @values[:input_type]
         stream << [18].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_input_type_to_stream, :_protobuf_message_encode_2_to_stream
@@ -1882,7 +1931,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_output_type, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:output_type]
         stream << [26].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_output_type_to_stream, :_protobuf_message_encode_3_to_stream
@@ -1905,7 +1955,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_options, :_protobuf_message_set_field_4
       
-      def _protobuf_message_encode_4_to_stream(value, stream)
+      def _protobuf_message_encode_4_to_stream(stream)
+        value = @values[:options]
         stream << [34].pack('C*') << ::Google::Protobuf::MethodOptions.encode(value)
       end
       alias_method :_protobuf_message_encode_options_to_stream, :_protobuf_message_encode_4_to_stream
@@ -1928,7 +1979,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_client_streaming, :_protobuf_message_set_field_5
       
-      def _protobuf_message_encode_5_to_stream(value, stream)
+      def _protobuf_message_encode_5_to_stream(stream)
+        value = @values[:client_streaming]
         stream << [40].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_client_streaming_to_stream, :_protobuf_message_encode_5_to_stream
@@ -1951,7 +2003,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_server_streaming, :_protobuf_message_set_field_6
       
-      def _protobuf_message_encode_6_to_stream(value, stream)
+      def _protobuf_message_encode_6_to_stream(stream)
+        value = @values[:server_streaming]
         stream << [48].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_server_streaming_to_stream, :_protobuf_message_encode_6_to_stream
@@ -2006,7 +2059,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_java_package, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:java_package]
         stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_java_package_to_stream, :_protobuf_message_encode_1_to_stream
@@ -2029,7 +2083,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_java_outer_classname, :_protobuf_message_set_field_8
       
-      def _protobuf_message_encode_8_to_stream(value, stream)
+      def _protobuf_message_encode_8_to_stream(stream)
+        value = @values[:java_outer_classname]
         stream << [66].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_java_outer_classname_to_stream, :_protobuf_message_encode_8_to_stream
@@ -2052,7 +2107,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_java_multiple_files, :_protobuf_message_set_field_10
       
-      def _protobuf_message_encode_10_to_stream(value, stream)
+      def _protobuf_message_encode_10_to_stream(stream)
+        value = @values[:java_multiple_files]
         stream << [80].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_java_multiple_files_to_stream, :_protobuf_message_encode_10_to_stream
@@ -2075,7 +2131,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_java_generate_equals_and_hash, :_protobuf_message_set_field_20
       
-      def _protobuf_message_encode_20_to_stream(value, stream)
+      def _protobuf_message_encode_20_to_stream(stream)
+        value = @values[:java_generate_equals_and_hash]
         stream << [160, 1].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_java_generate_equals_and_hash_to_stream, :_protobuf_message_encode_20_to_stream
@@ -2098,7 +2155,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_java_string_check_utf8, :_protobuf_message_set_field_27
       
-      def _protobuf_message_encode_27_to_stream(value, stream)
+      def _protobuf_message_encode_27_to_stream(stream)
+        value = @values[:java_string_check_utf8]
         stream << [216, 1].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_java_string_check_utf8_to_stream, :_protobuf_message_encode_27_to_stream
@@ -2121,7 +2179,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_optimize_for, :_protobuf_message_set_field_9
       
-      def _protobuf_message_encode_9_to_stream(value, stream)
+      def _protobuf_message_encode_9_to_stream(stream)
+        value = @values[:optimize_for]
         stream << [72].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
       end
       alias_method :_protobuf_message_encode_optimize_for_to_stream, :_protobuf_message_encode_9_to_stream
@@ -2144,7 +2203,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_go_package, :_protobuf_message_set_field_11
       
-      def _protobuf_message_encode_11_to_stream(value, stream)
+      def _protobuf_message_encode_11_to_stream(stream)
+        value = @values[:go_package]
         stream << [90].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_go_package_to_stream, :_protobuf_message_encode_11_to_stream
@@ -2167,7 +2227,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_cc_generic_services, :_protobuf_message_set_field_16
       
-      def _protobuf_message_encode_16_to_stream(value, stream)
+      def _protobuf_message_encode_16_to_stream(stream)
+        value = @values[:cc_generic_services]
         stream << [128, 1].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_cc_generic_services_to_stream, :_protobuf_message_encode_16_to_stream
@@ -2190,7 +2251,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_java_generic_services, :_protobuf_message_set_field_17
       
-      def _protobuf_message_encode_17_to_stream(value, stream)
+      def _protobuf_message_encode_17_to_stream(stream)
+        value = @values[:java_generic_services]
         stream << [136, 1].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_java_generic_services_to_stream, :_protobuf_message_encode_17_to_stream
@@ -2213,7 +2275,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_py_generic_services, :_protobuf_message_set_field_18
       
-      def _protobuf_message_encode_18_to_stream(value, stream)
+      def _protobuf_message_encode_18_to_stream(stream)
+        value = @values[:py_generic_services]
         stream << [144, 1].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_py_generic_services_to_stream, :_protobuf_message_encode_18_to_stream
@@ -2236,7 +2299,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_deprecated, :_protobuf_message_set_field_23
       
-      def _protobuf_message_encode_23_to_stream(value, stream)
+      def _protobuf_message_encode_23_to_stream(stream)
+        value = @values[:deprecated]
         stream << [184, 1].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_deprecated_to_stream, :_protobuf_message_encode_23_to_stream
@@ -2259,7 +2323,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_cc_enable_arenas, :_protobuf_message_set_field_31
       
-      def _protobuf_message_encode_31_to_stream(value, stream)
+      def _protobuf_message_encode_31_to_stream(stream)
+        value = @values[:cc_enable_arenas]
         stream << [248, 1].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_cc_enable_arenas_to_stream, :_protobuf_message_encode_31_to_stream
@@ -2282,7 +2347,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_objc_class_prefix, :_protobuf_message_set_field_36
       
-      def _protobuf_message_encode_36_to_stream(value, stream)
+      def _protobuf_message_encode_36_to_stream(stream)
+        value = @values[:objc_class_prefix]
         stream << [162, 2].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_objc_class_prefix_to_stream, :_protobuf_message_encode_36_to_stream
@@ -2305,7 +2371,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_csharp_namespace, :_protobuf_message_set_field_37
       
-      def _protobuf_message_encode_37_to_stream(value, stream)
+      def _protobuf_message_encode_37_to_stream(stream)
+        value = @values[:csharp_namespace]
         stream << [170, 2].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_csharp_namespace_to_stream, :_protobuf_message_encode_37_to_stream
@@ -2328,7 +2395,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_javanano_use_deprecated_package, :_protobuf_message_set_field_38
       
-      def _protobuf_message_encode_38_to_stream(value, stream)
+      def _protobuf_message_encode_38_to_stream(stream)
+        value = @values[:javanano_use_deprecated_package]
         stream << [176, 2].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_javanano_use_deprecated_package_to_stream, :_protobuf_message_encode_38_to_stream
@@ -2366,7 +2434,8 @@ module Google
       alias_method :_protobuf_message_set_field_uninterpreted_option, :_protobuf_message_set_field_999
       
       
-      def _protobuf_message_encode_999_to_stream(_value, stream)
+      def _protobuf_message_encode_999_to_stream(stream)
+        _value = @values[:uninterpreted_option]
         _value.each do |value|
           stream << [186, 62].pack('C*') << ::Google::Protobuf::UninterpretedOption.encode(value)
         end
@@ -2425,7 +2494,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_message_set_wire_format, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:message_set_wire_format]
         stream << [8].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_message_set_wire_format_to_stream, :_protobuf_message_encode_1_to_stream
@@ -2448,7 +2518,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_no_standard_descriptor_accessor, :_protobuf_message_set_field_2
       
-      def _protobuf_message_encode_2_to_stream(value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        value = @values[:no_standard_descriptor_accessor]
         stream << [16].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_no_standard_descriptor_accessor_to_stream, :_protobuf_message_encode_2_to_stream
@@ -2471,7 +2542,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_deprecated, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:deprecated]
         stream << [24].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_deprecated_to_stream, :_protobuf_message_encode_3_to_stream
@@ -2494,7 +2566,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_map_entry, :_protobuf_message_set_field_7
       
-      def _protobuf_message_encode_7_to_stream(value, stream)
+      def _protobuf_message_encode_7_to_stream(stream)
+        value = @values[:map_entry]
         stream << [56].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_map_entry_to_stream, :_protobuf_message_encode_7_to_stream
@@ -2532,7 +2605,8 @@ module Google
       alias_method :_protobuf_message_set_field_uninterpreted_option, :_protobuf_message_set_field_999
       
       
-      def _protobuf_message_encode_999_to_stream(_value, stream)
+      def _protobuf_message_encode_999_to_stream(stream)
+        _value = @values[:uninterpreted_option]
         _value.each do |value|
           stream << [186, 62].pack('C*') << ::Google::Protobuf::UninterpretedOption.encode(value)
         end
@@ -2591,7 +2665,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_ctype, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:ctype]
         stream << [8].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
       end
       alias_method :_protobuf_message_encode_ctype_to_stream, :_protobuf_message_encode_1_to_stream
@@ -2614,7 +2689,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_packed, :_protobuf_message_set_field_2
       
-      def _protobuf_message_encode_2_to_stream(value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        value = @values[:packed]
         stream << [16].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_packed_to_stream, :_protobuf_message_encode_2_to_stream
@@ -2637,7 +2713,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_jstype, :_protobuf_message_set_field_6
       
-      def _protobuf_message_encode_6_to_stream(value, stream)
+      def _protobuf_message_encode_6_to_stream(stream)
+        value = @values[:jstype]
         stream << [48].pack('C*') << ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)
       end
       alias_method :_protobuf_message_encode_jstype_to_stream, :_protobuf_message_encode_6_to_stream
@@ -2660,7 +2737,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_lazy, :_protobuf_message_set_field_5
       
-      def _protobuf_message_encode_5_to_stream(value, stream)
+      def _protobuf_message_encode_5_to_stream(stream)
+        value = @values[:lazy]
         stream << [40].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_lazy_to_stream, :_protobuf_message_encode_5_to_stream
@@ -2683,7 +2761,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_deprecated, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:deprecated]
         stream << [24].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_deprecated_to_stream, :_protobuf_message_encode_3_to_stream
@@ -2706,7 +2785,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_weak, :_protobuf_message_set_field_10
       
-      def _protobuf_message_encode_10_to_stream(value, stream)
+      def _protobuf_message_encode_10_to_stream(stream)
+        value = @values[:weak]
         stream << [80].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_weak_to_stream, :_protobuf_message_encode_10_to_stream
@@ -2744,7 +2824,8 @@ module Google
       alias_method :_protobuf_message_set_field_uninterpreted_option, :_protobuf_message_set_field_999
       
       
-      def _protobuf_message_encode_999_to_stream(_value, stream)
+      def _protobuf_message_encode_999_to_stream(stream)
+        _value = @values[:uninterpreted_option]
         _value.each do |value|
           stream << [186, 62].pack('C*') << ::Google::Protobuf::UninterpretedOption.encode(value)
         end
@@ -2803,7 +2884,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_allow_alias, :_protobuf_message_set_field_2
       
-      def _protobuf_message_encode_2_to_stream(value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        value = @values[:allow_alias]
         stream << [16].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_allow_alias_to_stream, :_protobuf_message_encode_2_to_stream
@@ -2826,7 +2908,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_deprecated, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:deprecated]
         stream << [24].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_deprecated_to_stream, :_protobuf_message_encode_3_to_stream
@@ -2864,7 +2947,8 @@ module Google
       alias_method :_protobuf_message_set_field_uninterpreted_option, :_protobuf_message_set_field_999
       
       
-      def _protobuf_message_encode_999_to_stream(_value, stream)
+      def _protobuf_message_encode_999_to_stream(stream)
+        _value = @values[:uninterpreted_option]
         _value.each do |value|
           stream << [186, 62].pack('C*') << ::Google::Protobuf::UninterpretedOption.encode(value)
         end
@@ -2923,7 +3007,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_deprecated, :_protobuf_message_set_field_1
       
-      def _protobuf_message_encode_1_to_stream(value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        value = @values[:deprecated]
         stream << [8].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_deprecated_to_stream, :_protobuf_message_encode_1_to_stream
@@ -2961,7 +3046,8 @@ module Google
       alias_method :_protobuf_message_set_field_uninterpreted_option, :_protobuf_message_set_field_999
       
       
-      def _protobuf_message_encode_999_to_stream(_value, stream)
+      def _protobuf_message_encode_999_to_stream(stream)
+        _value = @values[:uninterpreted_option]
         _value.each do |value|
           stream << [186, 62].pack('C*') << ::Google::Protobuf::UninterpretedOption.encode(value)
         end
@@ -3020,7 +3106,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_deprecated, :_protobuf_message_set_field_33
       
-      def _protobuf_message_encode_33_to_stream(value, stream)
+      def _protobuf_message_encode_33_to_stream(stream)
+        value = @values[:deprecated]
         stream << [136, 2].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_deprecated_to_stream, :_protobuf_message_encode_33_to_stream
@@ -3058,7 +3145,8 @@ module Google
       alias_method :_protobuf_message_set_field_uninterpreted_option, :_protobuf_message_set_field_999
       
       
-      def _protobuf_message_encode_999_to_stream(_value, stream)
+      def _protobuf_message_encode_999_to_stream(stream)
+        _value = @values[:uninterpreted_option]
         _value.each do |value|
           stream << [186, 62].pack('C*') << ::Google::Protobuf::UninterpretedOption.encode(value)
         end
@@ -3117,7 +3205,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_deprecated, :_protobuf_message_set_field_33
       
-      def _protobuf_message_encode_33_to_stream(value, stream)
+      def _protobuf_message_encode_33_to_stream(stream)
+        value = @values[:deprecated]
         stream << [136, 2].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_deprecated_to_stream, :_protobuf_message_encode_33_to_stream
@@ -3155,7 +3244,8 @@ module Google
       alias_method :_protobuf_message_set_field_uninterpreted_option, :_protobuf_message_set_field_999
       
       
-      def _protobuf_message_encode_999_to_stream(_value, stream)
+      def _protobuf_message_encode_999_to_stream(stream)
+        _value = @values[:uninterpreted_option]
         _value.each do |value|
           stream << [186, 62].pack('C*') << ::Google::Protobuf::UninterpretedOption.encode(value)
         end
@@ -3215,7 +3305,8 @@ module Google
         end
         alias_method :_protobuf_message_set_field_name_part, :_protobuf_message_set_field_1
         
-        def _protobuf_message_encode_1_to_stream(value, stream)
+        def _protobuf_message_encode_1_to_stream(stream)
+          value = @values[:name_part]
           stream << [10].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
         end
         alias_method :_protobuf_message_encode_name_part_to_stream, :_protobuf_message_encode_1_to_stream
@@ -3238,7 +3329,8 @@ module Google
         end
         alias_method :_protobuf_message_set_field_is_extension, :_protobuf_message_set_field_2
         
-        def _protobuf_message_encode_2_to_stream(value, stream)
+        def _protobuf_message_encode_2_to_stream(stream)
+          value = @values[:is_extension]
           stream << [16].pack('C*') << ::PROTOBUF_FIELD_BOOL_FIELD.encode(value)
         end
         alias_method :_protobuf_message_encode_is_extension_to_stream, :_protobuf_message_encode_2_to_stream
@@ -3307,7 +3399,8 @@ module Google
       alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_2
       
       
-      def _protobuf_message_encode_2_to_stream(_value, stream)
+      def _protobuf_message_encode_2_to_stream(stream)
+        _value = @values[:name]
         _value.each do |value|
           stream << [18].pack('C*') << ::Google::Protobuf::UninterpretedOption::NamePart.encode(value)
         end
@@ -3332,7 +3425,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_identifier_value, :_protobuf_message_set_field_3
       
-      def _protobuf_message_encode_3_to_stream(value, stream)
+      def _protobuf_message_encode_3_to_stream(stream)
+        value = @values[:identifier_value]
         stream << [26].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_identifier_value_to_stream, :_protobuf_message_encode_3_to_stream
@@ -3355,7 +3449,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_positive_int_value, :_protobuf_message_set_field_4
       
-      def _protobuf_message_encode_4_to_stream(value, stream)
+      def _protobuf_message_encode_4_to_stream(stream)
+        value = @values[:positive_int_value]
         stream << [32].pack('C*') << ::PROTOBUF_FIELD_UINT64_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_positive_int_value_to_stream, :_protobuf_message_encode_4_to_stream
@@ -3378,7 +3473,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_negative_int_value, :_protobuf_message_set_field_5
       
-      def _protobuf_message_encode_5_to_stream(value, stream)
+      def _protobuf_message_encode_5_to_stream(stream)
+        value = @values[:negative_int_value]
         stream << [40].pack('C*') << ::PROTOBUF_FIELD_INT64_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_negative_int_value_to_stream, :_protobuf_message_encode_5_to_stream
@@ -3401,7 +3497,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_double_value, :_protobuf_message_set_field_6
       
-      def _protobuf_message_encode_6_to_stream(value, stream)
+      def _protobuf_message_encode_6_to_stream(stream)
+        value = @values[:double_value]
         stream << [49].pack('C*') << ::PROTOBUF_FIELD_DOUBLE_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_double_value_to_stream, :_protobuf_message_encode_6_to_stream
@@ -3424,7 +3521,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_string_value, :_protobuf_message_set_field_7
       
-      def _protobuf_message_encode_7_to_stream(value, stream)
+      def _protobuf_message_encode_7_to_stream(stream)
+        value = @values[:string_value]
         stream << [58].pack('C*') << ::PROTOBUF_FIELD_BYTES_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_string_value_to_stream, :_protobuf_message_encode_7_to_stream
@@ -3447,7 +3545,8 @@ module Google
       end
       alias_method :_protobuf_message_set_field_aggregate_value, :_protobuf_message_set_field_8
       
-      def _protobuf_message_encode_8_to_stream(value, stream)
+      def _protobuf_message_encode_8_to_stream(stream)
+        value = @values[:aggregate_value]
         stream << [66].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
       end
       alias_method :_protobuf_message_encode_aggregate_value_to_stream, :_protobuf_message_encode_8_to_stream
@@ -3518,7 +3617,8 @@ module Google
         alias_method :_protobuf_message_set_field_path, :_protobuf_message_set_field_1
         
         
-        def _protobuf_message_encode_1_to_stream(_value, stream)
+        def _protobuf_message_encode_1_to_stream(stream)
+          _value = @values[:path]
           packed_value = _value.map { |value| ::PROTOBUF_FIELD_INT32_FIELD.encode(value) }.join
           stream << [10].pack('C*') << ::Protobuf::Field::VarintField.encode(packed_value.size) << packed_value
         end
@@ -3557,7 +3657,8 @@ module Google
         alias_method :_protobuf_message_set_field_span, :_protobuf_message_set_field_2
         
         
-        def _protobuf_message_encode_2_to_stream(_value, stream)
+        def _protobuf_message_encode_2_to_stream(stream)
+          _value = @values[:span]
           packed_value = _value.map { |value| ::PROTOBUF_FIELD_INT32_FIELD.encode(value) }.join
           stream << [18].pack('C*') << ::Protobuf::Field::VarintField.encode(packed_value.size) << packed_value
         end
@@ -3581,7 +3682,8 @@ module Google
         end
         alias_method :_protobuf_message_set_field_leading_comments, :_protobuf_message_set_field_3
         
-        def _protobuf_message_encode_3_to_stream(value, stream)
+        def _protobuf_message_encode_3_to_stream(stream)
+          value = @values[:leading_comments]
           stream << [26].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
         end
         alias_method :_protobuf_message_encode_leading_comments_to_stream, :_protobuf_message_encode_3_to_stream
@@ -3604,7 +3706,8 @@ module Google
         end
         alias_method :_protobuf_message_set_field_trailing_comments, :_protobuf_message_set_field_4
         
-        def _protobuf_message_encode_4_to_stream(value, stream)
+        def _protobuf_message_encode_4_to_stream(stream)
+          value = @values[:trailing_comments]
           stream << [34].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
         end
         alias_method :_protobuf_message_encode_trailing_comments_to_stream, :_protobuf_message_encode_4_to_stream
@@ -3642,7 +3745,8 @@ module Google
         alias_method :_protobuf_message_set_field_leading_detached_comments, :_protobuf_message_set_field_6
         
         
-        def _protobuf_message_encode_6_to_stream(_value, stream)
+        def _protobuf_message_encode_6_to_stream(stream)
+          _value = @values[:leading_detached_comments]
           _value.each do |value|
             stream << [50].pack('C*') << ::PROTOBUF_FIELD_STRING_FIELD.encode(value)
           end
@@ -3713,7 +3817,8 @@ module Google
       alias_method :_protobuf_message_set_field_location, :_protobuf_message_set_field_1
       
       
-      def _protobuf_message_encode_1_to_stream(_value, stream)
+      def _protobuf_message_encode_1_to_stream(stream)
+        _value = @values[:location]
         _value.each do |value|
           stream << [10].pack('C*') << ::Google::Protobuf::SourceCodeInfo::Location.encode(value)
         end
