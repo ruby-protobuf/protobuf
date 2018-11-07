@@ -157,10 +157,6 @@ module Protobuf
         label =~ /repeated/i
       end
 
-      def required?
-        label =~ /required/i
-      end
-
       private
 
       def access_methods_for_serialization
@@ -183,11 +179,9 @@ module Protobuf
 
                             if value.empty?
                               @values.delete(#{name})
-                              _protobuf_message_remove_tag_to_serialize(#{number})
                             else
                               @values[#{name}] ||= ::Protobuf::Field::FieldHash.new(field)
                               @values[#{name}].replace(value)
-                              _protobuf_message_add_tag_to_serialize(#{number})
                             end
                           end
                           alias_method :_protobuf_message_set_field_#{normalized_name}, :_protobuf_message_set_field_#{number}
@@ -222,11 +216,9 @@ module Protobuf
  
                             if value.empty?
                               @values.delete(#{name})
-                              _protobuf_message_remove_tag_to_serialize(#{number})
                             else
-                              @values[#{name}] ||= ::PROTOBUF_FIELD_FIELD_ARRAY.new(field)
+                              @values[#{name}] ||= ::Protobuf::Field::FieldArray.new(field)
                               @values[#{name}].replace(value)
-                              _protobuf_message_add_tag_to_serialize(#{number})
                             end
                           end
                           alias_method :_protobuf_message_set_field_#{normalized_name}, :_protobuf_message_set_field_#{number}
@@ -268,10 +260,8 @@ module Protobuf
                           def _protobuf_message_set_field_#{number}(value, ignore_nil_for_repeated)
                             if value.nil? # rubocop:disable Style/IfInsideElse
                               @values.delete(#{name})
-                              _protobuf_message_remove_tag_to_serialize(#{number})
                             else
                               @values[#{name}] = #{value_coercion}
-                              _protobuf_message_add_tag_to_serialize(#{number})
                             end
                           end
                           alias_method :_protobuf_message_set_field_#{normalized_name}, :_protobuf_message_set_field_#{number}
@@ -351,78 +341,78 @@ module Protobuf
       def field_type_encoder
         case descriptor.type.name
         when :TYPE_ENUM
-          "::PROTOBUF_FIELD_INTEGER_FIELD.encode(value.to_i)"
+          "::Protobuf::Field::IntegerField::encode(value.to_i)"
         when :TYPE_STRING
-          "::PROTOBUF_FIELD_STRING_FIELD.encode(value)"
+          "::Protobuf::Field::StringField.encode(value)"
         when :TYPE_BYTES
-          "::PROTOBUF_FIELD_BYTES_FIELD.encode(value)"
+          "::Protobuf::Field::BytesField.encode(value)"
         when :TYPE_FLOAT
-          "::PROTOBUF_FIELD_FLOAT_FIELD.encode(value)"
+          "::Protobuf::Field::FloatField.encode(value)"
         when :TYPE_DOUBLE
-          "::PROTOBUF_FIELD_DOUBLE_FIELD.encode(value)"
+          "::Protobuf::Field::DoubleField.encode(value)"
         when :TYPE_INT64
-          "::PROTOBUF_FIELD_INT64_FIELD.encode(value)"
+          "::Protobuf::Field::Int64Field.encode(value)"
         when :TYPE_UINT64
-          "::PROTOBUF_FIELD_UINT64_FIELD.encode(value)"
+          "::Protobuf::Field::Uint64.encode(value)"
         when :TYPE_INT32
-          "::PROTOBUF_FIELD_INT32_FIELD.encode(value)"
+          "::Protobuf::Field::Int32Field.encode(value)"
         when :TYPE_FIXED64
-          "::PROTOBUF_FIELD_FIXED64_FIELD.encode(value)"
+          "::Protobuf::Field::Fixed64.encode(value)"
         when :TYPE_FIXED32
-          "::PROTOBUF_FIELD_FIXED32_FIELD.encode(value)"
+          "::Protobuf::Field::Fixed32.encode(value)"
         when :TYPE_BOOL
-          "::PROTOBUF_FIELD_BOOL_FIELD.encode(value)"
+          "::Protobuf::Field::BoolField.encode(value)"
         when :TYPE_MESSAGE
           "#{type_name}.encode(value)" # TODO: verify this
         when :TYPE_UINT32
-          "::PROTOBUF_FIELD_UINT32_FIELD.encode(value)"
+          "::Protobuf::Field::Uint32.encode(value)"
         when :TYPE_SFIXED32
-          "::PROTOBUF_FIELD_SFIXED32_FIELD.encode(value)"
+          "::Protobuf::Field::Sfixed32.encode(value)"
         when :TYPE_SFIXED64
-          "::PROTOBUF_FIELD_SFIXED64_FIELD.encode(value)"
+          "::Protobuf::Field::Sfixed64.encode(value)"
         when :TYPE_SINT32
-          "::PROTOBUF_FIELD_SINT32_FIELD.encode(value)"
+          "::Protobuf::Field::Sint32Field.encode(value)"
         when :TYPE_SINT64
-          "::PROTOBUF_FIELD_SINT64_FIELD.encode(value)"
+          "::Protobuf::Field::Sint64Field.encode(value)"
         end
       end
 
       def field_type_decoder
         case descriptor.type.name
         when :TYPE_ENUM
-          "#{type_name}.fetch(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes))"
+          "#{type_name}.fetch(::Protobuf::Field::IntegerField::decode(bytes))"
         when :TYPE_STRING
-          "::PROTOBUF_FIELD_STRING_FIELD.decode(bytes)"
+          "::Protobuf::Field::StringField.decode(bytes)"
         when :TYPE_BYTES
-          "::PROTOBUF_FIELD_BYTES_FIELD.decode(bytes)"
+          "::Protobuf::Field::BytesField.decode(bytes)"
         when :TYPE_FLOAT
-          "::PROTOBUF_FIELD_FLOAT_FIELD.decode(bytes)"
+          "::Protobuf::Field::FloatField.decode(bytes)"
         when :TYPE_DOUBLE
-          "::PROTOBUF_FIELD_DOUBLE_FIELD.decode(bytes)"
+          "::Protobuf::Field::DoubleField.decode(bytes)"
         when :TYPE_INT64
-          "::PROTOBUF_FIELD_INT64_FIELD.decode(bytes)"
+          "::Protobuf::Field::Int64Field.decode(bytes)"
         when :TYPE_UINT64
-          "::PROTOBUF_FIELD_UINT64_FIELD.decode(bytes)"
+          "::Protobuf::Field::Uint64.decode(bytes)"
         when :TYPE_INT32
-          "::PROTOBUF_FIELD_INT32_FIELD.decode(bytes)"
+          "::Protobuf::Field::Int32Field.decode(bytes)"
         when :TYPE_FIXED64
-          "::PROTOBUF_FIELD_FIXED64_FIELD.decode(bytes)"
+          "::Protobuf::Field::Fixed64.decode(bytes)"
         when :TYPE_FIXED32
-          "::PROTOBUF_FIELD_FIXED32_FIELD.decode(bytes)"
+          "::Protobuf::Field::Fixed32.decode(bytes)"
         when :TYPE_BOOL
-          "::PROTOBUF_FIELD_BOOL_FIELD.decode(bytes)"
+          "::Protobuf::Field::BoolField.decode(bytes)"
         when :TYPE_MESSAGE
           "#{type_name}.decode(bytes)"
         when :TYPE_UINT32
-          "::PROTOBUF_FIELD_UINT32_FIELD.decode(bytes)"
+          "::Protobuf::Field::Uint32.decode(bytes)"
         when :TYPE_SFIXED32
-          "::PROTOBUF_FIELD_SFIXED32_FIELD.decode(bytes)"
+          "::Protobuf::Field::Sfixed32.decode(bytes)"
         when :TYPE_SFIXED64
-          "::PROTOBUF_FIELD_SFIXED64_FIELD.decode(bytes)"
+          "::Protobuf::Field::Sfixed64.decode(bytes)"
         when :TYPE_SINT32
-          "::PROTOBUF_FIELD_SINT32_FIELD.decode(bytes)"
+          "::Protobuf::Field::Sint32Field.decode(bytes)"
         when :TYPE_SINT64
-          "::PROTOBUF_FIELD_SINT64_FIELD.decode(bytes)"
+          "::Protobuf::Field::Sint64Field.decode(bytes)"
         end
       end
 
@@ -431,37 +421,37 @@ module Protobuf
         when :TYPE_ENUM
           "value"
         when :TYPE_STRING
-          "::PROTOBUF_FIELD_BYTES_FIELD.coerce!(value)"
+          "::Protobuf::Field::BytesField.coerce!(value)"
         when :TYPE_BYTES
-          "::PROTOBUF_FIELD_BYTES_FIELD.coerce!(value)"
+          "::Protobuf::Field::BytesField.coerce!(value)"
         when :TYPE_FLOAT
-          "::PROTOBUF_FIELD_FLOAT_FIELD.coerce!(value)"
+          "::Protobuf::Field::FloatField.coerce!(value)"
         when :TYPE_DOUBLE
-          "::PROTOBUF_FIELD_FLOAT_FIELD.coerce!(value)"
+          "::Protobuf::Field::FloatField.coerce!(value)"
         when :TYPE_INT64
-          "::PROTOBUF_FIELD_INT64_FIELD.coerce!(value)"
+          "::Protobuf::Field::Int64Field.coerce!(value)"
         when :TYPE_UINT64
-          "::PROTOBUF_FIELD_UINT64_FIELD.coerce!(value)"
+          "::Protobuf::Field::Uint64Field.coerce!(value)"
         when :TYPE_INT32
-          "::PROTOBUF_FIELD_INT32_FIELD.coerce!(value)"
+          "::Protobuf::Field::Int32Field.coerce!(value)"
         when :TYPE_FIXED64
-          "::PROTOBUF_FIELD_UINT64_FIELD.coerce!(value)"
+          "::Protobuf::Field::Uint64Field.coerce!(value)"
         when :TYPE_FIXED32
-          "::PROTOBUF_FIELD_UINT64_FIELD.coerce!(value)"
+          "::Protobuf::Field::Uint32Field.coerce!(value)"
         when :TYPE_BOOL
-          "::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)"
+          "::Protobuf::Field::BoolField.coerce!(value)"
         when :TYPE_MESSAGE
           "value"
         when :TYPE_UINT32
-          "::PROTOBUF_FIELD_UINT64_FIELD.coerce!(value)"
+          "::Protobuf::Field::Uint32Field.coerce!(value)"
         when :TYPE_SFIXED32
-          "::PROTOBUF_FIELD_INT32_FIELD.coerce!(value)"
+          "::Protobuf::Field::Int32Field.coerce!(value)"
         when :TYPE_SFIXED64
-          "::PROTOBUF_FIELD_INT64_FIELD.coerce!(value)"
+          "::Protobuf::Field::Int64Field.coerce!(value)"
         when :TYPE_SINT32
-          "::PROTOBUF_FIELD_SINT32_FIELD.coerce!(value)"
+          "::Protobuf::Field::Sint32Field.coerce!(value)"
         when :TYPE_SINT64
-          "::PROTOBUF_FIELD_SINT64_FIELD.coerce!(value)"
+          "::Protobuf::Field::Sint64Field.coerce!(value)"
         end
       end
 

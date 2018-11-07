@@ -21,7 +21,11 @@ namespace :compile do
   desc 'Compile spec protos in spec/supprt/ directory'
   task :spec do
     proto_path = ::File.expand_path('../spec/support/', __FILE__)
-    proto_files = Dir[File.join(proto_path, '**', '*.proto')]
+    proto_files = [
+      ::File.join(proto_path, 'protos', 'resource.proto'),
+      #::File.join(proto_path, 'protos', 'enum.proto'),
+      #::File.join(proto_path, 'protos', 'multi_field_extensions.proto'),
+    ]
     cmd = %(protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{proto_files.join(' ')})
 
     puts cmd

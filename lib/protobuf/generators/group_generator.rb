@@ -81,6 +81,61 @@ module Protobuf
         end
       end
 
+      def add_message_serialization(descriptors, msg_descriptor)
+        required_field_tags = []
+        descriptors.each do |descriptor|
+          field = FieldGenerator.new(descriptor, msg_descriptor, nil)
+          required_field_tags << field.number
+        end
+
+        method_def = <<~RUBY
+          REQUIRED_FIELDS = #{required_field_tags}
+
+          def _protobuf_message_tags_to_serialize
+            @_tags_to_serialize ||= ::Set.new
+          end
+
+          def _protobuf_message_add_tag_to_serialize(tag)
+            @_tags_to_serialize.add(tag)
+          end
+
+          def _protobuf_message_clear_tags_to_serialize(tag)
+            @_tags_to_serialize.clear
+          end
+
+          def _protobuf_message_remove_tag_to_serialize(tag)
+            @_tags_to_serialize.delete(tag)
+          end
+
+          def _protobuf_message_serialize_message_to(stream)
+          RUBY
+
+          if required_field_tags.present?
+            method_def << <<~RUBY
+              ##
+              # Required
+              #
+              (@_tags_to_serialize - REQUIRED_FIELDS).each do |field_number|
+                fail ::Protobuf::SerializationError, "Required field \#{self.class.name}#\#{field_number} does not have a value."
+              end
+            RUBY
+          end
+
+          method_def << <<~RUBY
+            @_tags_to_serialize.each do |tag_to_serialize|
+              __send__("_protobuf_message_encode_\#{tag_to_serialize}_to_stream", stream)
+            end
+          end
+          RUBY
+
+          method_io = ::StringIO.new
+          method_def.each_line do |method_line|
+            method_io << "  " * indent_level << method_line
+          end
+
+          @groups[:message_serialization] = [method_io.string]
+      end
+
       def add_services(service_descriptors)
         service_descriptors.each do |service_descriptor|
           @groups[:service] << ServiceGenerator.new(service_descriptor, indent_level)

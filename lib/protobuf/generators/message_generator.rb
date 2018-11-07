@@ -53,8 +53,9 @@ module Protobuf
               end
 
               group.add_extension_fields(message_extension_fields)
+              group.add_message_serialization(descriptor.field, descriptor)
 
-              group.order = [:message, :options, :field, :extension_range, :extension_field]
+              group.order = [:message, :options, :field, :extension_range, :extension_field, :message_serialization]
               print group.to_s
             end
           end
