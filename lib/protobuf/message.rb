@@ -115,6 +115,7 @@ module Protobuf
 
     def initialize(fields = {})
       @values = {}
+      @_tags_to_serialize = ::Set.new
       fields.to_hash.each do |name, value|
         set_field(name, value, true)
       end
