@@ -120,3 +120,5 @@ module Protobuf
     end
   end
 end
+
+PROTOBUF_FIELD_FIELD_HASH = ::Protobuf::Field::FieldHash
