@@ -271,6 +271,25 @@ module Protobuf
       tag.class
     end
 
+    # Protobuf::Enum delegates methods to Fixnum, which has a custom hash equality method (`eql?`)
+    # This causes enum values to be equivalent when using `==`, `===`, `equals?`, but not `eql?`**:
+    #
+    #   2.3.7 :002 > ::Test::EnumTestType::ZERO.eql?(::Test::EnumTestType::ZERO)
+    #    => false
+    #
+    # However, they are equilvalent to their tag value:
+    #
+    #   2.3.7 :002 > ::Test::EnumTestType::ZERO.eql?(::Test::EnumTestType::ZERO.tag)
+    #    => true
+    #
+    # **The implementation changed in Ruby 2.5, so this only affects Ruby versions less than v2.4.
+    #
+    # Use the hash equality implementation from Object#eql?, which is equivalent to == instead.
+    #
+    def eql?(other)
+      self == other
+    end
+
     def inspect
       "\#<Protobuf::Enum(#{parent_class})::#{name}=#{tag}>"
     end

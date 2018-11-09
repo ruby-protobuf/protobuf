@@ -268,6 +268,20 @@ RSpec.describe Protobuf::Enum do
     specify { subject.try { |yielded| expect(yielded).to eq(subject) } }
   end
 
+  describe '#eql?' do
+    it "is equal to itself" do
+      expect(::Test::EnumTestType::ZERO.eql?(::Test::EnumTestType::ZERO)).to be(true)
+    end
+
+    it "is equal to it's tag" do
+      expect(::Test::EnumTestType::ZERO.eql?(::Test::EnumTestType::ZERO.tag)).to be(true)
+    end
+
+    it "is not equal to it's name" do
+      expect(::Test::EnumTestType::ZERO.eql?(::Test::EnumTestType::ZERO.name)).to be(false)
+    end
+  end
+
   context 'when coercing from enum' do
     subject { Test::StatusType::PENDING }
     it { is_expected.to eq(0) }
