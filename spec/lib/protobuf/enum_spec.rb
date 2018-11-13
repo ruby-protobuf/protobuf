@@ -21,6 +21,20 @@ RSpec.describe Protobuf::Enum do
       end
     end
 
+    describe '.==' do
+      it 'is true for identical values' do
+        expect(Test::EnumTestType::THREE).to eq(Test::EnumTestType::THREE)
+      end
+
+      it 'is false for different values in the same enum' do
+        expect(Test::EnumTestType::TWO).to_not eq(Test::EnumTestType::THREE)
+      end
+
+      it 'is false for values from different enums' do
+        expect(Test::EnumTestType::THREE).to_not eq(Test::AliasedEnum::THREE)
+      end
+    end
+
     describe '.aliases_allowed?' do
       it 'is false when the option is not set' do
         expect(Test::EnumTestType.aliases_allowed?).to be false
