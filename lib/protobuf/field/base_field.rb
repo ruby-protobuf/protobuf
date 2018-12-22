@@ -57,7 +57,7 @@ module Protobuf
         @packed = @repeated && options.key?(:packed)
 
         validate_packed_field if packed?
-        define_accessor(simple_name, fully_qualified_name) if simple_name
+        define_accessor(simple_name, fully_qualified_name, tag) if simple_name
         set_is_map!
         set_repeated_message!
         tag_encoded
@@ -210,7 +210,7 @@ module Protobuf
       # Private Instance Methods
       #
 
-      def define_accessor(simple_field_name, fully_qualified_field_name)
+      def define_accessor(simple_field_name, fully_qualified_field_name, tag)
         message_class.class_eval do
           define_method("#{simple_field_name}!") do
             @values[fully_qualified_field_name] if field?(fully_qualified_field_name)
@@ -219,8 +219,13 @@ module Protobuf
 
         message_class.class_eval do
           define_method(simple_field_name) { self[fully_qualified_field_name] }
-          define_method("#{simple_field_name}=") { |v| set_field(fully_qualified_field_name, v, false) }
         end
+
+        message_class.class_eval <<-RUBY, __FILE__, __LINE__ + 1
+          def #{simple_field_name}=(v)
+            _protobuf_message_set_field_#{tag}(v, false)
+          end
+        RUBY
 
         return unless deprecated?
 

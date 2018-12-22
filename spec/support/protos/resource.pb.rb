@@ -78,10 +78,10 @@ module Test
     def _protobuf_message_set_field_1(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:name)
-        _protobuf_message_remove_tag_to_serialize(1)
+        @_tags_to_serialize.delete(1)
       else
         @values[:name] = ::PROTOBUF_FIELD_BYTES_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(1)
+        @_tags_to_serialize.add(1)
       end
     end
     alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
@@ -102,10 +102,10 @@ module Test
     def _protobuf_message_set_field_2(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:active)
-        _protobuf_message_remove_tag_to_serialize(2)
+        @_tags_to_serialize.delete(2)
       else
         @values[:active] = ::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(2)
+        @_tags_to_serialize.add(2)
       end
     end
     alias_method :_protobuf_message_set_field_active, :_protobuf_message_set_field_2
@@ -139,11 +139,11 @@ module Test
     
       if value.empty?
         @values.delete(:widgets)
-        _protobuf_message_remove_tag_to_serialize(3)
+        @_tags_to_serialize.delete(3)
       else
         @values[:widgets] ||= ::PROTOBUF_FIELD_FIELD_ARRAY.new(field)
         @values[:widgets].replace(value)
-        _protobuf_message_add_tag_to_serialize(3)
+        @_tags_to_serialize.add(3)
       end
     end
     alias_method :_protobuf_message_set_field_widgets, :_protobuf_message_set_field_3
@@ -180,11 +180,11 @@ module Test
     
       if value.empty?
         @values.delete(:widget_bytes)
-        _protobuf_message_remove_tag_to_serialize(4)
+        @_tags_to_serialize.delete(4)
       else
         @values[:widget_bytes] ||= ::PROTOBUF_FIELD_FIELD_ARRAY.new(field)
         @values[:widget_bytes].replace(value)
-        _protobuf_message_add_tag_to_serialize(4)
+        @_tags_to_serialize.add(4)
       end
     end
     alias_method :_protobuf_message_set_field_widget_bytes, :_protobuf_message_set_field_4
@@ -206,6 +206,10 @@ module Test
     :widget_bytes => 4,
     }
     
+    def field?(name)
+      @_tags_to_serialize.include?(NAME_TO_TAG[name])
+    end
+    
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
     end
@@ -229,7 +233,7 @@ module Test
     (@_tags_to_serialize - REQUIRED_FIELDS).each do |field_number|
       fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field_number} does not have a value."
     end
-      @_tags_to_serialize.each do |tag_to_serialize|
+      @_tags_to_serialize.sort.each do |tag_to_serialize|
         __send__("_protobuf_message_encode_#{tag_to_serialize}_to_stream", stream)
       end
     end
@@ -246,10 +250,10 @@ module Test
     def _protobuf_message_set_field_1(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:sleep)
-        _protobuf_message_remove_tag_to_serialize(1)
+        @_tags_to_serialize.delete(1)
       else
         @values[:sleep] = ::PROTOBUF_FIELD_INT32_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(1)
+        @_tags_to_serialize.add(1)
       end
     end
     alias_method :_protobuf_message_set_field_sleep, :_protobuf_message_set_field_1
@@ -264,6 +268,10 @@ module Test
     NAME_TO_TAG = {
     :sleep => 1,
     }
+    
+    def field?(name)
+      @_tags_to_serialize.include?(NAME_TO_TAG[name])
+    end
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -288,7 +296,7 @@ module Test
     (@_tags_to_serialize - REQUIRED_FIELDS).each do |field_number|
       fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field_number} does not have a value."
     end
-      @_tags_to_serialize.each do |tag_to_serialize|
+      @_tags_to_serialize.sort.each do |tag_to_serialize|
         __send__("_protobuf_message_encode_#{tag_to_serialize}_to_stream", stream)
       end
     end
@@ -309,10 +317,10 @@ module Test
     def _protobuf_message_set_field_1(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:name)
-        _protobuf_message_remove_tag_to_serialize(1)
+        @_tags_to_serialize.delete(1)
       else
         @values[:name] = ::PROTOBUF_FIELD_BYTES_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(1)
+        @_tags_to_serialize.add(1)
       end
     end
     alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
@@ -333,10 +341,10 @@ module Test
     def _protobuf_message_set_field_2(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:date_created)
-        _protobuf_message_remove_tag_to_serialize(2)
+        @_tags_to_serialize.delete(2)
       else
         @values[:date_created] = ::PROTOBUF_FIELD_INT64_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(2)
+        @_tags_to_serialize.add(2)
       end
     end
     alias_method :_protobuf_message_set_field_date_created, :_protobuf_message_set_field_2
@@ -350,17 +358,17 @@ module Test
     optional ::Test::StatusType, :status, 3
     
     def _protobuf_message_set_field_3_bytes(bytes)
-      _protobuf_message_set_field_3(::Test::StatusType.fetch(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes)), true)
+      _protobuf_message_set_field_3(::Test::StatusType.enum_for_tag(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes)), true)
     end
     alias_method :_protobuf_message_set_field_status_bytes, :_protobuf_message_set_field_3_bytes
     
     def _protobuf_message_set_field_3(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:status)
-        _protobuf_message_remove_tag_to_serialize(3)
+        @_tags_to_serialize.delete(3)
       else
         @values[:status] = value
-        _protobuf_message_add_tag_to_serialize(3)
+        @_tags_to_serialize.add(3)
       end
     end
     alias_method :_protobuf_message_set_field_status, :_protobuf_message_set_field_3
@@ -374,7 +382,7 @@ module Test
     repeated ::Test::StatusType, :repeated_enum, 4
     
     def _protobuf_message_set_field_4_bytes(bytes)
-      _protobuf_message_set_field_4(::Test::StatusType.fetch(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes)), true)
+      _protobuf_message_set_field_4(::Test::StatusType.enum_for_tag(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes)), true)
     end
     alias_method :_protobuf_message_set_field_repeated_enum_bytes, :_protobuf_message_set_field_4_bytes
     
@@ -394,11 +402,11 @@ module Test
     
       if value.empty?
         @values.delete(:repeated_enum)
-        _protobuf_message_remove_tag_to_serialize(4)
+        @_tags_to_serialize.delete(4)
       else
         @values[:repeated_enum] ||= ::PROTOBUF_FIELD_FIELD_ARRAY.new(field)
         @values[:repeated_enum].replace(value)
-        _protobuf_message_add_tag_to_serialize(4)
+        @_tags_to_serialize.add(4)
       end
     end
     alias_method :_protobuf_message_set_field_repeated_enum, :_protobuf_message_set_field_4
@@ -424,10 +432,10 @@ module Test
     def _protobuf_message_set_field_100(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.Searchable.ext_is_searchable")
-        _protobuf_message_remove_tag_to_serialize(100)
+        @_tags_to_serialize.delete(100)
       else
         @values[:".test.Searchable.ext_is_searchable"] = ::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(100)
+        @_tags_to_serialize.add(100)
       end
     end
     alias_method :_protobuf_message_set_field__test_Searchable_ext_is_searchable, :_protobuf_message_set_field_100
@@ -448,10 +456,10 @@ module Test
     def _protobuf_message_set_field_101(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.Searchable.ext_is_hidden")
-        _protobuf_message_remove_tag_to_serialize(101)
+        @_tags_to_serialize.delete(101)
       else
         @values[:".test.Searchable.ext_is_hidden"] = ::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(101)
+        @_tags_to_serialize.add(101)
       end
     end
     alias_method :_protobuf_message_set_field__test_Searchable_ext_is_hidden, :_protobuf_message_set_field_101
@@ -465,17 +473,17 @@ module Test
     optional ::Test::Searchable::SearchType, :".test.Searchable.ext_search_type", 102, :default => ::Test::Searchable::SearchType::FLAT, :extension => true
     
     def _protobuf_message_set_field_102_bytes(bytes)
-      _protobuf_message_set_field_102(::Test::Searchable::SearchType.fetch(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes)), true)
+      _protobuf_message_set_field_102(::Test::Searchable::SearchType.enum_for_tag(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes)), true)
     end
     alias_method :_protobuf_message_set_field__test_Searchable_ext_search_type_bytes, :_protobuf_message_set_field_102_bytes
     
     def _protobuf_message_set_field_102(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.Searchable.ext_search_type")
-        _protobuf_message_remove_tag_to_serialize(102)
+        @_tags_to_serialize.delete(102)
       else
         @values[:".test.Searchable.ext_search_type"] = value
-        _protobuf_message_add_tag_to_serialize(102)
+        @_tags_to_serialize.add(102)
       end
     end
     alias_method :_protobuf_message_set_field__test_Searchable_ext_search_type, :_protobuf_message_set_field_102
@@ -496,10 +504,10 @@ module Test
     def _protobuf_message_set_field_105(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.Nested.NestedLevelOne.ext_nested_in_level_one")
-        _protobuf_message_remove_tag_to_serialize(105)
+        @_tags_to_serialize.delete(105)
       else
         @values[:".test.Nested.NestedLevelOne.ext_nested_in_level_one"] = ::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(105)
+        @_tags_to_serialize.add(105)
       end
     end
     alias_method :_protobuf_message_set_field__test_Nested_NestedLevelOne_ext_nested_in_level_one, :_protobuf_message_set_field_105
@@ -520,10 +528,10 @@ module Test
     def _protobuf_message_set_field_106(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.Nested.NestedLevelOne.ext_dup_field")
-        _protobuf_message_remove_tag_to_serialize(106)
+        @_tags_to_serialize.delete(106)
       else
         @values[:".test.Nested.NestedLevelOne.ext_dup_field"] = ::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(106)
+        @_tags_to_serialize.add(106)
       end
     end
     alias_method :_protobuf_message_set_field__test_Nested_NestedLevelOne_ext_dup_field, :_protobuf_message_set_field_106
@@ -542,6 +550,10 @@ module Test
     :repeated_enum => 4,
     }
     
+    def field?(name)
+      @_tags_to_serialize.include?(NAME_TO_TAG[name])
+    end
+    
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
     end
@@ -565,7 +577,7 @@ module Test
     (@_tags_to_serialize - REQUIRED_FIELDS).each do |field_number|
       fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field_number} does not have a value."
     end
-      @_tags_to_serialize.each do |tag_to_serialize|
+      @_tags_to_serialize.sort.each do |tag_to_serialize|
         __send__("_protobuf_message_encode_#{tag_to_serialize}_to_stream", stream)
       end
     end
@@ -582,10 +594,10 @@ module Test
     def _protobuf_message_set_field_1(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:foo_is_required)
-        _protobuf_message_remove_tag_to_serialize(1)
+        @_tags_to_serialize.delete(1)
       else
         @values[:foo_is_required] = ::PROTOBUF_FIELD_BYTES_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(1)
+        @_tags_to_serialize.add(1)
       end
     end
     alias_method :_protobuf_message_set_field_foo_is_required, :_protobuf_message_set_field_1
@@ -600,6 +612,10 @@ module Test
     NAME_TO_TAG = {
     :foo_is_required => 1,
     }
+    
+    def field?(name)
+      @_tags_to_serialize.include?(NAME_TO_TAG[name])
+    end
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -624,7 +640,7 @@ module Test
     (@_tags_to_serialize - REQUIRED_FIELDS).each do |field_number|
       fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field_number} does not have a value."
     end
-      @_tags_to_serialize.each do |tag_to_serialize|
+      @_tags_to_serialize.sort.each do |tag_to_serialize|
         __send__("_protobuf_message_encode_#{tag_to_serialize}_to_stream", stream)
       end
     end
@@ -642,10 +658,10 @@ module Test
       def _protobuf_message_set_field_1(value, ignore_nil_for_repeated)
         if value.nil? # rubocop:disable Style/IfInsideElse
           @values.delete(:child1)
-          _protobuf_message_remove_tag_to_serialize(1)
+          @_tags_to_serialize.delete(1)
         else
           @values[:child1] = ::PROTOBUF_FIELD_BYTES_FIELD.coerce!(value)
-          _protobuf_message_add_tag_to_serialize(1)
+          @_tags_to_serialize.add(1)
         end
       end
       alias_method :_protobuf_message_set_field_child1, :_protobuf_message_set_field_1
@@ -660,6 +676,10 @@ module Test
       NAME_TO_TAG = {
       :child1 => 1,
       }
+      
+      def field?(name)
+        @_tags_to_serialize.include?(NAME_TO_TAG[name])
+      end
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -684,7 +704,7 @@ module Test
       (@_tags_to_serialize - REQUIRED_FIELDS).each do |field_number|
         fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field_number} does not have a value."
       end
-        @_tags_to_serialize.each do |tag_to_serialize|
+        @_tags_to_serialize.sort.each do |tag_to_serialize|
           __send__("_protobuf_message_encode_#{tag_to_serialize}_to_stream", stream)
         end
       end
@@ -693,6 +713,10 @@ module Test
     REQUIRED_FIELDS = []
     NAME_TO_TAG = {
     }
+    
+    def field?(name)
+      @_tags_to_serialize.include?(NAME_TO_TAG[name])
+    end
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -711,7 +735,7 @@ module Test
     end
     
     def _protobuf_message_serialize_message_to(stream)
-      @_tags_to_serialize.each do |tag_to_serialize|
+      @_tags_to_serialize.sort.each do |tag_to_serialize|
         __send__("_protobuf_message_encode_#{tag_to_serialize}_to_stream", stream)
       end
     end
@@ -729,10 +753,10 @@ module Test
       def _protobuf_message_set_field_1(value, ignore_nil_for_repeated)
         if value.nil? # rubocop:disable Style/IfInsideElse
           @values.delete(:level_one)
-          _protobuf_message_remove_tag_to_serialize(1)
+          @_tags_to_serialize.delete(1)
         else
           @values[:level_one] = ::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)
-          _protobuf_message_add_tag_to_serialize(1)
+          @_tags_to_serialize.add(1)
         end
       end
       alias_method :_protobuf_message_set_field_level_one, :_protobuf_message_set_field_1
@@ -755,10 +779,10 @@ module Test
       def _protobuf_message_set_field_101(value, ignore_nil_for_repeated)
         if value.nil? # rubocop:disable Style/IfInsideElse
           @values.delete(:".test.ext_nested_level_one_outer")
-          _protobuf_message_remove_tag_to_serialize(101)
+          @_tags_to_serialize.delete(101)
         else
           @values[:".test.ext_nested_level_one_outer"] = ::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)
-          _protobuf_message_add_tag_to_serialize(101)
+          @_tags_to_serialize.add(101)
         end
       end
       alias_method :_protobuf_message_set_field__test_ext_nested_level_one_outer, :_protobuf_message_set_field_101
@@ -779,10 +803,10 @@ module Test
       def _protobuf_message_set_field_100(value, ignore_nil_for_repeated)
         if value.nil? # rubocop:disable Style/IfInsideElse
           @values.delete(:".test.Nested.ext_nested_level_one")
-          _protobuf_message_remove_tag_to_serialize(100)
+          @_tags_to_serialize.delete(100)
         else
           @values[:".test.Nested.ext_nested_level_one"] = ::PROTOBUF_FIELD_BOOL_FIELD.coerce!(value)
-          _protobuf_message_add_tag_to_serialize(100)
+          @_tags_to_serialize.add(100)
         end
       end
       alias_method :_protobuf_message_set_field__test_Nested_ext_nested_level_one, :_protobuf_message_set_field_100
@@ -797,6 +821,10 @@ module Test
       NAME_TO_TAG = {
       :level_one => 1,
       }
+      
+      def field?(name)
+        @_tags_to_serialize.include?(NAME_TO_TAG[name])
+      end
       
       def _protobuf_message_tags_to_serialize
         @_tags_to_serialize ||= ::Set.new
@@ -821,7 +849,7 @@ module Test
       (@_tags_to_serialize - REQUIRED_FIELDS).each do |field_number|
         fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field_number} does not have a value."
       end
-        @_tags_to_serialize.each do |tag_to_serialize|
+        @_tags_to_serialize.sort.each do |tag_to_serialize|
           __send__("_protobuf_message_encode_#{tag_to_serialize}_to_stream", stream)
         end
       end
@@ -837,10 +865,10 @@ module Test
     def _protobuf_message_set_field_1(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:name)
-        _protobuf_message_remove_tag_to_serialize(1)
+        @_tags_to_serialize.delete(1)
       else
         @values[:name] = ::PROTOBUF_FIELD_BYTES_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(1)
+        @_tags_to_serialize.add(1)
       end
     end
     alias_method :_protobuf_message_set_field_name, :_protobuf_message_set_field_1
@@ -861,10 +889,10 @@ module Test
     def _protobuf_message_set_field_2(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:resource)
-        _protobuf_message_remove_tag_to_serialize(2)
+        @_tags_to_serialize.delete(2)
       else
         @values[:resource] = value
-        _protobuf_message_add_tag_to_serialize(2)
+        @_tags_to_serialize.add(2)
       end
     end
     alias_method :_protobuf_message_set_field_resource, :_protobuf_message_set_field_2
@@ -898,11 +926,11 @@ module Test
     
       if value.empty?
         @values.delete(:multiple_resources)
-        _protobuf_message_remove_tag_to_serialize(3)
+        @_tags_to_serialize.delete(3)
       else
         @values[:multiple_resources] ||= ::PROTOBUF_FIELD_FIELD_ARRAY.new(field)
         @values[:multiple_resources].replace(value)
-        _protobuf_message_add_tag_to_serialize(3)
+        @_tags_to_serialize.add(3)
       end
     end
     alias_method :_protobuf_message_set_field_multiple_resources, :_protobuf_message_set_field_3
@@ -919,17 +947,17 @@ module Test
     optional ::Test::StatusType, :status, 4
     
     def _protobuf_message_set_field_4_bytes(bytes)
-      _protobuf_message_set_field_4(::Test::StatusType.fetch(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes)), true)
+      _protobuf_message_set_field_4(::Test::StatusType.enum_for_tag(::PROTOBUF_FIELD_INTEGER_FIELD.decode(bytes)), true)
     end
     alias_method :_protobuf_message_set_field_status_bytes, :_protobuf_message_set_field_4_bytes
     
     def _protobuf_message_set_field_4(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:status)
-        _protobuf_message_remove_tag_to_serialize(4)
+        @_tags_to_serialize.delete(4)
       else
         @values[:status] = value
-        _protobuf_message_add_tag_to_serialize(4)
+        @_tags_to_serialize.add(4)
       end
     end
     alias_method :_protobuf_message_set_field_status, :_protobuf_message_set_field_4
@@ -952,10 +980,10 @@ module Test
     def _protobuf_message_set_field_100(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.foo")
-        _protobuf_message_remove_tag_to_serialize(100)
+        @_tags_to_serialize.delete(100)
       else
         @values[:".test.foo"] = ::PROTOBUF_FIELD_BYTES_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(100)
+        @_tags_to_serialize.add(100)
       end
     end
     alias_method :_protobuf_message_set_field__test_foo, :_protobuf_message_set_field_100
@@ -976,10 +1004,10 @@ module Test
     def _protobuf_message_set_field_101(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.bar")
-        _protobuf_message_remove_tag_to_serialize(101)
+        @_tags_to_serialize.delete(101)
       else
         @values[:".test.bar"] = ::PROTOBUF_FIELD_INT64_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(101)
+        @_tags_to_serialize.add(101)
       end
     end
     alias_method :_protobuf_message_set_field__test_bar, :_protobuf_message_set_field_101
@@ -997,6 +1025,10 @@ module Test
     :multiple_resources => 3,
     :status => 4,
     }
+    
+    def field?(name)
+      @_tags_to_serialize.include?(NAME_TO_TAG[name])
+    end
     
     def _protobuf_message_tags_to_serialize
       @_tags_to_serialize ||= ::Set.new
@@ -1021,7 +1053,7 @@ module Test
     (@_tags_to_serialize - REQUIRED_FIELDS).each do |field_number|
       fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field_number} does not have a value."
     end
-      @_tags_to_serialize.each do |tag_to_serialize|
+      @_tags_to_serialize.sort.each do |tag_to_serialize|
         __send__("_protobuf_message_encode_#{tag_to_serialize}_to_stream", stream)
       end
     end
@@ -1042,10 +1074,10 @@ module Test
     def _protobuf_message_set_field_9585869(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.file_option")
-        _protobuf_message_remove_tag_to_serialize(9585869)
+        @_tags_to_serialize.delete(9585869)
       else
         @values[:".test.file_option"] = ::PROTOBUF_FIELD_UINT64_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(9585869)
+        @_tags_to_serialize.add(9585869)
       end
     end
     alias_method :_protobuf_message_set_field__test_file_option, :_protobuf_message_set_field_9585869
@@ -1069,10 +1101,10 @@ module Test
     def _protobuf_message_set_field_858769(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.field_option")
-        _protobuf_message_remove_tag_to_serialize(858769)
+        @_tags_to_serialize.delete(858769)
       else
         @values[:".test.field_option"] = ::PROTOBUF_FIELD_UINT64_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(858769)
+        @_tags_to_serialize.add(858769)
       end
     end
     alias_method :_protobuf_message_set_field__test_field_option, :_protobuf_message_set_field_858769
@@ -1096,10 +1128,10 @@ module Test
     def _protobuf_message_set_field_590284(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.enum_option")
-        _protobuf_message_remove_tag_to_serialize(590284)
+        @_tags_to_serialize.delete(590284)
       else
         @values[:".test.enum_option"] = ::PROTOBUF_FIELD_INT64_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(590284)
+        @_tags_to_serialize.add(590284)
       end
     end
     alias_method :_protobuf_message_set_field__test_enum_option, :_protobuf_message_set_field_590284
@@ -1123,10 +1155,10 @@ module Test
     def _protobuf_message_set_field_485969(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.message_option")
-        _protobuf_message_remove_tag_to_serialize(485969)
+        @_tags_to_serialize.delete(485969)
       else
         @values[:".test.message_option"] = ::PROTOBUF_FIELD_INT64_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(485969)
+        @_tags_to_serialize.add(485969)
       end
     end
     alias_method :_protobuf_message_set_field__test_message_option, :_protobuf_message_set_field_485969
@@ -1150,10 +1182,10 @@ module Test
     def _protobuf_message_set_field_5869607(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.service_option")
-        _protobuf_message_remove_tag_to_serialize(5869607)
+        @_tags_to_serialize.delete(5869607)
       else
         @values[:".test.service_option"] = ::PROTOBUF_FIELD_INT64_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(5869607)
+        @_tags_to_serialize.add(5869607)
       end
     end
     alias_method :_protobuf_message_set_field__test_service_option, :_protobuf_message_set_field_5869607
@@ -1177,10 +1209,10 @@ module Test
     def _protobuf_message_set_field_7893233(value, ignore_nil_for_repeated)
       if value.nil? # rubocop:disable Style/IfInsideElse
         @values.delete(:".test.method_option")
-        _protobuf_message_remove_tag_to_serialize(7893233)
+        @_tags_to_serialize.delete(7893233)
       else
         @values[:".test.method_option"] = ::PROTOBUF_FIELD_INT64_FIELD.coerce!(value)
-        _protobuf_message_add_tag_to_serialize(7893233)
+        @_tags_to_serialize.add(7893233)
       end
     end
     alias_method :_protobuf_message_set_field__test_method_option, :_protobuf_message_set_field_7893233

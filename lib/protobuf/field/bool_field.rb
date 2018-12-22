@@ -60,7 +60,7 @@ module Protobuf
       # Private Instance Methods
       #
 
-      def define_accessor(simple_field_name, _fully_qualified_field_name)
+      def define_accessor(simple_field_name, _fully_qualified_field_name, tag)
         super
         message_class.class_eval do
           alias_method "#{simple_field_name}?", simple_field_name

@@ -16,16 +16,15 @@ module Protobuf
 
       def self.decode(bytes)
         bytes_to_decode = bytes.dup
-        bytes_to_decode.force_encoding(::Protobuf::Field::StringField::ENCODING)
+        bytes_to_decode.force_encoding(::PROTOBUF_FIELD_STRING_FIELD::ENCODING)
         bytes_to_decode
       end
 
       def self.encode(value)
-        value_to_encode = value.dup
-        value_to_encode.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
-        value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+        value_to_encode = value.encode(::PROTOBUF_FIELD_STRING_FIELD::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+        value_to_encode.force_encoding(::PROTOBUF_FIELD_BYTES_FIELD::BYTES_ENCODING)
 
-        "#{::Protobuf::Field::VarintField.encode(value_to_encode.size)}#{value_to_encode}"
+        "#{::PROTOBUF_FIELD_VARINT_FIELD.encode(value_to_encode.size)}#{value_to_encode}"
       end
 
       ##
@@ -34,26 +33,23 @@ module Protobuf
 
       def decode(bytes)
         bytes_to_decode = bytes.dup
-        bytes_to_decode.force_encoding(::Protobuf::Field::StringField::ENCODING)
+        bytes_to_decode.force_encoding(::PROTOBUF_FIELD_STRING_FIELD::ENCODING)
         bytes_to_decode
       end
 
       def encode(value)
-        value_to_encode = value.dup
-        value_to_encode.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
-        value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+        value_to_encode = value.encode(::PROTOBUF_FIELD_STRING_FIELD::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+        value_to_encode.force_encoding(::PROTOBUF_FIELD_BYTES_FIELD::BYTES_ENCODING)
 
-        "#{::Protobuf::Field::VarintField.encode(value_to_encode.size)}#{value_to_encode}"
+        "#{::PROTOBUF_FIELD_VARINT_FIELD.encode(value_to_encode.size)}#{value_to_encode}"
       end
 
       def encode_to_stream(value, stream)
-        if value.encoding != ::Protobuf::Field::StringField::ENCODING
-          value = value.dup
-          value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+        if value.encoding != ::PROTOBUF_FIELD_STRING_FIELD::ENCODING
+          value = value.encode(::PROTOBUF_FIELD_STRING_FIELD::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
         end
 
-        byte_size = ::Protobuf::Field::VarintField.encode(value.bytesize)
-        stream << tag_encoded << byte_size << value
+        stream << tag_encoded << ::PROTOBUF_FIELD_VARINT_FIELD.encode(value.bytesize) << value
       end
 
       def json_encode(value)

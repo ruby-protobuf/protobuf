@@ -181,7 +181,7 @@ module Protobuf
       end
     end
 
-    def field?(name)
+#    def field?(name)
 #      field = self.class.get_field(name, true)
 #      return false if field.nil?
 #      if field.repeated?
@@ -189,9 +189,9 @@ module Protobuf
 #      else
 #        @values.key?(field.fully_qualified_name)
 #      end
-      @_tags_to_serialize[NAME_TO_TAG[name]]
-    end
-    ::Protobuf.deprecator.define_deprecated_methods(self, :has_field? => :field?)
+#      @_tags_to_serialize[NAME_TO_TAG[name]]
+#    end
+#    ::Protobuf.deprecator.define_deprecated_methods(self, :has_field? => :field?)
 
     def inspect
       attrs = self.class.fields.map do |field|
@@ -202,13 +202,18 @@ module Protobuf
     end
 
     def respond_to_has?(key)
-      respond_to?(key) && field?(key)
+      #respond_to?(key) && field?(key)
+      field?(key)
     end
+    alias_method :respond_to_has_and_present?, :respond_to_has?
 
-    def respond_to_has_and_present?(key)
-      respond_to_has?(key) &&
-        (self[key].present? || [true, false].include?(self[key]))
-    end
+    ##
+    # because of the new @values / @_tags_to_encode check we no longer need
+    # this as it is the same as `respond_to_has?`
+    # def respond_to_has_and_present?(key)
+    #   respond_to_has?(key) &&
+    #     (self[key].present? || [true, false].include?(self[key]))
+    # end
 
     # Return a hash-representation of the given fields for this message type.
     def to_hash

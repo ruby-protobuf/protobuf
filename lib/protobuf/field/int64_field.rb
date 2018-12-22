@@ -14,11 +14,11 @@ module Protobuf
       # Class Methods
       #
       def self.decode(value)
-        ::Protobuf::Field::IntegerField.decode(value)
+        ::PROTOBUF_FIELD_INTEGER_FIELD.decode(value)
       end
 
       def self.encode(value)
-        ::Protobuf::Field::IntegerField.encode(value)
+        ::PROTOBUF_FIELD_INTEGER_FIELD.encode(value)
       end
 
       def self.max
