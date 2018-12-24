@@ -3,10 +3,14 @@ require 'protobuf/field/varint_field'
 module Protobuf
   module Field
     class BoolField < VarintField
+      ONE = 1.freeze
       FALSE_ENCODE = [0].pack('C')
       FALSE_STRING = "false".freeze
+      FALSE_VALUES = [false, FALSE_STRING].freeze
       TRUE_ENCODE = [1].pack('C')
       TRUE_STRING = "true".freeze
+      TRUE_VALUES = [true, TRUE_STRING].freeze
+      ACCEPTABLES = [true, false, TRUE_STRING, FALSE_STRING].freeze
 
       ##
       # Class Methods
@@ -21,20 +25,18 @@ module Protobuf
       # #
 
       def acceptable?(val)
-        val == true || val == false || val == TRUE_STRING || val == FALSE_STRING
+        ACCEPTABLES.include?(val)
       end
 
       def coerce!(val)
-        return true if val == true
-        return false if val == false
-        return true if val == TRUE_STRING
-        return false if val == FALSE_STRING
+        return true if TRUE_VALUES.include?(val)
+        return false if FALSE_VALUES.include?(val)
 
         fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
       end
 
       def decode(value)
-        value == 1
+        value == ONE
       end
 
       def encode(value)

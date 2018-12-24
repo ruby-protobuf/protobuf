@@ -14,6 +14,10 @@ module Protobuf
       # Public Instance Methods
       #
 
+      def acceptable?(val)
+        val.is_a?(String) || val.nil? || val.is_a?(Symbol)
+      end
+
       def decode(bytes)
         bytes_to_decode = bytes.dup
         bytes_to_decode.force_encoding(::Protobuf::Field::StringField::ENCODING)

@@ -58,6 +58,10 @@ module Protobuf
 
         validate_packed_field if packed?
         define_accessor(simple_name, fully_qualified_name) if simple_name
+        set_repeated_message!
+        set_map!
+#        define_field_method!
+#        define_for_serialization!
         tag_encoded
       end
 
@@ -113,12 +117,88 @@ module Protobuf
         false
       end
 
+#      def define_field_method!
+#        if repeated?
+#          def field?(values)
+#            values.key?(fully_qualified_name) && values[fully_qualified_name].present?
+#          end
+#        else
+#          def field?(values)
+#            values.key?(fully_qualified_name)
+#          end
+#        end
+#      end
+
+#      def define_for_serialization!
+#        set_map!
+#
+#        if map?
+#          if required?
+#            def for_serialization(values)
+#              value = values[fully_qualified_name]
+#
+#              if value.nil?
+#                fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{name} does not have a value."
+#              else
+#                # on-the-wire, maps are represented like an array of entries where
+#                # each entry is a message of two fields, key and value.
+#                array = Array.new(value.size)
+#                i = 0
+#                value.each do |k, v|
+#                  array[i] = type_class.new(:key => k, :value => v)
+#                  i += 1
+#                end
+#                value = array
+#              end
+#
+#              value
+#            end
+#          else
+#            def for_serialization(values)
+#              value = values[fully_qualified_name]
+#
+#              unless value.nil?
+#                # on-the-wire, maps are represented like an array of entries where
+#                # each entry is a message of two fields, key and value.
+#                array = Array.new(value.size)
+#                i = 0
+#                value.each do |k, v|
+#                  array[i] = type_class.new(:key => k, :value => v)
+#                  i += 1
+#                end
+#                value = array
+#              end
+#
+#              value
+#            end
+#          end
+#        else
+#          if required?
+#            def for_serialization(values)
+#              value = values[fully_qualified_name]
+#              fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{name} does not have a value." if value.nil?
+#
+#              value
+#            end
+#          else
+#            def for_serialization(values)
+#              values[@fully_qualified_name]
+#            end
+#          end
+#        end
+#      end
+
       def message?
         false
       end
 
+      def set_map!
+        set_repeated_message!
+        @is_map = repeated_message? && type_class.get_option!(:map_entry)
+      end
+
       def map?
-        @is_map ||= repeated_message? && type_class.get_option(:map_entry)
+        @is_map
       end
 
       def optional?
@@ -133,8 +213,12 @@ module Protobuf
         @repeated
       end
 
+      def set_repeated_message!
+        @repeated_message = repeated? && message?
+      end
+
       def repeated_message?
-        repeated? && message?
+        @repeated_message
       end
 
       def required?

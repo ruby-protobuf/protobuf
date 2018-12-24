@@ -58,6 +58,7 @@ module Protobuf
       # to be incorrect; reset them
       @mapped_enums = @values = nil
       const_set(name, enum)
+      mapped_enums
     end
 
     # Internal: A mapping of enum number -> enums defined
@@ -132,6 +133,10 @@ module Protobuf
       tag && (mapped_enums[tag.to_i] || []).first
     end
 
+    def self.enum_for_tag_integer(tag)
+      (@mapped_enums[tag] || []).first
+    end
+
     # Public: Get an Enum by a variety of type-checking mechanisms.
     #
     # candidate - An Enum, Numeric, String, or Symbol object.
@@ -153,7 +158,7 @@ module Protobuf
     # Returns an Enum object or nil.
     #
     def self.fetch(candidate)
-      return enum_for_tag(candidate) if candidate.is_a?(::Integer)
+      return enum_for_tag_integer(candidate) if candidate.is_a?(::Integer)
 
       case candidate
       when self

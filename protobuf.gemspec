@@ -26,6 +26,7 @@ require "protobuf/version"
   s.add_dependency 'thor'
   s.add_dependency 'thread_safe'
 
+  s.add_development_dependency 'benchmark-ips'
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'rake', '< 11.0' # Rake 11.0.1 removes the last_comment method which rspec-core (< 3.4.4) uses
   s.add_development_dependency 'rspec', '>= 3.0'
@@ -49,7 +50,9 @@ require "protobuf/version"
 
     s.add_development_dependency 'varint'
     s.add_development_dependency 'ruby-prof'
-  else
+  elsif RUBY_PLATFORM =~ /java/i
+    s.add_development_dependency 'protobuf_java_helpers'
+    s.add_development_dependency 'fast_blank_java'
     s.add_development_dependency 'pry'
   end
 end
