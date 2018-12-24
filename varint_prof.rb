@@ -53,7 +53,7 @@ if ENV["FLAME"]
 else
   TO_HASH = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
   Benchmark.ips do |x|
-    x.config(:time => 10, :warmup => 10)
+    x.config(:time => 20, :warmup => 10)
     x.report("to_hash => true java") do
       TO_HASH.to_hash
     end
