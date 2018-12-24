@@ -19,13 +19,13 @@ module Protobuf
       end
 
       def decode(bytes)
-        bytes_to_decode = bytes.dup
+        bytes_to_decode = "" + bytes
         bytes_to_decode.force_encoding(::Protobuf::Field::StringField::ENCODING)
         bytes_to_decode
       end
 
       def encode(value)
-        value_to_encode = value.dup
+        value_to_encode = "" + value # dup is slower
         value_to_encode.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
         value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 
@@ -34,7 +34,7 @@ module Protobuf
 
       def encode_to_stream(value, stream)
         if value.encoding != ::Protobuf::Field::StringField::ENCODING
-          value = value.dup
+          value = "" + value
           value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
         end
 
