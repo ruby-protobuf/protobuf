@@ -51,8 +51,13 @@ if ENV["FLAME"]
   printer = JRuby::Profiler::FlameGraphProfilePrinter.new(result)
   printer.printProfile(STDOUT)
 else
+  TO_HASH = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
   Benchmark.ips do |x|
     x.config(:time => 10, :warmup => 10)
+    x.report("to_hash => true java") do
+      TO_HASH.to_hash
+    end
+
     x.report("to_proto => true java") do
       t = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
       t.status = 3
