@@ -1,6 +1,7 @@
 require 'active_support/core_ext/hash/slice'
 require 'protobuf/field/field_array'
 require 'protobuf/field/field_hash'
+require 'protobuf/field/base_field_method_definitions'
 
 module Protobuf
   module Field
@@ -58,6 +59,12 @@ module Protobuf
 
         validate_packed_field if packed?
         define_accessor(simple_name, fully_qualified_name) if simple_name
+        define_hash_accessor_for_message!
+        define_field_p!
+        define_field_and_present_p!
+        define_set_field!
+        define_set_method!
+        set_default_value!
         tag_encoded
       end
 
@@ -81,7 +88,7 @@ module Protobuf
         options[:default]
       end
 
-      def default_value
+      def set_default_value!
         @default_value ||= if optional? || required?
                              typed_default_value
                            elsif map?
@@ -91,6 +98,46 @@ module Protobuf
                            else
                              fail "Unknown field label -- something went very wrong"
                            end
+      end
+
+      def default_value
+        @default_value
+      end
+
+      def define_field_p!
+        if repeated?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_field_p!(self)
+        else
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_field_p!(self)
+        end
+      end
+
+      def define_field_and_present_p!
+        if type_class == ::Protobuf::Field::BoolField # boolean present check
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_bool_field_and_present_p!(self)
+        else
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_field_and_present_p!(self)
+        end
+      end
+
+      def define_hash_accessor_for_message!
+        if map?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_map_value_from_values!(self)
+        elsif repeated?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_value_from_values!(self)
+        else
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_field_value_from_values!(self)
+        end
+      end
+
+      def define_set_field!
+        if map?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_map_set_field!(self)
+        elsif repeated?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_set_field!(self)
+        else
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_set_field!(self)
+        end
       end
 
       def deprecated?
@@ -118,7 +165,7 @@ module Protobuf
       end
 
       def map?
-        @is_map ||= repeated_message? && type_class.get_option(:map_entry)
+        @is_map ||= repeated_message? && type_class.get_option!(:map_entry)
       end
 
       def optional?
@@ -141,32 +188,44 @@ module Protobuf
         @required
       end
 
-      # FIXME: need to cleanup (rename) this warthog of a method.
-      def set(message_instance, bytes)
-        return message_instance[name] = decode(bytes) unless repeated?
-
+      def define_set_method!
         if map?
-          hash = message_instance[name]
-          entry = decode(bytes)
-          # decoded value could be nil for an
-          # enum value that is not recognized
-          hash[entry.key] = entry.value unless entry.value.nil?
-          return hash[entry.key]
-        end
-
-        return message_instance[name] << decode(bytes) unless packed?
-
-        array = message_instance[name]
-        stream = StringIO.new(bytes)
-
-        if wire_type == ::Protobuf::WireType::VARINT
-          array << decode(Varint.decode(stream)) until stream.eof?
-        elsif wire_type == ::Protobuf::WireType::FIXED64
-          array << decode(stream.read(8)) until stream.eof?
-        elsif wire_type == ::Protobuf::WireType::FIXED32
-          array << decode(stream.read(4)) until stream.eof?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_map_set_method!(self)
+        elsif repeated? && packed?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_packed_set_method!(self)
+        elsif repeated?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_not_packed_set_method!(self)
+        else
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_set_method!(self)
         end
       end
+
+#      # FIXME: need to cleanup (rename) this warthog of a method.
+#      def set(message_instance, bytes)
+#        return message_instance.set_field(name, decode(bytes), true, self) unless repeated?
+#
+#        if map?
+#          hash = message_instance[name]
+#          entry = decode(bytes)
+#          # decoded value could be nil for an
+#          # enum value that is not recognized
+#          hash[entry.key] = entry.value unless entry.value.nil?
+#          return hash[entry.key]
+#        end
+#
+#        return message_instance[name] << decode(bytes) unless packed?
+#
+#        array = message_instance[name]
+#        stream = StringIO.new(bytes)
+#
+#        if wire_type == ::Protobuf::WireType::VARINT
+#          array << decode(Varint.decode(stream)) until stream.eof?
+#        elsif wire_type == ::Protobuf::WireType::FIXED64
+#          array << decode(stream.read(8)) until stream.eof?
+#        elsif wire_type == ::Protobuf::WireType::FIXED32
+#          array << decode(stream.read(4)) until stream.eof?
+#        end
+#      end
 
       def tag_encoded
         @tag_encoded ||= begin
