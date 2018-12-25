@@ -24,10 +24,15 @@ module Protobuf
     ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::MessageOptions }
 
     def self.inherited(subclass)
+      subclass.const_set("PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS", subclass.required_field_tags)
       subclass.const_set("PROTOBUF_MESSAGE_GET_FIELD", subclass.field_store)
       subclass.class_eval <<~RUBY, __FILE__, __LINE__
         def _protobuf_message_field
           PROTOBUF_MESSAGE_GET_FIELD
+        end
+
+        def _protobuf_message_required_field_tags
+          @_protobuf_message_required_field_tags ||= PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS.dup
         end
       RUBY
     end
@@ -89,25 +94,14 @@ module Protobuf
     end
 
     def each_field_for_serialization
-      self.class.all_fields.each do |field|
-        value = @values[field.fully_qualified_name]
-        if value.nil?
-          fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value." if field.required?
-          next
-        end
-        if field.map?
-          # on-the-wire, maps are represented like an array of entries where
-          # each entry is a message of two fields, key and value.
-          array = Array.new(value.size)
-          i = 0
-          value.each do |k, v|
-            array[i] = field.type_class.new(:key => k, :value => v)
-            i += 1
-          end
-          value = array
-        end
+      _protobuf_message_required_field_tags.each do |tag|
+        field = _protobuf_message_field[tag]
+        fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value."
+      end
 
-        yield(field, value)
+      @values.each_key do |fully_qualified_name|
+        field = _protobuf_message_field[fully_qualified_name]
+        yield(field, field.value_from_values_for_serialization(@values))
       end
     end
 
@@ -200,7 +194,7 @@ module Protobuf
 
     def set_field(name, value, ignore_nil_for_repeated, field = nil)
       if (field || field = _protobuf_message_field[name])
-        field.set_field(@values, value, ignore_nil_for_repeated)
+        field.set_field(@values, value, ignore_nil_for_repeated, self)
       else
         fail(::Protobuf::FieldNotDefinedError, name) unless ::Protobuf.ignore_unknown_fields?
       end
