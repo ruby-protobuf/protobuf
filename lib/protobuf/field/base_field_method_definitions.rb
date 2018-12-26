@@ -33,7 +33,7 @@ module Protobuf
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
             packed_value = value.map { |val| encode(val) }.join
-            stream << "\#{tag_encoded}\#{::Protobuf::Field::VarintField.encode(packed_value.size)}\#{packed_value}"
+            stream << #{selph.tag_encoded.dump} << "\#{::Protobuf::Field::VarintField.encode(packed_value.size)}\#{packed_value}"
           end
         RUBY
       end
@@ -43,7 +43,7 @@ module Protobuf
 
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
-            stream << tag_encoded << encode(value)
+            stream << #{selph.tag_encoded.dump} << encode(value)
           end
         RUBY
       end
@@ -54,7 +54,7 @@ module Protobuf
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
             value.each do |val|
-              stream << tag_encoded << encode(val)
+              stream << #{selph.tag_encoded.dump} << encode(val)
             end
           end
         RUBY
