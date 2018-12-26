@@ -41,6 +41,7 @@ module Protobuf
         # Define a required field.
         #
         def required(type_class, name, tag, options = {})
+          required_field_tags << tag
           define_field(:required, type_class, name, tag, options)
         end
 
@@ -76,6 +77,10 @@ module Protobuf
 
         def extension_ranges
           @extension_ranges ||= []
+        end
+
+        def required_field_tags
+          @required_field_tags ||= []
         end
 
         def extension_tag?(tag)

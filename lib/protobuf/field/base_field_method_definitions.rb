@@ -27,6 +27,39 @@ module Protobuf
         RUBY
       end
 
+      def self.define_repeated_packed_encode_to_stream_method!(selph)
+        return if selph.respond_to?(:encode_to_stream)
+
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def encode_to_stream(value, stream)
+            packed_value = value.map { |val| encode(val) }.join
+            stream << "\#{tag_encoded}\#{::Protobuf::Field::VarintField.encode(packed_value.size)}\#{packed_value}"
+          end
+        RUBY
+      end
+
+      def self.define_base_encode_to_stream_method!(selph)
+        return if selph.respond_to?(:encode_to_stream)
+
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def encode_to_stream(value, stream)
+            stream << tag_encoded << encode(value)
+          end
+        RUBY
+      end
+
+      def self.define_repeated_not_packed_encode_to_stream_method!(selph)
+        return if selph.respond_to?(:encode_to_stream)
+
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def encode_to_stream(value, stream)
+            value.each do |val|
+              stream << tag_encoded << encode(val)
+            end
+          end
+        RUBY
+      end
+
       def self.define_base_set_method!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def set(message_instance, bytes)
@@ -74,62 +107,127 @@ module Protobuf
       end
 
       def self.define_map_set_field!(selph)
-        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
-          def set_field(values, value, ignore_nil_for_repeated)
-            unless value.is_a?(Hash)
-              fail TypeError, <<-TYPE_ERROR
-                  Expected map value
-                  Got '#{value.class}' for map protobuf field #{selph.name}
-              TYPE_ERROR
-            end
+        if selph.required?
+          selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def set_field(values, value, ignore_nil_for_repeated, message_instance)
+              unless value.is_a?(Hash)
+                fail TypeError, <<-TYPE_ERROR
+                    Expected map value
+                    Got '#{value.class}' for map protobuf field #{selph.name}
+                TYPE_ERROR
+              end
 
-            if value.empty?
-              values.delete(#{fully_qualified_name_string(selph)})
-            else
-              values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldHash.new(self)
-              values[#{fully_qualified_name_string(selph)}].replace(value)
+              if value.empty?
+                values.delete(#{fully_qualified_name_string(selph)})
+                message_instance._protobuf_message_required_field_tags << #{selph.tag}
+              else
+                message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
+                values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldHash.new(self)
+                values[#{fully_qualified_name_string(selph)}].replace(value)
+              end
             end
-          end
-        RUBY
+          RUBY
+        else
+          selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def set_field(values, value, ignore_nil_for_repeated, message_instance)
+              unless value.is_a?(Hash)
+                fail TypeError, <<-TYPE_ERROR
+                    Expected map value
+                    Got '#{value.class}' for map protobuf field #{selph.name}
+                TYPE_ERROR
+              end
+
+              if value.empty?
+                values.delete(#{fully_qualified_name_string(selph)})
+              else
+                values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldHash.new(self)
+                values[#{fully_qualified_name_string(selph)}].replace(value)
+              end
+            end
+          RUBY
+        end
       end
 
       def self.define_repeated_set_field!(selph)
-        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
-          def set_field(values, value, ignore_nil_for_repeated)
-            if value.nil? && ignore_nil_for_repeated
-              ::Protobuf.deprecator.deprecation_warning("['#{fully_qualified_name_string(selph)}']=nil", "use an empty array instead of nil")
-              return
-            end
+        if selph.required?
+          selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def set_field(values, value, ignore_nil_for_repeated, message_instance)
+              if value.nil? && ignore_nil_for_repeated
+                ::Protobuf.deprecator.deprecation_warning("['#{fully_qualified_name_string(selph)}']=nil", "use an empty array instead of nil")
+                return
+              end
 
-            unless value.is_a?(Array)
-              fail TypeError, <<-TYPE_ERROR
-                  Expected repeated value of type '#{selph.type_class}'
-                  Got '\#{value.class}' for repeated protobuf field #{selph.name}
-              TYPE_ERROR
-            end
+              unless value.is_a?(Array)
+                fail TypeError, <<-TYPE_ERROR
+                    Expected repeated value of type '#{selph.type_class}'
+                    Got '\#{value.class}' for repeated protobuf field #{selph.name}
+                TYPE_ERROR
+              end
 
-            value = value.compact
+              value = value.compact
 
-            if value.empty?
-              values.delete(#{fully_qualified_name_string(selph)})
-            else
-              values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldArray.new(self)
-              values[#{fully_qualified_name_string(selph)}].replace(value)
+              if value.empty?
+                values.delete(#{fully_qualified_name_string(selph)})
+                message_instance._protobuf_message_required_field_tags << #{selph.tag}
+              else
+                message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
+                values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldArray.new(self)
+                values[#{fully_qualified_name_string(selph)}].replace(value)
+              end
             end
-          end
-        RUBY
+          RUBY
+        else
+          selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def set_field(values, value, ignore_nil_for_repeated, message_instance)
+              if value.nil? && ignore_nil_for_repeated
+                ::Protobuf.deprecator.deprecation_warning("['#{fully_qualified_name_string(selph)}']=nil", "use an empty array instead of nil")
+                return
+              end
+
+              unless value.is_a?(Array)
+                fail TypeError, <<-TYPE_ERROR
+                    Expected repeated value of type '#{selph.type_class}'
+                    Got '\#{value.class}' for repeated protobuf field #{selph.name}
+                TYPE_ERROR
+              end
+
+              value = value.compact
+
+              if value.empty?
+                values.delete(#{fully_qualified_name_string(selph)})
+              else
+                values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldArray.new(self)
+                values[#{fully_qualified_name_string(selph)}].replace(value)
+              end
+            end
+          RUBY
+        end
       end
 
       def self.define_base_set_field!(selph)
-        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
-          def set_field(values, value, ignore_nil_for_repeated)
-            if value.nil?
-              values.delete(#{fully_qualified_name_string(selph)})
-            else
-              values[#{fully_qualified_name_string(selph)}] = coerce!(value)
+        if selph.required?
+          selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def set_field(values, value, ignore_nil_for_repeated, message_instance)
+              if value.nil?
+                values.delete(#{fully_qualified_name_string(selph)})
+                message_instance._protobuf_message_required_field_tags << #{selph.tag}
+              else
+                message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
+                values[#{fully_qualified_name_string(selph)}] = coerce!(value)
+              end
             end
-          end
-        RUBY
+          RUBY
+        else
+          selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def set_field(values, value, ignore_nil_for_repeated, message_instance)
+              if value.nil?
+                values.delete(#{fully_qualified_name_string(selph)})
+              else
+                values[#{fully_qualified_name_string(selph)}] = coerce!(value)
+              end
+            end
+          RUBY
+        end
       end
 
       def self.define_base_field_and_present_p!(selph)
@@ -171,6 +269,7 @@ module Protobuf
           def value_from_values(values)
             values.fetch(#{fully_qualified_name_string(selph)}) { default_value }
           end
+          alias :value_from_values_for_serialization value_from_values
         RUBY
       end
 
@@ -178,6 +277,17 @@ module Protobuf
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def value_from_values(values)
             values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldHash.new(self)
+          end
+
+          def value_from_values_for_serialization(values)
+            value = value_from_values(values)
+
+            array = Array.new(value.size)
+            value.each do |k, v|
+              array << type_class.new(:key => k, :value => v)
+            end
+
+            array
           end
         RUBY
       end
@@ -187,6 +297,7 @@ module Protobuf
           def value_from_values(values)
             values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldArray.new(self)
           end
+          alias :value_from_values_for_serialization value_from_values
         RUBY
       end
 
