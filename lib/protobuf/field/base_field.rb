@@ -66,6 +66,7 @@ module Protobuf
         define_field_and_present_p!
         define_set_field!
         define_set_method!
+        define_encode_to_stream!
         set_default_value!
         tag_encoded
       end
@@ -104,6 +105,16 @@ module Protobuf
 
       def default_value
         @default_value
+      end
+
+      def define_encode_to_stream!
+        if repeated? && packed?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_packed_encode_to_stream_method!(self)
+        elsif repeated?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_not_packed_encode_to_stream_method!(self)
+        else
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_encode_to_stream_method!(self)
+        end
       end
 
       def define_field_p!
@@ -148,10 +159,6 @@ module Protobuf
 
       def encode(_value)
         fail NotImplementedError, "#{self.class.name}##{__method__}"
-      end
-
-      def encode_to_stream(value, stream)
-        stream << tag_encoded << encode(value)
       end
 
       def extension?

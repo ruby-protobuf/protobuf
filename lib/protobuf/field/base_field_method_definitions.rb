@@ -11,6 +11,33 @@ module Protobuf
         fully_qualified_name
       end
 
+      def self.define_base_encode_to_stream_method!(selph)
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def encode_to_stream(value, stream)
+            stream << tag_encoded << encode(value)
+          end
+        RUBY
+      end
+
+      def self.define_repeated_not_packed_encode_to_stream_method!(selph)
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def encode_to_stream(value, stream)
+            value.each do |val|
+              stream << tag_encoded << encode(val)
+            end
+          end
+        RUBY
+      end
+
+      def self.define_repeated_packed_encode_to_stream_method!(selph)
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def encode_to_stream(value, stream)
+            packed_value = value.map { |val| encode(val) }.join
+            stream << "\#{tag_encoded}\#{::Protobuf::Field::VarintField.encode(packed_value.size)}\#{packed_value}"
+          end
+        RUBY
+      end
+
       def self.define_base_set_method!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def set(message_instance, bytes)
