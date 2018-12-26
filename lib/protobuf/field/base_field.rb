@@ -255,6 +255,17 @@ module Protobuf
 
       def fully_qualified_name_only!
         @name = @fully_qualified_name
+
+        ##
+        # Recreate all of the meta methods as they may have used the original `name` value
+        #
+        define_hash_accessor_for_message!
+        define_field_p!
+        define_field_and_present_p!
+        define_set_field!
+        define_set_method!
+        define_to_message_hash!
+        define_encode_to_stream!
       end
 
       private
