@@ -107,7 +107,12 @@ module Protobuf
 
     def field?(name)
       field = _protobuf_message_field[name]
-      field && field.field?(@values)
+
+      if field
+        field.field?(@values)
+      else
+        false
+      end
     end
     alias :respond_to_has? field?
     ::Protobuf.deprecator.define_deprecated_methods(self, :has_field? => :field?)
@@ -122,7 +127,12 @@ module Protobuf
 
     def respond_to_has_and_present?(key)
       field = _protobuf_message_field[key]
-      field && field.field_and_present?(@values)
+
+      if field
+        field.field_and_present?(@values)
+      else
+        false
+      end
     end
 
     # Return a hash-representation of the given fields for this message type.

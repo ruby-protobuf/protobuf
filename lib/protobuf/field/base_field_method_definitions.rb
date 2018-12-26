@@ -14,7 +14,7 @@ module Protobuf
       def self.define_to_hash_value_to_message_hash!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def to_message_hash(values, result)
-            result["#{selph.name}"] = value_from_values(values).to_hash_value
+            result[#{selph.name.inspect}] = value_from_values(values).to_hash_value
           end
         RUBY
       end
@@ -22,7 +22,7 @@ module Protobuf
       def self.define_base_to_message_hash!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def to_message_hash(values, result)
-            result["#{selph.name}"] = value_from_values(values)
+            result[#{selph.name.inspect}] = value_from_values(values)
           end
         RUBY
       end
@@ -131,7 +131,7 @@ module Protobuf
               unless value.is_a?(Hash)
                 fail TypeError, <<-TYPE_ERROR
                     Expected map value
-                    Got '#{value.class}' for map protobuf field #{selph.name}
+                    Got '\#{value.class}' for map protobuf field #{selph.name}
                 TYPE_ERROR
               end
 
@@ -151,7 +151,7 @@ module Protobuf
               unless value.is_a?(Hash)
                 fail TypeError, <<-TYPE_ERROR
                     Expected map value
-                    Got '#{value.class}' for map protobuf field #{selph.name}
+                    Got '\#{value.class}' for map protobuf field #{selph.name}
                 TYPE_ERROR
               end
 
