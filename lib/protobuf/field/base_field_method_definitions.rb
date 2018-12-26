@@ -12,6 +12,8 @@ module Protobuf
       end
 
       def self.define_base_encode_to_stream_method!(selph)
+        return if selph.respond_to?(:encode_to_stream)
+
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
             stream << tag_encoded << encode(value)
@@ -20,6 +22,8 @@ module Protobuf
       end
 
       def self.define_repeated_not_packed_encode_to_stream_method!(selph)
+        return if selph.respond_to?(:encode_to_stream)
+
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
             value.each do |val|
@@ -30,6 +34,8 @@ module Protobuf
       end
 
       def self.define_repeated_packed_encode_to_stream_method!(selph)
+        return if selph.respond_to?(:encode_to_stream)
+
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
             packed_value = value.map { |val| encode(val) }.join
