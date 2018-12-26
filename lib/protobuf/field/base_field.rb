@@ -113,6 +113,10 @@ module Protobuf
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_packed_encode_to_stream_method!(self)
         elsif repeated?
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_not_packed_encode_to_stream_method!(self)
+        elsif message? || type_class == ::Protobuf::Field::BytesField
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_bytes_encode_to_stream_method!(self)
+        elsif type_class == ::Protobuf::Field::StringField
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_string_encode_to_stream_method!(self)
         else
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_encode_to_stream_method!(self)
         end

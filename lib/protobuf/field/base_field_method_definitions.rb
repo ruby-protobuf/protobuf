@@ -28,8 +28,6 @@ module Protobuf
       end
 
       def self.define_repeated_packed_encode_to_stream_method!(selph)
-        return if selph.respond_to?(:encode_to_stream)
-
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
             packed_value = value.map { |val| encode(val) }.join
@@ -38,9 +36,31 @@ module Protobuf
         RUBY
       end
 
-      def self.define_base_encode_to_stream_method!(selph)
-        return if selph.respond_to?(:encode_to_stream)
+      def self.define_bytes_encode_to_stream_method!(selph)
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def encode_to_stream(value, stream)
+            value = value.encode if value.is_a?(::Protobuf::Message)
+            byte_size = ::Protobuf::Field::VarintField.encode(value.bytesize)
 
+            stream << #{selph.tag_encoded.dump} << byte_size << value
+          end
+        RUBY
+      end
+
+      def self.define_string_encode_to_stream_method!(selph)
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def encode_to_stream(value, stream)
+            new_value = "" + value
+            if new_value.encoding != ::Protobuf::Field::StringField::ENCODING
+              new_value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+            end
+
+            stream << #{selph.tag_encoded.dump} << ::Protobuf::Field::VarintField.encode(new_value.bytesize) << new_value
+          end
+        RUBY
+      end
+
+      def self.define_base_encode_to_stream_method!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
             stream << #{selph.tag_encoded.dump} << encode(value)
@@ -49,8 +69,6 @@ module Protobuf
       end
 
       def self.define_repeated_not_packed_encode_to_stream_method!(selph)
-        return if selph.respond_to?(:encode_to_stream)
-
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def encode_to_stream(value, stream)
             value.each do |val|

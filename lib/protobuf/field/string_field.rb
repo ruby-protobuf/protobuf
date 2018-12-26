@@ -42,15 +42,6 @@ module Protobuf
         "#{::Protobuf::Field::VarintField.encode(value_to_encode.size)}#{value_to_encode}"
       end
 
-      def encode_to_stream(value, stream)
-        new_value = "" + value
-        if new_value.encoding != ::Protobuf::Field::StringField::ENCODING
-          new_value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
-        end
-
-        stream << tag_encoded << ::Protobuf::Field::VarintField.encode(new_value.bytesize) << new_value
-      end
-
       def json_encode(value)
         value
       end
