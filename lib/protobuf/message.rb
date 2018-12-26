@@ -137,9 +137,7 @@ module Protobuf
 
       @values.each_key do |field_name|
         field = _protobuf_message_field[field_name]
-        value = field.value_from_values(@values)
-        hashed_value = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
-        result[field.name] = hashed_value
+        field.to_message_hash(@values, result)
       end
 
       result

@@ -11,10 +11,26 @@ module Protobuf
         fully_qualified_name
       end
 
+      def self.define_to_hash_value_to_message_hash!(selph)
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def to_message_hash(values, result)
+            result["#{selph.name}"] = value_from_values(values).to_hash_value
+          end
+        RUBY
+      end
+
+      def self.define_base_to_message_hash!(selph)
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def to_message_hash(values, result)
+            result["#{selph.name}"] = value_from_values(values)
+          end
+        RUBY
+      end
+
       def self.define_base_set_method!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def set(message_instance, bytes)
-            message_instance.set_field(name, decode(bytes), true, self)
+            message_instance.set_field("#{selph.name}", decode(bytes), true, self)
           end
         RUBY
       end
@@ -22,7 +38,7 @@ module Protobuf
       def self.define_map_set_method!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def set(message_instance, bytes)
-            hash = message_instance[name]
+            hash = message_instance["#{selph.name}"]
             entry = decode(bytes)
             # decoded value could be nil for an
             # enum value that is not recognized
@@ -35,7 +51,7 @@ module Protobuf
       def self.define_repeated_not_packed_set_method!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def set(message_instance, bytes)
-            message_instance[name] << decode(bytes)
+            message_instance["#{selph.name}"] << decode(bytes)
           end
         RUBY
       end
@@ -43,7 +59,7 @@ module Protobuf
       def self.define_repeated_packed_set_method!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def set(message_instance, bytes)
-            array = message_instance[name]
+            array = message_instance["#{selph.name}"]
             stream = ::StringIO.new(bytes)
 
             if wire_type == ::Protobuf::WireType::VARINT

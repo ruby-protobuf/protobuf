@@ -66,6 +66,7 @@ module Protobuf
         define_field_and_present_p!
         define_set_field!
         define_set_method!
+        define_to_message_hash!
         set_default_value!
         tag_encoded
       end
@@ -142,6 +143,14 @@ module Protobuf
         end
       end
 
+      def define_to_message_hash!
+        if message? || enum? || repeated? || map?
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_to_hash_value_to_message_hash!(self)
+        else
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_to_message_hash!(self)
+        end
+      end
+
       def deprecated?
         @deprecated
       end
@@ -161,77 +170,6 @@ module Protobuf
       def enum?
         false
       end
-
-#      def define_field_method!
-#        if repeated?
-#          def field?(values)
-#            values.key?(fully_qualified_name) && values[fully_qualified_name].present?
-#          end
-#        else
-#          def field?(values)
-#            values.key?(fully_qualified_name)
-#          end
-#        end
-#      end
-
-#      def define_for_serialization!
-#        set_map!
-#
-#        if map?
-#          if required?
-#            def for_serialization(values)
-#              value = values[fully_qualified_name]
-#
-#              if value.nil?
-#                fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{name} does not have a value."
-#              else
-#                # on-the-wire, maps are represented like an array of entries where
-#                # each entry is a message of two fields, key and value.
-#                array = Array.new(value.size)
-#                i = 0
-#                value.each do |k, v|
-#                  array[i] = type_class.new(:key => k, :value => v)
-#                  i += 1
-#                end
-#                value = array
-#              end
-#
-#              value
-#            end
-#          else
-#            def for_serialization(values)
-#              value = values[fully_qualified_name]
-#
-#              unless value.nil?
-#                # on-the-wire, maps are represented like an array of entries where
-#                # each entry is a message of two fields, key and value.
-#                array = Array.new(value.size)
-#                i = 0
-#                value.each do |k, v|
-#                  array[i] = type_class.new(:key => k, :value => v)
-#                  i += 1
-#                end
-#                value = array
-#              end
-#
-#              value
-#            end
-#          end
-#        else
-#          if required?
-#            def for_serialization(values)
-#              value = values[fully_qualified_name]
-#              fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{name} does not have a value." if value.nil?
-#
-#              value
-#            end
-#          else
-#            def for_serialization(values)
-#              values[@fully_qualified_name]
-#            end
-#          end
-#        end
-#      end
 
       def message?
         false
@@ -281,33 +219,6 @@ module Protobuf
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_set_method!(self)
         end
       end
-
-#      # FIXME: need to cleanup (rename) this warthog of a method.
-#      def set(message_instance, bytes)
-#        return message_instance.set_field(name, decode(bytes), true, self) unless repeated?
-#
-#        if map?
-#          hash = message_instance[name]
-#          entry = decode(bytes)
-#          # decoded value could be nil for an
-#          # enum value that is not recognized
-#          hash[entry.key] = entry.value unless entry.value.nil?
-#          return hash[entry.key]
-#        end
-#
-#        return message_instance[name] << decode(bytes) unless packed?
-#
-#        array = message_instance[name]
-#        stream = StringIO.new(bytes)
-#
-#        if wire_type == ::Protobuf::WireType::VARINT
-#          array << decode(Varint.decode(stream)) until stream.eof?
-#        elsif wire_type == ::Protobuf::WireType::FIXED64
-#          array << decode(stream.read(8)) until stream.eof?
-#        elsif wire_type == ::Protobuf::WireType::FIXED32
-#          array << decode(stream.read(4)) until stream.eof?
-#        end
-#      end
 
       def tag_encoded
         @tag_encoded ||= begin
