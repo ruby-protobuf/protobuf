@@ -29,10 +29,13 @@ module Protobuf
       end
 
       def coerce!(val)
-        return true if TRUE_VALUES.include?(val)
-        return false if FALSE_VALUES.include?(val)
-
-        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
+        if TRUE_VALUES.include?(val)
+          true
+        elsif FALSE_VALUES.include?(val)
+          false
+        else
+          fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
+        end
       end
 
       def decode(value)
