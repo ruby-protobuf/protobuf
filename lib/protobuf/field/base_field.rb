@@ -143,6 +143,8 @@ module Protobuf
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_map_value_from_values!(self)
         elsif repeated?
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_value_from_values!(self)
+        elsif type_class == ::Protobuf::Field::BoolField # boolean present check
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_bool_field_value_from_values!(self)
         else
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_field_value_from_values!(self)
         end

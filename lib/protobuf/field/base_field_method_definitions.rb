@@ -282,10 +282,19 @@ module Protobuf
         RUBY
       end
 
+      def self.define_bool_field_value_from_values!(selph)
+        selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def value_from_values(values)
+            values.fetch(#{fully_qualified_name_string(selph)}) {  default_value }
+          end
+          alias :value_from_values_for_serialization value_from_values
+        RUBY
+      end
+
       def self.define_field_value_from_values!(selph)
         selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
           def value_from_values(values)
-            values.fetch(#{fully_qualified_name_string(selph)}) { default_value }
+            values[#{fully_qualified_name_string(selph)}] || default_value
           end
           alias :value_from_values_for_serialization value_from_values
         RUBY
