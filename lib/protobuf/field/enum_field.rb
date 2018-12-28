@@ -15,18 +15,31 @@ module Protobuf
       ##
       # Public Instance Methods
       #
+      if defined?(::ProtobufJavaHelpers)
+        include ::ProtobufJavaHelpers::Varinter
+        include ::ProtobufJavaHelpers::IntegerProtobufField
+
+        def encode(value)
+          to_varint_64(value.to_i) # Calling `to_i` because it is a delegator and the java side doesn't follow
+        end
+
+        def decode(value)
+          decode_varint_64(value)
+        end
+      else
+        def encode(value)
+          # original Google's library uses 64bits integer for negative value
+          ::Protobuf::Field::VarintField.encode(value & 0xffff_ffff_ffff_ffff)
+        end
+
+        def decode(value)
+          value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000).nonzero?
+          value if acceptable?(value)
+        end
+      end
 
       def acceptable?(val)
         !type_class.fetch(val).nil?
-      end
-
-      def encode(value)
-        super(value.to_i)
-      end
-
-      def decode(value)
-        decoded = super(value)
-        decoded if acceptable?(decoded)
       end
 
       def enum?
@@ -35,8 +48,7 @@ module Protobuf
 
       def coerce!(value)
         enum_value = type_class.fetch(value)
-        fail TypeError, "Invalid Enum value: #{value.inspect} for #{name}" unless enum_value
-        enum_value
+        enum_value || fail(TypeError, "Invalid Enum value: #{value.inspect} for #{name}")
       end
 
       private

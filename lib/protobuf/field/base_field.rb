@@ -155,6 +155,8 @@ module Protobuf
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_map_set_field!(self)
         elsif repeated?
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_repeated_set_field!(self)
+        elsif type_class == ::Protobuf::Field::StringField
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_string_set_field!(self)
         else
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_set_field!(self)
         end

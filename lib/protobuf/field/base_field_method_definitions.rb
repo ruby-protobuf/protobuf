@@ -222,6 +222,32 @@ module Protobuf
         end
       end
 
+      def self.define_string_set_field!(selph)
+        if selph.required?
+          selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def set_field(values, value, ignore_nil_for_repeated, message_instance)
+              if value.nil?
+                values.delete(#{fully_qualified_name_string(selph)})
+                message_instance._protobuf_message_required_field_tags << #{selph.tag}
+              else
+                message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
+                values[#{fully_qualified_name_string(selph)}] = value.to_s
+              end
+            end
+          RUBY
+        else
+          selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def set_field(values, value, ignore_nil_for_repeated, message_instance)
+              if value.nil?
+                values.delete(#{fully_qualified_name_string(selph)})
+              else
+                values[#{fully_qualified_name_string(selph)}] = value.to_s
+              end
+            end
+          RUBY
+        end
+      end
+
       def self.define_base_set_field!(selph)
         if selph.required?
           selph.instance_eval <<~RUBY, __FILE__, __LINE__ + 1

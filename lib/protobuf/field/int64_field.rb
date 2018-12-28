@@ -7,13 +7,26 @@ module Protobuf
       ##
       # Class Methods
       #
+      if defined?(::ProtobufJavaHelpers)
+        include ::ProtobufJavaHelpers::Varinter
+        include ::ProtobufJavaHelpers::IntegerProtobufField
+        include ::ProtobufJavaHelpers::Int64ProtobufField
 
-      def self.max
-        INT64_MAX
-      end
+        def encode(value)
+          to_varint_64(value)
+        end
 
-      def self.min
-        INT64_MIN
+        def decode(value)
+          decode_varint_64(value)
+        end
+      else
+        def self.max
+          INT64_MAX
+        end
+
+        def self.min
+          INT64_MIN
+        end
       end
 
     end
