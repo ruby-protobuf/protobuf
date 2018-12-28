@@ -38,7 +38,7 @@ module Protobuf
         end
         value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 
-        "#{::Protobuf::Field::VarintField.encode(value_to_encode.size)}#{value_to_encode}"
+        "#{::Protobuf::Field::VarintField.encode(value_to_encode.bytesize)}#{value_to_encode}"
       end
 
       def json_encode(value)
