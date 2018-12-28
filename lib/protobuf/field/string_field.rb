@@ -27,9 +27,8 @@ module Protobuf
       end
 
       def decode(bytes)
-        bytes_to_decode = "" + bytes
-        bytes_to_decode.force_encoding(::Protobuf::Field::StringField::ENCODING)
-        bytes_to_decode
+        bytes.force_encoding(::Protobuf::Field::StringField::ENCODING)
+        bytes
       end
 
       def encode(value)
