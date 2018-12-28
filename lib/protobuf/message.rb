@@ -95,8 +95,7 @@ module Protobuf
 
     def each_field_for_serialization
       _protobuf_message_required_field_tags.each do |tag|
-        field = _protobuf_message_field[tag]
-        fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value."
+        fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{_protobuf_message_field[tag].name} does not have a value."
       end
 
       @values.each_key do |fully_qualified_name|
