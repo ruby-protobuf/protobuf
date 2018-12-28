@@ -76,7 +76,6 @@ module Protobuf
       private
 
       def set_field_bytes(tag, bytes)
-        #field = self.class.get_field(tag, true)
         field = _protobuf_message_field[tag]
         field.set(self, bytes) if field
       end
