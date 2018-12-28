@@ -47,8 +47,7 @@ module Protobuf
       end
 
       def coerce!(value)
-        enum_value = type_class.fetch(value)
-        enum_value || fail(TypeError, "Invalid Enum value: #{value.inspect} for #{name}")
+        type_class.fetch(value) || fail(TypeError, "Invalid Enum value: #{value.inspect} for #{name}")
       end
 
       private
