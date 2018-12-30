@@ -51,7 +51,6 @@ require "protobuf/version"
     s.add_development_dependency 'varint'
     s.add_development_dependency 'ruby-prof'
   elsif RUBY_PLATFORM =~ /java/i
-    #s.add_development_dependency 'protobuf_java_helpers'
     s.add_development_dependency 'fast_blank_java'
     s.add_development_dependency 'pry'
   end

@@ -1,5 +1,4 @@
 require 'protobuf/field/base_field'
-require 'protobuf/field/varint_field_encoder_pure'
 
 module Protobuf
   module Field
@@ -25,27 +24,55 @@ module Protobuf
         0
       end
 
-      if defined?(::ProtobufJavaHelpers)
-        include ::ProtobufJavaHelpers::VarintProtobufField
-        extend ::ProtobufJavaHelpers::VarintProtobufField
-        extend ::ProtobufJavaHelpers::Varinter
+      # Because all tags and enums are calculated as VarInt it is "most common" to have
+      # values < CACHE_LIMIT (low numbers) which is defaulting to 1024
+      def self.cached_varint(value)
+        @_varint_cache ||= {}
+        (@_varint_cache[value] ||= encode(value, false)).dup
+      end
 
-        def self.encode(value)
-          to_varint(value)
-        end
-      else
-        include ::Protobuf::Field::VarintFieldEncoderPure
-        extend ::Protobuf::Field::VarintFieldEncoderPure::ClassMethods
+      def self.encode(value, use_cache = true)
+        return cached_varint(value) if use_cache && value >= 0 && value <= CACHE_LIMIT
 
-        # Load the cache of VarInts on load of file
-        (0..CACHE_LIMIT).each do |cached_value|
-          cached_varint(cached_value)
+        bytes = []
+        until value < 128
+          bytes << (0x80 | (value & 0x7f))
+          value >>= 7
         end
+        (bytes << value).pack('C*')
+      end
+
+      # Load the cache of VarInts on load of file
+      (0..CACHE_LIMIT).each do |cached_value|
+        cached_varint(cached_value)
       end
 
       ##
       # Public Instance Methods
       #
+      def acceptable?(val)
+        int_val = if val.is_a?(Integer)
+                    return true if val >= 0 && val < INT32_MAX # return quickly for smallest integer size, hot code path
+                    val
+                  elsif val.is_a?(Numeric)
+                    val.to_i
+                  else
+                    Integer(val, 10)
+                  end
+
+        int_val >= self.class.min && int_val <= self.class.max
+      rescue
+        false
+      end
+
+      def coerce!(val)
+        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'" unless acceptable?(val)
+        return val.to_i if val.is_a?(Numeric)
+        Integer(val, 10)
+      rescue ArgumentError
+        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
+      end
+
       def decode(value)
         value
       end

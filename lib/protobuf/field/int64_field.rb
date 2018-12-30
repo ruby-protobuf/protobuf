@@ -7,26 +7,26 @@ module Protobuf
       ##
       # Class Methods
       #
-      if defined?(::ProtobufJavaHelpers)
-        include ::ProtobufJavaHelpers::Varinter
-        include ::ProtobufJavaHelpers::IntegerProtobufField
-        include ::ProtobufJavaHelpers::Int64ProtobufField
 
-        def encode(value)
-          to_varint_64(value)
-        end
+      def self.max
+        INT64_MAX
+      end
 
-        def decode(value)
-          decode_varint_64(value)
-        end
-      else
-        def self.max
-          INT64_MAX
-        end
+      def self.min
+        INT64_MIN
+      end
 
-        def self.min
-          INT64_MIN
+      ##
+      # Instance Methods
+      #
+      def acceptable?(val)
+        if val.is_a?(Integer) || val.is_a?(Numeric)
+          val >= INT64_MIN && val <= INT64_MAX
+        else
+          Integer(val, 10) >= INT64_MIN && Integer(val, 10) <= INT64_MAX
         end
+      rescue
+        return false
       end
 
     end

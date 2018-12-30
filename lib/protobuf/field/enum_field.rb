@@ -15,27 +15,14 @@ module Protobuf
       ##
       # Public Instance Methods
       #
-      if defined?(::ProtobufJavaHelpers)
-        include ::ProtobufJavaHelpers::Varinter
-        include ::ProtobufJavaHelpers::IntegerProtobufField
+      def encode(value)
+        # original Google's library uses 64bits integer for negative value
+        ::Protobuf::Field::VarintField.encode(value & 0xffff_ffff_ffff_ffff)
+      end
 
-        def encode(value)
-          to_varint_64(value.to_i) # Calling `to_i` because it is a delegator and the java side doesn't follow
-        end
-
-        def decode(value)
-          decode_varint_64(value)
-        end
-      else
-        def encode(value)
-          # original Google's library uses 64bits integer for negative value
-          ::Protobuf::Field::VarintField.encode(value & 0xffff_ffff_ffff_ffff)
-        end
-
-        def decode(value)
-          value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000).nonzero?
-          value if acceptable?(value)
-        end
+      def decode(value)
+        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000).nonzero?
+        value if acceptable?(value)
       end
 
       def acceptable?(val)

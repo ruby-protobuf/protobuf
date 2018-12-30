@@ -18,7 +18,7 @@ module Protobuf
 
       def encode(value)
         bytes = value.encode
-        result = ::Protobuf::Field::VarintField.encode(bytes.size)
+        result = ::Protobuf::Field::VarintField.encode(bytes.bytesize)
         result << bytes
       end
 

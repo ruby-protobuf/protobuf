@@ -23,20 +23,6 @@ module Protobuf
     include ::Protobuf::Message::Serialization
     ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::MessageOptions }
 
-    def self.inherited(subclass)
-      subclass.const_set("PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS", subclass.required_field_tags)
-      subclass.const_set("PROTOBUF_MESSAGE_GET_FIELD", subclass.field_store)
-      subclass.class_eval <<~RUBY, __FILE__, __LINE__
-        def _protobuf_message_field
-          PROTOBUF_MESSAGE_GET_FIELD
-        end
-
-        def _protobuf_message_required_field_tags
-          @_protobuf_message_required_field_tags ||= PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS.dup
-        end
-      RUBY
-    end
-
     ##
     # Class Methods
     #
@@ -205,6 +191,14 @@ module Protobuf
       else
         fail(::Protobuf::FieldNotDefinedError, name) unless ::Protobuf.ignore_unknown_fields?
       end
+    end
+
+    def _protobuf_message_field
+      @_protobuf_message_field ||= self.class.field_store
+    end
+
+    def _protobuf_message_required_field_tags
+      @_protobuf_message_required_field_tags ||= self.class.required_field_tags
     end
 
     ##
