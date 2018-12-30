@@ -20,6 +20,17 @@ module Protobuf
       module ClassMethods
         def inherited(subclass)
           inherit_fields!(subclass)
+          subclass.const_set("PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS", subclass.required_field_tags)
+          subclass.const_set("PROTOBUF_MESSAGE_GET_FIELD", subclass.field_store)
+          subclass.class_eval <<~RUBY, __FILE__, __LINE__
+            def _protobuf_message_field
+              PROTOBUF_MESSAGE_GET_FIELD
+            end
+
+            def _protobuf_message_required_field_tags
+              @_protobuf_message_required_field_tags ||= PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS.dup
+            end
+          RUBY
         end
 
         ##

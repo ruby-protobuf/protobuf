@@ -193,14 +193,6 @@ module Protobuf
       end
     end
 
-    def _protobuf_message_field
-      @_protobuf_message_field ||= self.class.field_store
-    end
-
-    def _protobuf_message_required_field_tags
-      @_protobuf_message_required_field_tags ||= self.class.required_field_tags
-    end
-
     ##
     # Instance Aliases
     #
