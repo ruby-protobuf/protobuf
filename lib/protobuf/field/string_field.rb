@@ -21,8 +21,10 @@ module Protobuf
       def coerce!(value)
         if value.nil?
           nil
-        else
+        elsif acceptable?(value)
           value.to_s
+        else
+          fail TypeError, "Unacceptable value #{value} for field #{name} of type #{type_class}"
         end
       end
 

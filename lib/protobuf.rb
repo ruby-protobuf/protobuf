@@ -10,13 +10,6 @@ require 'active_support/inflector'
 require 'active_support/json'
 require 'active_support/notifications'
 
-# rubocop:disable Lint/HandleExceptions
-begin
-  require 'protobuf_java_helpers'
-rescue LoadError
-end
-# rubocop:enable Lint/HandleExceptions
-
 # All top-level run time code requires, ordered by necessity
 require 'protobuf/wire_type'
 

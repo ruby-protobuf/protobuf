@@ -231,7 +231,11 @@ module Protobuf
                 message_instance._protobuf_message_required_field_tags << #{selph.tag}
               else
                 message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
-                values[#{fully_qualified_name_string(selph)}] = value.to_s
+                values[#{fully_qualified_name_string(selph)}] = if value.is_a?(String)
+                                                                  value
+                                                                else
+                                                                  coerce!(value)
+                                                                end
               end
             end
           RUBY
@@ -241,7 +245,11 @@ module Protobuf
               if value.nil?
                 values.delete(#{fully_qualified_name_string(selph)})
               else
-                values[#{fully_qualified_name_string(selph)}] = value.to_s
+                values[#{fully_qualified_name_string(selph)}] = if value.is_a?(String)
+                                                                  value
+                                                                else
+                                                                  coerce!(value)
+                                                                end
               end
             end
           RUBY
@@ -335,7 +343,7 @@ module Protobuf
           def value_from_values_for_serialization(values)
             value = value_from_values(values)
 
-            array = Array.new(value.size)
+            array = []
             value.each do |k, v|
               array << type_class.new(:key => k, :value => v)
             end
