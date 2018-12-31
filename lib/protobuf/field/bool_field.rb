@@ -3,7 +3,7 @@ require 'protobuf/field/varint_field'
 module Protobuf
   module Field
     class BoolField < VarintField
-      ONE = 1.freeze
+      ONE = 1
       FALSE_ENCODE = [0].pack('C')
       FALSE_STRING = "false".freeze
       FALSE_VALUES = [false, FALSE_STRING].freeze

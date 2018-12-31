@@ -4,6 +4,8 @@ AllCops:
   DisplayCopNames: true
   Exclude:
     - 'spec/support/protos/*.pb.rb'
+    - 'lib/protobuf/field/base_field_method_definitions.rb'
+    - 'varint_prof.rb'
 
 Lint/EndAlignment:
   AlignWith: keyword

@@ -50,6 +50,9 @@ module Protobuf
     end
 
     Protobuf::Field::BaseField.module_eval do
+      def define_set_method!
+      end
+
       def set_without_options(message_instance, bytes)
         return message_instance[name] = decode(bytes) unless repeated?
 
@@ -98,6 +101,7 @@ module Protobuf
 
         set_without_options(message_instance, bytes)
       end
+      alias_method :set, :set_with_options
 
       def option_set(message_field, subfield, subvalue)
         return unless yield

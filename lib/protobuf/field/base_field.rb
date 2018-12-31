@@ -22,7 +22,7 @@ module Protobuf
       ##
       # Attributes
       #
-      attr_reader :message_class, :name, :fully_qualified_name, :options, :rule, :tag, :type_class
+      attr_reader :default_value, :message_class, :name, :fully_qualified_name, :options, :rule, :tag, :type_class
 
       ##
       # Class Methods
@@ -102,10 +102,6 @@ module Protobuf
                            else
                              fail "Unknown field label -- something went very wrong"
                            end
-      end
-
-      def default_value
-        @default_value
       end
 
       def define_encode_to_stream!

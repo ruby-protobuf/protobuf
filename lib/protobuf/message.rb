@@ -186,7 +186,9 @@ module Protobuf
     end
 
     def set_field(name, value, ignore_nil_for_repeated, field = nil)
-      if (field || field = _protobuf_message_field[name])
+      field ||= _protobuf_message_field[name]
+
+      if field
         field.set_field(@values, value, ignore_nil_for_repeated, self)
       else
         fail(::Protobuf::FieldNotDefinedError, name) unless ::Protobuf.ignore_unknown_fields?
