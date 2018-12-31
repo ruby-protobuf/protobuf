@@ -22,7 +22,7 @@ module Protobuf
           inherit_fields!(subclass)
           subclass.const_set("PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS", subclass.required_field_tags)
           subclass.const_set("PROTOBUF_MESSAGE_GET_FIELD", subclass.field_store)
-          subclass.class_eval <<~RUBY, __FILE__, __LINE__
+          subclass.class_eval <<-RUBY, __FILE__, __LINE__
             def _protobuf_message_field
               PROTOBUF_MESSAGE_GET_FIELD
             end
