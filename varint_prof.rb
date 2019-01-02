@@ -52,19 +52,27 @@ if ENV["FLAME"]
   printer.printProfile(STDOUT)
 else
   TO_HASH = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
+  ENCODE = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
+  DECODE = begin
+             ss = StringIO.new
+             ::Protobuf::Encoder.encode(ENCODE.to_proto, ss)
+             ss.rewind
+             ss.string
+           end
+
   Benchmark.ips do |x|
     x.config(:time => 20, :warmup => 10)
-    x.report("to_hash => true java") do
+    x.report("to_hash") do
       TO_HASH.to_hash
     end
 
-    x.report("to_proto => true java") do
-      t = ::Test::Resource.new(:name => "derp", :date_created => 123456789)
-      t.status = 3
+    x.report("encode") do
       ss = StringIO.new
-      ::Protobuf::Encoder.encode(t.to_proto, ss)
-      ss.rewind
-      t2 = ::Test::Resource.decode_from(ss)
+      ::Protobuf::Encoder.encode(ENCODE.to_proto, ss)
+    end
+
+    x.report("decode") do
+      ::Test::Resource.decode_from(::StringIO.new(DECODE.dup))
     end
   end
 end
