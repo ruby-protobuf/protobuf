@@ -3,7 +3,7 @@ module Protobuf
     class BaseFieldMethodDefinitions
 
       def self.fully_qualified_name_string(selph)
-        fully_qualified_name << ":"
+        fully_qualified_name = ":"
         fully_qualified_name << '"' if selph.fully_qualified_name.to_s.start_with?(".")
         fully_qualified_name << selph.fully_qualified_name.to_s
         fully_qualified_name << '"' if selph.fully_qualified_name.to_s.start_with?(".")

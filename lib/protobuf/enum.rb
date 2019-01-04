@@ -313,10 +313,6 @@ module Protobuf
       "\#<Protobuf::Enum(#{parent_class})::#{name}=#{tag}>"
     end
 
-    def to_i
-      tag
-    end
-
     def to_int
       tag.to_int
     end
@@ -357,12 +353,13 @@ module Protobuf
       end
     end
 
-    ::Protobuf.deprecator.define_deprecated_methods(self, :value => :to_i)
-
     ##
     # Instance Aliases
     #
-    alias :to_hash_value to_i
-    alias :to_json_hash_value to_i
+    alias :to_i tag
+    alias :to_hash_value tag
+    alias :to_json_hash_value tag
+
+    ::Protobuf.deprecator.define_deprecated_methods(self, :value => :to_i)
   end
 end
