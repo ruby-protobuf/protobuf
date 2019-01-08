@@ -69,7 +69,6 @@ module Protobuf
         define_to_message_hash!
         define_encode_to_stream!
         set_default_value!
-        tag_encoded
       end
 
       ##

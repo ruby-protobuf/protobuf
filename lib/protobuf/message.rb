@@ -70,7 +70,7 @@ module Protobuf
     end
 
     def each_field_for_serialization
-      _protobuf_message_required_field_tags.each do |tag|
+      _protobuf_message_unset_required_field_tags.each do |tag|
         fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{_protobuf_message_field[tag].name} does not have a value."
       end
 
