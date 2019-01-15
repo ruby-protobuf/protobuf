@@ -152,9 +152,9 @@ module Protobuf
 
               if value.empty?
                 values.delete(#{fully_qualified_name_string(selph)})
-                message_instance._protobuf_message_required_field_tags << #{selph.tag}
+                message_instance._protobuf_message_unset_required_field_tags << #{selph.tag}
               else
-                message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
+                message_instance._protobuf_message_unset_required_field_tags.delete(#{selph.tag})
                 values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldHash.new(self)
                 values[#{fully_qualified_name_string(selph)}].replace(value)
               end
@@ -200,9 +200,9 @@ module Protobuf
 
             if value.empty?
               values.delete(#{fully_qualified_name_string(selph)})
-              message_instance._protobuf_message_required_field_tags << #{selph.tag}
+              message_instance._protobuf_message_unset_required_field_tags << #{selph.tag}
             else
-              message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
+              message_instance._protobuf_message_unset_required_field_tags.delete(#{selph.tag})
               values[#{fully_qualified_name_string(selph)}] ||= ::Protobuf::Field::FieldArray.new(self)
               values[#{fully_qualified_name_string(selph)}].replace(value)
             end
@@ -247,9 +247,9 @@ module Protobuf
             def set_field(values, value, ignore_nil_for_repeated, message_instance)
               if value.nil?
                 values.delete(#{fully_qualified_name_string(selph)})
-                message_instance._protobuf_message_required_field_tags << #{selph.tag}
+                message_instance._protobuf_message_unset_required_field_tags << #{selph.tag}
               else
-                message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
+                message_instance._protobuf_message_unset_required_field_tags.delete(#{selph.tag})
                 values[#{fully_qualified_name_string(selph)}] = if value.is_a?(String)
                                                                   value
                                                                 else
@@ -281,9 +281,9 @@ module Protobuf
             def set_field(values, value, ignore_nil_for_repeated, message_instance)
               if value.nil?
                 values.delete(#{fully_qualified_name_string(selph)})
-                message_instance._protobuf_message_required_field_tags << #{selph.tag}
+                message_instance._protobuf_message_unset_required_field_tags << #{selph.tag}
               else
-                message_instance._protobuf_message_required_field_tags.delete(#{selph.tag})
+                message_instance._protobuf_message_unset_required_field_tags.delete(#{selph.tag})
                 values[#{fully_qualified_name_string(selph)}] = coerce!(value)
               end
             end

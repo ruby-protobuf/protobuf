@@ -27,8 +27,8 @@ module Protobuf
               PROTOBUF_MESSAGE_GET_FIELD
             end
 
-            def _protobuf_message_required_field_tags
-              @_protobuf_message_required_field_tags ||= PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS.dup
+            def _protobuf_message_unset_required_field_tags
+              @_protobuf_message_unset_required_field_tags ||= PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS.dup
             end
           RUBY
         end
