@@ -122,6 +122,17 @@ module Protobuf
       result
     end
 
+    def to_hash_with_string_keys
+      result = {}
+
+      @values.each_key do |field_name|
+        field = _protobuf_message_field[field_name]
+        field.to_message_hash_with_string_key(@values, result)
+      end
+
+      result
+    end
+
     def to_json(options = {})
       to_json_hash.to_json(options)
     end

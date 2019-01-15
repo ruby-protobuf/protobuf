@@ -10,6 +10,22 @@ module Protobuf
         fully_qualified_name
       end
 
+      def self.define_to_hash_value_to_message_hash_with_string_key!(selph)
+        selph.instance_eval <<-RUBY, __FILE__, __LINE__ + 1
+          def to_message_hash_with_string_key(values, result)
+            result["#{selph.name}"] = value_from_values(values).to_hash_value
+          end
+        RUBY
+      end
+
+      def self.define_base_to_message_hash_with_string_key!(selph)
+        selph.instance_eval <<-RUBY, __FILE__, __LINE__ + 1
+          def to_message_hash_with_string_key(values, result)
+            result["#{selph.name}"] = value_from_values(values)
+          end
+        RUBY
+      end
+
       def self.define_to_hash_value_to_message_hash!(selph)
         selph.instance_eval <<-RUBY, __FILE__, __LINE__ + 1
           def to_message_hash(values, result)

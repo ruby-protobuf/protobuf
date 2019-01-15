@@ -66,6 +66,10 @@ else
       TO_HASH.to_hash
     end
 
+    x.report("to_hash_with_string_keys") do
+      TO_HASH.to_hash_with_string_keys
+    end
+
     x.report("encode") do
       ss = StringIO.new
       ::Protobuf::Encoder.encode(ENCODE.to_proto, ss)

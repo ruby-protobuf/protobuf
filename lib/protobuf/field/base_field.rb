@@ -161,8 +161,10 @@ module Protobuf
       def define_to_message_hash!
         if message? || enum? || repeated? || map?
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_to_hash_value_to_message_hash!(self)
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_to_hash_value_to_message_hash_with_string_key!(self)
         else
           ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_to_message_hash!(self)
+          ::Protobuf::Field::BaseFieldMethodDefinitions.define_base_to_message_hash_with_string_key!(self)
         end
       end
 
