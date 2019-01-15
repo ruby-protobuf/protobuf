@@ -45,9 +45,17 @@ module Protobuf
       end
 
       def coerce!(val)
-        fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'" unless acceptable?(val)
-        return val.to_i if val.is_a?(Numeric)
-        Integer(val, 10)
+        if val.is_a?(Integer) && val >= 0 && val <= INT32_MAX
+          val
+        else
+          fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'" unless acceptable?(val)
+
+          if val.is_a?(Integer) || val.is_a?(Numeric)
+            val.to_i
+          else
+            Integer(val, 10)
+          end
+        end
       rescue ArgumentError
         fail TypeError, "Expected value of type '#{type_class}' for field #{name}, but got '#{val.class}'"
       end
