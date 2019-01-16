@@ -145,7 +145,7 @@ module Protobuf
       end
 
       def define_field_and_present_predicate!
-        @field_and_present_predicate = if type_class == ::Protobuf::Field::BoolField # boolean present check
+        @field_and_present_predicate = if !repeated? && type_class == ::Protobuf::Field::BoolField # boolean present check
                                          OBJECT_MODULE::BoolFieldAndPresentPredicate.new(self)
                                        else
                                          OBJECT_MODULE::BaseFieldAndPresentPredicate.new(self)
