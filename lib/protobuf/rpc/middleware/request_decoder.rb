@@ -28,7 +28,16 @@ module Protobuf
           env.request_type = rpc_method.request_type
           env.response_type = rpc_method.response_type
 
-          app.call(env)
+          operation = "#{service_name}##{method_name}"
+          trace = ::OpenTracing.extract(::OpenTracing::FORMAT_TEXT_MAP, trace_context)
+
+          # return app.call(env) if trace.nil?
+
+          result = nil
+          ::OpenTracing.start_active_span(operation, :child_of => trace) do |scope|
+            result = app.call(env)
+          end
+          result
         end
 
         def log_signature
@@ -49,6 +58,11 @@ module Protobuf
           @request ||= rpc_method.request_type.decode(request_wrapper.request_proto)
         rescue => exception
           raise BadRequestData, "Unable to decode request: #{exception.message}"
+        end
+
+        def trace_context
+          return nil if request_wrapper.trace.nil? # XXX test
+          @trace_context ||= JSON.parse(request_wrapper.trace.raw)
         end
 
         # Decode the incoming request object into our expected request object

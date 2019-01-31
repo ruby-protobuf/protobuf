@@ -26,10 +26,16 @@ package protobuf.socketrpc;
 
 message Request
 {
+  extensions 200 to max;
+
   required string service_name = 1;             // Fully- qualified Service class name
   required string method_name = 2;              // Service method to invoke
   optional bytes request_proto = 3;             // Serialized request bytes
   optional string caller = 4;                   // Calling hostname or address
+
+  extend Request {
+    optional Trace trace = 200;
+  }
 }
 
 message Response
@@ -39,6 +45,11 @@ message Response
   optional bool callback = 3 [default = false]; // Was callback invoked (not sure what this is for)
   optional ErrorReason error_reason = 4;        // Error Reason
   optional string server = 5;                   // Server hostname or address
+}
+
+message Trace {
+  optional string type = 1;
+  optional bytes raw = 2;
 }
 
 // Possible error reasons

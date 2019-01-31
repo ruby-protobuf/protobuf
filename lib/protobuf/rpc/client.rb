@@ -105,7 +105,8 @@ module Protobuf
       def method_missing(method_name, *params)
         service = options[:service]
         if service.rpc_method?(method_name)
-          logger.debug { sign_message("#{service.name}##{method_name}") }
+          operation = "#{service.name}##{method_name}"
+          logger.debug { sign_message(operation) }
           rpc = service.rpcs[method_name.to_sym]
 
           options[:request_type] = rpc.request_type
@@ -126,7 +127,9 @@ module Protobuf
             logger.debug { sign_message("no block given for callbacks") }
           end
 
-          send_request
+          ::OpenTracing.start_active_span(operation) do |scope|
+            send_request
+          end
         else
           logger.error { sign_message("#{service.name}##{method_name} not rpc method, passing to super") }
           super(method_name, *params)
