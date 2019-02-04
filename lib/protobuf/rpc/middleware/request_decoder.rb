@@ -29,7 +29,7 @@ module Protobuf
           env.response_type = rpc_method.response_type
 
           operation = "#{service_name}##{method_name}"
-          trace = ::OpenTracing.extract(::OpenTracing::FORMAT_TEXT_MAP, trace_context)
+          trace = ::OpenTracing.extract(::OpenTracing::FORMAT_BINARY, trace_context)
 
           # return app.call(env) if trace.nil?
 
@@ -62,7 +62,7 @@ module Protobuf
 
         def trace_context
           return nil if request_wrapper.trace.nil? # XXX test
-          @trace_context ||= JSON.parse(request_wrapper.trace.raw)
+          @trace_context ||= request_wrapper.trace.raw.to_s
         end
 
         # Decode the incoming request object into our expected request object
