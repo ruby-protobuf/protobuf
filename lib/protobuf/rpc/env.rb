@@ -41,6 +41,7 @@ module Protobuf
                     :method_name,
                     :request,
                     :request_type,
+                    :request_wrapper,
                     :response,
                     :response_type,
                     :rpc_method,

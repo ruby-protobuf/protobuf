@@ -21,6 +21,7 @@ module Protobuf
           env.service_name = service_name
           env.method_name = method_name
           env.request = request
+          env.request_wrapper = request_wrapper
           env.client_host = request_wrapper.caller
 
           env.rpc_service = service
@@ -28,16 +29,7 @@ module Protobuf
           env.request_type = rpc_method.request_type
           env.response_type = rpc_method.response_type
 
-          operation = "#{service_name}##{method_name}"
-          trace = ::OpenTracing.extract(::OpenTracing::FORMAT_BINARY, trace_context)
-
-          # return app.call(env) if trace.nil?
-
-          result = nil
-          ::OpenTracing.start_active_span(operation, :child_of => trace) do |scope|
-            result = app.call(env)
-          end
-          result
+          app.call(env)
         end
 
         def log_signature
