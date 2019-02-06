@@ -11,8 +11,6 @@ before_install:
   - java -Xmx1g -version
   - javac -J-Xmx1g -version
   - export JRUBY_OPTS=-J-Xmx1g
-  # Required for rainbow installation issue, https://github.com/sickill/rainbow/issues/44
-  - gem update --system
   - gem update bundler
 language: ruby
 rvm:
@@ -20,10 +18,11 @@ rvm:
   - 2.0.0
   - 2.1
   - 2.2
-  - 2.2.2
   - 2.3
   - 2.4
-  - jruby-9.1.7.0
+  - 2.5
+  - jruby-9.1.17.0
+  - jruby-9.2.5.0
   - rbx-2
 env:
   - PROTOBUF_VERSION=2.6.1

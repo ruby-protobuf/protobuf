@@ -14,28 +14,33 @@ module Protobuf
       # Public Instance Methods
       #
 
+      def acceptable?(val)
+        val.is_a?(String) || val.nil? || val.is_a?(Symbol)
+      end
+
+      def coerce!(value)
+        if value.nil?
+          nil
+        elsif acceptable?(value)
+          value.to_s
+        else
+          fail TypeError, "Unacceptable value #{value} for field #{name} of type #{type_class}"
+        end
+      end
+
       def decode(bytes)
-        bytes_to_decode = bytes.dup
-        bytes_to_decode.force_encoding(::Protobuf::Field::StringField::ENCODING)
-        bytes_to_decode
+        bytes.force_encoding(::Protobuf::Field::StringField::ENCODING)
+        bytes
       end
 
       def encode(value)
-        value_to_encode = value.dup
-        value_to_encode.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+        value_to_encode = "" + value # dup is slower
+        unless value_to_encode.encoding == ENCODING
+          value_to_encode.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+        end
         value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 
-        "#{::Protobuf::Field::VarintField.encode(value_to_encode.size)}#{value_to_encode}"
-      end
-
-      def encode_to_stream(value, stream)
-        if value.encoding != ::Protobuf::Field::StringField::ENCODING
-          value = value.dup
-          value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
-        end
-
-        byte_size = ::Protobuf::Field::VarintField.encode(value.bytesize)
-        stream << tag_encoded << byte_size << value
+        "#{::Protobuf::Field::VarintField.encode(value_to_encode.bytesize)}#{value_to_encode}"
       end
 
       def json_encode(value)

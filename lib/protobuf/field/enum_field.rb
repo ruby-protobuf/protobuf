@@ -15,18 +15,18 @@ module Protobuf
       ##
       # Public Instance Methods
       #
-
-      def acceptable?(val)
-        !type_class.fetch(val).nil?
-      end
-
       def encode(value)
-        super(value.to_i)
+        # original Google's library uses 64bits integer for negative value
+        ::Protobuf::Field::VarintField.encode(value.to_i & 0xffff_ffff_ffff_ffff)
       end
 
       def decode(value)
-        decoded = super(value)
-        decoded if acceptable?(decoded)
+        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000).nonzero?
+        value if acceptable?(value)
+      end
+
+      def acceptable?(val)
+        !type_class.fetch(val).nil?
       end
 
       def enum?
@@ -34,9 +34,7 @@ module Protobuf
       end
 
       def coerce!(value)
-        enum_value = type_class.fetch(value)
-        fail TypeError, "Invalid Enum value: #{value.inspect} for #{name}" unless enum_value
-        enum_value
+        type_class.fetch(value) || fail(TypeError, "Invalid Enum value: #{value.inspect} for #{name}")
       end
 
       private

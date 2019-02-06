@@ -20,6 +20,17 @@ module Protobuf
       module ClassMethods
         def inherited(subclass)
           inherit_fields!(subclass)
+          subclass.const_set("PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS", subclass.required_field_tags)
+          subclass.const_set("PROTOBUF_MESSAGE_GET_FIELD", subclass.field_store)
+          subclass.class_eval <<-RUBY, __FILE__, __LINE__
+            def _protobuf_message_field
+              PROTOBUF_MESSAGE_GET_FIELD
+            end
+
+            def _protobuf_message_unset_required_field_tags
+              @_protobuf_message_unset_required_field_tags ||= PROTOBUF_MESSAGE_REQUIRED_FIELD_TAGS.dup
+            end
+          RUBY
         end
 
         ##
@@ -41,6 +52,7 @@ module Protobuf
         # Define a required field.
         #
         def required(type_class, name, tag, options = {})
+          required_field_tags << tag
           define_field(:required, type_class, name, tag, options)
         end
 
@@ -76,6 +88,10 @@ module Protobuf
 
         def extension_ranges
           @extension_ranges ||= []
+        end
+
+        def required_field_tags
+          @required_field_tags ||= []
         end
 
         def extension_tag?(tag)

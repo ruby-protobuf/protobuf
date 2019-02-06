@@ -1,15 +1,5 @@
 require 'protobuf/message/fields'
 require 'protobuf/message/serialization'
-
-# Under MRI, this optimizes proto decoding by around 15% in tests.
-# When unavailable, we fall to pure Ruby.
-# rubocop:disable Lint/HandleExceptions
-begin
-  require 'varint/varint'
-rescue LoadError
-end
-# rubocop:enable Lint/HandleExceptions
-
 require 'protobuf/varint'
 
 module Protobuf
@@ -80,37 +70,26 @@ module Protobuf
     end
 
     def each_field_for_serialization
-      self.class.all_fields.each do |field|
-        value = @values[field.fully_qualified_name]
-        if value.nil?
-          fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{field.name} does not have a value." if field.required?
-          next
-        end
-        if field.map?
-          # on-the-wire, maps are represented like an array of entries where
-          # each entry is a message of two fields, key and value.
-          array = Array.new(value.size)
-          i = 0
-          value.each do |k, v|
-            array[i] = field.type_class.new(:key => k, :value => v)
-            i += 1
-          end
-          value = array
-        end
+      _protobuf_message_unset_required_field_tags.each do |tag|
+        fail ::Protobuf::SerializationError, "Required field #{self.class.name}##{_protobuf_message_field[tag].name} does not have a value."
+      end
 
-        yield(field, value)
+      @values.each_key do |fully_qualified_name|
+        field = _protobuf_message_field[fully_qualified_name]
+        yield(field, field.value_from_values_for_serialization(@values))
       end
     end
 
     def field?(name)
-      field = self.class.get_field(name, true)
-      return false if field.nil?
-      if field.repeated?
-        @values.key?(field.fully_qualified_name) && @values[field.fully_qualified_name].present?
+      field = _protobuf_message_field[name]
+
+      if field
+        field.field?(@values)
       else
-        @values.key?(field.fully_qualified_name)
+        false
       end
     end
+    alias :respond_to_has? field?
     ::Protobuf.deprecator.define_deprecated_methods(self, :has_field? => :field?)
 
     def inspect
@@ -121,13 +100,14 @@ module Protobuf
       "#<#{self.class} #{attrs}>"
     end
 
-    def respond_to_has?(key)
-      respond_to?(key) && field?(key)
-    end
-
     def respond_to_has_and_present?(key)
-      respond_to_has?(key) &&
-        (self[key].present? || [true, false].include?(self[key]))
+      field = _protobuf_message_field[key]
+
+      if field
+        field.field_and_present?(@values)
+      else
+        false
+      end
     end
 
     # Return a hash-representation of the given fields for this message type.
@@ -135,10 +115,19 @@ module Protobuf
       result = {}
 
       @values.each_key do |field_name|
-        value = self[field_name]
-        field = self.class.get_field(field_name, true)
-        hashed_value = value.respond_to?(:to_hash_value) ? value.to_hash_value : value
-        result[field.name] = hashed_value
+        field = _protobuf_message_field[field_name]
+        field.to_message_hash(@values, result)
+      end
+
+      result
+    end
+
+    def to_hash_with_string_keys
+      result = {}
+
+      @values.each_key do |field_name|
+        field = _protobuf_message_field[field_name]
+        field.to_message_hash_with_string_key(@values, result)
       end
 
       result
@@ -186,11 +175,8 @@ module Protobuf
     end
 
     def [](name)
-      field = self.class.get_field(name, true)
-
-      return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldHash.new(field) if field.map?
-      return @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field) if field.repeated?
-      @values.fetch(field.fully_qualified_name, field.default_value)
+      field = _protobuf_message_field[name]
+      field.value_from_values(@values)
     rescue # not having a field should be the exceptional state
       raise if field
       fail ArgumentError, "invalid field name=#{name.inspect}"
@@ -198,6 +184,16 @@ module Protobuf
 
     def []=(name, value)
       set_field(name, value, true)
+    end
+
+    def set_field(name, value, ignore_nil_for_repeated, field = nil)
+      field ||= _protobuf_message_field[name]
+
+      if field
+        field.set_field(@values, value, ignore_nil_for_repeated, self)
+      else
+        fail(::Protobuf::FieldNotDefinedError, name) unless ::Protobuf.ignore_unknown_fields?
+      end
     end
 
     ##
@@ -221,57 +217,6 @@ module Protobuf
     #
 
     private
-
-    # rubocop:disable Metrics/MethodLength
-    def set_field(name, value, ignore_nil_for_repeated)
-      if (field = self.class.get_field(name, true))
-        if field.map?
-          unless value.is_a?(Hash)
-            fail TypeError, <<-TYPE_ERROR
-                Expected map value
-                Got '#{value.class}' for map protobuf field #{field.name}
-            TYPE_ERROR
-          end
-
-          if value.empty?
-            @values.delete(field.fully_qualified_name)
-          else
-            @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldHash.new(field)
-            @values[field.fully_qualified_name].replace(value)
-          end
-        elsif field.repeated?
-          if value.nil? && ignore_nil_for_repeated
-            ::Protobuf.deprecator.deprecation_warning("#{self.class}#[#{name}]=nil", "use an empty array instead of nil")
-            return
-          end
-          unless value.is_a?(Array)
-            fail TypeError, <<-TYPE_ERROR
-                Expected repeated value of type '#{field.type_class}'
-                Got '#{value.class}' for repeated protobuf field #{field.name}
-            TYPE_ERROR
-          end
-
-          value = value.compact
-
-          if value.empty?
-            @values.delete(field.fully_qualified_name)
-          else
-            @values[field.fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(field)
-            @values[field.fully_qualified_name].replace(value)
-          end
-        else
-          if value.nil? # rubocop:disable Style/IfInsideElse
-            @values.delete(field.fully_qualified_name)
-          else
-            @values[field.fully_qualified_name] = field.coerce!(value)
-          end
-        end
-      else
-        unless ::Protobuf.ignore_unknown_fields?
-          fail ::Protobuf::FieldNotDefinedError, name
-        end
-      end
-    end
 
     def copy_to(object, method)
       duplicate = proc do |obj|

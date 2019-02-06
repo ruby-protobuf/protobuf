@@ -27,30 +27,19 @@ module Protobuf
       end
 
       def decode(bytes)
-        bytes_to_decode = bytes.dup
-        bytes_to_decode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
-        bytes_to_decode
+        bytes.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
+        bytes
       end
 
       def encode(value)
-        value_to_encode =
-          if value.is_a?(::Protobuf::Message)
-            value.encode
-          else
-            value.dup
-          end
+        value_to_encode = if value.is_a?(::Protobuf::Message)
+                            value.encode
+                          else
+                            "" + value
+                          end
 
         value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
-        string_size = ::Protobuf::Field::VarintField.encode(value_to_encode.size)
-
-        "#{string_size}#{value_to_encode}"
-      end
-
-      def encode_to_stream(value, stream)
-        value = value.encode if value.is_a?(::Protobuf::Message)
-        byte_size = ::Protobuf::Field::VarintField.encode(value.bytesize)
-
-        stream << tag_encoded << byte_size << value
+        "#{::Protobuf::Field::VarintField.encode(value_to_encode.bytesize)}#{value_to_encode}"
       end
 
       def wire_type

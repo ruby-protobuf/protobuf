@@ -50,6 +50,35 @@ module Protobuf
     end
 
     Protobuf::Field::BaseField.module_eval do
+      def define_set_method!
+      end
+
+      def set_without_options(message_instance, bytes)
+        return message_instance[name] = decode(bytes) unless repeated?
+
+        if map?
+          hash = message_instance[name]
+          entry = decode(bytes)
+          # decoded value could be nil for an
+          # enum value that is not recognized
+          hash[entry.key] = entry.value unless entry.value.nil?
+          return hash[entry.key]
+        end
+
+        return message_instance[name] << decode(bytes) unless packed?
+
+        array = message_instance[name]
+        stream = StringIO.new(bytes)
+
+        if wire_type == ::Protobuf::WireType::VARINT
+          array << decode(Varint.decode(stream)) until stream.eof?
+        elsif wire_type == ::Protobuf::WireType::FIXED64
+          array << decode(stream.read(8)) until stream.eof?
+        elsif wire_type == ::Protobuf::WireType::FIXED32
+          array << decode(stream.read(4)) until stream.eof?
+        end
+      end
+
       # Sets a MessageField that is known to be an option.
       # We must allow fields to be set one at a time, as option syntax allows us to
       # set each field within the option using a separate "option" line.
@@ -72,6 +101,7 @@ module Protobuf
 
         set_without_options(message_instance, bytes)
       end
+      alias_method :set, :set_with_options
 
       def option_set(message_field, subfield, subvalue)
         return unless yield
@@ -85,9 +115,6 @@ module Protobuf
           message_field[subfield.tag] = subvalue
         end
       end
-
-      alias_method :set_without_options, :set
-      alias_method :set, :set_with_options
     end
   end
 end
