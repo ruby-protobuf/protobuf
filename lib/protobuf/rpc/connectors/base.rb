@@ -138,18 +138,11 @@ module Protobuf
         end
 
         def request_bytes
-          trace_carrier = ""
-          ::OpenTracing.inject(::OpenTracing.active_span.context,
-                               ::OpenTracing::FORMAT_BINARY,
-                               trace_carrier)
-          trace = ::Protobuf::Socketrpc::Trace.new(:raw => trace_carrier)
-
           validate_request_type!
           fields = { :service_name => @options[:service].name,
                      :method_name => @options[:method].to_s,
                      :request_proto => @options[:request],
-                     :caller => request_caller,
-                     :trace => trace }
+                     :caller => request_caller }
 
           return ::Protobuf::Socketrpc::Request.encode(fields)
         rescue => e

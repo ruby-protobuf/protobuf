@@ -23,7 +23,6 @@ require "protobuf/version"
   active_support_max_version = "< 5" if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.2.2")
   s.add_dependency "activesupport", '>= 3.2', active_support_max_version
   s.add_dependency 'middleware'
-  s.add_dependency 'opentracing'
   s.add_dependency 'thor'
   s.add_dependency 'thread_safe'
 
