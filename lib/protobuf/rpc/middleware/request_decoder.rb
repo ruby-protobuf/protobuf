@@ -52,11 +52,6 @@ module Protobuf
           raise BadRequestData, "Unable to decode request: #{exception.message}"
         end
 
-        def trace_context
-          return nil if request_wrapper.trace.nil? # XXX test
-          @trace_context ||= request_wrapper.trace.raw.to_s
-        end
-
         # Decode the incoming request object into our expected request object
         #
         def request_wrapper
