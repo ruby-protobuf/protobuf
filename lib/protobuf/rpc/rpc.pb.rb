@@ -32,6 +32,7 @@ module Protobuf
     class Request < ::Protobuf::Message; end
     class Response < ::Protobuf::Message; end
     class Trace < ::Protobuf::Message; end
+    class MapEntry < ::Protobuf::Message; end
 
 
     ##
@@ -56,8 +57,12 @@ module Protobuf
     end
 
     class Trace
-      optional :string, :type, 1
-      optional :bytes, :raw, 2
+      repeated ::Protobuf::Socketrpc::MapEntry, :headers, 1
+    end
+
+    class MapEntry
+      optional :string, :key, 1
+      optional :string, :value, 2
     end
 
   end

@@ -48,8 +48,12 @@ message Response
 }
 
 message Trace {
-  optional string type = 1;
-  optional bytes raw = 2;
+  repeated MapEntry headers = 1;
+}
+
+message MapEntry {
+  optional string key = 1;
+  optional string value = 2;
 }
 
 // Possible error reasons
