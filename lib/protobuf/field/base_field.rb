@@ -1,6 +1,7 @@
 require 'active_support/core_ext/hash/slice'
 require 'protobuf/field/field_array'
 require 'protobuf/field/field_hash'
+require 'protobuf/field/base_field_object_definitions'
 
 module Protobuf
   module Field
@@ -11,7 +12,7 @@ module Protobuf
       ##
       # Constants
       #
-
+      OBJECT_MODULE = ::Protobuf::Field::BaseFieldObjectDefinitions
       PACKED_TYPES = [
         ::Protobuf::WireType::VARINT,
         ::Protobuf::WireType::FIXED32,
@@ -21,7 +22,7 @@ module Protobuf
       ##
       # Attributes
       #
-      attr_reader :message_class, :name, :fully_qualified_name, :options, :rule, :tag, :type_class
+      attr_reader :default_value, :message_class, :name, :fully_qualified_name, :options, :rule, :tag, :type_class
 
       ##
       # Class Methods
@@ -58,7 +59,27 @@ module Protobuf
 
         validate_packed_field if packed?
         define_accessor(simple_name, fully_qualified_name) if simple_name
-        tag_encoded
+        set_repeated_message!
+        set_map!
+        @value_from_values = nil
+        @value_from_values_for_serialization = nil
+        @field_predicate = nil
+        @field_and_present_predicate = nil
+        @set_field = nil
+        @set_method = nil
+        @to_message_hash = nil
+        @to_message_hash_string_keys = nil
+        @encode_to_stream = nil
+
+        define_value_from_values!
+        define_value_from_values_for_serialization!
+        define_field_predicate!
+        define_field_and_present_predicate!
+        define_set_field!
+        define_set_method!
+        define_to_message_hash!
+        define_encode_to_stream!
+        set_default_value!
       end
 
       ##
@@ -81,7 +102,7 @@ module Protobuf
         options[:default]
       end
 
-      def default_value
+      def set_default_value!
         @default_value ||= if optional? || required?
                              typed_default_value
                            elsif map?
@@ -93,16 +114,128 @@ module Protobuf
                            end
       end
 
+      def define_encode_to_stream!
+        @encode_to_stream = if repeated? && packed?
+                              OBJECT_MODULE::RepeatedPackedEncodeToStream.new(self)
+                            elsif repeated?
+                              OBJECT_MODULE::RepeatedNotPackedEncodeToStream.new(self)
+                            elsif message? || type_class == ::Protobuf::Field::BytesField
+                              OBJECT_MODULE::BytesEncodeToStream.new(self)
+                            elsif type_class == ::Protobuf::Field::StringField
+                              OBJECT_MODULE::StringEncodeToStream.new(self)
+                            else
+                              OBJECT_MODULE::BaseEncodeToStream.new(self)
+                            end
+      end
+
+      def encode_to_stream(value, stream)
+        @encode_to_stream.call(value, stream)
+      end
+
+      def define_field_predicate!
+        @field_predicate = if repeated?
+                             OBJECT_MODULE::RepeatedFieldPredicate.new(self)
+                           else
+                             OBJECT_MODULE::BaseFieldPredicate.new(self)
+                           end
+      end
+
+      def field?(values)
+        @field_predicate.call(values)
+      end
+
+      def define_field_and_present_predicate!
+        @field_and_present_predicate = if !repeated? && type_class == ::Protobuf::Field::BoolField # boolean present check
+                                         OBJECT_MODULE::BoolFieldAndPresentPredicate.new(self)
+                                       else
+                                         OBJECT_MODULE::BaseFieldAndPresentPredicate.new(self)
+                                       end
+      end
+
+      def field_and_present?(values)
+        @field_and_present_predicate.call(values)
+      end
+
+      def define_value_from_values!
+        @value_from_values = if map?
+                               OBJECT_MODULE::MapValueFromValues.new(self)
+                             elsif repeated?
+                               OBJECT_MODULE::RepeatedFieldValueFromValues.new(self)
+                             elsif type_class == ::Protobuf::Field::BoolField # boolean present check
+                               OBJECT_MODULE::BoolFieldValueFromValues.new(self)
+                             else
+                               OBJECT_MODULE::BaseFieldValueFromValues.new(self)
+                             end
+      end
+
+      def value_from_values(values)
+        @value_from_values.call(values)
+      end
+
+      def define_value_from_values_for_serialization!
+        @value_from_values_for_serialization = if map?
+                                                 OBJECT_MODULE::MapValueFromValuesForSerialization.new(self)
+                                               elsif repeated?
+                                                 OBJECT_MODULE::RepeatedFieldValueFromValuesForSerialization.new(self)
+                                               elsif type_class == ::Protobuf::Field::BoolField # boolean present check
+                                                 OBJECT_MODULE::BoolFieldValueFromValuesForSerialization.new(self)
+                                               else
+                                                 OBJECT_MODULE::BaseFieldValueFromValuesForSerialization.new(self)
+                                               end
+      end
+
+      def value_from_values_for_serialization(values)
+        @value_from_values_for_serialization.call(values)
+      end
+
+      def define_set_field!
+        @set_field = if map? && required?
+                       OBJECT_MODULE::RequiredMapSetField.new(self)
+                     elsif repeated? && required?
+                       OBJECT_MODULE::RequiredRepeatedSetField.new(self)
+                     elsif type_class == ::Protobuf::Field::StringField && required?
+                       OBJECT_MODULE::RequiredStringSetField.new(self)
+                     elsif required?
+                       OBJECT_MODULE::RequiredBaseSetField.new(self)
+                     elsif map?
+                       OBJECT_MODULE::MapSetField.new(self)
+                     elsif repeated?
+                       OBJECT_MODULE::RepeatedSetField.new(self)
+                     elsif type_class == ::Protobuf::Field::StringField
+                       OBJECT_MODULE::StringSetField.new(self)
+                     else
+                       OBJECT_MODULE::BaseSetField.new(self)
+                     end
+      end
+
+      def set_field(values, value, ignore_nil_for_repeated, message_instance)
+        @set_field.call(values, value, ignore_nil_for_repeated, message_instance)
+      end
+
+      def define_to_message_hash!
+        if message? || enum? || repeated? || map?
+          @to_message_hash = OBJECT_MODULE::ToHashValueToMessageHash.new(self)
+          @to_message_hash_string_keys = OBJECT_MODULE::ToHashValueToMessageHashWithStringKey.new(self)
+        else
+          @to_message_hash = OBJECT_MODULE::BaseToMessageHash.new(self)
+          @to_message_hash_string_keys = OBJECT_MODULE::BaseToMessageHashWithStringKey.new(self)
+        end
+      end
+
+      def to_message_hash(values, result)
+        @to_message_hash.call(values, result)
+      end
+
+      def to_message_hash_with_string_key(values, result)
+        @to_message_hash_string_keys.call(values, result)
+      end
+
       def deprecated?
         @deprecated
       end
 
       def encode(_value)
         fail NotImplementedError, "#{self.class.name}##{__method__}"
-      end
-
-      def encode_to_stream(value, stream)
-        stream << tag_encoded << encode(value)
       end
 
       def extension?
@@ -117,8 +250,13 @@ module Protobuf
         false
       end
 
+      def set_map!
+        set_repeated_message!
+        @is_map = repeated_message? && type_class.get_option!(:map_entry)
+      end
+
       def map?
-        @is_map ||= repeated_message? && type_class.get_option(:map_entry)
+        @is_map
       end
 
       def optional?
@@ -133,39 +271,32 @@ module Protobuf
         @repeated
       end
 
+      def set_repeated_message!
+        @repeated_message = repeated? && message?
+      end
+
       def repeated_message?
-        repeated? && message?
+        @repeated_message
       end
 
       def required?
         @required
       end
 
-      # FIXME: need to cleanup (rename) this warthog of a method.
+      def define_set_method!
+        @set_method = if map?
+                        OBJECT_MODULE::MapSetMethod.new(self)
+                      elsif repeated? && packed?
+                        OBJECT_MODULE::RepeatedPackedSetMethod.new(self)
+                      elsif repeated?
+                        OBJECT_MODULE::RepeatedNotPackedSetMethod.new(self)
+                      else
+                        OBJECT_MODULE::BaseSetMethod.new(self)
+                      end
+      end
+
       def set(message_instance, bytes)
-        return message_instance[name] = decode(bytes) unless repeated?
-
-        if map?
-          hash = message_instance[name]
-          entry = decode(bytes)
-          # decoded value could be nil for an
-          # enum value that is not recognized
-          hash[entry.key] = entry.value unless entry.value.nil?
-          return hash[entry.key]
-        end
-
-        return message_instance[name] << decode(bytes) unless packed?
-
-        array = message_instance[name]
-        stream = StringIO.new(bytes)
-
-        if wire_type == ::Protobuf::WireType::VARINT
-          array << decode(Varint.decode(stream)) until stream.eof?
-        elsif wire_type == ::Protobuf::WireType::FIXED64
-          array << decode(stream.read(8)) until stream.eof?
-        elsif wire_type == ::Protobuf::WireType::FIXED32
-          array << decode(stream.read(4)) until stream.eof?
-        end
+        @set_method.call(message_instance, bytes)
       end
 
       def tag_encoded
@@ -192,6 +323,18 @@ module Protobuf
 
       def fully_qualified_name_only!
         @name = @fully_qualified_name
+
+        ##
+        # Recreate all of the meta methods as they may have used the original `name` value
+        #
+        define_value_from_values!
+        define_value_from_values_for_serialization!
+        define_field_predicate!
+        define_field_and_present_predicate!
+        define_set_field!
+        define_set_method!
+        define_to_message_hash!
+        define_encode_to_stream!
       end
 
       private

@@ -9,6 +9,20 @@ require 'active_support/core_ext/object/try'
 require 'active_support/inflector'
 require 'active_support/json'
 require 'active_support/notifications'
+# Under MRI, this optimizes proto decoding by around 15% in tests.
+# When unavailable, we fall to pure Ruby.
+# rubocop:disable Lint/HandleExceptions
+begin
+  require 'varint/varint'
+rescue LoadError
+end
+# rubocop:enable Lint/HandleExceptions
+# rubocop:disable Lint/HandleExceptions
+begin
+  require 'protobuf_java_helpers'
+rescue LoadError
+end
+# rubocop:enable Lint/HandleExceptions
 
 # All top-level run time code requires, ordered by necessity
 require 'protobuf/wire_type'
