@@ -43,8 +43,6 @@ module Protobuf
       optional :bytes, :request_proto, 3
       optional :string, :caller, 4
       repeated ::Protobuf::Socketrpc::Header, :headers, 5
-      # Extension Fields
-      extensions 200...536870912
     end
 
     class Response
