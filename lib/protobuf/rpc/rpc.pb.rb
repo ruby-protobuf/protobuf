@@ -31,8 +31,7 @@ module Protobuf
     #
     class Request < ::Protobuf::Message; end
     class Response < ::Protobuf::Message; end
-    class Trace < ::Protobuf::Message; end
-    class MapEntry < ::Protobuf::Message; end
+    class Header < ::Protobuf::Message; end
 
 
     ##
@@ -43,9 +42,9 @@ module Protobuf
       required :string, :method_name, 2
       optional :bytes, :request_proto, 3
       optional :string, :caller, 4
+      repeated ::Protobuf::Socketrpc::Header, :headers, 5
       # Extension Fields
       extensions 200...536870912
-      optional ::Protobuf::Socketrpc::Trace, :".protobuf.socketrpc.Request.trace", 200, :extension => true
     end
 
     class Response
@@ -56,12 +55,8 @@ module Protobuf
       optional :string, :server, 5
     end
 
-    class Trace
-      repeated ::Protobuf::Socketrpc::MapEntry, :headers, 1
-    end
-
-    class MapEntry
-      optional :string, :key, 1
+    class Header
+      required :string, :key, 1
       optional :string, :value, 2
     end
 
