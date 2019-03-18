@@ -137,14 +137,16 @@ module Protobuf
           ENV.key?("PB_RPC_PING_PORT")
         end
 
+        def request_fields
+          { :service_name => @options[:service].name,
+            :method_name => @options[:method].to_s,
+            :request_proto => @options[:request],
+            :caller => request_caller }
+        end
+
         def request_bytes
           validate_request_type!
-          fields = { :service_name => @options[:service].name,
-                     :method_name => @options[:method].to_s,
-                     :request_proto => @options[:request],
-                     :caller => request_caller }
-
-          return ::Protobuf::Socketrpc::Request.encode(fields)
+          return ::Protobuf::Socketrpc::Request.encode(request_fields)
         rescue => e
           failure(:INVALID_REQUEST_PROTO, "Could not set request proto: #{e.message}")
         end
