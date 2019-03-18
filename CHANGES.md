@@ -1,5 +1,14 @@
 # Stable (3.8.x)
 
+
+3.10.0
+------
+- Add headers to request proto
+
+3.9.0
+-----
+- Performance improvements
+
 3.8.0
 -----
 - Map types now supported (#367)
