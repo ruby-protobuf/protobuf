@@ -137,13 +137,6 @@ module Protobuf
           ENV.key?("PB_RPC_PING_PORT")
         end
 
-        def request_fields
-          { :service_name => @options[:service].name,
-            :method_name => @options[:method].to_s,
-            :request_proto => @options[:request],
-            :caller => request_caller }
-        end
-
         def request_bytes
           validate_request_type!
           return ::Protobuf::Socketrpc::Request.encode(request_fields)
@@ -153,6 +146,13 @@ module Protobuf
 
         def request_caller
           @options[:client_host] || ::Protobuf.client_host
+        end
+
+        def request_fields
+          { :service_name => @options[:service].name,
+            :method_name => @options[:method].to_s,
+            :request_proto => @options[:request],
+            :caller => request_caller }
         end
 
         def send_request
