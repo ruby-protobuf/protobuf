@@ -30,6 +30,7 @@ message Request
   required string method_name = 2;              // Service method to invoke
   optional bytes request_proto = 3;             // Serialized request bytes
   optional string caller = 4;                   // Calling hostname or address
+  repeated Header headers = 5;                  // General purpose request headers
 }
 
 message Response
@@ -39,6 +40,11 @@ message Response
   optional bool callback = 3 [default = false]; // Was callback invoked (not sure what this is for)
   optional ErrorReason error_reason = 4;        // Error Reason
   optional string server = 5;                   // Server hostname or address
+}
+
+message Header {
+  required string key = 1;
+  optional string value = 2;
 }
 
 // Possible error reasons

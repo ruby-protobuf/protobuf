@@ -31,6 +31,7 @@ module Protobuf
     #
     class Request < ::Protobuf::Message; end
     class Response < ::Protobuf::Message; end
+    class Header < ::Protobuf::Message; end
 
 
     ##
@@ -41,6 +42,7 @@ module Protobuf
       required :string, :method_name, 2
       optional :bytes, :request_proto, 3
       optional :string, :caller, 4
+      repeated ::Protobuf::Socketrpc::Header, :headers, 5
     end
 
     class Response
@@ -49,6 +51,11 @@ module Protobuf
       optional :bool, :callback, 3, :default => false
       optional ::Protobuf::Socketrpc::ErrorReason, :error_reason, 4
       optional :string, :server, 5
+    end
+
+    class Header
+      required :string, :key, 1
+      optional :string, :value, 2
     end
 
   end
