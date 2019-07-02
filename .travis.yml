@@ -7,30 +7,20 @@ before_install:
   - sudo make install
   # Retrun to project directory
   - cd ..
-  - sudo -E ./install-protobuf.sh
+  - curl -SsfL -O https://github.com/protocolbuffers/protobuf/releases/download/v3.8.0/protoc-3.8.0-linux-x86_64.zip
+  - sudo -E unzip -d /usr protoc-3.8.0-linux-x86_64.zip
   - java -Xmx1g -version
   - javac -J-Xmx1g -version
   - export JRUBY_OPTS=-J-Xmx1g
   - gem update bundler
 language: ruby
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1
-  - 2.2
   - 2.3
   - 2.4
   - 2.5
+  - 2.6
   - jruby-9.1.17.0
-  - jruby-9.2.5.0
-  - rbx-2
-env:
-  - PROTOBUF_VERSION=2.6.1
-  - PROTOBUF_VERSION=3.0.0-alpha-2
-matrix:
-  allow_failures:
-    - rvm: rbx-2
-    - env: PROTOBUF_VERSION=3.0.0-alpha-2
+  - jruby-9.2.7.0
 notifications:
   webhooks:
     urls:
