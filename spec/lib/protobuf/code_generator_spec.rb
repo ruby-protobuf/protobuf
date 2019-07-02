@@ -27,8 +27,12 @@ RSpec.describe ::Protobuf::CodeGenerator do
     end
 
     before do
-      expect(::Protobuf::Generators::FileGenerator).to receive(:new).with(input_file1).and_return(file_generator1)
-      expect(::Protobuf::Generators::FileGenerator).to receive(:new).with(input_file2).and_return(file_generator2)
+      expect(::Protobuf::Generators::FileGenerator).to receive(:new)
+        .with(input_file1, 'test/bar.proto' => input_file2, 'test/foo.proto' => input_file1)
+        .and_return(file_generator1)
+      expect(::Protobuf::Generators::FileGenerator).to receive(:new)
+        .with(input_file2, 'test/bar.proto' => input_file2, 'test/foo.proto' => input_file1)
+        .and_return(file_generator2)
     end
 
     it 'returns the serialized CodeGeneratorResponse which contains the generated file contents' do

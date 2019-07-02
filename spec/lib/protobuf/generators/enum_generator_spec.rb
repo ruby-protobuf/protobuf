@@ -28,6 +28,8 @@ RSpec.describe ::Protobuf::Generators::EnumGenerator do
     let(:compiled) do
       <<-RUBY
 class TestEnum < ::Protobuf::Enum
+  FULLY_QUALIFIED_NAME = FULLY_QUALIFIED_NAME + '.TestEnum'
+
   define :FOO, 1
   define :BAR, 2
   define :BAZ, 3
@@ -45,6 +47,8 @@ end
       let(:compiled) do
         <<-RUBY
 class TestEnum < ::Protobuf::Enum
+  FULLY_QUALIFIED_NAME = FULLY_QUALIFIED_NAME + '.TestEnum'
+
   set_option :allow_alias, true
 
   define :FOO, 1

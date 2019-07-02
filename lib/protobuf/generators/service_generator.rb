@@ -8,6 +8,8 @@ module Protobuf
       def compile
         run_once(:compile) do
           print_class(descriptor.name, :service) do
+            puts "FULLY_QUALIFIED_NAME = FULLY_QUALIFIED_NAME + '.#{descriptor.name}'"
+            puts
             print OptionGenerator.new(descriptor.options, current_indent).to_s if descriptor.options
             descriptor.method.each do |method_descriptor|
               print_method(method_descriptor)

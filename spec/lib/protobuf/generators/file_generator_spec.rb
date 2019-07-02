@@ -8,7 +8,7 @@ RSpec.describe ::Protobuf::Generators::FileGenerator do
   let(:descriptor_fields) { base_descriptor_fields }
   let(:file_descriptor) { ::Google::Protobuf::FileDescriptorProto.new(descriptor_fields) }
 
-  subject { described_class.new(file_descriptor) }
+  subject { described_class.new(file_descriptor, {}) }
   specify { expect(subject.file_name).to eq('test/foo.pb.rb') }
 
   describe '#print_import_requires' do
@@ -39,14 +39,43 @@ RSpec.describe ::Protobuf::Generators::FileGenerator do
   describe '#compile' do
     it 'generates the file contents' do
       subject.compile
-      expect(subject.to_s).to eq <<EOF
+      expect(subject.to_s).to eq <<EOF.chomp
 # encoding: utf-8
+# frozen_string_literal: true
 
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
+require 'base64'
+require 'set'
 require 'protobuf'
 
+FULLY_QUALIFIED_NAME = '' unless defined?(self::FULLY_QUALIFIED_NAME)
+
+@descriptors = [] unless instance_variable_defined?(:@descriptors)
+@descriptors << lambda do
+  bytes = File.read(__FILE__, mode: 'rb').split(/^__END__$/, 2).last
+  ::Google::Protobuf::FileDescriptorProto.decode(Base64.decode64(bytes))
+end
+
+@descriptor_dependencies = Set.new unless instance_variable_defined?(:@descriptor_dependencies)
+@descriptor_dependencies |= []
+
+unless respond_to?(:descriptor_set)
+  def self.descriptor_set
+    ::Google::Protobuf::FileDescriptorSet.new(:file => @descriptors.map(&:call))
+  end
+end
+
+unless respond_to?(:descriptor_dependencies)
+  def self.descriptor_dependencies
+    @descriptor_dependencies
+  end
+end
+
+# Raw descriptor bytes below
+__END__
+#{Base64.encode64(file_descriptor.encode)}
 EOF
     end
 
@@ -54,18 +83,47 @@ EOF
       allow(ENV).to receive(:key?).with('PB_ALLOW_DEFAULT_PACKAGE_NAME')
         .and_return(true)
       subject.compile
-      expect(subject.to_s).to eq <<EOF
+      expect(subject.to_s).to eq <<EOF.chomp
 # encoding: utf-8
+# frozen_string_literal: true
 
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
+require 'base64'
+require 'set'
 require 'protobuf'
 
 module Foo
+  FULLY_QUALIFIED_NAME = '' unless defined?(self::FULLY_QUALIFIED_NAME)
+
+  @descriptors = [] unless instance_variable_defined?(:@descriptors)
+  @descriptors << lambda do
+    bytes = File.read(__FILE__, mode: 'rb').split(/^__END__$/, 2).last
+    ::Google::Protobuf::FileDescriptorProto.decode(Base64.decode64(bytes))
+  end
+
+  @descriptor_dependencies = Set.new unless instance_variable_defined?(:@descriptor_dependencies)
+  @descriptor_dependencies |= []
+
+  unless respond_to?(:descriptor_set)
+    def self.descriptor_set
+      ::Google::Protobuf::FileDescriptorSet.new(:file => @descriptors.map(&:call))
+    end
+  end
+
+  unless respond_to?(:descriptor_dependencies)
+    def self.descriptor_dependencies
+      @descriptor_dependencies
+    end
+  end
   ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 end
 
+
+# Raw descriptor bytes below
+__END__
+#{Base64.encode64(file_descriptor.encode)}
 EOF
     end
 
@@ -85,17 +143,42 @@ EOF
 
       it 'generates the file contents that include the namespaced extension name' do
         subject.compile
-        expect(subject.to_s).to eq <<EOF
+        expect(subject.to_s).to eq <<EOF.chomp
 # encoding: utf-8
+# frozen_string_literal: true
 
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
+require 'base64'
+require 'set'
 require 'protobuf'
 
 module Test
   module Pkg
     module File_generator_spec
+      FULLY_QUALIFIED_NAME = 'test.pkg.file_generator_spec' unless defined?(self::FULLY_QUALIFIED_NAME)
+
+      @descriptors = [] unless instance_variable_defined?(:@descriptors)
+      @descriptors << lambda do
+        bytes = File.read(__FILE__, mode: 'rb').split(/^__END__$/, 2).last
+        ::Google::Protobuf::FileDescriptorProto.decode(Base64.decode64(bytes))
+      end
+
+      @descriptor_dependencies = Set.new unless instance_variable_defined?(:@descriptor_dependencies)
+      @descriptor_dependencies |= []
+
+      unless respond_to?(:descriptor_set)
+        def self.descriptor_set
+          ::Google::Protobuf::FileDescriptorSet.new(:file => @descriptors.map(&:call))
+        end
+      end
+
+      unless respond_to?(:descriptor_dependencies)
+        def self.descriptor_dependencies
+          @descriptor_dependencies
+        end
+      end
       ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
       ##
@@ -111,6 +194,10 @@ module Test
 
 end
 
+
+# Raw descriptor bytes below
+__END__
+#{Base64.encode64(file_descriptor.encode)}
 EOF
       end
     end

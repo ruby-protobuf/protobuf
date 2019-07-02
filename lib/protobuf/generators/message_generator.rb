@@ -40,7 +40,7 @@ module Protobuf
         run_once(:compile_message) do
           if printable?
             print_class(descriptor.name, nil) do
-              group = GroupGenerator.new(current_indent)
+              group = GroupGenerator.new(current_indent, descriptor.name)
               group.add_messages(descriptor.nested_type, :extension_fields => @extension_fields, :namespace => type_namespace)
               group.add_comment(:options, 'Message Options')
               group.add_options(descriptor.options) if options?

@@ -53,6 +53,8 @@ RSpec.describe ::Protobuf::Generators::ServiceGenerator do
     let(:compiled) do
       <<EOF
 class TestService < ::Protobuf::Rpc::Service
+  FULLY_QUALIFIED_NAME = FULLY_QUALIFIED_NAME + '.TestService'
+
   rpc :search, FooRequest, FooResponse
   rpc :foo_bar, ::Foo::Request, ::Bar::Response do
     set_option :custom_string_option, "boom"
@@ -75,6 +77,8 @@ EOF
       let(:compiled) do
         <<EOF
 class TestService < ::Protobuf::Rpc::Service
+  FULLY_QUALIFIED_NAME = FULLY_QUALIFIED_NAME + '.TestService'
+
   rpc :Search, FooRequest, FooResponse
   rpc :FooBar, ::Foo::Request, ::Bar::Response do
     set_option :custom_string_option, "boom"
