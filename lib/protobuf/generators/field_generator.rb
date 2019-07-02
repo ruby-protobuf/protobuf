@@ -79,7 +79,7 @@ module Protobuf
       end
 
       def name
-        @name ||= descriptor.name.to_sym.inspect
+        @name ||= descriptor.fully_qualified_name.to_sym.inspect
       end
 
       def number

@@ -1,6 +1,14 @@
 require 'active_support/core_ext/module/aliasing'
 require 'protobuf/generators/file_generator'
 
+::Google::Protobuf::FieldDescriptorProto.module_eval do
+  attr_writer :fully_qualified_name
+
+  def fully_qualified_name
+    @fully_qualified_name || name
+  end
+end
+
 module Protobuf
   class CodeGenerator
 

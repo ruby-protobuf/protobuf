@@ -59,7 +59,7 @@ module Protobuf
           message_klass = modulize(message_name).safe_constantize
           if message_klass
             unknown_fields = fields.reject do |field|
-              @known_messages[message_name] && message_klass.get_field(field.name, true)
+              @known_messages[message_name] && message_klass.get_field(field.fully_qualified_name, true)
             end
             [message_name, unknown_fields]
           else
@@ -94,7 +94,7 @@ module Protobuf
 
         descriptor.extension.each do |field_descriptor|
           unless fully_qualified_token?(field_descriptor.name) && fully_qualified_namespace
-            field_descriptor.name = "#{fully_qualified_namespace}.#{field_descriptor.name}"
+            field_descriptor.fully_qualified_name = "#{fully_qualified_namespace}.#{field_descriptor.name}"
           end
           @extension_fields[field_descriptor.extendee] << field_descriptor
         end
