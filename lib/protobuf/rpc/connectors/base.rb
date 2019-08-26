@@ -63,8 +63,9 @@ module Protobuf
         # @param [String] message The error message
         def failure(code, message)
           @error = ClientError.new
-          @error.code = ::Protobuf::Socketrpc::ErrorReason.fetch(code)
+          @stats.status = @error.code = ::Protobuf::Socketrpc::ErrorReason.fetch(code)
           @error.message = message
+
           logger.debug { sign_message("Server failed request (invoking on_failure): #{@error.inspect}") }
 
           @failure_cb.call(@error) unless @failure_cb.nil?
