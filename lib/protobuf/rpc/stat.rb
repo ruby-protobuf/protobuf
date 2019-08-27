@@ -23,7 +23,7 @@ module Protobuf
         ::Protobuf::Socketrpc::ErrorReason::BAD_RESPONSE_PROTO => "BAD_RESPONSE_PROTO",
         ::Protobuf::Socketrpc::ErrorReason::UNKNOWN_HOST => "UNKNOWN_HOST",
         ::Protobuf::Socketrpc::ErrorReason::IO_ERROR => "IO_ERROR",
-      }
+      }.freeze
 
       def initialize(mode = :SERVER)
         @mode = mode
