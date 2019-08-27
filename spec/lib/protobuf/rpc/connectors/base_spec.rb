@@ -187,14 +187,14 @@ RSpec.describe Protobuf::Rpc::Connectors::Base do
   shared_examples "a ConnectorDisposition" do |meth, cb, *args|
 
     it "calls #complete before exit" do
-      subject.stats = double("Object", :stop => true)
+      subject.stats = ::Protobuf::Rpc::Stat.new(:stop => true)
 
       expect(subject).to receive(:complete)
       subject.method(meth).call(*args)
     end
 
     it "calls the #{cb} callback when provided" do
-      stats = double("Object")
+      stats = ::Protobuf::Rpc::Stat.new
       allow(stats).to receive(:stop).and_return(true)
       subject.stats = stats
       some_cb = double("Object")
@@ -205,7 +205,7 @@ RSpec.describe Protobuf::Rpc::Connectors::Base do
     end
 
     it "calls the complete callback when provided" do
-      stats = double("Object")
+      stats = ::Protobuf::Rpc::Stat.new
       allow(stats).to receive(:stop).and_return(true)
       subject.stats = stats
       comp_cb = double("Object")
@@ -217,8 +217,8 @@ RSpec.describe Protobuf::Rpc::Connectors::Base do
 
   end
 
-  it_behaves_like("a ConnectorDisposition", :failure, "failure_cb", "code", "message")
-  it_behaves_like("a ConnectorDisposition", :failure, "complete_cb", "code", "message")
+  it_behaves_like("a ConnectorDisposition", :failure, "failure_cb", :RPC_ERROR, "message")
+  it_behaves_like("a ConnectorDisposition", :failure, "complete_cb", :RPC_ERROR, "message")
   it_behaves_like("a ConnectorDisposition", :succeed, "complete_cb", "response")
   it_behaves_like("a ConnectorDisposition", :succeed, "success_cb", "response")
   it_behaves_like("a ConnectorDisposition", :complete, "complete_cb")
