@@ -66,5 +66,4 @@ enum ErrorReason
   BAD_RESPONSE_PROTO = 7;                       // Server returned a bad response proto
   UNKNOWN_HOST = 8;                             // Could not find supplied host
   IO_ERROR = 9;                                 // I/O error while communicating with server
-  NONE = 10000;                                // No error.  Typically not used.  This is a placeholder to remind us not to use this value.
 }

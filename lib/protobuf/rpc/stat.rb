@@ -13,7 +13,6 @@ module Protobuf
       MODES = [:SERVER, :CLIENT].freeze
 
       ERROR_TRANSLATIONS = {
-        ::Protobuf::Socketrpc::ErrorReason::NONE => "OK",
         ::Protobuf::Socketrpc::ErrorReason::BAD_REQUEST_DATA => "BAD_REQUEST_DATA",
         ::Protobuf::Socketrpc::ErrorReason::BAD_REQUEST_PROTO => "BAD_REQUEST_PROTO",
         ::Protobuf::Socketrpc::ErrorReason::SERVICE_NOT_FOUND => "SERVICE_NOT_FOUND",
@@ -30,7 +29,6 @@ module Protobuf
         @mode = mode
         @request_size = 0
         @response_size = 0
-        @status = ::Protobuf::Socketrpc::ErrorReason::NONE  # default to NONE and only set if error occurs
         start
       end
 
@@ -95,6 +93,8 @@ module Protobuf
       end
 
       def status_string
+        return "OK" if status.nil?
+
         ERROR_TRANSLATIONS.fetch(status, "UNKNOWN_ERROR")
       end
 
