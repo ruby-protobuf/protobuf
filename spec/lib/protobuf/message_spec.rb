@@ -911,4 +911,50 @@ RSpec.describe Protobuf::Message do
       end
     end
   end
+
+  describe 'equality & hash codes' do
+    let(:m1) { ::Test::Resource.new(:name => "Jim") }
+    let(:m2) { ::Test::Resource.new(:date_created => nil, :name => "Jim") }
+    let(:m3) { ::Test::Resource.new(:date_created => 55, :name => "Jim") }
+
+    let(:hash) do
+      { m1 => 4, m3 => 6 }
+    end
+
+    it 'works with equality' do
+      expect(m1.nil?).to eq(false)
+      expect(m1 == 5).to eq(false)
+
+      expect(m1.equal?(m2)).to eq(false)
+      expect(m1.equal?(m3)).to eq(false)
+      expect(m2.equal?(m1)).to eq(false)
+      expect(m2.equal?(m3)).to eq(false)
+      expect(m3.equal?(m1)).to eq(false)
+      expect(m3.equal?(m2)).to eq(false)
+
+      expect(m1 == m2).to eq(true)
+      expect(m2 == m1).to eq(true)
+      expect(m1.eql?(m2)).to eq(true)
+      expect(m2.eql?(m1)).to eq(true)
+
+      expect(m1 == m3).to eq(false)
+      expect(m2 == m3).to eq(false)
+      expect(m3 == m1).to eq(false)
+      expect(m3 == m2).to eq(false)
+    end
+
+    it 'works with hash codes' do
+      expect(m1.hash).to eq(m2.hash)
+      expect(m1.hash).to_not eq(m3.hash)
+
+      expect([m1] == [m2]).to eq(true)
+      expect([m1] - [m2]).to eq([])
+
+      expect([m1, m3] - [m2]).to eq([m3])
+
+      expect(hash[m1]).to eq(4)
+      expect(hash[m2]).to eq(4)
+      expect(hash[m3]).to eq(6)
+    end
+  end
 end
