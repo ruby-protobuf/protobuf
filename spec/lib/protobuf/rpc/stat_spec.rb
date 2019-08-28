@@ -33,7 +33,7 @@ RSpec.describe ::Protobuf::Rpc::Stat do
 
         ::Timecop.freeze(1.62.seconds.from_now) do
           stats.stop
-          expect(stats.to_s).to eq "[SRV] - myserver1 - #{stats.trace_id} - BarService#find_bars - 43B/1302B - 1.62s - #{::Time.now.iso8601}"
+          expect(stats.to_s).to eq "[SRV] - myserver1 - #{stats.trace_id} - BarService#find_bars - 43B/1302B - 1.62s - OK - #{::Time.now.iso8601}"
         end
       end
     end
@@ -44,7 +44,7 @@ RSpec.describe ::Protobuf::Rpc::Stat do
         stats.client = 'myserver1'
         stats.dispatcher = double('dispatcher', :service => BarService.new(:find_bars))
         stats.request_size = 43
-        expect(stats.to_s).to eq "[SRV] - myserver1 - #{stats.trace_id} - BarService#find_bars - 43B/-"
+        expect(stats.to_s).to eq "[SRV] - myserver1 - #{stats.trace_id} - BarService#find_bars - 43B/- - OK"
       end
     end
   end
@@ -61,9 +61,28 @@ RSpec.describe ::Protobuf::Rpc::Stat do
 
         ::Timecop.freeze(0.832.seconds.from_now) do
           stats.stop
-          expect(stats.to_s).to eq "[CLT] - myserver1.myhost.com:30000 - #{stats.trace_id} - Foo::BarService#find_bars - 37B/12345B - 0.832s - #{::Time.now.iso8601}"
+          expect(stats.to_s).to eq "[CLT] - myserver1.myhost.com:30000 - #{stats.trace_id} - Foo::BarService#find_bars - 37B/12345B - 0.832s - OK - #{::Time.now.iso8601}"
         end
 
+      end
+    end
+
+    describe 'error log' do
+      it 'resolves error to a string' do
+        ::Timecop.freeze(10.minutes.ago) do
+          stats = ::Protobuf::Rpc::Stat.new(:CLIENT)
+          stats.server = ['30000', 'myserver1.myhost.com']
+          stats.service = 'Foo::BarService'
+          stats.status = ::Protobuf::Socketrpc::ErrorReason::RPC_ERROR
+          stats.method_name = 'find_bars'
+          stats.request_size = 37
+          stats.response_size = 12345
+
+          ::Timecop.freeze(0.832.seconds.from_now) do
+            stats.stop
+            expect(stats.to_s).to eq "[CLT] - myserver1.myhost.com:30000 - #{stats.trace_id} - Foo::BarService#find_bars - 37B/12345B - 0.832s - RPC_ERROR - #{::Time.now.iso8601}"
+          end
+        end
       end
     end
 
@@ -74,7 +93,7 @@ RSpec.describe ::Protobuf::Rpc::Stat do
         stats.service = 'Foo::BarService'
         stats.method_name = 'find_bars'
         stats.request_size = 37
-        expect(stats.to_s).to eq "[CLT] - myserver1.myhost.com:30000 - #{stats.trace_id} - Foo::BarService#find_bars - 37B/-"
+        expect(stats.to_s).to eq "[CLT] - myserver1.myhost.com:30000 - #{stats.trace_id} - Foo::BarService#find_bars - 37B/- - OK"
       end
     end
   end

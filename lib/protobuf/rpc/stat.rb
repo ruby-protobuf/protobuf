@@ -1,15 +1,29 @@
 require 'date'
 require 'time'
 require 'protobuf/logging'
+require 'protobuf/rpc/rpc.pb'
 
 module Protobuf
   module Rpc
     class Stat
       attr_accessor :mode, :start_time, :end_time, :request_size, :dispatcher
-      attr_accessor :response_size, :client, :service, :method_name
+      attr_accessor :response_size, :client, :service, :method_name, :status
       attr_reader   :server
 
       MODES = [:SERVER, :CLIENT].freeze
+
+      ERROR_TRANSLATIONS = {
+        ::Protobuf::Socketrpc::ErrorReason::BAD_REQUEST_DATA => "BAD_REQUEST_DATA",
+        ::Protobuf::Socketrpc::ErrorReason::BAD_REQUEST_PROTO => "BAD_REQUEST_PROTO",
+        ::Protobuf::Socketrpc::ErrorReason::SERVICE_NOT_FOUND => "SERVICE_NOT_FOUND",
+        ::Protobuf::Socketrpc::ErrorReason::METHOD_NOT_FOUND => "METHOD_NOT_FOUND",
+        ::Protobuf::Socketrpc::ErrorReason::RPC_ERROR => "RPC_ERROR",
+        ::Protobuf::Socketrpc::ErrorReason::RPC_FAILED => "RPC_FAILED",
+        ::Protobuf::Socketrpc::ErrorReason::INVALID_REQUEST_PROTO => "INVALID_REQUEST_PROTO",
+        ::Protobuf::Socketrpc::ErrorReason::BAD_RESPONSE_PROTO => "BAD_RESPONSE_PROTO",
+        ::Protobuf::Socketrpc::ErrorReason::UNKNOWN_HOST => "UNKNOWN_HOST",
+        ::Protobuf::Socketrpc::ErrorReason::IO_ERROR => "IO_ERROR",
+      }.freeze
 
       def initialize(mode = :SERVER)
         @mode = mode
@@ -78,6 +92,12 @@ module Protobuf
         @mode == :CLIENT
       end
 
+      def status_string
+        return "OK" if status.nil?
+
+        ERROR_TRANSLATIONS.fetch(status, "UNKNOWN_ERROR")
+      end
+
       def to_s
         [
           server? ? "[SRV]" : "[CLT]",
@@ -86,6 +106,7 @@ module Protobuf
           rpc,
           sizes,
           elapsed_time,
+          status_string,
           @end_time.try(:iso8601),
         ].compact.join(' - ')
       end
@@ -93,7 +114,6 @@ module Protobuf
       def trace_id
         ::Thread.current.object_id.to_s(16)
       end
-
     end
   end
 end
