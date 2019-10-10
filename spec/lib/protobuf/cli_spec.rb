@@ -275,6 +275,17 @@ RSpec.describe ::Protobuf::CLI do
         end
       end
 
+      context 'before server bind' do
+        it 'publishes a message before the runner runs' do
+          server_published_message_before_bind = false
+          ::ActiveSupport::Notifications.subscribe('before_server_bind') do
+            server_published_message_before_bind = true
+          end
+          described_class.start(args)
+          expect(server_published_message_before_bind).to eq(true)
+        end
+      end
+
     end
 
   end
