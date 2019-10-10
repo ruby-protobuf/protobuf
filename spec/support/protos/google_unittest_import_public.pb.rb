@@ -5,7 +5,7 @@
 #
 require 'protobuf'
 
-module Protobuf_unittest_import
+module ProtobufUnittestImport
   ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##

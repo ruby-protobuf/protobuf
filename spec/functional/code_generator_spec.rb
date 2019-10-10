@@ -21,6 +21,8 @@ RSpec.describe 'code generation' do
 
     code_generator = ::Protobuf::CodeGenerator.new(bytes)
     code_generator.eval_unknown_extensions!
+    File.write("/tmp/c", code_generator.response_bytes)
+    File.write("/tmp/d", expected_output)
     expect(code_generator.response_bytes).to eq(expected_output)
   end
 
