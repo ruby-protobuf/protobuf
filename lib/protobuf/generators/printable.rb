@@ -55,14 +55,13 @@ module Protobuf
       # as a constant. Otherwise we do not attempt to change the
       # token's definition.
       #
-      #   modulize("foo.bar.Baz") -> "::Foo::Bar::Baz"
-      #   modulize("foo.bar.baz") -> "::Foo::Bar::Baz"
-      #   modulize("foo.bar.BAZ") -> "::Foo::Bar::BAZ"
+      #   modulize("foo.bar.Baz")     -> "::Foo::Bar::Baz"
+      #   modulize("foo.bar.baz")     -> "::Foo::Bar::Baz"
+      #   modulize("foo.bar.baz_boy") -> "::Foo::Bar::BazBoy"
+      #   modulize("foo.bar.BAZ")     -> "::Foo::Bar::BAZ"
       #
       def modulize(name)
-        name = name.gsub(/\./, '::')
-        name = name.gsub(/(^(?:::)?[a-z]|::[a-z])/, &:upcase)
-        name
+        name.split('.').map(&:camelize).join('::')
       end
 
       # Decrease the indent level. Cannot be negative.
