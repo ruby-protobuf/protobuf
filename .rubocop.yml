@@ -5,6 +5,7 @@ AllCops:
   Exclude:
     - 'spec/support/protos/*.pb.rb'
     - 'varint_prof.rb'
+    - 'protobuf-*/**/*.rb'
 
 Lint/EndAlignment:
   AlignWith: keyword
