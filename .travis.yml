@@ -26,7 +26,7 @@ rvm:
   - rbx-2
 env:
   - PROTOBUF_VERSION=2.6.1
-  - PROTOBUF_VERSION=3.0.0-alpha-2
+  - PROTOBUF_VERSION=3.0.0
 matrix:
   allow_failures:
     - rvm: rbx-2
