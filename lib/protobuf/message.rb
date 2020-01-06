@@ -134,13 +134,15 @@ module Protobuf
     end
 
     def to_json(options = {})
-      to_json_hash.to_json(options)
+      to_json_hash(options).to_json(options)
     end
 
     # Return a hash-representation of the given fields for this message type that
     # is safe to convert to JSON.
-    def to_json_hash
+    def to_json_hash(options = {})
       result = {}
+
+      lower_camel_case = options[:lower_camel_case]
 
       @values.each_key do |field_name|
         value = self[field_name]
@@ -156,7 +158,8 @@ module Protobuf
                          value
                        end
 
-        result[field.name] = hashed_value
+        key = lower_camel_case ? field.name.to_s.camelize(:lower).to_sym : field.name
+        result[key] = hashed_value
       end
 
       result
