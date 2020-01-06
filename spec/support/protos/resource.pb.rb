@@ -72,6 +72,7 @@ module Test
     optional :bool, :active, 2
     repeated :string, :widgets, 3
     repeated :bytes, :widget_bytes, 4
+    optional :bytes, :single_bytes, 5
   end
 
   class ResourceSleepRequest
@@ -169,4 +170,3 @@ module Test
   end
 
 end
-
