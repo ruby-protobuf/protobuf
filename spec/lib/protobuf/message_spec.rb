@@ -429,7 +429,7 @@ RSpec.describe Protobuf::Message do
     specify { expect(subject.to_json).to eq '{"name":"Test Name","active":false}' }
 
     context 'for byte fields' do
-      let(:bytes) { "\x06\x8D1HP\x17:b" }
+      let(:bytes) { "\x06\x8D1HP\x17:b".force_encoding(Encoding::ASCII_8BIT) }
 
       subject do
         ::Test::ResourceFindRequest.new(:widget_bytes => [bytes])
@@ -439,7 +439,7 @@ RSpec.describe Protobuf::Message do
     end
 
     context 'using lower camel case field names' do
-      let(:bytes) { "\x06\x8D1HP\x17:b" }
+      let(:bytes) { "\x06\x8D1HP\x17:b".force_encoding(Encoding::ASCII_8BIT) }
 
       subject do
         ::Test::ResourceFindRequest.new(:widget_bytes => [bytes])
