@@ -38,7 +38,7 @@ module Protobuf
       end
 
       def json_encode(value)
-        enum = type_class.enums.find {|e| e.to_i == value}
+        enum = type_class.enums.find { |e| e.to_i == value }
         enum.to_s(:name)
       end
 

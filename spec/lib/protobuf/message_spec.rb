@@ -453,17 +453,17 @@ RSpec.describe Protobuf::Message do
     it 'decodes optional bytes field with base64' do
       expected_single_bytes = "\x06\x8D1HP\x17:b".unpack('C*')
       single_bytes = ::Test::ResourceFindRequest
-        .from_json('{"singleBytes":"Bo0xSFAXOmI="}')
-        .single_bytes.unpack('C*')
+                     .from_json('{"singleBytes":"Bo0xSFAXOmI="}')
+                     .single_bytes.unpack('C*')
 
       expect(single_bytes).to(eq(expected_single_bytes))
     end
 
     it 'decodes repeated bytes field with base64' do
-      expected_widget_bytes = ["\x06\x8D1HP\x17:b"].map {|s| s.unpack('C*')}
+      expected_widget_bytes = ["\x06\x8D1HP\x17:b"].map { |s| s.unpack('C*') }
       widget_bytes = ::Test::ResourceFindRequest
-        .from_json('{"widgetBytes":["Bo0xSFAXOmI="]}')
-        .widget_bytes.map {|s| s.unpack('C*')}
+                     .from_json('{"widgetBytes":["Bo0xSFAXOmI="]}')
+                     .widget_bytes.map { |s| s.unpack('C*') }
 
       expect(widget_bytes).to(eq(expected_widget_bytes))
     end
