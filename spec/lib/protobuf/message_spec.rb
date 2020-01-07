@@ -437,6 +437,16 @@ RSpec.describe Protobuf::Message do
 
       specify { expect(subject.to_json).to eq '{"widget_bytes":["Bo0xSFAXOmI="]}' }
     end
+
+    context 'using lower camel case field names' do
+      let(:bytes) { "\x06\x8D1HP\x17:b" }
+
+      subject do
+        ::Test::ResourceFindRequest.new(:widget_bytes => [bytes])
+      end
+
+      specify { expect(subject.to_json(:lower_camel_case => true)).to eq '{"widgetBytes":["Bo0xSFAXOmI="]}' }
+    end
   end
 
   describe '.from_json' do

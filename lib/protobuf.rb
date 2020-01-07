@@ -54,6 +54,18 @@ module Protobuf
     attr_writer :client_host
   end
 
+  def self.after_server_bind(&block)
+    ::ActiveSupport::Notifications.subscribe('after_server_bind') do |*args|
+      block.call(*args)
+    end
+  end
+
+  def self.before_server_bind(&block)
+    ::ActiveSupport::Notifications.subscribe('before_server_bind') do |*args|
+      block.call(*args)
+    end
+  end
+
   def self.client_host
     @client_host ||= Socket.gethostname
   end

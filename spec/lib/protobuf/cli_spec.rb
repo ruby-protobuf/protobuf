@@ -275,6 +275,41 @@ RSpec.describe ::Protobuf::CLI do
         end
       end
 
+      context 'after server bind' do
+        let(:sock_runner) { double("FakeRunner", :run => nil) }
+
+        before { allow(sock_runner).to receive(:run).and_yield }
+
+        it 'publishes when using the lib/protobuf callback' do
+          message_after_bind = false
+          ::Protobuf.after_server_bind do
+            message_after_bind = true
+          end
+          described_class.start(args)
+          expect(message_after_bind).to eq(true)
+        end
+      end
+
+      context 'before server bind' do
+        it 'publishes a message before the runner runs' do
+          message_before_bind = false
+          ::ActiveSupport::Notifications.subscribe('before_server_bind') do
+            message_before_bind = true
+          end
+          described_class.start(args)
+          expect(message_before_bind).to eq(true)
+        end
+
+        it 'publishes when using the lib/protobuf callback' do
+          message_before_bind = false
+          ::Protobuf.before_server_bind do
+            message_before_bind = true
+          end
+          described_class.start(args)
+          expect(message_before_bind).to eq(true)
+        end
+      end
+
     end
 
   end

@@ -49,14 +49,14 @@ module Protobuf
       # Return a hash-representation of the given values for this field type
       # that is safe to convert to JSON.
       # The value in this case would be an array.
-      def to_json_hash_value
+      def to_json_hash_value(options = {})
         if field.respond_to?(:json_encode)
           map do |value|
             field.json_encode(value)
           end
         else
           map do |value|
-            value.respond_to?(:to_json_hash_value) ? value.to_json_hash_value : value
+            value.respond_to?(:to_json_hash_value) ? value.to_json_hash_value(options) : value
           end
         end
       end
