@@ -240,6 +240,8 @@ module Protobuf
       def start_server
         debug_say('Running server')
 
+        ::ActiveSupport::Notifications.instrument("before_server_bind")
+
         runner.run do
           logger.info do
             "pid #{::Process.pid} -- #{mode} RPC Server listening at #{options.host}:#{options.port}"
