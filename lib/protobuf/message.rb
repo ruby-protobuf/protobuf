@@ -164,7 +164,7 @@ module Protobuf
 
         # NB: to_json_hash_value should come before json_encode so as to handle
         # repeated fields without extra logic.
-        hashed_value = if value.respond_to?(:to_json_hash_value)
+        hashed_value = if value.respond_to?(:to_json_hash_value) && !field.is_a?(::Protobuf::Field::EnumField)
                          value.to_json_hash_value
                        elsif field.respond_to?(:json_encode)
                          field.json_encode(value)
