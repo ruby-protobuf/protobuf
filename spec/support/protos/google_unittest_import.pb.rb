@@ -11,7 +11,7 @@ require 'protobuf'
 #
 require 'protos/google_unittest_import_public.pb'
 
-module Protobuf_unittest_import
+module ProtobufUnittestImport
   ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##

@@ -95,7 +95,7 @@ require 'protobuf'
 
 module Test
   module Pkg
-    module File_generator_spec
+    module FileGeneratorSpec
       ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
       ##

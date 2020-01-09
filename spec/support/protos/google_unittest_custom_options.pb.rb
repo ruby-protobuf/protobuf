@@ -12,7 +12,7 @@ require 'protobuf/rpc/service'
 #
 require 'google/protobuf/descriptor.pb'
 
-module Protobuf_unittest
+module ProtobufUnittest
   ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##
@@ -157,7 +157,7 @@ module Protobuf_unittest
 
   class CustomOptionOtherValues
     # Message Options
-    set_option :".protobuf_unittest.enum_opt", ::Protobuf_unittest::DummyMessageContainingEnum::TestEnumType::TEST_OPTION_ENUM_TYPE2
+    set_option :".protobuf_unittest.enum_opt", ::ProtobufUnittest::DummyMessageContainingEnum::TestEnumType::TEST_OPTION_ENUM_TYPE2
     set_option :".protobuf_unittest.bytes_opt", "Hello\x00World"
     set_option :".protobuf_unittest.string_opt", "Hello, \"World\""
     set_option :".protobuf_unittest.double_opt", 1.2345678901234567
@@ -188,7 +188,7 @@ module Protobuf_unittest
     # Extension Fields
     extensions 100...536870912
     optional :int32, :".protobuf_unittest.quux", 7663707, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType3, :".protobuf_unittest.corge", 7663442, :extension => true
+    optional ::ProtobufUnittest::ComplexOptionType3, :".protobuf_unittest.corge", 7663442, :extension => true
   end
 
   class ComplexOptionType2
@@ -196,14 +196,14 @@ module Protobuf_unittest
       optional :int32, :waldo, 1
     end
 
-    optional ::Protobuf_unittest::ComplexOptionType1, :bar, 1
+    optional ::ProtobufUnittest::ComplexOptionType1, :bar, 1
     optional :int32, :baz, 2
-    optional ::Protobuf_unittest::ComplexOptionType2::ComplexOptionType4, :fred, 3
-    repeated ::Protobuf_unittest::ComplexOptionType2::ComplexOptionType4, :barney, 4
+    optional ::ProtobufUnittest::ComplexOptionType2::ComplexOptionType4, :fred, 3
+    repeated ::ProtobufUnittest::ComplexOptionType2::ComplexOptionType4, :barney, 4
     # Extension Fields
     extensions 100...536870912
     optional :int32, :".protobuf_unittest.grault", 7650927, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType1, :".protobuf_unittest.garply", 7649992, :extension => true
+    optional ::ProtobufUnittest::ComplexOptionType1, :".protobuf_unittest.garply", 7649992, :extension => true
   end
 
   class ComplexOptionType3
@@ -227,7 +227,7 @@ module Protobuf_unittest
 
     # Extension Fields
     extensions 4...536870912
-    optional ::Protobuf_unittest::AggregateMessageSetElement, :".protobuf_unittest.AggregateMessageSetElement.message_set_extension", 15447542, :extension => true
+    optional ::ProtobufUnittest::AggregateMessageSetElement, :".protobuf_unittest.AggregateMessageSetElement.message_set_extension", 15447542, :extension => true
   end
 
   class AggregateMessageSetElement
@@ -237,9 +237,9 @@ module Protobuf_unittest
   class Aggregate
     optional :int32, :i, 1
     optional :string, :s, 2
-    optional ::Protobuf_unittest::Aggregate, :sub, 3
+    optional ::ProtobufUnittest::Aggregate, :sub, 3
     optional ::Google::Protobuf::FileOptions, :file, 4
-    optional ::Protobuf_unittest::AggregateMessageSet, :mset, 5
+    optional ::ProtobufUnittest::AggregateMessageSet, :mset, 5
   end
 
   class AggregateMessage
@@ -260,16 +260,16 @@ module Protobuf_unittest
   end
 
   class OldOptionType
-    required ::Protobuf_unittest::OldOptionType::TestEnum, :value, 1
+    required ::ProtobufUnittest::OldOptionType::TestEnum, :value, 1
   end
 
   class NewOptionType
-    required ::Protobuf_unittest::NewOptionType::TestEnum, :value, 1
+    required ::ProtobufUnittest::NewOptionType::TestEnum, :value, 1
   end
 
   class TestMessageWithRequiredEnumOption
     # Message Options
-    set_option :".protobuf_unittest.required_enum_opt", { :value => ::Protobuf_unittest::OldOptionType::TestEnum::OLD_VALUE }
+    set_option :".protobuf_unittest.required_enum_opt", { :value => ::ProtobufUnittest::OldOptionType::TestEnum::OLD_VALUE }
 
   end
 
@@ -279,8 +279,8 @@ module Protobuf_unittest
   #
   class ::Google::Protobuf::FileOptions < ::Protobuf::Message
     optional :uint64, :".protobuf_unittest.file_opt1", 7736974, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.fileopt", 15478479, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.Aggregate.nested", 15476903, :extension => true
+    optional ::ProtobufUnittest::Aggregate, :".protobuf_unittest.fileopt", 15478479, :extension => true
+    optional ::ProtobufUnittest::Aggregate, :".protobuf_unittest.Aggregate.nested", 15476903, :extension => true
     optional :int32, :".protobuf_unittest.NestedOptionType.nested_extension", 7912573, :extension => true, :".protobuf_unittest.field_opt2" => 1005
   end
 
@@ -301,42 +301,42 @@ module Protobuf_unittest
     optional :double, :".protobuf_unittest.double_opt", 7673293, :extension => true
     optional :string, :".protobuf_unittest.string_opt", 7673285, :extension => true
     optional :bytes, :".protobuf_unittest.bytes_opt", 7673238, :extension => true
-    optional ::Protobuf_unittest::DummyMessageContainingEnum::TestEnumType, :".protobuf_unittest.enum_opt", 7673233, :extension => true
-    optional ::Protobuf_unittest::DummyMessageInvalidAsOptionType, :".protobuf_unittest.message_type_opt", 7665967, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType1, :".protobuf_unittest.complex_opt1", 7646756, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType2, :".protobuf_unittest.complex_opt2", 7636949, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType3, :".protobuf_unittest.complex_opt3", 7636463, :extension => true
+    optional ::ProtobufUnittest::DummyMessageContainingEnum::TestEnumType, :".protobuf_unittest.enum_opt", 7673233, :extension => true
+    optional ::ProtobufUnittest::DummyMessageInvalidAsOptionType, :".protobuf_unittest.message_type_opt", 7665967, :extension => true
+    optional ::ProtobufUnittest::ComplexOptionType1, :".protobuf_unittest.complex_opt1", 7646756, :extension => true
+    optional ::ProtobufUnittest::ComplexOptionType2, :".protobuf_unittest.complex_opt2", 7636949, :extension => true
+    optional ::ProtobufUnittest::ComplexOptionType3, :".protobuf_unittest.complex_opt3", 7636463, :extension => true
     repeated :int32, :".protobuf_unittest.repeated_opt1", 7636464, :extension => true
-    repeated ::Protobuf_unittest::ComplexOptionType3, :".protobuf_unittest.repeated_opt2", 7636465, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.msgopt", 15480088, :extension => true
-    optional ::Protobuf_unittest::OldOptionType, :".protobuf_unittest.required_enum_opt", 106161807, :extension => true
-    optional ::Protobuf_unittest::ComplexOptionType2::ComplexOptionType4, :".protobuf_unittest.ComplexOptionType2.ComplexOptionType4.complex_opt4", 7633546, :extension => true
+    repeated ::ProtobufUnittest::ComplexOptionType3, :".protobuf_unittest.repeated_opt2", 7636465, :extension => true
+    optional ::ProtobufUnittest::Aggregate, :".protobuf_unittest.msgopt", 15480088, :extension => true
+    optional ::ProtobufUnittest::OldOptionType, :".protobuf_unittest.required_enum_opt", 106161807, :extension => true
+    optional ::ProtobufUnittest::ComplexOptionType2::ComplexOptionType4, :".protobuf_unittest.ComplexOptionType2.ComplexOptionType4.complex_opt4", 7633546, :extension => true
   end
 
   class ::Google::Protobuf::FieldOptions < ::Protobuf::Message
     optional :fixed64, :".protobuf_unittest.field_opt1", 7740936, :extension => true
     optional :int32, :".protobuf_unittest.field_opt2", 7753913, :default => 42, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.fieldopt", 15481374, :extension => true
+    optional ::ProtobufUnittest::Aggregate, :".protobuf_unittest.fieldopt", 15481374, :extension => true
   end
 
   class ::Google::Protobuf::EnumOptions < ::Protobuf::Message
     optional :sfixed32, :".protobuf_unittest.enum_opt1", 7753576, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.enumopt", 15483218, :extension => true
+    optional ::ProtobufUnittest::Aggregate, :".protobuf_unittest.enumopt", 15483218, :extension => true
   end
 
   class ::Google::Protobuf::EnumValueOptions < ::Protobuf::Message
     optional :int32, :".protobuf_unittest.enum_value_opt1", 1560678, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.enumvalopt", 15486921, :extension => true
+    optional ::ProtobufUnittest::Aggregate, :".protobuf_unittest.enumvalopt", 15486921, :extension => true
   end
 
   class ::Google::Protobuf::ServiceOptions < ::Protobuf::Message
     optional :sint64, :".protobuf_unittest.service_opt1", 7887650, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.serviceopt", 15497145, :extension => true
+    optional ::ProtobufUnittest::Aggregate, :".protobuf_unittest.serviceopt", 15497145, :extension => true
   end
 
   class ::Google::Protobuf::MethodOptions < ::Protobuf::Message
-    optional ::Protobuf_unittest::MethodOpt1, :".protobuf_unittest.method_opt1", 7890860, :extension => true
-    optional ::Protobuf_unittest::Aggregate, :".protobuf_unittest.methodopt", 15512713, :extension => true
+    optional ::ProtobufUnittest::MethodOpt1, :".protobuf_unittest.method_opt1", 7890860, :extension => true
+    optional ::ProtobufUnittest::Aggregate, :".protobuf_unittest.methodopt", 15512713, :extension => true
   end
 
 
@@ -345,14 +345,14 @@ module Protobuf_unittest
   #
   class TestServiceWithCustomOptions < ::Protobuf::Rpc::Service
     set_option :".protobuf_unittest.service_opt1", -9876543210
-    rpc :foo, ::Protobuf_unittest::CustomOptionFooRequest, ::Protobuf_unittest::CustomOptionFooResponse do
-      set_option :".protobuf_unittest.method_opt1", ::Protobuf_unittest::MethodOpt1::METHODOPT1_VAL2
+    rpc :foo, ::ProtobufUnittest::CustomOptionFooRequest, ::ProtobufUnittest::CustomOptionFooResponse do
+      set_option :".protobuf_unittest.method_opt1", ::ProtobufUnittest::MethodOpt1::METHODOPT1_VAL2
     end
   end
 
   class AggregateService < ::Protobuf::Rpc::Service
     set_option :".protobuf_unittest.serviceopt", { :s => "ServiceAnnotation" }
-    rpc :method, ::Protobuf_unittest::AggregateMessage, ::Protobuf_unittest::AggregateMessage do
+    rpc :method, ::ProtobufUnittest::AggregateMessage, ::ProtobufUnittest::AggregateMessage do
       set_option :".protobuf_unittest.methodopt", { :s => "MethodAnnotation" }
     end
   end
