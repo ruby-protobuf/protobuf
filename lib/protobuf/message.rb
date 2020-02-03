@@ -156,7 +156,11 @@ module Protobuf
                          value
                        end
 
-        result[field.name] = hashed_value
+        if hashed_value.nil?
+          result.delete(field.name)
+        else
+          result[field.name] = hashed_value
+        end
       end
 
       result

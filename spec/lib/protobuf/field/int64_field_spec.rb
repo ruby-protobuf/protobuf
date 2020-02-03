@@ -12,9 +12,19 @@ RSpec.describe Protobuf::Field::Int64Field do
 
   # https://developers.google.com/protocol-buffers/docs/proto3#json
   describe '.{to_json, from_json}' do
-    it 'serialises int64 value as string' do
-      instance = message.new(:field => 10)
-      expect(instance.to_json).to eq('{"field":"10"}')
+    it 'serialises 0 as empty' do
+      instance = message.new(:field => 0)
+      expect(instance.to_json).to eq('{}')
+    end
+
+    it 'serialises max value as string' do
+      instance = message.new(:field => described_class.max)
+      expect(instance.to_json).to eq('{"field":"9223372036854775807"}')
+    end
+
+    it 'serialises min value as string' do
+      instance = message.new(:field => described_class.min)
+      expect(instance.to_json).to eq('{"field":"-9223372036854775808"}')
     end
   end
 end

@@ -29,6 +29,9 @@ module Protobuf
         return false
       end
 
+      def json_encode(value)
+        value == 0 ? nil : value.to_s
+      end
     end
   end
 end
