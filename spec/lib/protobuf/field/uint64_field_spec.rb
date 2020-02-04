@@ -20,7 +20,7 @@ RSpec.describe Protobuf::Field::Uint64Field do
 
     it 'serialises max value' do
       instance = message.new(some_field: described_class.max)
-      expect(instance.to_json(proto3: true)).to eq('{"some_field":"18446744073709551615"}')
+      expect(instance.to_json(proto3: true)).to eq('{"someField":"18446744073709551615"}')
       expect(instance.to_json).to eq('{"some_field":18446744073709551615}')
     end
 

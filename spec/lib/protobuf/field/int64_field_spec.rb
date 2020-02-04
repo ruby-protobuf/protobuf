@@ -20,13 +20,13 @@ RSpec.describe Protobuf::Field::Int64Field do
 
     it 'serialises max value' do
       instance = message.new(some_field: described_class.max)
-      expect(instance.to_json(proto3: true)).to eq('{"some_field":"9223372036854775807"}')
+      expect(instance.to_json(proto3: true)).to eq('{"someField":"9223372036854775807"}')
       expect(instance.to_json).to eq('{"some_field":9223372036854775807}')
     end
 
     it 'serialises min value' do
       instance = message.new(some_field: described_class.min)
-      expect(instance.to_json(proto3: true)).to eq('{"some_field":"-9223372036854775808"}')
+      expect(instance.to_json(proto3: true)).to eq('{"someField":"-9223372036854775808"}')
       expect(instance.to_json).to eq('{"some_field":-9223372036854775808}')
     end
   end
