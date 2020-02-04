@@ -134,29 +134,28 @@ module Protobuf
     end
 
     def to_json(options = {})
-      to_json_hash.to_json(options)
+      to_json_hash(options).to_json(options)
     end
 
     # Return a hash-representation of the given fields for this message type that
     # is safe to convert to JSON.
-    def to_json_hash
+    def to_json_hash(options = {})
       result = {}
 
       @values.each_key do |field_name|
         value = self[field_name]
         field = self.class.get_field(field_name, true)
-
         # NB: to_json_hash_value should come before json_encode so as to handle
         # repeated fields without extra logic.
         hashed_value = if value.respond_to?(:to_json_hash_value)
                          value.to_json_hash_value
                        elsif field.respond_to?(:json_encode)
-                         field.json_encode(value)
+                         field.json_encode(value, options)
                        else
                          value
                        end
 
-        if hashed_value.nil?
+        if hashed_value.nil? || (options[:proto3] && value == field.default)
           result.delete(field.name)
         else
           result[field.name] = hashed_value

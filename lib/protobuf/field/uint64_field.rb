@@ -16,8 +16,12 @@ module Protobuf
         0
       end
 
-      def json_encode(value)
-        value == 0 ? nil : value.to_s
+      def json_encode(value, options = {})
+        if options[:proto3]
+          value == 0 ? nil : value.to_s
+        else
+          value
+        end
       end
     end
   end
