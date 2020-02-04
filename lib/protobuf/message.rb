@@ -147,6 +147,7 @@ module Protobuf
       @values.each_key do |field_name|
         value = self[field_name]
         field = self.class.get_field(field_name, true)
+
         # NB: to_json_hash_value should come before json_encode so as to handle
         # repeated fields without extra logic.
         hashed_value = if value.respond_to?(:to_json_hash_value)
