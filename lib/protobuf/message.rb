@@ -155,7 +155,7 @@ module Protobuf
                          value
                        end
 
-        if hashed_value.nil? || (options[:proto3] && value == field.default)
+        if options[:proto3] && (hashed_value.nil? || value == field.default)
           result.delete(field.name)
         else
           result[field.name] = hashed_value
