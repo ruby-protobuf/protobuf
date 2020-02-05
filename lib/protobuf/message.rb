@@ -142,7 +142,7 @@ module Protobuf
     def to_json_hash(options = {})
       result = {}
 
-      lower_camel_case = options[:lower_camel_case]
+      proto3 = options[:proto3] || options[:lower_camel_case]
 
       @values.each_key do |field_name|
         value = self[field_name]
@@ -153,13 +153,17 @@ module Protobuf
         hashed_value = if value.respond_to?(:to_json_hash_value)
                          value.to_json_hash_value(options)
                        elsif field.respond_to?(:json_encode)
-                         field.json_encode(value)
+                         field.json_encode(value, options)
                        else
                          value
                        end
 
-        key = lower_camel_case ? field.name.to_s.camelize(:lower).to_sym : field.name
-        result[key] = hashed_value
+        if proto3 && (hashed_value.nil? || value == field.class.default)
+          result.delete(field.name)
+        else
+          key = proto3 ? field.name.to_s.camelize(:lower).to_sym : field.name
+          result[key] = hashed_value
+        end
       end
 
       result
