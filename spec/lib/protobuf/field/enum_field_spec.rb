@@ -23,4 +23,22 @@ RSpec.describe Protobuf::Field::EnumField do
       expect(message.decode(instance.encode).enum).to eq(-33)
     end
   end
+
+  # https://developers.google.com/protocol-buffers/docs/proto3#json
+  describe '.{to_json, from_json}' do
+    it 'serialises enum value as string' do
+      instance = message.new(:enum => :POSITIVE)
+      expect(instance.to_json).to eq('{"enum":"POSITIVE"}')
+    end
+
+    it 'deserialises enum value as integer' do
+      instance = message.from_json('{"enum":22}')
+      expect(instance.enum).to eq(22)
+    end
+
+    it 'deserialises enum value as string' do
+      instance = message.from_json('{"enum":"NEGATIVE"}')
+      expect(instance.enum).to eq(-33)
+    end
+  end
 end

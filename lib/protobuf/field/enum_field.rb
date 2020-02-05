@@ -37,6 +37,11 @@ module Protobuf
         type_class.fetch(value) || fail(TypeError, "Invalid Enum value: #{value.inspect} for #{name}")
       end
 
+      def json_encode(value, options={})
+        enum = type_class.enums.find { |e| e.to_i == value }
+        enum.to_s(:name)
+      end
+
       private
 
       ##

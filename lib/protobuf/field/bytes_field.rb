@@ -48,7 +48,18 @@ module Protobuf
 
       def coerce!(value)
         case value
-        when String, Symbol
+        when String
+          if value.encoding == Encoding::ASCII_8BIT
+            # This is a "binary" string
+            value
+          else
+            # Assume the value is Base64 encoded (from JSON)
+            # Ideally we'd do the Base64 decoding while processing the JSON,
+            # but this is tricky to do since we don't know the protobuf field
+            # types when we do that.
+            Base64.decode64(value)
+          end
+        when Symbol
           value.to_s
         when NilClass
           nil
