@@ -43,7 +43,7 @@ module Protobuf
         "#{::Protobuf::Field::VarintField.encode(value_to_encode.bytesize)}#{value_to_encode}"
       end
 
-      def json_encode(value)
+      def json_encode(value, options={})
         value
       end
     end
