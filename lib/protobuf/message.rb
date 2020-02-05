@@ -158,7 +158,7 @@ module Protobuf
                          value
                        end
 
-        if proto3 && (hashed_value.nil? || value == field.default)
+        if proto3 && (hashed_value.nil? || value == field.class.default)
           result.delete(field.name)
         else
           key = proto3 ? field.name.to_s.camelize(:lower).to_sym : field.name
