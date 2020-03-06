@@ -8,8 +8,9 @@ module Protobuf
 
       attr_reader :output_file
 
-      def initialize(*args)
-        super
+      def initialize(*args, proto_file_to_descriptor)
+        super(*args)
+        @proto_file_to_descriptor = proto_file_to_descriptor
         @output_file = ::Google::Protobuf::Compiler::CodeGeneratorResponse::File.new(:name => file_name)
         @extension_fields = Hash.new { |h, k| h[k] = [] }
         @known_messages = {}
@@ -30,6 +31,7 @@ module Protobuf
           print_import_requires
 
           print_package do
+            add_descriptor
             inject_optionable
             group = GroupGenerator.new(current_indent)
             group.add_options(descriptor.options) if descriptor.options
@@ -48,6 +50,7 @@ module Protobuf
             print group.to_s
           end
 
+          print_descriptor_bytes
         end
       end
 
@@ -56,7 +59,7 @@ module Protobuf
           message_klass = modulize(message_name).safe_constantize
           if message_klass
             unknown_fields = fields.reject do |field|
-              @known_messages[message_name] && message_klass.get_field(field.name, true)
+              @known_messages[message_name] && message_klass.get_field(field.fully_qualified_name, true)
             end
             [message_name, unknown_fields]
           else
@@ -91,7 +94,7 @@ module Protobuf
 
         descriptor.extension.each do |field_descriptor|
           unless fully_qualified_token?(field_descriptor.name) && fully_qualified_namespace
-            field_descriptor.name = "#{fully_qualified_namespace}.#{field_descriptor.name}"
+            field_descriptor.fully_qualified_name = "#{fully_qualified_namespace}.#{field_descriptor.name}"
           end
           @extension_fields[field_descriptor.extendee] << field_descriptor
         end
@@ -106,14 +109,19 @@ module Protobuf
       end
 
       def print_file_comment
-        puts "# encoding: utf-8"
-        puts
-        puts "##"
-        puts "# This file is auto-generated. DO NOT EDIT!"
-        puts "#"
+        puts <<~END_OF_FILE_COMMENT
+          # encoding: utf-8
+          # frozen_string_literal: true
+
+          ##
+          # This file is auto-generated. DO NOT EDIT!
+          #
+        END_OF_FILE_COMMENT
       end
 
       def print_generic_requires
+        print_require("base64")
+        print_require("set")
         print_require("protobuf")
         print_require("protobuf/rpc/service") if descriptor.service.count > 0
         puts
@@ -233,7 +241,7 @@ module Protobuf
 
       def eval_enum_code(enum, fully_qualified_namespace)
         group = GroupGenerator.new(0)
-        group.add_enums([enum], :namespace => [fully_qualified_namespace])
+        group.add_enums([enum], :namespace => [fully_qualified_namespace], :dependency_eval => true)
         print group.to_s
         eval_code(modulize(fully_qualified_namespace).safe_constantize || Object)
       end
@@ -253,9 +261,49 @@ module Protobuf
         end
       end
 
+      def add_descriptor
+        dependencies = descriptor.dependency.map do |proto_file|
+          modulize(@proto_file_to_descriptor[proto_file].package)
+        end.uniq.join(', ')
+
+        puts <<~END_OF_DESCRIPTOR
+          FULLY_QUALIFIED_NAME = '#{descriptor.package}' unless defined?(self::FULLY_QUALIFIED_NAME)
+
+          @descriptors = [] unless instance_variable_defined?(:@descriptors)
+          @descriptors << lambda do
+            bytes = File.read(__FILE__, mode: 'rb').split(/^__END__$/, 2).last
+            ::Google::Protobuf::FileDescriptorProto.decode(Base64.decode64(bytes))
+          end
+
+          @descriptor_dependencies = Set.new unless instance_variable_defined?(:@descriptor_dependencies)
+          @descriptor_dependencies |= [#{dependencies}]
+
+          unless respond_to?(:descriptor_set)
+            def self.descriptor_set
+              ::Google::Protobuf::FileDescriptorSet.new(:file => @descriptors.map(&:call))
+            end
+          end
+
+          unless respond_to?(:descriptor_dependencies)
+            def self.descriptor_dependencies
+              @descriptor_dependencies
+            end
+          end
+        END_OF_DESCRIPTOR
+      end
+
       def inject_optionable
         return if descriptor.package.empty? && !ENV.key?('PB_ALLOW_DEFAULT_PACKAGE_NAME')
         puts "::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }"
+      end
+
+      def print_descriptor_bytes
+        puts <<~BYTES
+
+          # Raw descriptor bytes below
+          __END__
+          #{Base64.encode64(descriptor.encode)}
+        BYTES
       end
     end
   end

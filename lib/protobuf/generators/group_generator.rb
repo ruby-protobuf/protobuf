@@ -13,12 +13,13 @@ module Protobuf
       attr_reader :groups, :indent_level
       attr_writer :order
 
-      def initialize(indent_level = 0)
+      def initialize(indent_level = 0, name = nil)
         @groups = Hash.new { |h, k| h[k] = [] }
         @headers = {}
         @comments = {}
         @handlers = {}
         @indent_level = indent_level
+        @name = name
         @order = [:enum, :message_declaration, :options, :message, :extended_message, :service]
         init_printer(indent_level)
       end
@@ -88,6 +89,8 @@ module Protobuf
       end
 
       def compile
+        puts "FULLY_QUALIFIED_NAME = FULLY_QUALIFIED_NAME + '.#{@name}'" if @name
+
         @order.each do |type|
           items = @groups[type]
           next if items.empty?

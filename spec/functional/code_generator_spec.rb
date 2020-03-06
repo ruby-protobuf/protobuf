@@ -4,55 +4,46 @@ require 'spec_helper'
 require 'protobuf/code_generator'
 
 RSpec.describe 'code generation' do
+  before(:all) do
+    require PROTOS_PATH.join('google_unittest.pb') unless defined?(::Protobuf_unittest::ForeignEnum)
+    require PROTOS_PATH.join('map-test.pb') unless defined?(::Foo::Bar)
+    require PROTOS_PATH.join('google_unittest_custom_options.pb') unless defined?(::Protobuf_unittest::MethodOpt1)
+  end
+
   it "generates code for google's unittest.proto" do
-    bytes = IO.read(PROTOS_PATH.join('google_unittest.bin'), :mode => 'rb')
+    attrs = {
+      optional_int32: 1,
+      repeated_string: %w[boom],
+      optional_nested_message: { bb: 10 },
+      optional_nested_enum: ::Protobuf_unittest::TestAllTypes::NestedEnum::BAZ,
+      optional_foreign_message: { c: 12 },
+      repeated_import_message: [{ d: 13 }],
+    }
+    bytes = ::Protobuf_unittest::TestAllTypes.new(attrs).encode
+    message = ::Protobuf_unittest::TestAllTypes.decode(bytes)
+    expect(message.to_hash).to eq(attrs)
+    expect(message.default_int32).to eq(41)
+    expect(::Protobuf_unittest::TestAllTypes::FULLY_QUALIFIED_NAME).to eq('protobuf_unittest.TestAllTypes')
+    descriptor_file = ::Protobuf_unittest.descriptor_set.file.first
+    expect(descriptor_file.name).to eq('protos/google_unittest.proto')
+    expect(descriptor_file.package).to eq('protobuf_unittest')
+  end
 
-    expected_files =
-      ["google_unittest_import_public.pb.rb", "google_unittest_import.pb.rb", "google_unittest.pb.rb"]
-
-    expected_file_descriptors = expected_files.map do |file_name|
-      file_content = File.open(PROTOS_PATH.join(file_name), "r:UTF-8", &:read)
-      ::Google::Protobuf::Compiler::CodeGeneratorResponse::File.new(
-        :name => "protos/" + file_name, :content => file_content)
-    end
-
-    expected_output =
-      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => expected_file_descriptors)
-
-    code_generator = ::Protobuf::CodeGenerator.new(bytes)
-    code_generator.eval_unknown_extensions!
-    expect(code_generator.response_bytes).to eq(expected_output)
+  it "generates code for google's unittest.proto extensions" do
+    attrs = { optional_import_message_extension: { d: 14 } }
+    bytes = ::Protobuf_unittest::TestAllExtensions.new(attrs).encode
+    message = ::Protobuf_unittest::TestAllExtensions.decode(bytes)
+    expect(message.to_hash).to eq(attrs)
+    expect(message.default_int64_extension).to eq(42)
+    ::Protobuf_unittest::TestService.send(:set_option, '.protobuf_unittest.service_opt1', 10)
+    expect(::Protobuf_unittest::TestService.get_option!('.protobuf_unittest.service_opt1')).to eq(10)
+    rpc = ::Protobuf_unittest::TestService.rpcs[:foo]
+    rpc.send(:set_option, '.protobuf_unittest.method_opt1', :METHODOPT1_VAL2)
+    expect(rpc.get_option!('.protobuf_unittest.method_opt1')).to eq(:METHODOPT1_VAL2)
   end
 
   it "generates code for map types" do
-    input_descriptor = ::Google::Protobuf::FileDescriptorSet.decode(
-      IO.read(PROTOS_PATH.join('map-test.bin'), :mode => 'rb'))
-    request = ::Google::Protobuf::Compiler::CodeGeneratorRequest.new(:file_to_generate => ['map-test.proto'],
-                                                                     :proto_file => input_descriptor.file)
-
-    file_name = "map-test.pb.rb"
-    file_content = File.open(PROTOS_PATH.join(file_name), "r:UTF-8", &:read)
-    expected_file_output =
-      ::Google::Protobuf::Compiler::CodeGeneratorResponse::File.new(
-        :name => file_name, :content => file_content)
-
-    expected_response =
-      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => [expected_file_output])
-
-    code_generator = ::Protobuf::CodeGenerator.new(request.encode)
-    code_generator.eval_unknown_extensions!
-    expect(code_generator.response_bytes).to eq(expected_response)
-  end
-
-  it "generates code (including service stubs) with custom field and method options" do
-    expected_unittest_custom_options =
-      File.open(PROTOS_PATH.join('google_unittest_custom_options.pb.rb'), "r:UTF-8", &:read)
-
-    bytes = IO.read(PROTOS_PATH.join('google_unittest_custom_options.bin'), :mode => 'rb')
-    code_generator = ::Protobuf::CodeGenerator.new(bytes)
-    code_generator.eval_unknown_extensions!
-    response = ::Google::Protobuf::Compiler::CodeGeneratorResponse.decode(code_generator.response_bytes)
-    expect(response.file.find { |f| f.name == 'protos/google_unittest_custom_options.pb.rb' }.content)
-      .to eq(expected_unittest_custom_options)
+    bar = ::Foo::Bar.new(int32_to_baz: { 4 => { looks_like_map: { 'goat' => 'sheep' } } })
+    expect(bar.int32_to_baz[4].looks_like_map).to eq('goat' => 'sheep')
   end
 end

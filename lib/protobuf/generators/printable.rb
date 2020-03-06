@@ -136,7 +136,14 @@ module Protobuf
       #
       def puts(message = nil)
         if message
-          @io.puts(("  " * current_indent) + message)
+          message.split("\n").each do |line|
+            if line.empty?
+              @io.puts
+              next
+            end
+
+            @io.puts(("  " * current_indent) + line)
+          end
         else
           @io.puts
         end

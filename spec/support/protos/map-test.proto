@@ -6,8 +6,8 @@ syntax = "proto2";
 package foo;
 
 enum Frobnitz {
-  FROB = 1;
-  NITZ = 2;
+  FROB = 0;
+  NITZ = 1;
 }
 
 message Baz {

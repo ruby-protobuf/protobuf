@@ -1,6 +1,14 @@
 require 'active_support/core_ext/module/aliasing'
 require 'protobuf/generators/file_generator'
 
+::Google::Protobuf::FieldDescriptorProto.module_eval do
+  attr_writer :fully_qualified_name
+
+  def fully_qualified_name
+    @fully_qualified_name || name
+  end
+end
+
 module Protobuf
   class CodeGenerator
 
@@ -28,17 +36,18 @@ module Protobuf
     def initialize(request_bytes)
       @request_bytes = request_bytes
       self.request = ::Google::Protobuf::Compiler::CodeGeneratorRequest.decode(request_bytes)
+      @proto_file_to_descriptor = request.proto_file.map { |file_descriptor| [file_descriptor.name, file_descriptor] }.to_h.freeze
     end
 
     def eval_unknown_extensions!
       request.proto_file.each do |file_descriptor|
-        ::Protobuf::Generators::FileGenerator.new(file_descriptor).eval_unknown_extensions!
+        ::Protobuf::Generators::FileGenerator.new(file_descriptor, @proto_file_to_descriptor).eval_unknown_extensions!
       end
       self.request = ::Google::Protobuf::Compiler::CodeGeneratorRequest.decode(@request_bytes)
     end
 
     def generate_file(file_descriptor)
-      ::Protobuf::Generators::FileGenerator.new(file_descriptor).generate_output_file
+      ::Protobuf::Generators::FileGenerator.new(file_descriptor, @proto_file_to_descriptor).generate_output_file
     end
 
     def response_bytes

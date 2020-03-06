@@ -10,6 +10,8 @@ module Protobuf
           tags = []
 
           print_class(descriptor.name, :enum) do
+            puts "FULLY_QUALIFIED_NAME = FULLY_QUALIFIED_NAME + '.#{descriptor.name}'" unless @options[:dependency_eval]
+            puts
             if descriptor.options
               print OptionGenerator.new(descriptor.options, current_indent).to_s
               puts

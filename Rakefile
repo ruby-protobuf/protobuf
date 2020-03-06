@@ -18,11 +18,11 @@ task :default => ['compile:spec', 'compile:rpc', :spec, :rubocop]
 desc 'Run specs'
 namespace :compile do
 
-  desc 'Compile spec protos in spec/supprt/ directory'
+  desc 'Compile spec protos in spec/support/ directory'
   task :spec do
     proto_path = ::File.expand_path('../spec/support/', __FILE__)
     proto_files = Dir[File.join(proto_path, '**', '*.proto')]
-    cmd = %(protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{proto_files.join(' ')})
+    cmd = %(protoc --plugin=protoc-gen-ruby-protobuf=./bin/protoc-gen-ruby --ruby-protobuf_out=#{proto_path} -I #{proto_path} #{proto_files.join(' ')})
 
     puts cmd
     system(cmd)
@@ -35,7 +35,7 @@ namespace :compile do
     output_dir = ::File.expand_path('../tmp/rpc', __FILE__)
     ::FileUtils.mkdir_p(output_dir)
 
-    cmd = %(protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{output_dir} -I #{proto_path} #{proto_files.join(' ')})
+    cmd = %(protoc --plugin=protoc-gen-ruby-protobuf=./bin/protoc-gen-ruby --ruby-protobuf_out=#{output_dir} -I #{proto_path} #{proto_files.join(' ')})
 
     puts cmd
     system(cmd)
