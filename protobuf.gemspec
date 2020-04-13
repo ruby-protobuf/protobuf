@@ -35,23 +35,4 @@ require "protobuf/version"
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'timecop'
   s.add_development_dependency 'yard'
-
-  # debuggers only work in MRI
-  if RUBY_ENGINE.to_sym == :ruby
-    # we don't support MRI < 1.9.3
-    pry_debugger = if RUBY_VERSION < '2.0.0'
-                     'pry-debugger'
-                   else
-                     'pry-byebug'
-                   end
-
-    s.add_development_dependency pry_debugger
-    s.add_development_dependency 'pry-stack_explorer'
-
-    s.add_development_dependency 'varint'
-    s.add_development_dependency 'ruby-prof'
-  elsif RUBY_PLATFORM =~ /java/i
-    s.add_development_dependency 'fast_blank_java'
-    s.add_development_dependency 'pry'
-  end
 end
