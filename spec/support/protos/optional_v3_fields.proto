@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message SomethingWithOptionalFields {
+  optional string i_am_optional = 1;
+  string i_am_not_optional      = 2;
+}

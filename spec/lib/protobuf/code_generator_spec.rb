@@ -23,7 +23,7 @@ RSpec.describe ::Protobuf::CodeGenerator do
     end
 
     let(:expected_response_bytes) do
-      COMPILER::CodeGeneratorResponse.encode(:file => [output_file1, output_file2])
+      COMPILER::CodeGeneratorResponse.encode(:file => [output_file1, output_file2], :supported_features => 1)
     end
 
     before do
