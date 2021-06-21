@@ -46,7 +46,16 @@ module Protobuf
         generate_file(file_descriptor)
       end
 
-      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => generated_files)
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(
+        :file => generated_files,
+        :supported_features => supported_features,
+      )
+    end
+
+    def supported_features
+      # The only available feature is proto3 with optional fields.
+      # This is backwards compatible with proto2 optional fields.
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse::Feature::FEATURE_PROTO3_OPTIONAL.to_i
     end
 
     Protobuf::Field::BaseField.module_eval do
