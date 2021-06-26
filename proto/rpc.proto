@@ -22,6 +22,8 @@
 //
 // Protobufs needed for socket rpcs.
 
+syntax = "proto2";
+
 package protobuf.socketrpc;
 
 message Request

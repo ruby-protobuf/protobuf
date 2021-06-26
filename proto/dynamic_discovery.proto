@@ -22,6 +22,8 @@
 //
 // Protobufs needed for dynamic discovery zmq server and client.
 
+syntax = "proto2";
+
 package protobuf.rpc.dynamicDiscovery;
 
 enum BeaconType {
