@@ -1,0 +1,43 @@
+version: 2.1
+
+orbs:
+  # orbs are basically bundles of pre-written build scripts that work for common cases
+  # https://github.com/CircleCI-Public/ruby-orb
+  ruby: circleci/ruby@1.1
+
+jobs:
+  # skipping build step because Gemfile.lock is not included in the source
+  # this makes the bundler caching step a noop
+  test:
+    parameters:
+      ruby-image:
+        type: string
+    docker:
+      - image: << parameters.ruby-image >>
+    steps:
+      - run:
+          command: sudo apt-get update
+      - run:
+          message: Install ZeroMQ and Protobuf Compiler
+          command: sudo apt-get -y install libzmq3-dev protobuf-compiler
+      - checkout
+      - run:
+          command: gem install bundler
+      - run:
+          command: bundle install
+      - run:
+          command: bundle exec rake
+
+workflows:
+  build_and_test:
+    jobs:
+      - test:
+          matrix:
+            parameters:
+              ruby-image:
+                # - circleci/jruby:9.2.6.0-jdk
+                # - circleci/jruby:9.1.17.0-jdk
+                # - circleci/jruby:9.2-jdk8
+                # - circleci/ruby:2.4
+                # - circleci/ruby:2.5
+                - circleci/ruby:2.7
