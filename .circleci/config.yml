@@ -30,9 +30,9 @@ workflows:
           matrix:
             parameters:
               ruby-image:
-                # - circleci/jruby:9.2.6.0-jdk
-                # - circleci/jruby:9.1.17.0-jdk
-                # - circleci/jruby:9.2-jdk8
-                # - circleci/ruby:2.4
-                # - circleci/ruby:2.5
+                - circleci/jruby:9.2.6.0-jdk
+                - circleci/jruby:9.1.17.0-jdk
+                - circleci/jruby:9.2-jdk8
+                - circleci/ruby:2.4
+                - circleci/ruby:2.5
                 - circleci/ruby:2.7
