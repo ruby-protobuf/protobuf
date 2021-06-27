@@ -1,10 +1,5 @@
 version: 2.1
 
-orbs:
-  # orbs are basically bundles of pre-written build scripts that work for common cases
-  # https://github.com/CircleCI-Public/ruby-orb
-  ruby: circleci/ruby@1.1
-
 jobs:
   # skipping build step because Gemfile.lock is not included in the source
   # this makes the bundler caching step a noop
