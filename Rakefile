@@ -22,10 +22,12 @@ namespace :compile do
   task :spec do
     proto_path = ::File.expand_path('../spec/support/', __FILE__)
     proto_files = Dir[File.join(proto_path, '**', '*.proto')]
-    cmd = %(protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{proto_path} -I #{proto_path} #{proto_files.join(' ')})
 
-    puts cmd
-    system(cmd)
+    proto_files.each do |proto_file|
+      cmd = %(protoc --plugin=protoc-gen-ruby-protobuf=./bin/protoc-gen-ruby --ruby-protobuf_out=#{proto_path} -I #{proto_path} #{proto_file})
+      puts cmd
+      system(cmd) || fail("Failed to compile spec proto: #{proto_file}")
+    end
   end
 
   desc 'Compile rpc protos in protos/ directory'
@@ -35,10 +37,10 @@ namespace :compile do
     output_dir = ::File.expand_path('../tmp/rpc', __FILE__)
     ::FileUtils.mkdir_p(output_dir)
 
-    cmd = %(protoc --plugin=./bin/protoc-gen-ruby --ruby_out=#{output_dir} -I #{proto_path} #{proto_files.join(' ')})
+    cmd = %(protoc --plugin=protoc-gen-ruby-protobuf=./bin/protoc-gen-ruby --ruby-protobuf_out=#{output_dir} -I #{proto_path} #{proto_files.join(' ')})
 
     puts cmd
-    system(cmd)
+    system(cmd) || fail("Failed to compile rpc protos!")
 
     files = {
       'tmp/rpc/dynamic_discovery.pb.rb'               => 'lib/protobuf/rpc',
