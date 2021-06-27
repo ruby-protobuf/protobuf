@@ -1,13 +1,13 @@
 // Use protoc v3.0.0 to compile this file into map-test.bin:
-//   protoc --descriptor_set_out=map-test.bin map-test.proto 
+//   protoc --descriptor_set_out=map-test.bin map-test.proto
 
 syntax = "proto2";
 
 package foo;
 
 enum Frobnitz {
-  FROB = 1;
-  NITZ = 2;
+  FROB = 0;
+  NITZ = 1;
 }
 
 message Baz {
