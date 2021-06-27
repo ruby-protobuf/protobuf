@@ -15,6 +15,8 @@ jobs:
       - run:
           message: Install ZeroMQ and Protobuf Compiler
           command: sudo apt-get -y install libzmq3-dev protobuf-compiler
+      - run:
+          command: protoc --version
       - checkout
       - run:
           command: gem install bundler
@@ -31,8 +33,8 @@ workflows:
             parameters:
               ruby-image:
                 - circleci/jruby:9.2.6.0-jdk
-                - circleci/jruby:9.1.17.0-jdk
-                - circleci/jruby:9.2-jdk8
-                - circleci/ruby:2.4
-                - circleci/ruby:2.5
-                - circleci/ruby:2.7
+                  #                - circleci/jruby:9.1.17.0-jdk
+                  #                - circleci/jruby:9.2-jdk8
+                  #                - circleci/ruby:2.4
+                  #                - circleci/ruby:2.5
+                  #                - circleci/ruby:2.7
