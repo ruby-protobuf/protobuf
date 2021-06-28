@@ -12,8 +12,8 @@ module Foo
   # Enum Classes
   #
   class Frobnitz < ::Protobuf::Enum
-    define :FROB, 1
-    define :NITZ, 2
+    define :FROB, 0
+    define :NITZ, 1
   end
 
 
