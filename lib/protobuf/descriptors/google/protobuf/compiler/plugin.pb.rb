@@ -21,6 +21,11 @@ module Google
       #
       class CodeGeneratorRequest < ::Protobuf::Message; end
       class CodeGeneratorResponse < ::Protobuf::Message
+        class Feature < ::Protobuf::Enum
+          define :FEATURE_NONE, 0
+          define :FEATURE_PROTO3_OPTIONAL, 1
+        end
+
         class File < ::Protobuf::Message; end
 
       end
@@ -51,6 +56,7 @@ module Google
         end
 
         optional :string, :error, 1
+        optional :uint64, :supported_features, 2
         repeated ::Google::Protobuf::Compiler::CodeGeneratorResponse::File, :file, 15
       end
 

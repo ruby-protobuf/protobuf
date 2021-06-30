@@ -17,7 +17,7 @@ RSpec.describe 'code generation' do
     end
 
     expected_output =
-      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => expected_file_descriptors)
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => expected_file_descriptors, :supported_features => 1)
 
     code_generator = ::Protobuf::CodeGenerator.new(bytes)
     code_generator.eval_unknown_extensions!
@@ -37,7 +37,7 @@ RSpec.describe 'code generation' do
         :name => file_name, :content => file_content)
 
     expected_response =
-      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => [expected_file_output])
+      ::Google::Protobuf::Compiler::CodeGeneratorResponse.encode(:file => [expected_file_output], :supported_features => 1)
 
     code_generator = ::Protobuf::CodeGenerator.new(request.encode)
     code_generator.eval_unknown_extensions!
