@@ -4,6 +4,7 @@
 3.10.0
 ------
 - Add headers to request proto
+- Add support for compiling v3 protos with optional fields as v2 optional fields
 
 3.9.0
 -----
