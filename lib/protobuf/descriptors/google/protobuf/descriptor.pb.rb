@@ -20,6 +20,7 @@ module Google
 
     end
 
+    class ExtensionRangeOptions < ::Protobuf::Message; end
     class FieldDescriptorProto < ::Protobuf::Message
       class Type < ::Protobuf::Enum
         define :TYPE_DOUBLE, 1
@@ -51,7 +52,11 @@ module Google
     end
 
     class OneofDescriptorProto < ::Protobuf::Message; end
-    class EnumDescriptorProto < ::Protobuf::Message; end
+    class EnumDescriptorProto < ::Protobuf::Message
+      class EnumReservedRange < ::Protobuf::Message; end
+
+    end
+
     class EnumValueDescriptorProto < ::Protobuf::Message; end
     class ServiceDescriptorProto < ::Protobuf::Message; end
     class MethodDescriptorProto < ::Protobuf::Message; end
@@ -80,10 +85,19 @@ module Google
 
     end
 
+    class OneofOptions < ::Protobuf::Message; end
     class EnumOptions < ::Protobuf::Message; end
     class EnumValueOptions < ::Protobuf::Message; end
     class ServiceOptions < ::Protobuf::Message; end
-    class MethodOptions < ::Protobuf::Message; end
+    class MethodOptions < ::Protobuf::Message
+      class IdempotencyLevel < ::Protobuf::Enum
+        define :IDEMPOTENCY_UNKNOWN, 0
+        define :NO_SIDE_EFFECTS, 1
+        define :IDEMPOTENT, 2
+      end
+
+    end
+
     class UninterpretedOption < ::Protobuf::Message
       class NamePart < ::Protobuf::Message; end
 
@@ -91,6 +105,11 @@ module Google
 
     class SourceCodeInfo < ::Protobuf::Message
       class Location < ::Protobuf::Message; end
+
+    end
+
+    class GeneratedCodeInfo < ::Protobuf::Message
+      class Annotation < ::Protobuf::Message; end
 
     end
 
@@ -102,7 +121,8 @@ module Google
     set_option :java_package, "com.google.protobuf"
     set_option :java_outer_classname, "DescriptorProtos"
     set_option :optimize_for, ::Google::Protobuf::FileOptions::OptimizeMode::SPEED
-    set_option :go_package, "descriptor"
+    set_option :go_package, "google.golang.org/protobuf/types/descriptorpb"
+    set_option :cc_enable_arenas, true
     set_option :objc_class_prefix, "GPB"
     set_option :csharp_namespace, "Google.Protobuf.Reflection"
 
@@ -133,6 +153,7 @@ module Google
       class ExtensionRange
         optional :int32, :start, 1
         optional :int32, :end, 2
+        optional ::Google::Protobuf::ExtensionRangeOptions, :options, 3
       end
 
       class ReservedRange
@@ -152,6 +173,12 @@ module Google
       repeated :string, :reserved_name, 10
     end
 
+    class ExtensionRangeOptions
+      repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
+      # Extension Fields
+      extensions 1000...536870912
+    end
+
     class FieldDescriptorProto
       optional :string, :name, 1
       optional :int32, :number, 3
@@ -163,16 +190,25 @@ module Google
       optional :int32, :oneof_index, 9
       optional :string, :json_name, 10
       optional ::Google::Protobuf::FieldOptions, :options, 8
+      optional :bool, :proto3_optional, 17
     end
 
     class OneofDescriptorProto
       optional :string, :name, 1
+      optional ::Google::Protobuf::OneofOptions, :options, 2
     end
 
     class EnumDescriptorProto
+      class EnumReservedRange
+        optional :int32, :start, 1
+        optional :int32, :end, 2
+      end
+
       optional :string, :name, 1
       repeated ::Google::Protobuf::EnumValueDescriptorProto, :value, 2
       optional ::Google::Protobuf::EnumOptions, :options, 3
+      repeated ::Google::Protobuf::EnumDescriptorProto::EnumReservedRange, :reserved_range, 4
+      repeated :string, :reserved_name, 5
     end
 
     class EnumValueDescriptorProto
@@ -200,18 +236,23 @@ module Google
       optional :string, :java_package, 1
       optional :string, :java_outer_classname, 8
       optional :bool, :java_multiple_files, 10, :default => false
-      optional :bool, :java_generate_equals_and_hash, 20, :default => false
+      optional :bool, :java_generate_equals_and_hash, 20, :deprecated => true
       optional :bool, :java_string_check_utf8, 27, :default => false
       optional ::Google::Protobuf::FileOptions::OptimizeMode, :optimize_for, 9, :default => ::Google::Protobuf::FileOptions::OptimizeMode::SPEED
       optional :string, :go_package, 11
       optional :bool, :cc_generic_services, 16, :default => false
       optional :bool, :java_generic_services, 17, :default => false
       optional :bool, :py_generic_services, 18, :default => false
+      optional :bool, :php_generic_services, 42, :default => false
       optional :bool, :deprecated, 23, :default => false
-      optional :bool, :cc_enable_arenas, 31, :default => false
+      optional :bool, :cc_enable_arenas, 31, :default => true
       optional :string, :objc_class_prefix, 36
       optional :string, :csharp_namespace, 37
-      optional :bool, :javanano_use_deprecated_package, 38
+      optional :string, :swift_prefix, 39
+      optional :string, :php_class_prefix, 40
+      optional :string, :php_namespace, 41
+      optional :string, :php_metadata_namespace, 44
+      optional :string, :ruby_package, 45
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
@@ -234,6 +275,12 @@ module Google
       optional :bool, :lazy, 5, :default => false
       optional :bool, :deprecated, 3, :default => false
       optional :bool, :weak, 10, :default => false
+      repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
+      # Extension Fields
+      extensions 1000...536870912
+    end
+
+    class OneofOptions
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
@@ -263,6 +310,7 @@ module Google
 
     class MethodOptions
       optional :bool, :deprecated, 33, :default => false
+      optional ::Google::Protobuf::MethodOptions::IdempotencyLevel, :idempotency_level, 34, :default => ::Google::Protobuf::MethodOptions::IdempotencyLevel::IDEMPOTENCY_UNKNOWN
       repeated ::Google::Protobuf::UninterpretedOption, :uninterpreted_option, 999
       # Extension Fields
       extensions 1000...536870912
@@ -293,6 +341,17 @@ module Google
       end
 
       repeated ::Google::Protobuf::SourceCodeInfo::Location, :location, 1
+    end
+
+    class GeneratedCodeInfo
+      class Annotation
+        repeated :int32, :path, 1, :packed => true
+        optional :string, :source_file, 2
+        optional :int32, :begin, 3
+        optional :int32, :end, 4
+      end
+
+      repeated ::Google::Protobuf::GeneratedCodeInfo::Annotation, :annotation, 1
     end
 
   end
