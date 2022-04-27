@@ -18,7 +18,7 @@ module Protobuf
       end
 
       def to_response(args = {})
-        ::Protobuf::Socketrpc::Response.new({:error => message, :error_reason => error_type}.merge(args))
+        ::Protobuf::Socketrpc::Response.new({ :error => message, :error_reason => error_type }.merge(args))
       end
     end
   end
