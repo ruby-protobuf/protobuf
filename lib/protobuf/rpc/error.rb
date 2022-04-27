@@ -13,12 +13,12 @@ module Protobuf
         super message
       end
 
-      def encode
-        to_response.encode
+      def encode(args = {})
+        to_response(args).encode
       end
 
-      def to_response
-        ::Protobuf::Socketrpc::Response.new(:error => message, :error_reason => error_type)
+      def to_response(args = {})
+        ::Protobuf::Socketrpc::Response.new({ :error => message, :error_reason => error_type }.merge(args))
       end
     end
   end

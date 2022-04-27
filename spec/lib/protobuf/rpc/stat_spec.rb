@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'timecop'
-require 'active_support/core_ext/numeric/time'
+require 'active_support/all'
 
 RSpec.describe ::Protobuf::Rpc::Stat do
 
