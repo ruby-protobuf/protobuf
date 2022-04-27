@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Protobuf::Rpc::Middleware::ExceptionHandler do
   let(:app) { proc { |env| env } }
-  let(:env) { Protobuf::Rpc::Env.new }
+  let(:env) { Protobuf::Rpc::Env.new("server" => "cooldude") }
 
   subject { described_class.new(app) }
 
@@ -17,7 +17,7 @@ RSpec.describe Protobuf::Rpc::Middleware::ExceptionHandler do
     end
 
     context "when exceptions occur" do
-      let(:encoded_error) { error.encode }
+      let(:encoded_error) { error.encode(:server => "cooldude") }
       let(:error) { Protobuf::Rpc::MethodNotFound.new('Boom!') }
 
       before { allow(app).to receive(:call).and_raise(error, 'Boom!') }
@@ -42,7 +42,7 @@ RSpec.describe Protobuf::Rpc::Middleware::ExceptionHandler do
       end
 
       context "when exception is not a Protobuf error" do
-        let(:encoded_error) { error.encode }
+        let(:encoded_error) { error.encode(:server => "cooldude") }
         let(:error) { Protobuf::Rpc::RpcFailed.new('Boom!') }
 
         before { allow(app).to receive(:call).and_raise(RuntimeError, 'Boom!') }
