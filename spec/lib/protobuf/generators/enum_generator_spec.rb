@@ -71,6 +71,7 @@ end
 
     context 'with PB_UPCASE_ENUMS set' do
       before { allow(ENV).to receive(:key?).with('PB_UPCASE_ENUMS').and_return(true) }
+      before { allow(ENV).to receive(:key?).with('PB_CAPITALIZE_ENUMS').and_return(false) }
       let(:values) { [{ :name => 'boom', :number => 1 }] }
 
       it 'returns a string with the given enum name in ALL CAPS' do
@@ -79,6 +80,7 @@ end
     end
 
     context 'with PB_CAPITALIZE_ENUMS set' do
+      before { allow(ENV).to receive(:key?).with('PB_UPCASE_ENUMS').and_return(false) }
       before { allow(ENV).to receive(:key?).with('PB_CAPITALIZE_ENUMS').and_return(true) }
       let(:values) { [{ :name => 'boom', :number => 1 }] }
 

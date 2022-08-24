@@ -67,6 +67,7 @@ RSpec.describe ::Protobuf::Generators::FieldGenerator do
         let(:type_name) { '.foo.bar.Baz' }
         let(:default_value) { 'quux' }
         before { allow(ENV).to receive(:key?).with('PB_UPCASE_ENUMS').and_return(true) }
+        before { allow(ENV).to receive(:key?).with('PB_CAPITALIZE_ENUMS').and_return(false) }
 
         specify { expect(subject).to eq "  optional ::Foo::Bar::Baz, :foo_bar, 3, :default => ::Foo::Bar::Baz::QUUX\n" }
       end
@@ -75,6 +76,7 @@ RSpec.describe ::Protobuf::Generators::FieldGenerator do
         let(:type_enum) { :TYPE_ENUM }
         let(:type_name) { '.foo.bar.Baz' }
         let(:default_value) { 'quux' }
+        before { allow(ENV).to receive(:key?).with('PB_UPCASE_ENUMS').and_return(false) }
         before { allow(ENV).to receive(:key?).with('PB_CAPITALIZE_ENUMS').and_return(true) }
 
         specify { expect(subject).to eq "  optional ::Foo::Bar::Baz, :foo_bar, 3, :default => ::Foo::Bar::Baz::Quux\n" }
