@@ -77,6 +77,15 @@ end
         expect(subject.build_value(enum.value.first)).to eq("define :BOOM, 1")
       end
     end
+
+    context 'with PB_CAPITALIZE_ENUMS set' do
+      before { allow(ENV).to receive(:key?).with('PB_CAPITALIZE_ENUMS').and_return(true) }
+      let(:values) { [{ :name => 'boom', :number => 1 }] }
+
+      it 'returns a string with the given enum name in ALL CAPS' do
+        expect(subject.build_value(enum.value.first)).to eq("define :Boom, 1")
+      end
+    end
   end
 
 end

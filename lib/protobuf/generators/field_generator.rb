@@ -140,6 +140,8 @@ module Protobuf
         optionally_upcased_default =
           if ENV.key?('PB_UPCASE_ENUMS')
             verbatim_default_value.upcase
+          elsif ENV.key?('PB_CAPITALIZE_ENUMS')
+            verbatim_default_value.capitalize
           else
             verbatim_default_value
           end
