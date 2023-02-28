@@ -46,6 +46,8 @@ module Protobuf
     option :worker_port,                :type => :numeric, :default => nil, :desc => "Port for 'backend' where workers connect (defaults to port + 1)"
     option :zmq_inproc,                 :type => :boolean, :default => true, :desc => 'Use inproc protocol for zmq Server/Broker/Worker'
 
+    option :healthcheck,                :type => :boolean, :default => false, :desc => "Turn on healcheck on 0.0.0.0:80808"
+
     def start(app_file)
       debug_say('Configuring the rpc_server process')
 
@@ -236,6 +238,29 @@ module Protobuf
         ::Protobuf::Rpc::ServiceDirectory.instance.stop
       end
 
+      def start_healthcheck_server
+        @health_server = ::WEBrick::HTTPServer.new(
+          :Port => 8080,
+          :BindAddress => "0.0.0.0",
+          :Logger => ::WEBrick::Log.new("/dev/null"),
+          :AccessLog => [],
+        )
+
+        @health_server.mount_proc "/health/live" do |_req, res|
+          rpc_instance_running = ::Protobuf::Rpc::ServiceDirectory.instance.running?
+          if rpc_instance_running > 0
+            @status = 200
+          else
+            @status = 400
+          end
+        end
+        @health_server.start
+      end
+
+      def shutdown_healthcheck_server
+        @health_server&.shutdown
+      end
+
       # Start the runner and log the relevant options.
       def start_server
         debug_say('Running server')
@@ -245,6 +270,7 @@ module Protobuf
         runner.run do
           logger.info do
             "pid #{::Process.pid} -- #{mode} RPC Server listening at #{options.host}:#{options.port}"
+            start_healthcheck_server if !!options[:healthcheck]
           end
 
           ::ActiveSupport::Notifications.instrument("after_server_bind")
