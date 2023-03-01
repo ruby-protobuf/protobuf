@@ -240,22 +240,23 @@ module Protobuf
 
       def start_healthcheck_server
         parsed_url = ::URI.parse(options[:healthcheck_url])
+        ::Thread.new do
+          @health_server = ::WEBrick::HTTPServer.new(
+            :Port => parsed_url.port,
+            :BindAddress => parsed_url.host,
+            :Logger => ::WEBrick::Log.new("/dev/null"),
+            :AccessLog => [],
+          )
 
-        @health_server = ::WEBrick::HTTPServer.new(
-          :Port => parsed_url.port,
-          :BindAddress => parsed_url.host,
-          :Logger => ::WEBrick::Log.new("/dev/null"),
-          :AccessLog => [],
-        )
-
-        @health_server.mount_proc parsed_url.path do |_req, res|
-          if ::Protobuf::Rpc::ServiceDirectory.instance.running?
-            res.status = 200
-          else
-            res.status = 400
+          @health_server.mount_proc parsed_url.path do |_req, res|
+            if ::Protobuf::Rpc::ServiceDirectory.instance.running?
+              res.status = 200
+            else
+              res.status = 400
+            end
           end
+          @health_server.start
         end
-        @health_server.start
       end
 
       def shutdown_healthcheck_server
