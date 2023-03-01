@@ -239,8 +239,9 @@ module Protobuf
       end
 
       def start_healthcheck_server
-        parsed_url = ::URI.parse(options[:healthcheck_url])
         ::Thread.new do
+          parsed_url = ::URI.parse(options[:healthcheck_url])
+
           @health_server = ::WEBrick::HTTPServer.new(
             :Port => parsed_url.port,
             :BindAddress => parsed_url.host,
