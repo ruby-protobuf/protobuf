@@ -250,9 +250,9 @@ module Protobuf
 
         @health_server.mount_proc parsed_url.path do |_req, res|
           if ::Protobuf::Rpc::ServiceDirectory.instance.running?
-            @status = 200
+            res.status = 200
           else
-            @status = 400
+            res.status = 400
           end
         end
         @health_server.start
