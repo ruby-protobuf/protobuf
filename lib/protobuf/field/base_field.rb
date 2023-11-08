@@ -1,3 +1,4 @@
+require 'active_support'
 require 'active_support/core_ext/hash/slice'
 require 'protobuf/field/field_array'
 require 'protobuf/field/field_hash'
