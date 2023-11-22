@@ -1,5 +1,6 @@
 require 'ostruct'
 
+require 'active_support'
 require 'active_support/core_ext/hash/reverse_merge'
 
 require 'spec_helper'
