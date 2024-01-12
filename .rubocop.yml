@@ -6,8 +6,11 @@ AllCops:
     - 'spec/support/protos/*.pb.rb'
     - 'varint_prof.rb'
 
-Lint/EndAlignment:
-  AlignWith: keyword
+Bundler/DuplicatedGem:
+  Enabled: false
+
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: keyword
 
 Lint/Loop:
   Enabled: false
@@ -18,25 +21,26 @@ Metrics/ClassLength:
 Metrics/ModuleLength:
   Enabled: false
 
-Style/CaseIndentation:
-  IndentWhenRelativeTo: end
+Layout/CaseIndentation:
+  EnforcedStyle: end
 
 Style/ClassAndModuleChildren:
   Exclude:
     - '**/*.pb.rb'
+    - 'spec/**/*.rb'
 
-Style/ClassAndModuleCamelCase:
+Naming/ClassAndModuleCamelCase:
   Exclude:
     - '**/*.pb.rb'
 
-Style/EmptyLineBetweenDefs:
+Layout/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true
 
-Style/EmptyLines:
+Layout/EmptyLines:
   Exclude:
     - '**/*.pb.rb'
 
-Style/FileName:
+Naming/FileName:
   Exclude:
     - '**/protoc-gen-ruby*'
 
@@ -46,7 +50,7 @@ Style/GuardClause:
 Style/HashSyntax:
   EnforcedStyle: hash_rockets
 
-Style/IndentHash:
+Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 
 Style/Semicolon:
@@ -55,16 +59,23 @@ Style/Semicolon:
 Style/SingleLineBlockParams:
   Enabled: false
 
-Style/TrailingBlankLines:
+Layout/TrailingEmptyLines:
   Exclude:
     - '**/*.pb.rb'
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
 
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
 
 Style/TrivialAccessors:
   AllowDSLWriters: true
   AllowPredicates: true
+
+Style/Encoding:
+  Exclude:
+    - '**/*.pb.rb'
