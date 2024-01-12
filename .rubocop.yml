@@ -6,6 +6,9 @@ AllCops:
     - 'spec/support/protos/*.pb.rb'
     - 'varint_prof.rb'
 
+Bundler/DuplicatedGem:
+  Enabled: false
+
 Layout/EndAlignment:
   EnforcedStyleAlignWith: keyword
 
@@ -24,6 +27,7 @@ Layout/CaseIndentation:
 Style/ClassAndModuleChildren:
   Exclude:
     - '**/*.pb.rb'
+    - 'spec/**/*.rb'
 
 Naming/ClassAndModuleCamelCase:
   Exclude:

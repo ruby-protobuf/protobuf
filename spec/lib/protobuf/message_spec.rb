@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 require 'stringio'
 require 'spec_helper'
 require PROTOS_PATH.join('resource.pb')
