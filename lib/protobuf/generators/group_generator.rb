@@ -4,6 +4,7 @@ require 'protobuf/generators/field_generator'
 require 'protobuf/generators/message_generator'
 require 'protobuf/generators/option_generator'
 require 'protobuf/generators/service_generator'
+require 'protobuf/generators/oneof_group_generator'
 
 module Protobuf
   module Generators
@@ -25,6 +26,12 @@ module Protobuf
 
       def add_options(option_descriptor)
         @groups[:options] << OptionGenerator.new(option_descriptor, indent_level)
+      end
+
+      def add_oneof_groups(field_descriptors, msg_descriptor)
+        return unless msg_descriptor.oneof_decl.length > 0
+
+        @groups[:oneof_group] << OneofGroupGenerator.new(msg_descriptor.oneof_decl, field_descriptors, indent_level)
       end
 
       def add_enums(enum_descriptors, options)

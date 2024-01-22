@@ -1,5 +1,6 @@
 require 'protobuf/message/fields'
 require 'protobuf/message/serialization'
+require 'protobuf/message/oneof_groups'
 require 'protobuf/varint'
 
 module Protobuf
@@ -10,6 +11,7 @@ module Protobuf
     #
 
     extend ::Protobuf::Message::Fields
+    extend ::Protobuf::Message::OneofGroups
     include ::Protobuf::Message::Serialization
     ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::MessageOptions }
 
