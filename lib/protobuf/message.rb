@@ -173,6 +173,7 @@ module Protobuf
       end
       true
     end
+    alias :eql? ==
 
     def [](name)
       field = _protobuf_message_field[name]
@@ -194,6 +195,10 @@ module Protobuf
       else
         fail(::Protobuf::FieldNotDefinedError, name) unless ::Protobuf.ignore_unknown_fields?
       end
+    end
+
+    def hash
+      to_hash.hash
     end
 
     ##
