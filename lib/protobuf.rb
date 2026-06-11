@@ -44,6 +44,8 @@ require 'protobuf/enum'
 require 'protobuf/message'
 require 'protobuf/descriptors'
 
+require 'protobuf/railtie' if defined?(::Rails::Railtie)
+
 module Protobuf
 
   class << self
@@ -114,6 +116,7 @@ end
 unless ENV.key?('PB_NO_NETWORKING')
   require 'protobuf/rpc/client'
   require 'protobuf/rpc/service'
+  require 'protobuf/rpc/application_service'
 
   env_connector_type = ENV.fetch('PB_CLIENT_TYPE') do
     :socket
