@@ -1,7 +1,8 @@
 module Protobuf
   class Decoder
 
-    # Read bytes from +stream+ and pass to +message+ object.
+    # Read bytes from +stream+ and yield (tag, bytes, wire_type) for each field.
+    # A block that takes only (tag, bytes) still works: blocks drop extra arguments.
     def self.decode_each_field(stream)
       until stream.eof?
         bits = Varint.decode(stream)
@@ -21,7 +22,7 @@ module Protobuf
                   fail InvalidWireType, wire_type
                 end
 
-        yield(tag, bytes)
+        yield(tag, bytes, wire_type)
       end
     end
   end

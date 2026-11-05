@@ -116,9 +116,13 @@ module Protobuf
         def initialize(selph)
           @selph = selph
           @name = selph.name
+          @wire_type = selph.wire_type
         end
 
-        def call(message_instance, bytes)
+        # A record whose wire type differs from the field's is skipped, as the
+        # protobuf spec and the reference parsers do.
+        def call(message_instance, bytes, wire_type = nil)
+          return if wire_type && wire_type != @wire_type
           message_instance.set_field(@name, @selph.decode(bytes), true, @selph)
         end
       end
@@ -129,7 +133,7 @@ module Protobuf
           @name = selph.name
         end
 
-        def call(message_instance, bytes)
+        def call(message_instance, bytes, _wire_type = nil)
           hash = message_instance[@name]
           entry = @selph.decode(bytes)
           # decoded value could be nil for an
@@ -139,26 +143,52 @@ module Protobuf
         end
       end
 
+      # Repeated string, bytes, and message fields. These are never packed.
       class RepeatedNotPackedSetMethod
         def initialize(selph)
           @selph = selph
           @name = selph.name
         end
 
-        def call(message_instance, bytes)
+        def call(message_instance, bytes, _wire_type = nil)
           message_instance[@name] << @selph.decode(bytes)
         end
       end
 
-      class RepeatedPackedSetMethod
+      # Repeated scalar numeric fields (varint, fixed32, fixed64). The protobuf
+      # spec requires a parser to accept both the packed and the unpacked
+      # encoding, whatever the field declares. The wire type of each record
+      # selects the decoding: LENGTH_DELIMITED is a packed run, and the field's
+      # own wire type is one value. A record without a wire type (an old
+      # caller of BaseField#set) falls back to the declaration.
+      class RepeatedPackableSetMethod
+        LENGTH_DELIMITED = ::Protobuf::WireType::LENGTH_DELIMITED
+
         def initialize(selph)
           @selph = selph
           @name = selph.name
           @wire_type = selph.wire_type
+          @packed = selph.packed?
         end
 
-        def call(message_instance, bytes)
-          array = message_instance[@name]
+        def call(message_instance, bytes, wire_type = nil)
+          # Most common first: one unpacked value, as this gem encodes by default.
+          if wire_type == @wire_type
+            message_instance[@name] << @selph.decode(bytes)
+          elsif wire_type == LENGTH_DELIMITED
+            decode_packed(message_instance[@name], bytes)
+          elsif wire_type.nil?
+            if @packed
+              decode_packed(message_instance[@name], bytes)
+            else
+              message_instance[@name] << @selph.decode(bytes)
+            end
+          end
+        end
+
+        private
+
+        def decode_packed(array, bytes)
           stream = ::StringIO.new(bytes)
 
           if @wire_type == ::Protobuf::WireType::VARINT

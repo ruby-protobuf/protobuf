@@ -38,8 +38,8 @@ module Protobuf
       # Decode the given stream into this message.
       #
       def decode_from(stream)
-        ::Protobuf::Decoder.decode_each_field(stream) do |tag, bytes|
-          set_field_bytes(tag, bytes)
+        ::Protobuf::Decoder.decode_each_field(stream) do |tag, bytes, wire_type|
+          set_field_bytes(tag, bytes, wire_type)
         end
 
         self
@@ -75,9 +75,9 @@ module Protobuf
 
       private
 
-      def set_field_bytes(tag, bytes)
+      def set_field_bytes(tag, bytes, wire_type = nil)
         field = _protobuf_message_field[tag]
-        field.set(self, bytes) if field
+        field.set(self, bytes, wire_type) if field
       end
 
     end
