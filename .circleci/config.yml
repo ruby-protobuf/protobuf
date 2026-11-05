@@ -1,46 +1,74 @@
 version: 2.1
 
 jobs:
-  # skipping build step because Gemfile.lock is not included in the source
-  # this makes the bundler caching step a noop
-  test:
-    parameters:
-      ruby-image:
-        type: string
+  rubocop:
     docker:
-      - image: << parameters.ruby-image >>
+      - image: cimg/ruby:3.4
     steps:
-      - run:
-          name: Install protobuf compiler
-          command: |
-            archive=protoc-3.16.0-linux-x86_64
-            curl -O -L https://github.com/protocolbuffers/protobuf/releases/download/v3.16.0/$archive.zip
-            sudo unzip -d '/usr/local' $archive.zip 'bin/*' 'include/*'
-            sudo chown -R $(whoami) /usr/local/bin/protoc /usr/local/include/google
-            rm -rf $archive.zip
-      - run:
-          command: protoc --version
-      - run:
-          command: sudo apt-get update
-      - run:
-          message: Install ZeroMQ
-          command: sudo apt-get -y install libzmq3-dev
       - checkout
       - run:
-          command: gem install bundler
+          name: Install gems
+          command: bundle install --jobs 4 --retry 3
       - run:
-          command: bundle install
+          name: RuboCop
+          command: bundle exec rubocop
+
+  test:
+    parameters:
+      ruby:
+        type: string
+      rails:
+        type: string
+    docker:
+      - image: cimg/ruby:<< parameters.ruby >>
+    environment:
+      # Newer protoc versions reject the explicit `map_entry` option in the spec protos.
+      PROTOC_VERSION: "3.16.0"
+      RAILS_VERSION: "~> << parameters.rails >>.0"
+    steps:
+      - checkout
       - run:
-          command: bundle exec rake
+          name: Install ZeroMQ
+          command: sudo apt-get update && sudo apt-get install -y libzmq3-dev
+      - run:
+          name: Install protoc
+          command: |
+            archive="protoc-${PROTOC_VERSION}-linux-x86_64"
+            curl -sSL -o "/tmp/${archive}.zip" \
+              "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${archive}.zip"
+            sudo unzip -q -o -d /usr/local "/tmp/${archive}.zip" 'bin/*' 'include/*'
+            sudo chmod -R a+rX /usr/local/bin/protoc /usr/local/include/google
+            protoc --version
+      # Gemfile.lock is not committed, so each job resolves gems for its own
+      # Ruby and RAILS_VERSION.
+      - run:
+          name: Install gems
+          command: bundle install --jobs 4 --retry 3
+      - run:
+          name: Compile protos
+          command: bundle exec rake compile:spec compile:rpc
+      - run:
+          name: Check compiled protos are committed
+          command: git diff --exit-code
+      - run:
+          name: Run specs
+          command: bundle exec rspec
 
 workflows:
   build_and_test:
     jobs:
+      - rubocop
       - test:
+          name: test-ruby-<< matrix.ruby >>-rails-<< matrix.rails >>
           matrix:
             parameters:
-              ruby-image:
-                - circleci/jruby:9.2.6.0-jdk
-                - circleci/jruby:9.1.17.0-jdk
-                - circleci/ruby:2.5
-                - circleci/ruby:2.7
+              ruby: ["3.1", "3.2", "3.3", "3.4"]
+              rails: ["6.0", "6.1", "7.0", "7.1", "7.2", "8.0", "8.1"]
+            exclude:
+              # Rails 8.0+ requires Ruby 3.2+.
+              - { ruby: "3.1", rails: "8.0" }
+              - { ruby: "3.1", rails: "8.1" }
+              # Rails 6.x does not load on Ruby 3.4: it needs bigdecimal, which
+              # is no longer a default gem, and does not declare it.
+              - { ruby: "3.4", rails: "6.0" }
+              - { ruby: "3.4", rails: "6.1" }

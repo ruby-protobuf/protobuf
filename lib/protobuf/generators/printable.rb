@@ -82,10 +82,19 @@ module Protobuf
         when :enum then
           PARENT_CLASS_ENUM
         when :service then
-          PARENT_CLASS_SERVICE
+          service_parent_class
         else
           fail "Unknown parent class type #{type}: #{caller[0..5].join("\n")}"
         end
+      end
+
+      # PB_SERVICE_PARENT sets the parent class of generated services, for
+      # example `ApplicationService` or `::Protobuf::Rpc::ApplicationService`.
+      # The parent class must be loaded before the generated file.
+      #
+      def service_parent_class
+        parent = ENV['PB_SERVICE_PARENT'].to_s.strip
+        parent.empty? ? PARENT_CLASS_SERVICE : parent
       end
 
       # Print a class or module block, indicated by type.

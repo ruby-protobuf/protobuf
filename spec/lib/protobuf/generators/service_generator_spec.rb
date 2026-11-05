@@ -95,5 +95,28 @@ EOF
         expect(subject.to_s).to eq(compiled)
       end
     end
+
+    context 'with PB_SERVICE_PARENT in the environment' do
+      let(:service_parent) { ' ::Protobuf::Rpc::ApplicationService ' }
+
+      before do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with('PB_SERVICE_PARENT').and_return(service_parent)
+      end
+
+      it 'uses the given parent class' do
+        subject.compile
+        expect(subject.to_s).to start_with("class TestService < ::Protobuf::Rpc::ApplicationService\n")
+      end
+
+      context 'when it is empty' do
+        let(:service_parent) { '' }
+
+        it 'uses ::Protobuf::Rpc::Service' do
+          subject.compile
+          expect(subject.to_s).to eq(compiled)
+        end
+      end
+    end
   end
 end

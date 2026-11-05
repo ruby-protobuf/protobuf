@@ -44,6 +44,10 @@ require 'protobuf/enum'
 require 'protobuf/message'
 require 'protobuf/descriptors'
 
+# Rails runs this hook when the application class is defined. That works even
+# when protobuf loads before Rails, as `rpc_server` does.
+::ActiveSupport.on_load(:before_configuration) { require 'protobuf/railtie' }
+
 module Protobuf
 
   class << self
@@ -114,6 +118,7 @@ end
 unless ENV.key?('PB_NO_NETWORKING')
   require 'protobuf/rpc/client'
   require 'protobuf/rpc/service'
+  require 'protobuf/rpc/application_service'
 
   env_connector_type = ENV.fetch('PB_CLIENT_TYPE') do
     :socket

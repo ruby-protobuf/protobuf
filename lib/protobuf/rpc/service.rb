@@ -1,3 +1,4 @@
+require 'active_support/core_ext/class/subclasses'
 require 'protobuf/logging'
 require 'protobuf/message'
 require 'protobuf/rpc/client'
@@ -65,15 +66,18 @@ module Protobuf
       end
 
       # An array of defined service classes that contain implementation
-      # code
+      # code. Walks the full descendant tree so intermediate parents
+      # (e.g. ApplicationService) don't hide the real services from
+      # discovery.
       def self.implemented_services
-        classes = (subclasses || []).select do |subclass|
+        classes = descendants.select do |subclass|
           subclass.rpcs.any? do |(name, _)|
             subclass.method_defined? name
           end
         end
 
-        classes.map(&:name)
+        # Dev reloads can leave nameless/duplicate classes in `descendants`.
+        classes.map(&:name).compact.uniq
       end
 
       # Shorthand call to configure, passing a string formatted as hostname:port

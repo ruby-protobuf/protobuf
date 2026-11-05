@@ -1,3 +1,5 @@
+require 'active_support/core_ext/class/subclasses'
+
 module Protobuf
   module Rpc
     module ServiceFilters
@@ -34,23 +36,51 @@ module Protobuf
           @rescue_filters ||= {}
         end
 
+        # A subclass gets the filters of its parent, so a base class such as
+        # ApplicationService can hold shared filters. A filter that the parent
+        # adds later also goes to existing subclasses (after their own filters).
+        def inherited(subclass)
+          super
+          subclass.inherit_filters_from(self)
+        end
+
         def rescue_from(*ex_klasses, &block)
           options = ex_klasses.last.is_a?(Hash) ? ex_klasses.pop : {}
           callable = options.delete(:with) { block }
           fail ArgumentError, 'Option :with missing from rescue_from options' if callable.nil?
-          ex_klasses.each { |ex_klass| rescue_filters[ex_klass] = callable }
+          ex_klasses.each do |ex_klass|
+            inherited_callable = rescue_filters[ex_klass]
+            rescue_filters[ex_klass] = callable
+            descendants.each do |klass|
+              # A subclass keeps a handler that it defined itself.
+              current = klass.rescue_filters[ex_klass]
+              klass.rescue_filters[ex_klass] = callable if current.nil? || current.equal?(inherited_callable)
+            end
+          end
         end
 
-        private
+        protected
 
-        def define_filter(type, filter, options = {})
+        def inherit_filters_from(parent)
+          parent.filters.each { |type, list| filters[type] = list.dup }
+          parent.defined_filters.each { |type, set| defined_filters[type] = set.dup }
+          rescue_filters.merge!(parent.rescue_filters)
+        end
+
+        def defined_filters
+          @defined_filters ||= Hash.new { |h, k| h[k] = Set.new }
+        end
+
+        def add_filter(type, filter, options)
           return if filter_defined?(type, filter)
           filters[type] << options.merge(:callable => filter)
           remember_filter(type, filter)
         end
 
-        def defined_filters
-          @defined_filters ||= Hash.new { |h, k| h[k] = Set.new }
+        private
+
+        def define_filter(type, filter, options = {})
+          ([self] + descendants).each { |klass| klass.add_filter(type, filter, options) }
         end
 
         # Check to see if the filter has been defined.

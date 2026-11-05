@@ -2,6 +2,9 @@ inherit_from: .rubocop_todo.yml
 
 AllCops:
   DisplayCopNames: true
+  # The newest version RuboCop 0.81 knows. Without it, RuboCop reads the Ruby
+  # version from .ruby-version or Gemfile.lock and fails on Ruby 3.x.
+  TargetRubyVersion: 2.7
   Exclude:
     - 'spec/support/protos/*.pb.rb'
     - 'varint_prof.rb'
@@ -79,3 +82,8 @@ Style/TrivialAccessors:
 Style/Encoding:
   Exclude:
     - '**/*.pb.rb'
+
+# TargetRubyVersion (2.7) cannot match required_ruby_version (>= 3.1), because
+# RuboCop 0.81 does not know Ruby 3.x.
+Gemspec/RequiredRubyVersion:
+  Enabled: false
