@@ -16,6 +16,15 @@ module Protobuf
         0
       end
 
+      ##
+      # Public Instance Methods
+      #
+
+      # Keep the low 32 bits, as the reference parsers do.
+      def decode(value)
+        value & 0xffff_ffff
+      end
+
     end
   end
 end

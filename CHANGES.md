@@ -12,6 +12,10 @@
   or raise `NoMethodError`/`TypeError` for string, bytes, message, and map
   fields.
 - Decode any non-zero bool varint as `true`.
+- An `int32`, `uint32`, or `sint32` field keeps the low 32 bits of a wider
+  varint, as the reference parsers do. Before, a peer that sent an int64 value
+  for the field (a compatible schema change) made the whole decode raise
+  `TypeError`.
 - Support Ruby 4.0. CircleCI also tests Ruby 4.0, JRuby 9.4, and JRuby 10.0.
 - Require Ruby >= 3.1 and ActiveSupport >= 6.0.
 - Add `Protobuf::Rpc::ApplicationService`, a base class for application services.
