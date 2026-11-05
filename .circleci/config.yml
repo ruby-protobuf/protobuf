@@ -54,6 +54,45 @@ jobs:
           name: Run specs
           command: bundle exec rspec
 
+  test-jruby:
+    parameters:
+      jruby:
+        type: string
+      rails:
+        type: string
+    docker:
+      - image: jruby:<< parameters.jruby >>
+    environment:
+      PROTOC_VERSION: "3.16.0"
+      RAILS_VERSION: "~> << parameters.rails >>.0"
+      JRUBY_OPTS: "--dev"
+    steps:
+      # The jruby image has no git, so install it before checkout.
+      - run:
+          name: Install system packages
+          command: apt-get update && apt-get install -y git unzip build-essential libzmq3-dev
+      - checkout
+      - run:
+          name: Install protoc
+          command: |
+            archive="protoc-${PROTOC_VERSION}-linux-x86_64"
+            curl -sSL -o "/tmp/${archive}.zip" \
+              "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${archive}.zip"
+            unzip -q -o -d /usr/local "/tmp/${archive}.zip" 'bin/*' 'include/*'
+            protoc --version
+      - run:
+          name: Install gems
+          command: bundle install --jobs 4 --retry 3
+      - run:
+          name: Compile protos
+          command: bundle exec rake compile:spec compile:rpc
+      - run:
+          name: Check compiled protos are committed
+          command: git diff --exit-code
+      - run:
+          name: Run specs
+          command: bundle exec rspec
+
 workflows:
   build_and_test:
     jobs:
@@ -72,3 +111,17 @@ workflows:
               # is no longer a default gem, and does not declare it.
               - { ruby: "3.4", rails: "6.0" }
               - { ruby: "3.4", rails: "6.1" }
+      - test-jruby:
+          name: test-jruby-<< matrix.jruby >>-rails-<< matrix.rails >>
+          matrix:
+            parameters:
+              # JRuby 9.4 is Ruby 3.1; JRuby 10.0 is Ruby 3.4.
+              jruby: ["9.4", "10.0"]
+              rails: ["6.1", "7.1", "7.2", "8.0", "8.1"]
+            exclude:
+              # Rails 8.0+ requires Ruby 3.2+.
+              - { jruby: "9.4", rails: "8.0" }
+              - { jruby: "9.4", rails: "8.1" }
+              # Rails 6.x does not load on Ruby 3.4 (base64 and bigdecimal are
+              # no longer default gems).
+              - { jruby: "10.0", rails: "6.1" }
