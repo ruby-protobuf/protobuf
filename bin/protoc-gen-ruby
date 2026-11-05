@@ -16,7 +16,23 @@ require 'protobuf/code_generator'
 STDIN.binmode
 STDOUT.binmode
 
-request_bytes = STDIN.read
+request_bytes = if ENV['PB_LOAD_REQUEST_BYTES']
+                  File.read(ENV['PB_LOAD_REQUEST_BYTES'])
+                else
+                  STDIN.read
+                end
+if ENV['PB_DUMP_REQUEST_BYTES']
+  dump_file = ENV['PB_DUMP_REQUEST_BYTES']
+  unless File.directory?(File.dirname(dump_file))
+    warn "PB_DUMP_REQUEST_BYTES=#{dump_file.inspect} is not a valid path for the request bytes"
+    warn "Usage: PB_DUMP_REQUEST_BYTES=/path/to/desired/dump/file.bin protoc blah.proto"
+    exit 1
+  end
+  File.open(dump_file, 'w') do |f|
+    f.print(request_bytes)
+  end
+  exit 1
+end
 code_generator = ::Protobuf::CodeGenerator.new(request_bytes)
 code_generator.eval_unknown_extensions!
 STDOUT.print(code_generator.response_bytes)
