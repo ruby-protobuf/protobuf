@@ -1,7 +1,25 @@
 # Stable (3.8.x)
 
-Unreleased
-----------
+3.10.10
+-------
+- Decode repeated scalar fields by the wire type of each record, not by the
+  `packed` declaration. Packed input (the proto3 default in Go, Java, C++ and
+  google-protobuf) for a field without `packed` no longer decodes bools as
+  `false`, raises on integers and enums, or drops all but the first
+  fixed32/float/double value. (#438, #330, #414)
+- Skip a record whose wire type does not match its known field, as the
+  reference parsers do. Before, such a record could decode to a wrong value
+  or raise `NoMethodError`/`TypeError` for string, bytes, message, and map
+  fields.
+- Decode any non-zero bool varint as `true`.
+- An `int32`, `uint32`, or `sint32` field keeps the low 32 bits of a wider
+  varint, as the reference parsers do. Before, a peer that sent an int64 value
+  for the field (a compatible schema change) made the whole decode raise
+  `TypeError`.
+- Skip a group (wire types 3 and 4, from proto2 groups or editions `DELIMITED`
+  encoding) as an unknown field. Before, the decode raised
+  `Protobuf::InvalidWireType`.
+- Support Ruby 4.0. CircleCI also tests Ruby 4.0, JRuby 9.4, and JRuby 10.0.
 - Require Ruby >= 3.1 and ActiveSupport >= 6.0.
 - Add `Protobuf::Rpc::ApplicationService`, a base class for application services.
 - `Service.implemented_services` walks all descendants, not only direct subclasses.

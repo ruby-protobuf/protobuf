@@ -287,8 +287,8 @@ module Protobuf
       def define_set_method!
         @set_method = if map?
                         OBJECT_MODULE::MapSetMethod.new(self)
-                      elsif repeated? && packed?
-                        OBJECT_MODULE::RepeatedPackedSetMethod.new(self)
+                      elsif repeated? && packable?
+                        OBJECT_MODULE::RepeatedPackableSetMethod.new(self)
                       elsif repeated?
                         OBJECT_MODULE::RepeatedNotPackedSetMethod.new(self)
                       else
@@ -296,8 +296,16 @@ module Protobuf
                       end
       end
 
-      def set(message_instance, bytes)
-        @set_method.call(message_instance, bytes)
+      # Whether the field's type can use the packed encoding (scalar numeric
+      # types). This is about the type, not about the `packed` option.
+      def packable?
+        ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
+      end
+
+      # +wire_type+ is the wire type of the record that +bytes+ came from. It is
+      # nil for callers that do not know it; then the field declaration decides.
+      def set(message_instance, bytes, wire_type = nil)
+        @set_method.call(message_instance, bytes, wire_type)
       end
 
       def tag_encoded
@@ -372,7 +380,7 @@ module Protobuf
       end
 
       def validate_packed_field
-        if packed? && ! ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
+        if packed? && !packable?
           fail "Can't use packed encoding for '#{type_class}' type"
         end
       end

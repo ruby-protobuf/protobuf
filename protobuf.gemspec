@@ -25,6 +25,8 @@ require "protobuf/version"
   s.add_dependency 'thor'
   s.add_dependency 'thread_safe'
 
+  # Ruby 4.0 no longer loads benchmark from the standard library.
+  s.add_development_dependency 'benchmark'
   s.add_development_dependency 'benchmark-ips'
   s.add_development_dependency 'ffi-rzmq'
   s.add_development_dependency 'railties', '>= 6.0'

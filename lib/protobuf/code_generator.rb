@@ -63,7 +63,14 @@ module Protobuf
       def define_set_method!
       end
 
-      def set_without_options(message_instance, bytes)
+      # Same rules as the set methods in BaseFieldObjectDefinitions: a packable
+      # repeated field decodes by the record's wire type, not its declaration.
+      def set_without_options(message_instance, bytes, record_wire_type = nil)
+        if repeated? && packable?
+          return set_packable_without_options(message_instance[name], bytes, record_wire_type)
+        end
+
+        return if record_wire_type && record_wire_type != wire_type
         return message_instance[name] = decode(bytes) unless repeated?
 
         if map?
@@ -75,9 +82,14 @@ module Protobuf
           return hash[entry.key]
         end
 
-        return message_instance[name] << decode(bytes) unless packed?
+        message_instance[name] << decode(bytes)
+      end
 
-        array = message_instance[name]
+      def set_packable_without_options(array, bytes, record_wire_type)
+        record_wire_type ||= packed? ? ::Protobuf::WireType::LENGTH_DELIMITED : wire_type
+        return array << decode(bytes) if record_wire_type == wire_type
+        return unless record_wire_type == ::Protobuf::WireType::LENGTH_DELIMITED
+
         stream = StringIO.new(bytes)
 
         if wire_type == ::Protobuf::WireType::VARINT
@@ -92,7 +104,7 @@ module Protobuf
       # Sets a MessageField that is known to be an option.
       # We must allow fields to be set one at a time, as option syntax allows us to
       # set each field within the option using a separate "option" line.
-      def set_with_options(message_instance, bytes)
+      def set_with_options(message_instance, bytes, record_wire_type = nil)
         if message_instance[name].is_a?(::Protobuf::Message)
           gp = Google::Protobuf
           if message_instance.is_a?(gp::EnumOptions) || message_instance.is_a?(gp::EnumValueOptions) ||
@@ -109,7 +121,7 @@ module Protobuf
           end
         end
 
-        set_without_options(message_instance, bytes)
+        set_without_options(message_instance, bytes, record_wire_type)
       end
       alias_method :set, :set_with_options
 
