@@ -1,5 +1,17 @@
 # Stable (3.8.x)
 
+Unreleased
+----------
+- Require Ruby >= 3.1 and ActiveSupport >= 6.0.
+- Add `Protobuf::Rpc::ApplicationService`, a base class for application services.
+- `Service.implemented_services` walks all descendants, not only direct subclasses.
+- Add `Protobuf::Railtie`. Set `config.protobuf.services_path` to load that
+  directory when the RPC server binds, so dynamic discovery sees lazily loaded
+  services.
+- Service filters and `rescue_from` handlers now pass from a parent class to
+  its subclasses.
+- Add `PB_SERVICE_PARENT` to set the parent class of generated services.
+
 
 3.10.0
 ------
