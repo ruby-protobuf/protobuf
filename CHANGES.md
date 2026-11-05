@@ -16,6 +16,9 @@
   varint, as the reference parsers do. Before, a peer that sent an int64 value
   for the field (a compatible schema change) made the whole decode raise
   `TypeError`.
+- Skip a group (wire types 3 and 4, from proto2 groups or editions `DELIMITED`
+  encoding) as an unknown field. Before, the decode raised
+  `Protobuf::InvalidWireType`.
 - Support Ruby 4.0. CircleCI also tests Ruby 4.0, JRuby 9.4, and JRuby 10.0.
 - Require Ruby >= 3.1 and ActiveSupport >= 6.0.
 - Add `Protobuf::Rpc::ApplicationService`, a base class for application services.
