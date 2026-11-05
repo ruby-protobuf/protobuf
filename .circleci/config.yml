@@ -40,7 +40,7 @@ workflows:
           matrix:
             parameters:
               ruby-image:
-                - circleci/jruby:9.2.6.0-jdk
-                - circleci/jruby:9.1.17.0-jdk
-                - circleci/ruby:2.5
-                - circleci/ruby:2.7
+                - cimg/ruby:3.1
+                - cimg/ruby:3.2
+                - cimg/ruby:3.3
+                - cimg/ruby:3.4

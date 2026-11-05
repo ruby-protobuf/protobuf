@@ -79,3 +79,8 @@ Style/TrivialAccessors:
 Style/Encoding:
   Exclude:
     - '**/*.pb.rb'
+
+# RuboCop 0.81 cannot target Ruby newer than 2.7, so TargetRubyVersion cannot
+# match required_ruby_version (>= 3.1).
+Gemspec/RequiredRubyVersion:
+  Enabled: false
