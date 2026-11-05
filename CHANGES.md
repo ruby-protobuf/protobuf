@@ -6,8 +6,11 @@
   `packed` declaration. Packed input (the proto3 default in Go, Java, C++ and
   google-protobuf) for a field without `packed` no longer decodes bools as
   `false`, raises on integers and enums, or drops all but the first
-  fixed32/float/double value. A record with the wrong wire type for a known
-  field is skipped. (#438, #330, #414)
+  fixed32/float/double value. (#438, #330, #414)
+- Skip a record whose wire type does not match its known field, as the
+  reference parsers do. Before, such a record could decode to a wrong value
+  or raise `NoMethodError`/`TypeError` for string, bytes, message, and map
+  fields.
 - Decode any non-zero bool varint as `true`.
 - Support Ruby 4.0. CircleCI also tests Ruby 4.0, JRuby 9.4, and JRuby 10.0.
 - Require Ruby >= 3.1 and ActiveSupport >= 6.0.

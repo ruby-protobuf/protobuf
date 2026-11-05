@@ -66,10 +66,12 @@ module Protobuf
       # Same rules as the set methods in BaseFieldObjectDefinitions: a packable
       # repeated field decodes by the record's wire type, not its declaration.
       def set_without_options(message_instance, bytes, record_wire_type = nil)
-        unless repeated?
-          return if record_wire_type && record_wire_type != wire_type
-          return message_instance[name] = decode(bytes)
+        if repeated? && packable?
+          return set_packable_without_options(message_instance[name], bytes, record_wire_type)
         end
+
+        return if record_wire_type && record_wire_type != wire_type
+        return message_instance[name] = decode(bytes) unless repeated?
 
         if map?
           hash = message_instance[name]
@@ -80,9 +82,7 @@ module Protobuf
           return hash[entry.key]
         end
 
-        return message_instance[name] << decode(bytes) unless packable?
-
-        set_packable_without_options(message_instance[name], bytes, record_wire_type)
+        message_instance[name] << decode(bytes)
       end
 
       def set_packable_without_options(array, bytes, record_wire_type)

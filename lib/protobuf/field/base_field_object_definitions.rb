@@ -131,9 +131,11 @@ module Protobuf
         def initialize(selph)
           @selph = selph
           @name = selph.name
+          @wire_type = selph.wire_type
         end
 
-        def call(message_instance, bytes, _wire_type = nil)
+        def call(message_instance, bytes, wire_type = nil)
+          return if wire_type && wire_type != @wire_type
           hash = message_instance[@name]
           entry = @selph.decode(bytes)
           # decoded value could be nil for an
@@ -148,9 +150,11 @@ module Protobuf
         def initialize(selph)
           @selph = selph
           @name = selph.name
+          @wire_type = selph.wire_type
         end
 
-        def call(message_instance, bytes, _wire_type = nil)
+        def call(message_instance, bytes, wire_type = nil)
+          return if wire_type && wire_type != @wire_type
           message_instance[@name] << @selph.decode(bytes)
         end
       end

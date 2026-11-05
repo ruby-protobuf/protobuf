@@ -44,6 +44,7 @@ RSpec.describe 'Decoding packed and unpacked repeated scalar fields' do
       optional :int32, :i32, 1
       optional :bool, :b, 7
       optional :string, :str, 15
+      map :string, :int32, :counts, 16
     end
   end
 
@@ -198,6 +199,17 @@ RSpec.describe 'Decoding packed and unpacked repeated scalar fields' do
       bytes = tag(29, ::Protobuf::WireType::VARINT) + varint(5) + len(21, "\x01".b)
       message = PackedDecodingSpec::Unpacked.decode(bytes)
       expect([message.r_f32.to_a, message.r_i32.to_a]).to eq([[], [1]])
+    end
+
+    it 'is skipped for a repeated string field' do
+      bytes = tag(35, ::Protobuf::WireType::VARINT) + varint(5) + len(35, 'ok')
+      expect(PackedDecodingSpec::Unpacked.decode(bytes).r_str.to_a).to eq(['ok'])
+    end
+
+    it 'is skipped for a map field' do
+      entry = len(1, 'a') + tag(2, ::Protobuf::WireType::VARINT) + varint(3)
+      bytes = tag(16, ::Protobuf::WireType::VARINT) + varint(5) + len(16, entry)
+      expect(PackedDecodingSpec::Singular.decode(bytes).counts.to_h).to eq('a' => 3)
     end
   end
 

@@ -380,7 +380,7 @@ module Protobuf
       end
 
       def validate_packed_field
-        if packed? && ! ::Protobuf::Field::BaseField::PACKED_TYPES.include?(wire_type)
+        if packed? && !packable?
           fail "Can't use packed encoding for '#{type_class}' type"
         end
       end
