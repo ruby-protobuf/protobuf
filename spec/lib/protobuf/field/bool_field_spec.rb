@@ -53,6 +53,27 @@ RSpec.describe Protobuf::Field::BoolField do
     end
   end
 
+  describe '#decode' do
+    subject { described_class.new(SomeBoolMessage, :optional, described_class, :b, 1, :b, {}) }
+
+    it 'decodes 0 as false' do
+      expect(subject.decode(0)).to be(false)
+    end
+
+    it 'decodes 1 as true' do
+      expect(subject.decode(1)).to be(true)
+    end
+
+    it 'decodes any other non-zero varint as true, like the reference parsers' do
+      expect(subject.decode(2)).to be(true)
+      expect(subject.decode(0xffff_ffff_ffff_ffff)).to be(true)
+    end
+  end
+
+  it 'decodes a non-canonical varint (2) on the wire as true' do
+    expect(SomeBoolMessage.decode("\x08\x02".b).some_bool).to be(true)
+  end
+
   it 'defines ? method' do
     instance.required_bool = false
     expect(instance.required_bool?).to be(false)
