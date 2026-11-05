@@ -15,12 +15,12 @@ RSpec.describe Protobuf::ServiceLoader do
     let(:tracker) { [] }
 
     before do
-      # Expose the tracker globally so files loaded via `load` can reach it.
-      $service_loader_spec_tracker = tracker
+      # Expose the tracker globally so the required files can reach it.
+      $service_loader_spec_tracker = tracker # rubocop:disable Style/GlobalVars
     end
 
     after do
-      $service_loader_spec_tracker = nil
+      $service_loader_spec_tracker = nil # rubocop:disable Style/GlobalVars
     end
 
     def write_service(relative_path, marker)
@@ -38,14 +38,15 @@ RSpec.describe Protobuf::ServiceLoader do
       expect(described_class.load_services('/no/such/dir/here')).to eq([])
     end
 
-    it 'loads every *_service.rb file under the path' do
+    it 'loads every .rb file under the path' do
       write_service('foo_service.rb', 'foo')
       write_service('nested/bar_service.rb', 'bar')
-      write_service('ignore_me.rb', 'nope')
+      write_service('helper.rb', 'helper')
+      write_service('notes.txt', 'nope')
 
       described_class.load_services(@services_dir)
 
-      expect(tracker).to contain_exactly('foo', 'bar')
+      expect(tracker).to contain_exactly('foo', 'bar', 'helper')
     end
 
     it 'loads files in deterministic (sorted) order' do
@@ -55,16 +56,16 @@ RSpec.describe Protobuf::ServiceLoader do
 
       described_class.load_services(@services_dir)
 
-      expect(tracker).to eq(%w(a b c))
+      expect(tracker).to eq(%w[a b c])
     end
 
-    it 're-executes files on subsequent calls (Rails to_prepare reload semantics)' do
-      write_service('reload_service.rb', 'one')
+    it 'does not execute a file a second time on later calls' do
+      write_service('once_service.rb', 'one')
 
       described_class.load_services(@services_dir)
       described_class.load_services(@services_dir)
 
-      expect(tracker).to eq(%w(one one))
+      expect(tracker).to eq(%w[one])
     end
 
     it 'accepts a Pathname for the path' do

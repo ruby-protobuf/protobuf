@@ -1,18 +1,20 @@
 module Protobuf
-  # Loads service classes from a directory tree so that
-  # `Protobuf::Rpc::Service.subclasses` is populated before the RPC server
-  # asks for `implemented_services`. Needed because Zeitwerk autoloading is
-  # lazy and `subclasses` only returns classes that have been loaded.
+  # Requires every Ruby file below a directory, in sorted order. Protobuf::Railtie
+  # uses it when the main autoloader cannot eager-load the services directory
+  # (classic autoloader, Zeitwerk < 2.6.2, or a path outside the main loader).
+  #
+  # It uses `require`, not `load`. Zeitwerk tracks `require` of the files it
+  # manages, and a file never executes two times.
   module ServiceLoader
-    DEFAULT_GLOB = '**/*_service.rb'.freeze
+    DEFAULT_GLOB = '**/*.rb'.freeze
 
     def self.load_services(path, glob = DEFAULT_GLOB)
       return [] if path.nil?
-      dir = path.to_s
+      dir = ::File.expand_path(path.to_s)
       return [] unless ::File.directory?(dir)
 
       ::Dir.glob(::File.join(dir, glob)).sort.each do |file|
-        load file
+        require file
       end
     end
   end

@@ -76,7 +76,8 @@ module Protobuf
           end
         end
 
-        classes.map(&:name)
+        # Dev reloads can leave nameless/duplicate classes in `descendants`.
+        classes.map(&:name).compact.uniq
       end
 
       # Shorthand call to configure, passing a string formatted as hostname:port

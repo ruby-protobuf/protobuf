@@ -13,7 +13,10 @@ RSpec.describe Protobuf::Rpc::ApplicationService do
   describe 'integration with implemented_services' do
     let!(:app_subclass) do
       Class.new(described_class) do
-        def self.name; 'ImplementedAppSubclassService'; end
+        def self.name
+          'ImplementedAppSubclassService'
+        end
+
         rpc :find, Test::ResourceFindRequest, Test::Resource
         def find; end
       end
@@ -21,16 +24,19 @@ RSpec.describe Protobuf::Rpc::ApplicationService do
 
     let!(:abstract_subclass) do
       Class.new(described_class) do
-        def self.name; 'AbstractAppSubclassService'; end
+        def self.name
+          'AbstractAppSubclassService'
+        end
+
         rpc :find, Test::ResourceFindRequest, Test::Resource
         # no #find method defined -> not "implemented"
       end
     end
 
     after do
-      # `descendants` walks the live class tree; remove anonymous classes
-      # so they don't leak into other specs.
-      ObjectSpace.garbage_collect
+      # `descendants` holds these classes until GC, which can run late. Remove
+      # the rpc method so other specs do not see this class as implemented.
+      app_subclass.send(:remove_method, :find)
     end
 
     it 'is discovered by Service.implemented_services (descendants traversal)' do
