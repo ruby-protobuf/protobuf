@@ -11,6 +11,7 @@ Unreleased
 - Service filters and `rescue_from` handlers now pass from a parent class to
   its subclasses.
 - Add `PB_SERVICE_PARENT` to set the parent class of generated services.
+- CircleCI tests Ruby 3.1 to 3.4 with Rails 6.0 to 8.1, and runs RuboCop.
 
 
 3.10.0
