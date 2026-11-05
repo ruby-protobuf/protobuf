@@ -9,7 +9,7 @@
   fixed32/float/double value. A record with the wrong wire type for a known
   field is skipped. (#438, #330, #414)
 - Decode any non-zero bool varint as `true`.
-- CircleCI also tests JRuby 9.4 and 10.0.
+- Support Ruby 4.0. CircleCI also tests Ruby 4.0, JRuby 9.4, and JRuby 10.0.
 - Require Ruby >= 3.1 and ActiveSupport >= 6.0.
 - Add `Protobuf::Rpc::ApplicationService`, a base class for application services.
 - `Service.implemented_services` walks all descendants, not only direct subclasses.
