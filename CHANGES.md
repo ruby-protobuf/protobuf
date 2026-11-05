@@ -1,7 +1,7 @@
 # Stable (3.8.x)
 
-Unreleased
-----------
+3.10.10
+-------
 - Decode repeated scalar fields by the wire type of each record, not by the
   `packed` declaration. Packed input (the proto3 default in Go, Java, C++ and
   google-protobuf) for a field without `packed` no longer decodes bools as
@@ -9,6 +9,7 @@ Unreleased
   fixed32/float/double value. A record with the wrong wire type for a known
   field is skipped. (#438, #330, #414)
 - Decode any non-zero bool varint as `true`.
+- CircleCI also tests JRuby 9.4 and 10.0.
 - Require Ruby >= 3.1 and ActiveSupport >= 6.0.
 - Add `Protobuf::Rpc::ApplicationService`, a base class for application services.
 - `Service.implemented_services` walks all descendants, not only direct subclasses.
