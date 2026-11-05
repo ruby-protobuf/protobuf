@@ -38,8 +38,9 @@ module Protobuf
         end
       end
 
+      # Any non-zero varint is true, as in the reference parsers.
       def decode(value)
-        value == ONE
+        value != 0
       end
 
       def encode(value)
