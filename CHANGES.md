@@ -1,5 +1,14 @@
 # Stable (3.8.x)
 
+3.10.10
+-------
+- Decode repeated scalar fields by the wire type of each record, not by the
+  `packed` declaration. Packed input (the proto3 default in Go, Java, C++ and
+  google-protobuf) for a field without `packed` no longer decodes bools as
+  `false`, raises on integers and enums, or drops all but the first
+  fixed32/float/double value. A record with the wrong wire type for a known
+  field is skipped. (#438, #330, #414)
+- Decode any non-zero bool varint as `true`.
 
 3.10.0
 ------
