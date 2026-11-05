@@ -1,5 +1,11 @@
 # Stable (3.8.x)
 
+Unreleased
+----------
+- Require Ruby >= 3.1 and ActiveSupport >= 6.0.
+- Replace CircleCI with GitHub Actions. CI tests Ruby 3.1 to 3.4 with Rails 6.0
+  to 8.1, and runs RuboCop.
+
 
 3.10.0
 ------

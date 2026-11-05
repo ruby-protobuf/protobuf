@@ -2,6 +2,12 @@ source 'https://rubygems.org'
 
 gemspec
 
+# CI sets RAILS_VERSION (for example "~> 6.1.0") to test each supported Rails.
+if (rails_version = ENV['RAILS_VERSION'])
+  gem 'activesupport', rails_version
+  gem 'railties', rails_version
+end
+
 group :development do
   # debuggers only work in MRI
   if RUBY_ENGINE.to_sym == :ruby

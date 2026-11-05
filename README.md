@@ -1,7 +1,7 @@
 # protobuf
 
 [![Gem Version](https://badge.fury.io/rb/protobuf.svg)](http://badge.fury.io/rb/protobuf)
-[![Build Status](https://secure.travis-ci.org/ruby-protobuf/protobuf.svg?branch=master)](https://travis-ci.org/ruby-protobuf/protobuf)
+[![CI](https://github.com/skunkworker/protobuf/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/skunkworker/protobuf/actions/workflows/ci.yml)
 [![Gitter chat](https://badges.gitter.im/ruby-protobuf/protobuf.svg)](https://gitter.im/ruby-protobuf/protobuf)
 [![protobuf API Documentation](https://www.omniref.com/ruby/gems/protobuf.png)](https://www.omniref.com/ruby/gems/protobuf)
 
