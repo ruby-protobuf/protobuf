@@ -6,6 +6,12 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
+# RuboCop 0.81 validates this file alone, before it merges it into
+# .rubocop.yml, so it needs its own TargetRubyVersion. Keep it equal to the
+# value in .rubocop.yml.
+AllCops:
+  TargetRubyVersion: 2.7
+
 # Offense count: 1
 # Cop supports --auto-correct.
 # Configuration parameters: TreatCommentsAsGroupSeparators, Include.
