@@ -186,6 +186,12 @@ module Protobuf
       set_field(name, value, true)
     end
 
+    # The values hash, keyed by fully qualified field name. The decode set
+    # methods in BaseFieldObjectDefinitions write decoded values to it.
+    def _protobuf_message_values
+      @values
+    end
+
     def set_field(name, value, ignore_nil_for_repeated, field = nil)
       field ||= _protobuf_message_field[name]
 

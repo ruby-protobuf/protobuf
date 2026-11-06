@@ -2,6 +2,11 @@ module Protobuf
   module Field
     class FieldArray < Array
 
+      # Array#push without normalize, for a value that the field decoded. A
+      # decoded value already has the type of the field. This alias must come
+      # before the push method below, so that it copies Array#push.
+      alias push_decoded push
+
       ##
       # Attributes
       #

@@ -1,5 +1,21 @@
 # Stable (3.8.x)
 
+Unreleased
+----------
+- Decode is faster. Decode writes each decoded value to the message and does
+  not send it through the setters again. A 262-byte message decodes 15-30%
+  faster on MRI 3.4, about 50% faster on JRuby 9.4, and 60-70% faster on
+  JRuby 10.0. Adapted from #297.
+- `VarintPure#decode` is faster. MRI apps without the optional `varint` gem
+  use it: decode is a further 25% faster without a JIT, or 45-60% with YJIT.
+- Encode is 12-25% faster on MRI, about 10% faster on JRuby 10.0, and up to
+  5% faster on JRuby 9.4. `VarintField.encode` returns a frozen string from a
+  cache for values below 16384. Code that changes the string that it returns
+  must change a copy.
+- Values that you add to a decoded repeated field are still normalized and
+  checked, as before.
+
+
 3.10.10
 -------
 - Decode repeated scalar fields by the wire type of each record, not by the

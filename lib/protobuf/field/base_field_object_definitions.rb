@@ -112,18 +112,88 @@ module Protobuf
         end
       end
 
-      class BaseSetMethod
-        def initialize(selph)
+      # The decode set methods below write a decoded value to the values hash
+      # of the message. They do not call coerce! or FieldArray#normalize,
+      # because a decoded value already has the type of the field, with two
+      # exceptions that DecodedValue handles. Adapted from #297 (abrandoned).
+      module DecodedValue
+        # Values that the field type cannot hold go through coerce! or
+        # normalize, which raise TypeError as before.
+        OUT_OF_RANGE = ::Object.new.freeze
+
+        private
+
+        def setup_decoded_value(selph)
           @selph = selph
           @name = selph.name
           @wire_type = selph.wire_type
+          @fully_qualified_name = selph.fully_qualified_name
+          # EnumField#decode returns the tag as an Integer, or nil for a tag
+          # that the enum does not define. The values hash holds Enum objects.
+          @enum_class = selph.type_class if selph.enum?
+          # A varint can hold more than 64 bits. The 64-bit fields (int64,
+          # uint64, sint64) decode such a value to a number out of their range.
+          # The fixed-width fields are subclasses of these classes, but they
+          # cannot decode to a number out of range, so they do not check.
+          if selph.wire_type == ::Protobuf::WireType::VARINT && selph.class.respond_to?(:max)
+            @min = selph.class.min
+            @max = selph.class.max
+          end
+        end
+
+        # The value to store, nil for no value, or OUT_OF_RANGE.
+        def decoded_value(value)
+          if @enum_class
+            value && @enum_class.fetch(value)
+          elsif @max && (value > @max || value < @min)
+            OUT_OF_RANGE
+          else
+            value
+          end
+        end
+
+        def values_array(message_instance)
+          message_instance._protobuf_message_values[@fully_qualified_name] ||= ::Protobuf::Field::FieldArray.new(@selph)
+        end
+
+        def push_decoded(array, raw_value)
+          value = decoded_value(raw_value)
+          if value.equal?(OUT_OF_RANGE)
+            array << raw_value
+          elsif !value.nil?
+            array.push_decoded(value)
+          end
+        end
+      end
+
+      # Singular fields.
+      class BaseSetMethod
+        include DecodedValue
+
+        def initialize(selph)
+          setup_decoded_value(selph)
+          @tag = selph.tag
+          @required = selph.required?
         end
 
         # A record whose wire type differs from the field's is skipped, as the
         # protobuf spec and the reference parsers do.
         def call(message_instance, bytes, wire_type = nil)
           return if wire_type && wire_type != @wire_type
-          message_instance.set_field(@name, @selph.decode(bytes), true, @selph)
+
+          raw_value = @selph.decode(bytes)
+          value = decoded_value(raw_value)
+          return message_instance.set_field(@name, raw_value, true, @selph) if value.equal?(OUT_OF_RANGE)
+
+          values = message_instance._protobuf_message_values
+          if value.nil?
+            # A tag that the enum does not define clears the field.
+            values.delete(@fully_qualified_name)
+            message_instance._protobuf_message_unset_required_field_tags << @tag if @required
+          else
+            values[@fully_qualified_name] = value
+            message_instance._protobuf_message_unset_required_field_tags.delete(@tag) if @required
+          end
         end
       end
 
@@ -147,15 +217,15 @@ module Protobuf
 
       # Repeated string, bytes, and message fields. These are never packed.
       class RepeatedNotPackedSetMethod
+        include DecodedValue
+
         def initialize(selph)
-          @selph = selph
-          @name = selph.name
-          @wire_type = selph.wire_type
+          setup_decoded_value(selph)
         end
 
         def call(message_instance, bytes, wire_type = nil)
           return if wire_type && wire_type != @wire_type
-          message_instance[@name] << @selph.decode(bytes)
+          values_array(message_instance).push_decoded(@selph.decode(bytes))
         end
       end
 
@@ -166,26 +236,26 @@ module Protobuf
       # own wire type is one value. A record without a wire type (an old
       # caller of BaseField#set) falls back to the declaration.
       class RepeatedPackableSetMethod
+        include DecodedValue
+
         LENGTH_DELIMITED = ::Protobuf::WireType::LENGTH_DELIMITED
 
         def initialize(selph)
-          @selph = selph
-          @name = selph.name
-          @wire_type = selph.wire_type
+          setup_decoded_value(selph)
           @packed = selph.packed?
         end
 
         def call(message_instance, bytes, wire_type = nil)
           # Most common first: one unpacked value, as this gem encodes by default.
           if wire_type == @wire_type
-            message_instance[@name] << @selph.decode(bytes)
+            push_decoded(values_array(message_instance), @selph.decode(bytes))
           elsif wire_type == LENGTH_DELIMITED
-            decode_packed(message_instance[@name], bytes)
+            decode_packed(values_array(message_instance), bytes)
           elsif wire_type.nil?
             if @packed
-              decode_packed(message_instance[@name], bytes)
+              decode_packed(values_array(message_instance), bytes)
             else
-              message_instance[@name] << @selph.decode(bytes)
+              push_decoded(values_array(message_instance), @selph.decode(bytes))
             end
           end
         end
@@ -196,11 +266,11 @@ module Protobuf
           stream = ::StringIO.new(bytes)
 
           if @wire_type == ::Protobuf::WireType::VARINT
-            array << @selph.decode(Varint.decode(stream)) until stream.eof?
+            push_decoded(array, @selph.decode(Varint.decode(stream))) until stream.eof?
           elsif @wire_type == ::Protobuf::WireType::FIXED64
-            array << @selph.decode(stream.read(8)) until stream.eof?
+            push_decoded(array, @selph.decode(stream.read(8))) until stream.eof?
           elsif @wire_type == ::Protobuf::WireType::FIXED32
-            array << @selph.decode(stream.read(4)) until stream.eof?
+            push_decoded(array, @selph.decode(stream.read(4))) until stream.eof?
           end
         end
       end
