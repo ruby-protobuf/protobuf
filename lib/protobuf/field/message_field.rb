@@ -18,8 +18,8 @@ module Protobuf
 
       def encode(value)
         bytes = value.encode
-        result = ::Protobuf::Field::VarintField.encode(bytes.bytesize)
-        result << bytes
+        # VarintField.encode can return a frozen cached string, so do not append to it.
+        "#{::Protobuf::Field::VarintField.encode(bytes.bytesize)}#{bytes}"
       end
 
       def message?
