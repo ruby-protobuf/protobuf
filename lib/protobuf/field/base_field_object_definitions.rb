@@ -79,10 +79,7 @@ module Protobuf
         end
 
         def call(value, stream)
-          new_value = "" + value
-          if new_value.encoding != ::Protobuf::Field::StringField::ENCODING
-            new_value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
-          end
+          new_value = ::Protobuf::Field::StringField.to_utf8(value)
 
           stream << @tag_encoded << ::Protobuf::Field::VarintField.encode(new_value.bytesize) << new_value
         end
