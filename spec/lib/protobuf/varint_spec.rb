@@ -24,6 +24,30 @@ RSpec.describe Protobuf::Varint do
           expect(described_class.decode(io)).to eq(number)
         end
       end
+
+      # Each value is at the edge of a byte count, so the last byte changes.
+      {
+        127 => "fw==",
+        128 => "gAE=",
+        16_383 => "/38=",
+        16_384 => "gIAB",
+        4_294_967_295 => "/////w8=",
+        9_223_372_036_854_775_807 => "//////////9/",
+        18_446_744_073_709_551_615 => "////////////AQ==",
+      }.each do |number, encoded|
+        it "decodes #{number} and stops at the end of the varint" do
+          io = StringIO.new(Base64.decode64(encoded) + "\x01".b)
+          expect(described_class.decode(io)).to eq(number)
+          expect(io.read).to eq("\x01".b)
+        end
+      end
+
+      # The C varint gem raises TypeError here, so only VarintPure has this test.
+      if klass == Protobuf::VarintPure
+        it "raises EOFError on a varint without its last byte" do
+          expect { described_class.decode(StringIO.new("\x80\x80".b)) }.to raise_error(EOFError)
+        end
+      end
     end
   end
 end

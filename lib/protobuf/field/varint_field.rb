@@ -22,8 +22,19 @@ module Protobuf
         0
       end
 
+      # Varints below this value (one or two bytes) come from a cache. Tags,
+      # lengths, and most integer values are in this range.
+      ENCODE_CACHE_LIMIT = 16_384
+      ENCODE_CACHE = ::Array.new(ENCODE_CACHE_LIMIT)
+
+      # Returns a frozen string for a value below ENCODE_CACHE_LIMIT. Callers
+      # must not change the returned string.
       def self.encode(value)
-        ::Protobuf::Varint.encode(value)
+        if value >= 0 && value < ENCODE_CACHE_LIMIT
+          ENCODE_CACHE[value] ||= ::Protobuf::Varint.encode(value).freeze
+        else
+          ::Protobuf::Varint.encode(value)
+        end
       end
 
       ##

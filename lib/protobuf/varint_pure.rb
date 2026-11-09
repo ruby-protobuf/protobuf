@@ -7,14 +7,15 @@ module Protobuf
       (@_varint_cache[value] ||= encode(value, false)).dup
     end
 
+    # A byte above 127 has more bytes after it. The last byte needs no mask.
+    # Adapted from #297 (abrandoned).
     def decode(stream)
-      value = index = 0
-      begin
-        byte = stream.readbyte
-        value |= (byte & 0x7f) << (7 * index)
-        index += 1
-      end while (byte & 0x80).nonzero?
-      value
+      value = shift = 0
+      while (byte = stream.readbyte) > 127
+        value |= (byte & 0x7f) << shift
+        shift += 7
+      end
+      value | (byte << shift)
     end
 
     def encode(value, use_cache = true)
