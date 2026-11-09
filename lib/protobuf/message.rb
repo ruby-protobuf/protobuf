@@ -166,13 +166,36 @@ module Protobuf
       self
     end
 
+    # An unset field compares as its default value.
     def ==(other)
       return false unless other.is_a?(self.class)
-      each_field do |field, value|
-        return false unless value == other[field.name]
+      self.class.all_fields.each do |field|
+        return false unless _protobuf_message_compare_value(field) == other._protobuf_message_compare_value(field)
       end
       true
     end
+
+    # Messages of the same class with equal field values are eql?, so they
+    # are the same Hash key and Array#uniq keeps one of them. Unlike ==, a
+    # subclass instance is not eql? to a parent instance, so eql? is symmetric.
+    # Adapted from #398 (drcapulet).
+    def eql?(other)
+      other.class == self.class && self == other
+    end
+
+    # Agrees with ==, so Message.new and Message.new(:id => 0) have the same
+    # hash. Do not change a message while it is a Hash key: its hash changes.
+    def hash
+      self.class.all_fields.map { |field| _protobuf_message_compare_value(field) }.push(self.class).hash
+    end
+
+    # The value that == and hash use: the stored value, or the field default.
+    # Unlike #[], it does not add an empty repeated or map field to the
+    # message, so comparing or hashing a message does not change its to_hash.
+    def _protobuf_message_compare_value(field)
+      @values.fetch(field.fully_qualified_name) { field.default_value }
+    end
+    protected :_protobuf_message_compare_value
 
     def [](name)
       field = _protobuf_message_field[name]
