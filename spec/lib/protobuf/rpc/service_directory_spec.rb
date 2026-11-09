@@ -55,11 +55,24 @@ RSpec.describe ::Protobuf::Rpc::ServiceDirectory do
     described_class.port = @port
   end
 
+  # The listener thread adds each beacon to this queue after it processes it.
+  before do
+    @processed_beacons = ::Queue.new
+    allow(subject).to receive(:process_beacon).and_wrap_original do |original, beacon|
+      original.call(beacon)
+    ensure
+      @processed_beacons << beacon
+    end
+  end
+
   def expect_event_trigger(event)
     expect(::ActiveSupport::Notifications).to receive(:instrument)
       .with(event, hash_including(:listing => an_instance_of(::Protobuf::Rpc::ServiceDirectory::Listing))).once
   end
 
+  # Sends a beacon and, while the directory runs, waits until the listener
+  # thread has processed it. A fixed 10 ms sleep was too short on slow CI
+  # machines, so a lookup right after it could return nil.
   def send_beacon(type, server)
     type = type.to_s.upcase
     beacon = ::Protobuf::Rpc::DynamicDiscovery::Beacon.new(
@@ -67,8 +80,15 @@ RSpec.describe ::Protobuf::Rpc::ServiceDirectory do
       :beacon_type => ::Protobuf::Rpc::DynamicDiscovery::BeaconType.fetch(type),
     )
 
+    processed = @processed_beacons.size
     @socket.send(beacon.encode, 0, @address, @port)
-    sleep 0.01 # give the service directory time to process the beacon
+    return unless subject.running?
+
+    deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + 5
+    while @processed_beacons.size == processed
+      fail "the service directory did not process the #{type} beacon in 5 seconds" if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) > deadline
+      sleep 0.001
+    end
   end
 
   it "should be a singleton" do
@@ -195,9 +215,14 @@ RSpec.describe ::Protobuf::Rpc::ServiceDirectory do
         expect(uuids.count("combo")).to be_within(25).of(50)
       end
 
+      # The listener removes expired listings in a sweep every 5 seconds, so
+      # wait for up to two sweeps after the 1 second ttl.
       it "should not return expired listings" do
         send_beacon(:heartbeat, hello_server_with_short_ttl)
-        sleep 5
+        expect(subject.lookup("HelloService")).not_to be_nil
+
+        deadline = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) + 12
+        sleep 0.1 until subject.lookup("HelloService").nil? || ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) > deadline
         expect(subject.lookup("HelloService")).to be_nil
       end
 
