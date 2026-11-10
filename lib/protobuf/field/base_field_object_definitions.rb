@@ -187,6 +187,12 @@ module Protobuf
           value = decoded_value(raw_value)
           return message_instance.set_field(@name, raw_value, true, @selph) if value.equal?(OUT_OF_RANGE)
 
+          store_decoded(message_instance, value)
+        end
+
+        # Store a value that is already decoded. Decoder calls this for a
+        # message value that it decoded without recursion.
+        def store_decoded(message_instance, value)
           # A tag that the enum does not define (or a truncated fixed-width
           # value) leaves the field as it is: the proto2 spec keeps the value
           # from an earlier record.
@@ -216,11 +222,16 @@ module Protobuf
           return if wire_type && wire_type != @wire_type
 
           entry = @selph.decode(bytes)
-          unless entry.field?(:value)
-            # Rare: the value is absent, or the enum does not define it.
-            return if @enum_value && unknown_enum_value?(bytes)
-            entry.value = @message_value_class.new if @message_value_class
-          end
+          # Rare: the value is absent, or the enum does not define it.
+          return if @enum_value && !entry.field?(:value) && unknown_enum_value?(bytes)
+
+          store_decoded(message_instance, entry)
+        end
+
+        # Store an entry that is already decoded. Decoder calls this only for
+        # a map with message values, so the enum check above does not apply.
+        def store_decoded(message_instance, entry)
+          entry.value = @message_value_class.new if @message_value_class && !entry.field?(:value)
           message_instance[@name][entry.key] = entry.value
         end
 
@@ -246,7 +257,11 @@ module Protobuf
 
         def call(message_instance, bytes, wire_type = nil)
           return if wire_type && wire_type != @wire_type
-          values_array(message_instance).push_decoded(@selph.decode(bytes))
+          store_decoded(message_instance, @selph.decode(bytes))
+        end
+
+        def store_decoded(message_instance, value)
+          values_array(message_instance).push_decoded(value)
         end
       end
 
