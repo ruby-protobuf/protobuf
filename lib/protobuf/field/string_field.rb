@@ -10,6 +10,24 @@ module Protobuf
 
       ENCODING = Encoding::UTF_8
 
+      # Return +value+ (a new String) with UTF-8 encoding, for the wire.
+      # A BINARY (ASCII-8BIT) String that holds valid UTF-8 keeps its bytes:
+      # sockets, files, Base64.decode64, and Array#pack return BINARY Strings.
+      # Other encodings are transcoded to UTF-8. Characters that cannot be
+      # transcoded, and invalid bytes, are dropped, as before.
+      def self.to_utf8(value)
+        new_value = "" + value # dup is slower
+        return new_value if new_value.encoding == ENCODING
+
+        if new_value.encoding == ::Encoding::BINARY
+          new_value.force_encoding(ENCODING)
+          return new_value if new_value.valid_encoding?
+          new_value.force_encoding(::Encoding::BINARY)
+        end
+
+        new_value.encode!(ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
+      end
+
       ##
       # Public Instance Methods
       #
@@ -34,10 +52,7 @@ module Protobuf
       end
 
       def encode(value)
-        value_to_encode = "" + value # dup is slower
-        unless value_to_encode.encoding == ENCODING
-          value_to_encode.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
-        end
+        value_to_encode = self.class.to_utf8(value)
         value_to_encode.force_encoding(::Protobuf::Field::BytesField::BYTES_ENCODING)
 
         "#{::Protobuf::Field::VarintField.encode(value_to_encode.bytesize)}#{value_to_encode}"

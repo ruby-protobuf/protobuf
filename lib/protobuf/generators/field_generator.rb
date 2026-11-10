@@ -13,6 +13,12 @@ module Protobuf
       RUBY_INFINITY_DEFAULT           = '::Float::INFINITY'.freeze
       RUBY_NEGATIVE_INFINITY_DEFAULT  = '-::Float::INFINITY'.freeze
       RUBY_NAN_DEFAULT                = '::Float::NAN'.freeze
+      # The escapes in a C-escaped bytes default from protoc.
+      C_ESCAPES = {
+        'a' => "\a", 'b' => "\b", 'f' => "\f", 'n' => "\n", 'r' => "\r", 't' => "\t", 'v' => "\v",
+        '\\' => '\\', "'" => "'", '"' => '"', '?' => '?'
+      }.freeze
+      C_ESCAPE_PATTERN = /\\(?:([0-7]{1,3})|x(\h{1,2})|(.))/m
 
       ##
       # Attributes
@@ -40,8 +46,10 @@ module Protobuf
                                case descriptor.type.name
                                when :TYPE_ENUM
                                  enum_default_value
-                               when :TYPE_STRING, :TYPE_BYTES
+                               when :TYPE_STRING
                                  string_default_value
+                               when :TYPE_BYTES
+                                 bytes_default_value
                                when :TYPE_FLOAT, :TYPE_DOUBLE
                                  float_double_default_value
                                else
@@ -161,8 +169,29 @@ module Protobuf
         end
       end
 
+      # protoc gives a string default as the raw text. String#inspect writes a
+      # Ruby literal for it: quotes, backslashes, and newlines are escaped,
+      # and "#{" does not interpolate.
       def string_default_value
-        %("#{verbatim_default_value.gsub(/'/, '\\\\\'')}")
+        verbatim_default_value.dup.force_encoding(::Encoding::UTF_8).inspect
+      end
+
+      # protoc gives a bytes default C-escaped (for example "\\001\\377").
+      # Unescape it and write a BINARY literal.
+      def bytes_default_value
+        "#{c_unescape(verbatim_default_value).inspect}.b"
+      end
+
+      def c_unescape(text)
+        text.b.gsub(C_ESCAPE_PATTERN) do
+          if Regexp.last_match(1)
+            Regexp.last_match(1).to_i(8).chr
+          elsif Regexp.last_match(2)
+            Regexp.last_match(2).to_i(16).chr
+          else
+            C_ESCAPES.fetch(Regexp.last_match(3)) { Regexp.last_match(3) }.b
+          end
+        end
       end
 
       def verbatim_default_value

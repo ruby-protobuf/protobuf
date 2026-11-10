@@ -14,6 +14,31 @@ Unreleased
   must change a copy.
 - Values that you add to a decoded repeated field are still normalized and
   checked, as before.
+- A `string` field with a BINARY (ASCII-8BIT) value keeps its bytes on
+  encode when they are valid UTF-8. Before, every non-ASCII byte was dropped
+  with no error: `"café".b` was sent as `"caf"`. Values in other encodings
+  are transcoded to UTF-8, and invalid bytes are dropped, as before.
+- A packed repeated field that is empty writes no record. Before, reading
+  the field (for example with `inspect`) made the next encode write a
+  0-length record for it.
+- **Behavior change:** an enum record with a number that the enum does not
+  define no longer clears the field. The field keeps the value from an
+  earlier record, as the proto2 spec requires. A required enum field with an
+  earlier valid value is no longer counted as missing.
+- Enum fields keep the low 32 bits of a wider varint, as `int32` fields do
+  since 3.10.10. A 5-byte `-1` decodes to `-1`, not to the default.
+- A map entry whose enum value the enum does not define is skipped. Before,
+  it was stored with the enum default. A map entry without a message value
+  gets an empty message. Before, the entry was dropped.
+- The code generator escapes string and bytes defaults. Before, a default
+  with `"` and a newline made a file that Ruby could not load, a backslash
+  could be lost, and `#{...}` ran as Ruby code. Bytes defaults are BINARY.
+  Regenerate code from `.proto` files that have such defaults.
+- Loading `protobuf/code_generator` no longer changes how other messages
+  decode. Only option messages decode differently in the generator.
+- The RPC server answers a request that nests messages too deep for the
+  stack with `BAD_REQUEST_DATA`. Before, the client got no response and the
+  ZMQ worker thread stopped.
 
 
 3.10.10

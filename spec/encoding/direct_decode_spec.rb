@@ -31,6 +31,8 @@ RSpec.describe 'Decoding without the setters' do
       repeated :string, :r_str, 14
       repeated ::DirectDecodeSpec::Inner, :r_inner, 15
       map :string, :int64, :counts, 16
+      map :string, ::DirectDecodeSpec::Color, :colors, 17
+      map :string, ::DirectDecodeSpec::Inner, :inners, 18
     end
 
     class Fixed < ::Protobuf::Message
@@ -97,14 +99,51 @@ RSpec.describe 'Decoding without the setters' do
       expect(decoded.field?(:color)).to be(false)
     end
 
-    it 'clears a singular field that an earlier record set' do
+    # proto2 spec: a closed enum keeps the value from an earlier record.
+    it 'keeps the value that an earlier record set' do
       decoded = DirectDecodeSpec::Message.decode(varint(9, 1) + varint(9, 7))
-      expect(decoded.field?(:color)).to be(false)
+      expect(decoded.color).to eq(DirectDecodeSpec::Color::GREEN)
+    end
+
+    it 'keeps the low 32 bits of a wider varint' do
+      decoded = DirectDecodeSpec::Message.decode(varint(9, 0x1_0000_0001))
+      expect(decoded.color).to eq(DirectDecodeSpec::Color::GREEN)
     end
 
     it 'is not added to a repeated field' do
       decoded = DirectDecodeSpec::Message.decode(varint(13, 1) + varint(13, 7) + len(13, "\x07\x00".b))
       expect(decoded.r_color.map(&:to_i)).to eq([1, 0])
+    end
+  end
+
+  describe 'map entries' do
+    def entry(key_bytes, value_bytes = ''.b)
+      len(1, key_bytes) + value_bytes
+    end
+
+    it 'skips an entry whose enum value the enum does not define' do
+      decoded = DirectDecodeSpec::Message.decode(len(17, entry('a', varint(2, 7))) + len(17, entry('b', varint(2, 1))))
+      expect(decoded.colors.to_h).to eq('b' => DirectDecodeSpec::Color::GREEN)
+    end
+
+    it 'uses the last value record of an entry' do
+      decoded = DirectDecodeSpec::Message.decode(len(17, entry('a', varint(2, 7) + varint(2, 1))))
+      expect(decoded.colors.to_h).to eq('a' => DirectDecodeSpec::Color::GREEN)
+    end
+
+    it 'gives the default to an enum entry without a value' do
+      decoded = DirectDecodeSpec::Message.decode(len(17, entry('a')))
+      expect(decoded.colors.to_h).to eq('a' => DirectDecodeSpec::Color::RED)
+    end
+
+    it 'gives an empty message to a message entry without a value' do
+      decoded = DirectDecodeSpec::Message.decode(len(18, entry('a')))
+      expect(decoded.inners.to_h).to eq('a' => DirectDecodeSpec::Inner.new)
+    end
+
+    it 'gives the default to a scalar entry without a value' do
+      decoded = DirectDecodeSpec::Message.decode(len(16, entry('a')))
+      expect(decoded.counts.to_h).to eq('a' => 0)
     end
   end
 
@@ -119,9 +158,14 @@ RSpec.describe 'Decoding without the setters' do
       expect { decoded.encode }.to raise_error(::Protobuf::SerializationError)
     end
 
-    it 'counts a required enum field with an undefined tag as missing' do
-      decoded = DirectDecodeSpec::Required.decode(varint(1, 1) + varint(2, 1) + varint(2, 7))
+    it 'counts a required enum field with only an undefined tag as missing' do
+      decoded = DirectDecodeSpec::Required.decode(varint(1, 1) + varint(2, 7))
       expect { decoded.encode }.to raise_error(::Protobuf::SerializationError, /color/)
+    end
+
+    it 'keeps a required enum field that an earlier record set' do
+      decoded = DirectDecodeSpec::Required.decode(varint(1, 1) + varint(2, 1) + varint(2, 7))
+      expect(decoded.encode).to eq(varint(1, 1) + varint(2, 1))
     end
   end
 

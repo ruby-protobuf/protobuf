@@ -52,9 +52,14 @@ module Protobuf
           @tag_encoded = selph.tag_encoded
         end
 
+        # An empty field has no record. Reading a repeated field (#[], inspect)
+        # stores an empty FieldArray, and without this check the encode would
+        # add a 0-length record for it.
         def call(value, stream)
+          return if value.empty?
+
           packed_value = value.map { |val| @selph.encode(val) }.join
-          stream << @tag_encoded << "#{::Protobuf::Field::VarintField.encode(packed_value.size)}#{packed_value}"
+          stream << @tag_encoded << "#{::Protobuf::Field::VarintField.encode(packed_value.bytesize)}#{packed_value}"
         end
       end
 
@@ -79,10 +84,7 @@ module Protobuf
         end
 
         def call(value, stream)
-          new_value = "" + value
-          if new_value.encoding != ::Protobuf::Field::StringField::ENCODING
-            new_value.encode!(::Protobuf::Field::StringField::ENCODING, :invalid => :replace, :undef => :replace, :replace => "")
-          end
+          new_value = ::Protobuf::Field::StringField.to_utf8(value)
 
           stream << @tag_encoded << ::Protobuf::Field::VarintField.encode(new_value.bytesize) << new_value
         end
@@ -185,33 +187,52 @@ module Protobuf
           value = decoded_value(raw_value)
           return message_instance.set_field(@name, raw_value, true, @selph) if value.equal?(OUT_OF_RANGE)
 
-          values = message_instance._protobuf_message_values
-          if value.nil?
-            # A tag that the enum does not define clears the field.
-            values.delete(@fully_qualified_name)
-            message_instance._protobuf_message_unset_required_field_tags << @tag if @required
-          else
-            values[@fully_qualified_name] = value
-            message_instance._protobuf_message_unset_required_field_tags.delete(@tag) if @required
-          end
+          # A tag that the enum does not define (or a truncated fixed-width
+          # value) leaves the field as it is: the proto2 spec keeps the value
+          # from an earlier record.
+          return if value.nil?
+
+          message_instance._protobuf_message_values[@fully_qualified_name] = value
+          message_instance._protobuf_message_unset_required_field_tags.delete(@tag) if @required
         end
       end
 
       class MapSetMethod
+        VALUE_TAG = 2
+
         def initialize(selph)
           @selph = selph
           @name = selph.name
           @wire_type = selph.wire_type
+          @value_field = selph.type_class.get_field(:value)
+          @enum_value = @value_field.enum?
+          @message_value_class = @value_field.type_class if @value_field.message?
         end
 
+        # An entry without a key or a value gets the default, as in the
+        # reference parsers: a message value is an empty message. An entry
+        # whose value the enum does not define is skipped (proto2 closed enum).
         def call(message_instance, bytes, wire_type = nil)
           return if wire_type && wire_type != @wire_type
-          hash = message_instance[@name]
+
           entry = @selph.decode(bytes)
-          # decoded value could be nil for an
-          # enum value that is not recognized
-          hash[entry.key] = entry.value unless entry.value.nil?
-          hash[entry.key]
+          unless entry.field?(:value)
+            # Rare: the value is absent, or the enum does not define it.
+            return if @enum_value && unknown_enum_value?(bytes)
+            entry.value = @message_value_class.new if @message_value_class
+          end
+          message_instance[@name][entry.key] = entry.value
+        end
+
+        private
+
+        # The last value record wins, so only the last one counts.
+        def unknown_enum_value?(bytes)
+          last = nil
+          ::Protobuf::Decoder.decode_each_field(::StringIO.new(bytes)) do |tag, value, record_wire_type|
+            last = value if tag == VALUE_TAG && record_wire_type == ::Protobuf::WireType::VARINT
+          end
+          !last.nil? && @value_field.decode(last).nil?
         end
       end
 

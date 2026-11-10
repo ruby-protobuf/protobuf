@@ -4,6 +4,14 @@ module Protobuf
       class RequestDecoder
         include ::Protobuf::Logging
 
+        # Too deep a nesting of messages in the request uses up the stack. That
+        # error is not a StandardError, and on JRuby it is a Java error, so the
+        # plain rescues below do not catch it. Without this the client gets no
+        # response, and the ZMQ worker thread stops.
+        STACK_ERRORS = [::SystemStackError].tap do |errors|
+          errors << ::Java::JavaLang::StackOverflowError if defined?(::JRUBY_VERSION)
+        end.freeze
+
         attr_reader :app, :env
 
         def initialize(app)
@@ -48,7 +56,7 @@ module Protobuf
 
         def request
           @request ||= rpc_method.request_type.decode(request_wrapper.request_proto)
-        rescue => exception
+        rescue StandardError, *STACK_ERRORS => exception
           raise BadRequestData, "Unable to decode request: #{exception.message}"
         end
 
@@ -56,7 +64,7 @@ module Protobuf
         #
         def request_wrapper
           @request_wrapper ||= ::Protobuf::Socketrpc::Request.decode(env.encoded_request)
-        rescue => exception
+        rescue StandardError, *STACK_ERRORS => exception
           raise BadRequestData, "Unable to decode request: #{exception.message}"
         end
 

@@ -82,6 +82,14 @@ RSpec.describe Protobuf::Rpc::Middleware::RequestDecoder do
       end
     end
 
+    context "when the request nests messages too deep for the stack" do
+      before { allow(rpc_method.request_type).to receive(:decode).and_raise(SystemStackError, "stack level too deep") }
+
+      it "raises a bad request data exception" do
+        expect { subject.call(env) }.to raise_exception(Protobuf::Rpc::BadRequestData, /stack level too deep/)
+      end
+    end
+
     context "when the RPC service is not defined" do
       let(:request_wrapper) do
         ::Protobuf::Socketrpc::Request.new(

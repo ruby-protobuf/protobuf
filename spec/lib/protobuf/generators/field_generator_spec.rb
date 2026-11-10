@@ -86,7 +86,29 @@ RSpec.describe ::Protobuf::Generators::FieldGenerator do
         let(:type_enum) { :TYPE_STRING }
         let(:default_value) { "a default \"string\"" }
 
-        specify { expect(subject).to eq "  optional :string, :foo_bar, 3, :default => \"a default \"string\"\"\n" }
+        specify { expect(subject).to eq "  optional :string, :foo_bar, 3, :default => \"a default \\\"string\\\"\"\n" }
+
+        context 'with characters that Ruby escapes or interpolates' do
+          let(:default_value) { "it's \"q\"\n\\d \#{1 + 1}" }
+
+          it 'writes a literal that evaluates to the same string' do
+            literal = subject[/:default => (.*)$/, 1]
+            expect(eval(literal)).to eq default_value # rubocop:disable Security/Eval
+          end
+        end
+      end
+
+      context 'when the type is bytes' do
+        let(:type_enum) { :TYPE_BYTES }
+        # protoc gives a bytes default C-escaped.
+        let(:default_value) { "\\001\\377\\x41\\n\\\"\#{x}" }
+
+        it 'writes a BINARY literal of the unescaped bytes' do
+          literal = subject[/:default => (.*)$/, 1]
+          value = eval(literal) # rubocop:disable Security/Eval
+          expect(value).to eq "\x01\xFFA\n\"\#{x}".b
+          expect(value.encoding).to eq Encoding::BINARY
+        end
       end
 
       context 'when float or double field type' do

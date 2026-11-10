@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'protobuf/code_generator'
 
 RSpec.describe Protobuf::Field::MessageField do
   let(:inner_message) do

@@ -20,8 +20,12 @@ module Protobuf
         ::Protobuf::Field::VarintField.encode(value.to_i & 0xffff_ffff_ffff_ffff)
       end
 
+      # Enum values are int32 on the wire. Keep the low 32 bits of a wider
+      # varint, as Int32Field does. Return nil for a value that the enum does
+      # not define.
       def decode(value)
-        value -= 0x1_0000_0000_0000_0000 if (value & 0x8000_0000_0000_0000).nonzero?
+        value &= 0xffff_ffff
+        value -= 0x1_0000_0000 if value >= 0x8000_0000
         value if acceptable?(value)
       end
 

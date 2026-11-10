@@ -267,7 +267,7 @@ module Protobuf_unittest
     optional :double, :default_double, 72, :default => 52000
     optional :bool, :default_bool, 73, :default => true
     optional :string, :default_string, 74, :default => "hello"
-    optional :bytes, :default_bytes, 75, :default => "world"
+    optional :bytes, :default_bytes, 75, :default => "world".b
     optional ::Protobuf_unittest::TestAllTypes::NestedEnum, :default_nested_enum, 81, :default => ::Protobuf_unittest::TestAllTypes::NestedEnum::BAR
     optional ::Protobuf_unittest::ForeignEnum, :default_foreign_enum, 82, :default => ::Protobuf_unittest::ForeignEnum::FOREIGN_BAR
     optional ::Protobuf_unittest_import::ImportEnum, :default_import_enum, 83, :default => ::Protobuf_unittest_import::ImportEnum::IMPORT_BAR
@@ -361,7 +361,7 @@ module Protobuf_unittest
     optional :double, :".protobuf_unittest.default_double_extension", 72, :default => 52000, :extension => true
     optional :bool, :".protobuf_unittest.default_bool_extension", 73, :default => true, :extension => true
     optional :string, :".protobuf_unittest.default_string_extension", 74, :default => "hello", :extension => true
-    optional :bytes, :".protobuf_unittest.default_bytes_extension", 75, :default => "world", :extension => true
+    optional :bytes, :".protobuf_unittest.default_bytes_extension", 75, :default => "world".b, :extension => true
     optional ::Protobuf_unittest::TestAllTypes::NestedEnum, :".protobuf_unittest.default_nested_enum_extension", 81, :default => ::Protobuf_unittest::TestAllTypes::NestedEnum::BAR, :extension => true
     optional ::Protobuf_unittest::ForeignEnum, :".protobuf_unittest.default_foreign_enum_extension", 82, :default => ::Protobuf_unittest::ForeignEnum::FOREIGN_BAR, :extension => true
     optional ::Protobuf_unittest_import::ImportEnum, :".protobuf_unittest.default_import_enum_extension", 83, :default => ::Protobuf_unittest_import::ImportEnum::IMPORT_BAR, :extension => true
@@ -515,7 +515,7 @@ module Protobuf_unittest
   end
 
   class TestExtremeDefaultValues
-    optional :bytes, :escaped_bytes, 1, :default => "\000\001\007\010\014\n\r\t\013\\\\'\"\376"
+    optional :bytes, :escaped_bytes, 1, :default => "\x00\x01\a\b\f\n\r\t\v\\'\"\xFE".b
     optional :uint32, :large_uint32, 2, :default => 4294967295
     optional :uint64, :large_uint64, 3, :default => 18446744073709551615
     optional :int32, :small_int32, 4, :default => -2147483647
@@ -537,10 +537,10 @@ module Protobuf_unittest
     optional :float, :neg_inf_float, 18, :default => -::Float::INFINITY
     optional :float, :nan_float, 19, :default => ::Float::NAN
     optional :string, :cpp_trigraph, 20, :default => "? ? ?? ?? ??? ??/ ??-"
-    optional :string, :string_with_zero, 23, :default => "hel lo"
-    optional :bytes, :bytes_with_zero, 24, :default => "wor\000ld"
-    optional :string, :string_piece_with_zero, 25, :default => "ab c", :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
-    optional :string, :cord_with_zero, 26, :default => "12 3", :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
+    optional :string, :string_with_zero, 23, :default => "hel\u0000lo"
+    optional :bytes, :bytes_with_zero, 24, :default => "wor\x00ld".b
+    optional :string, :string_piece_with_zero, 25, :default => "ab\u0000c", :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
+    optional :string, :cord_with_zero, 26, :default => "12\u00003", :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
     optional :string, :replacement_string, 27, :default => "${unknown}"
   end
 
@@ -632,7 +632,7 @@ module Protobuf_unittest
     optional :string, :bar_string, 13, :default => "STRING"
     optional :string, :bar_cord, 14, :default => "CORD", :ctype => ::Google::Protobuf::FieldOptions::CType::CORD
     optional :string, :bar_string_piece, 15, :default => "SPIECE", :ctype => ::Google::Protobuf::FieldOptions::CType::STRING_PIECE
-    optional :bytes, :bar_bytes, 16, :default => "BYTES"
+    optional :bytes, :bar_bytes, 16, :default => "BYTES".b
     optional ::Protobuf_unittest::TestOneof2::NestedEnum, :bar_enum, 17, :default => ::Protobuf_unittest::TestOneof2::NestedEnum::BAR
     optional :int32, :baz_int, 18
     optional :string, :baz_string, 19, :default => "BAZ"
