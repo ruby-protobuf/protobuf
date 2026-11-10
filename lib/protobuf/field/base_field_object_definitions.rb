@@ -52,9 +52,14 @@ module Protobuf
           @tag_encoded = selph.tag_encoded
         end
 
+        # An empty field has no record. Reading a repeated field (#[], inspect)
+        # stores an empty FieldArray, and without this check the encode would
+        # add a 0-length record for it.
         def call(value, stream)
+          return if value.empty?
+
           packed_value = value.map { |val| @selph.encode(val) }.join
-          stream << @tag_encoded << "#{::Protobuf::Field::VarintField.encode(packed_value.size)}#{packed_value}"
+          stream << @tag_encoded << "#{::Protobuf::Field::VarintField.encode(packed_value.bytesize)}#{packed_value}"
         end
       end
 
