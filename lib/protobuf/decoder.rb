@@ -19,9 +19,9 @@ module Protobuf
     #
     # A field or a message class that changes how its messages decode (see
     # MessageField#iterative_decode?) decodes with BaseField#set, which recurses.
+    # Message#decode_from calls this only for a class that decodes with the
+    # methods in Message::Serialization.
     def self.decode_message(message, stream)
-      return decode_with_set_field_bytes(message, stream) unless message.class._protobuf_standard_decode?
-
       max_depth = ::Protobuf.max_decode_depth
       root = message
       # The field of the parent message that gets +message+ when it is complete.
@@ -153,25 +153,5 @@ module Protobuf
       fail DecodeDepthError, "Messages nest more than #{max_depth} levels deep (Protobuf.max_decode_depth)"
     end
     private_class_method :check_depth!
-
-    # Whether +klass+ decodes with the methods in Message::Serialization. A
-    # class that changes one of them decodes with its own methods.
-    def self.standard_decode?(klass)
-      serialization = ::Protobuf::Message::Serialization
-      klass.method(:decode).owner == serialization::ClassMethods &&
-        klass.instance_method(:decode).owner == serialization &&
-        klass.instance_method(:decode_from).owner == serialization &&
-        klass.instance_method(:set_field_bytes).owner == serialization
-    end
-
-    # The decode before decode_message: a nested message recurses. For a
-    # message class that changes set_field_bytes or another decode method.
-    def self.decode_with_set_field_bytes(message, stream)
-      decode_each_field(stream) do |tag, bytes, wire_type|
-        message.__send__(:set_field_bytes, tag, bytes, wire_type)
-      end
-      message
-    end
-    private_class_method :decode_with_set_field_bytes
   end
 end
