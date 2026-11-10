@@ -97,9 +97,15 @@ RSpec.describe 'Decoding without the setters' do
       expect(decoded.field?(:color)).to be(false)
     end
 
-    it 'clears a singular field that an earlier record set' do
+    # proto2 spec: a closed enum keeps the value from an earlier record.
+    it 'keeps the value that an earlier record set' do
       decoded = DirectDecodeSpec::Message.decode(varint(9, 1) + varint(9, 7))
-      expect(decoded.field?(:color)).to be(false)
+      expect(decoded.color).to eq(DirectDecodeSpec::Color::GREEN)
+    end
+
+    it 'keeps the low 32 bits of a wider varint' do
+      decoded = DirectDecodeSpec::Message.decode(varint(9, 0x1_0000_0001))
+      expect(decoded.color).to eq(DirectDecodeSpec::Color::GREEN)
     end
 
     it 'is not added to a repeated field' do
@@ -119,9 +125,14 @@ RSpec.describe 'Decoding without the setters' do
       expect { decoded.encode }.to raise_error(::Protobuf::SerializationError)
     end
 
-    it 'counts a required enum field with an undefined tag as missing' do
-      decoded = DirectDecodeSpec::Required.decode(varint(1, 1) + varint(2, 1) + varint(2, 7))
+    it 'counts a required enum field with only an undefined tag as missing' do
+      decoded = DirectDecodeSpec::Required.decode(varint(1, 1) + varint(2, 7))
       expect { decoded.encode }.to raise_error(::Protobuf::SerializationError, /color/)
+    end
+
+    it 'keeps a required enum field that an earlier record set' do
+      decoded = DirectDecodeSpec::Required.decode(varint(1, 1) + varint(2, 1) + varint(2, 7))
+      expect(decoded.encode).to eq(varint(1, 1) + varint(2, 1))
     end
   end
 

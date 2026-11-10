@@ -187,15 +187,13 @@ module Protobuf
           value = decoded_value(raw_value)
           return message_instance.set_field(@name, raw_value, true, @selph) if value.equal?(OUT_OF_RANGE)
 
-          values = message_instance._protobuf_message_values
-          if value.nil?
-            # A tag that the enum does not define clears the field.
-            values.delete(@fully_qualified_name)
-            message_instance._protobuf_message_unset_required_field_tags << @tag if @required
-          else
-            values[@fully_qualified_name] = value
-            message_instance._protobuf_message_unset_required_field_tags.delete(@tag) if @required
-          end
+          # A tag that the enum does not define (or a truncated fixed-width
+          # value) leaves the field as it is: the proto2 spec keeps the value
+          # from an earlier record.
+          return if value.nil?
+
+          message_instance._protobuf_message_values[@fully_qualified_name] = value
+          message_instance._protobuf_message_unset_required_field_tags.delete(@tag) if @required
         end
       end
 
