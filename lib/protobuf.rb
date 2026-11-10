@@ -113,6 +113,28 @@ module Protobuf
   def self.ignore_unknown_fields=(value)
     @ignore_unknown_fields = !!value
   end
+
+  # Maximum decode depth
+  #
+  # Default: nil (no limit)
+  #
+  # The number of levels that messages can nest inside the top message when
+  # they decode. Deeper input raises Protobuf::DecodeDepthError. Decode does
+  # not recurse, so it does not use up the stack, but encode, to_hash, and ==
+  # on a deep message still recurse. On JRuby, set a limit (for example 100,
+  # as the Google parsers) for input that is not trusted.
+  #
+  # A message class that changes how it decodes (see Decoder.decode_message)
+  # recurses, and the levels below it count from zero again.
+  def self.max_decode_depth
+    @max_decode_depth
+  end
+
+  def self.max_decode_depth=(value)
+    fail ArgumentError, "max_decode_depth must be nil or a positive Integer" unless value.nil? || (value.is_a?(Integer) && value.positive?)
+
+    @max_decode_depth = value
+  end
 end
 
 unless ENV.key?('PB_NO_NETWORKING')

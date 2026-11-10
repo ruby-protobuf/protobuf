@@ -59,6 +59,20 @@ module Protobuf
       ::Google::Protobuf::Compiler::CodeGeneratorResponse::Feature::FEATURE_PROTO3_OPTIONAL.to_i
     end
 
+    # The message fields of an options message merge in
+    # BaseField#set_with_options, so Decoder must call set for them.
+    module OptionsMessageFieldDecode
+      def iterative_decode?
+        gp = ::Google::Protobuf
+        options_classes = [gp::EnumOptions, gp::EnumValueOptions, gp::FieldOptions, gp::FileOptions,
+                           gp::MethodOptions, gp::ServiceOptions, gp::MessageOptions]
+        return false if options_classes.any? { |klass| message_class <= klass }
+
+        super
+      end
+    end
+    Protobuf::Field::MessageField.prepend(OptionsMessageFieldDecode)
+
     Protobuf::Field::BaseField.module_eval do
       # Sets a MessageField that is known to be an option.
       # We must allow fields to be set one at a time, as option syntax allows us to

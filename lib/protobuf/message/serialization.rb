@@ -15,6 +15,14 @@ module Protobuf
           new.decode_from(stream)
         end
 
+        # Whether this class decodes with the methods in this module. See
+        # Decoder.decode_message.
+        def _protobuf_standard_decode?
+          return @_protobuf_standard_decode unless @_protobuf_standard_decode.nil?
+
+          @_protobuf_standard_decode = ::Protobuf::Decoder.standard_decode?(self)
+        end
+
         # Create a new object with the given values and return the encoded bytes.
         def encode(fields = {})
           new(fields).encode
@@ -38,11 +46,7 @@ module Protobuf
       # Decode the given stream into this message.
       #
       def decode_from(stream)
-        ::Protobuf::Decoder.decode_each_field(stream) do |tag, bytes, wire_type|
-          set_field_bytes(tag, bytes, wire_type)
-        end
-
-        self
+        ::Protobuf::Decoder.decode_message(self, stream)
       end
 
       # Encode this message

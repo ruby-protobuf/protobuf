@@ -16,6 +16,19 @@ module Protobuf
         type_class.decode(bytes)
       end
 
+      # Whether Decoder can decode this field's messages without recursion and
+      # store them with #store_decoded. Not when this field, its message class,
+      # or its set method changes how a message decodes, and not for a map with
+      # enum values (MapSetMethod reads the entry bytes for those).
+      def iterative_decode?
+        return @iterative_decode unless @iterative_decode.nil?
+
+        @iterative_decode = method(:decode).owner == ::Protobuf::Field::MessageField &&
+                            method(:set).owner == ::Protobuf::Field::BaseField &&
+                            type_class._protobuf_standard_decode? &&
+                            !(map? && type_class.get_field(:value).enum?)
+      end
+
       def encode(value)
         bytes = value.encode
         # VarintField.encode can return a frozen cached string, so do not append to it.

@@ -308,6 +308,16 @@ module Protobuf
         @set_method.call(message_instance, bytes, wire_type)
       end
 
+      # Store a value that Decoder decoded already. Only for fields where
+      # MessageField#iterative_decode? is true.
+      def store_decoded(message_instance, value)
+        @set_method.store_decoded(message_instance, value)
+      end
+
+      def iterative_decode?
+        false
+      end
+
       def tag_encoded
         @tag_encoded ||= begin
                            case
