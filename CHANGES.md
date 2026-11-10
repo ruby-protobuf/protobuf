@@ -65,6 +65,9 @@ Unreleased
   the old classes still works.
 - With `protobuf_java_helpers`, varint decode uses `VarintPure#decode`, which
   has the limit. Encode still uses the Java helper.
+- `VarintPure#decode` returns a one-byte varint before its loop. Decode is
+  7-9% faster on MRI without the `varint` gem, and 4-14% faster on JRuby 10
+  with `protobuf_java_helpers`.
 
 
 3.10.10

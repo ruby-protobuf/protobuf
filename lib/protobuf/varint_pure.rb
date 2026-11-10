@@ -15,9 +15,15 @@ module Protobuf
 
     # A byte above 127 has more bytes after it. The last byte needs no mask.
     # As in the reference parsers and the C varint gem, read at most 10 bytes
-    # and keep the low 64 bits. Adapted from #297 (abrandoned).
+    # and keep the low 64 bits. Most varints (tags, lengths, small values)
+    # have one byte, so that case returns before the loop: with the limit,
+    # this is as fast as the loop without it. Adapted from #297 (abrandoned).
     def decode(stream)
-      value = shift = 0
+      byte = stream.readbyte
+      return byte if byte < 128
+
+      value = byte & 0x7f
+      shift = 7
       while (byte = stream.readbyte) > 127
         value |= (byte & 0x7f) << shift
         shift += 7
