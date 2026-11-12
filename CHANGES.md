@@ -49,8 +49,8 @@ Unreleased
   decode with recursion.
 - New `Protobuf.max_decode_depth` (default `nil`, no limit). Deeper input
   raises `Protobuf::DecodeDepthError`, a `Protobuf::DecodeError`. `encode`,
-  `to_hash`, and `==` still recurse, so on JRuby set a limit (for example
-  100, as the Google parsers do) for input that you do not trust.
+  `to_hash`, `==`, and `hash` still recurse, so on JRuby set a limit (for
+  example 100, as the Google parsers do) for input that you do not trust.
 - **Security:** decode reads at most 10 bytes for a varint, as the protobuf
   spec requires. Before, `VarintPure` and `protobuf_java_helpers` read a
   varint of any length, and the time grew as the square of the length: a
@@ -68,6 +68,13 @@ Unreleased
 - `VarintPure#decode` returns a one-byte varint before its loop. Decode is
   7-9% faster on MRI without the `varint` gem, and 4-14% faster on JRuby 10
   with `protobuf_java_helpers`.
+- Messages define `eql?` and `hash`. Messages of the same class with equal
+  field values are now the same Hash key, and `Array#uniq` keeps one of them.
+  An unset field counts as its default value, as in `==`. Do not change a
+  message while it is a Hash key. Adapted from #398.
+- `==` no longer adds empty repeated and map fields to the message, so a
+  comparison does not change `to_hash` or `to_json`. It is about 2 times
+  faster.
 
 
 3.10.10
