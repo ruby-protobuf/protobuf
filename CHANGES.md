@@ -48,9 +48,26 @@ Unreleased
   or `set_field_bytes`, and a field class that overrides `decode`, still
   decode with recursion.
 - New `Protobuf.max_decode_depth` (default `nil`, no limit). Deeper input
-  raises `Protobuf::DecodeDepthError`, a `Protobuf::Error`. `encode`,
+  raises `Protobuf::DecodeDepthError`, a `Protobuf::DecodeError`. `encode`,
   `to_hash`, and `==` still recurse, so on JRuby set a limit (for example
   100, as the Google parsers do) for input that you do not trust.
+- **Security:** decode reads at most 10 bytes for a varint, as the protobuf
+  spec requires. Before, `VarintPure` and `protobuf_java_helpers` read a
+  varint of any length, and the time grew as the square of the length: a
+  1 MB run of bytes above 127 used 15 seconds of CPU on MRI and minutes on
+  JRuby. A longer varint now raises `Protobuf::DecodeError`. (#171)
+- A 10-byte varint keeps its low 64 bits on every varint path, as the C
+  `varint` gem and the reference parsers do. Before, `VarintPure` kept all 70
+  bits, and a 64-bit field raised `TypeError`.
+- New `Protobuf::DecodeError < Protobuf::Error`. `Protobuf::InvalidWireType`
+  and `Protobuf::DecodeDepthError` are now subclasses of it, so code that
+  rescues `DecodeError` catches every decode failure, and code that rescues
+  the old classes still works.
+- With `protobuf_java_helpers`, varint decode uses `VarintPure#decode`, which
+  has the limit. Encode still uses the Java helper.
+- `VarintPure#decode` returns a one-byte varint before its loop. Decode is
+  7-9% faster on MRI without the `varint` gem, and 4-14% faster on JRuby 10
+  with `protobuf_java_helpers`.
 
 
 3.10.10

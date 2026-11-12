@@ -5,6 +5,7 @@ require 'protobuf/encoder'
 module Protobuf
   class Message
     module Serialization
+      C_VARINT_TOO_LONG = 'too many bytes when decoding varint'.freeze
 
       module ClassMethods
         def decode(bytes)
@@ -58,6 +59,13 @@ module Protobuf
           set_field_bytes(tag, bytes, wire_type)
         end
         self
+      rescue ArgumentError => e
+        # The C varint gem stops after 10 bytes with its own error. The rescue
+        # is here, once for each message, because a rescue for each varint
+        # makes decode slower.
+        raise unless e.message == C_VARINT_TOO_LONG
+
+        raise ::Protobuf::DecodeError, "varint is longer than 10 bytes"
       end
 
       # Encode this message
