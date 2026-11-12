@@ -192,24 +192,69 @@ RSpec.describe 'Decoding without the setters' do
     end
   end
 
-  # A varint can hold up to 70 bits. VarintPure decodes all of them. A 64-bit
-  # field cannot hold such a value, so decode raises TypeError, as the setters
-  # do. The C varint gem keeps only the low 64 bits, so it does not raise.
+  # A 10-byte varint can hold up to 70 bits. Every varint decoder keeps the
+  # low 64 bits, as the reference parsers and the C varint gem do.
   describe 'a varint wider than 64 bits' do
     let(:wide) { 2**70 - 1 }
 
-    it 'raises for a singular 64-bit field' do
-      skip 'the C varint gem keeps only 64 bits' if defined?(::Varint)
-      expect { DirectDecodeSpec::Message.decode(varint(3, wide)) }.to raise_error(TypeError)
+    it 'keeps the low 64 bits for a singular 64-bit field' do
+      expect(DirectDecodeSpec::Message.decode(varint(3, wide)).u64).to eq(2**64 - 1)
     end
 
-    it 'raises for a repeated 64-bit field' do
-      skip 'the C varint gem keeps only 64 bits' if defined?(::Varint)
-      expect { DirectDecodeSpec::Message.decode(varint(12, wide)) }.to raise_error(TypeError)
+    it 'keeps the low 64 bits for a repeated 64-bit field' do
+      expect(DirectDecodeSpec::Message.decode(varint(12, wide)).r_u64.to_a).to eq([2**64 - 1])
     end
 
     it 'keeps the low 32 bits for an int32 field' do
       expect(DirectDecodeSpec::Message.decode(varint(1, wide)).i32).to eq(-1)
+    end
+  end
+
+  # A varint has at most 10 bytes. Without a limit, a long run of bytes above
+  # 127 used seconds of CPU (#171).
+  describe 'a varint longer than 10 bytes' do
+    let(:too_long) { ("\xFF" * 10 + "\x01").b }
+
+    it 'raises DecodeError for a tag' do
+      expect { DirectDecodeSpec::Message.decode(too_long) }.to raise_error(::Protobuf::DecodeError)
+    end
+
+    it 'raises DecodeError for a value' do
+      expect { DirectDecodeSpec::Message.decode(tag(1, ::Protobuf::WireType::VARINT) + too_long) }
+        .to raise_error(::Protobuf::DecodeError)
+    end
+
+    it 'raises DecodeError for a length' do
+      expect { DirectDecodeSpec::Message.decode(tag(7, ::Protobuf::WireType::LENGTH_DELIMITED) + too_long) }
+        .to raise_error(::Protobuf::DecodeError)
+    end
+
+    it 'raises DecodeError in a packed run' do
+      packed = too_long
+      bytes = tag(11, ::Protobuf::WireType::LENGTH_DELIMITED) + ::Protobuf::Varint.encode(packed.bytesize) + packed
+      expect { DirectDecodeSpec::Message.decode(bytes) }.to raise_error(::Protobuf::DecodeError)
+    end
+
+    it 'raises DecodeError in an unknown group' do
+      bytes = tag(99, ::Protobuf::WireType::START_GROUP) + tag(1, ::Protobuf::WireType::VARINT) + too_long
+      expect { DirectDecodeSpec::Message.decode(bytes) }.to raise_error(::Protobuf::DecodeError)
+    end
+
+    it 'raises DecodeError for the length of a nested message' do
+      expect { DirectDecodeSpec::Message.decode(tag(10, ::Protobuf::WireType::LENGTH_DELIMITED) + too_long) }
+        .to raise_error(::Protobuf::DecodeError)
+    end
+
+    it 'raises DecodeError for a value in a nested message' do
+      inner = tag(1, ::Protobuf::WireType::VARINT) + too_long
+      expect { DirectDecodeSpec::Message.decode(len(10, inner)) }.to raise_error(::Protobuf::DecodeError)
+    end
+
+    it 'raises at once for a long run of bytes' do
+      bytes = tag(1, ::Protobuf::WireType::VARINT) + ("\xFF" * 1_000_000 + "\x01").b
+      started = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
+      expect { DirectDecodeSpec::Message.decode(bytes) }.to raise_error(::Protobuf::DecodeError)
+      expect(::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - started).to be < 0.5
     end
   end
 end

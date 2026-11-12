@@ -13,6 +13,10 @@ module Protobuf
       end
     elsif defined?(::ProtobufJavaHelpers)
       extend ::ProtobufJavaHelpers::EncodeDecode
+
+      # The helper's decode is plain Ruby with no length limit. VarintPure's
+      # decode is as fast and stops after 10 bytes. Encode stays in Java.
+      define_singleton_method(:decode, ::Protobuf::VarintPure.instance_method(:decode))
     else
       extend VarintPure
     end

@@ -290,8 +290,8 @@ RSpec.describe 'Decoding nested messages without recursion' do
       expect { node.decode(len(3, len(6, len(1, 'k') + len(2, len(2, ''))))) }.to raise_error(::Protobuf::DecodeDepthError)
     end
 
-    it 'is a Protobuf::Error, so code that rescues StandardError gets it' do
-      expect(::Protobuf::DecodeDepthError.ancestors).to include(::Protobuf::Error, ::StandardError)
+    it 'is a Protobuf::DecodeError, so code that rescues DecodeError or StandardError gets it' do
+      expect(::Protobuf::DecodeDepthError.ancestors).to include(::Protobuf::DecodeError, ::Protobuf::Error, ::StandardError)
     end
 
     it 'rejects a value that is not nil or a positive Integer' do
