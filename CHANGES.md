@@ -39,6 +39,18 @@ Unreleased
 - The RPC server answers a request that nests messages too deep for the
   stack with `BAD_REQUEST_DATA`. Before, the client got no response and the
   ZMQ worker thread stopped.
+- Decode does not recurse for nested messages, so deep input does not use up
+  the stack. Before, about 150 levels on JRuby (fewer with a small `-Xss`)
+  stopped the process when the decode ran on the main thread, and about
+  1,000 levels raised `SystemStackError` on MRI. Decode speed: about the
+  same on MRI (within 4% with or without YJIT for usual messages), 4-13%
+  faster on JRuby. A message class that overrides `decode`, `decode_from`,
+  or `set_field_bytes`, and a field class that overrides `decode`, still
+  decode with recursion.
+- New `Protobuf.max_decode_depth` (default `nil`, no limit). Deeper input
+  raises `Protobuf::DecodeDepthError`, a `Protobuf::Error`. `encode`,
+  `to_hash`, and `==` still recurse, so on JRuby set a limit (for example
+  100, as the Google parsers do) for input that you do not trust.
 
 
 3.10.10

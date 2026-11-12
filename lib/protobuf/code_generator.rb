@@ -59,6 +59,25 @@ module Protobuf
       ::Google::Protobuf::Compiler::CodeGeneratorResponse::Feature::FEATURE_PROTO3_OPTIONAL.to_i
     end
 
+    # Option syntax sets each field of an options message on its own line, so
+    # the message fields of these classes merge (see set_with_options).
+    OPTIONS_CLASSES = [
+      ::Google::Protobuf::EnumOptions, ::Google::Protobuf::EnumValueOptions, ::Google::Protobuf::FieldOptions,
+      ::Google::Protobuf::FileOptions, ::Google::Protobuf::MethodOptions, ::Google::Protobuf::ServiceOptions,
+      ::Google::Protobuf::MessageOptions
+    ].freeze
+
+    # The message fields of an options message merge in
+    # BaseField#set_with_options, so Decoder must call set for them.
+    module OptionsMessageFieldDecode
+      def iterative_decode?
+        return @options_iterative_decode unless @options_iterative_decode.nil?
+
+        @options_iterative_decode = OPTIONS_CLASSES.none? { |klass| message_class <= klass } && super
+      end
+    end
+    Protobuf::Field::MessageField.prepend(OptionsMessageFieldDecode)
+
     Protobuf::Field::BaseField.module_eval do
       # Sets a MessageField that is known to be an option.
       # We must allow fields to be set one at a time, as option syntax allows us to
@@ -66,12 +85,7 @@ module Protobuf
       # Every other field uses the normal set method.
       def set_with_options(message_instance, bytes, record_wire_type = nil)
         if message_instance[name].is_a?(::Protobuf::Message)
-          gp = Google::Protobuf
-          if message_instance.is_a?(gp::EnumOptions) || message_instance.is_a?(gp::EnumValueOptions) ||
-             message_instance.is_a?(gp::FieldOptions) || message_instance.is_a?(gp::FileOptions) ||
-             message_instance.is_a?(gp::MethodOptions) || message_instance.is_a?(gp::ServiceOptions) ||
-             message_instance.is_a?(gp::MessageOptions)
-
+          if OPTIONS_CLASSES.any? { |klass| message_instance.is_a?(klass) }
             original_field = message_instance[name]
             decoded_field = decode(bytes)
             decoded_field.each_field do |subfield, subvalue|

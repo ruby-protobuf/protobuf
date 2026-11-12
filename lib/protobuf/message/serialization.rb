@@ -15,6 +15,19 @@ module Protobuf
           new.decode_from(stream)
         end
 
+        # Whether this class decodes with the methods in this module, so that
+        # Decoder.decode_message can decode it. A class that changes one of
+        # them decodes with its own methods, with recursion.
+        def _protobuf_standard_decode?
+          return @_protobuf_standard_decode unless @_protobuf_standard_decode.nil?
+
+          serialization = ::Protobuf::Message::Serialization
+          @_protobuf_standard_decode = method(:decode).owner == serialization::ClassMethods &&
+                                       instance_method(:decode).owner == serialization &&
+                                       instance_method(:decode_from).owner == serialization &&
+                                       instance_method(:set_field_bytes).owner == serialization
+        end
+
         # Create a new object with the given values and return the encoded bytes.
         def encode(fields = {})
           new(fields).encode
@@ -38,10 +51,12 @@ module Protobuf
       # Decode the given stream into this message.
       #
       def decode_from(stream)
+        return ::Protobuf::Decoder.decode_message(self, stream) if self.class._protobuf_standard_decode?
+
+        # A class that changes set_field_bytes (or another decode method).
         ::Protobuf::Decoder.decode_each_field(stream) do |tag, bytes, wire_type|
           set_field_bytes(tag, bytes, wire_type)
         end
-
         self
       end
 
